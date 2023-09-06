@@ -1,0 +1,19 @@
+<div class="response-list">
+  <p>schemer works!</p>
+  <div class="response-row" [style.grid-template-columns]="'2fr 5fr 2fr' + (showCode ? ' 1fr' : '') + (showScore ? ' 1fr' : '')">
+    <div>Variable</div>
+    <div>Wert</div>
+    <div>Status</div>
+    <div *ngIf="showCode" class="centered-column">Code</div>
+    <div *ngIf="showScore" class="centered-column">Bew.</div>
+  </div>
+  <div class="response-row"
+       [style.grid-template-columns]="'2fr 5fr 2fr' + (showCode ? ' 1fr' : '') + (showScore ? ' 1fr' : '')"
+       *ngFor="let rd of data">
+    <div>{{rd.id}}</div>
+    <div>{{rd.value}}</div>
+    <div>{{rd.status}}</div>
+    <div *ngIf="showCode" class="centered-column">{{rd.code || rd.code === 0 ? rd.code : '-'}}</div>
+    <div *ngIf="showScore" class="centered-column">{{rd.score || rd.score === 0 ? rd.score : '-'}}</div>
+  </div>
+</div>
