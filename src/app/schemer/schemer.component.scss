@@ -1,0 +1,11 @@
+.response-list .response-row {
+  display: grid;
+  grid-template-rows: auto;
+  column-gap: 10px
+}
+.response-list .response-row:nth-child(even) {
+  background-color: #f1f1f1;
+}
+.centered-column {
+  text-align: center
+}
