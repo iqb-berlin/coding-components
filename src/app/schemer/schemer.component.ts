@@ -8,7 +8,22 @@ import {Response} from "@iqb/responses";
   encapsulation: ViewEncapsulation.ShadowDom
 })
 export class SchemerComponent {
-  @Input() showCode = true;
-  @Input() showScore = true;
-  @Input() data: Response[] = [];
+  showCode = true;
+  @Input('showCode')
+  set showCodeStr(value: string) {
+    this.showCode = value === 'true';
+  }
+  showScore = true;
+  @Input('showScore')
+  set showScoreStr(value: string) {
+    this.showScore = value === 'true';
+  }
+  data: Response[] = [];
+  set responses (value: Response[]) {
+    this.data = value || [];
+  }
+  @Input('data')
+  set dataStr(value: string) {
+    this.data = value ? JSON.parse(value) : [];
+  }
 }
