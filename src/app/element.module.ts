@@ -20,7 +20,7 @@ export class ElementModule implements DoBootstrap {
             const schemerComponent = createCustomElement(SchemerComponent, {
                 injector: this.injector,    // This injector is used to load the component's factory
             });
-            customElements.define('responses-schemer', schemerComponent);
+            customElements.define('iqb-responses-schemer', schemerComponent);
         }
     }
 }
