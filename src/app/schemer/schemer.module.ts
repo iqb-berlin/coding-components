@@ -26,6 +26,11 @@ import {CodeDataComponent} from "./code/code-data.component";
 import {AppTranslateLoader} from "./app-translate-loader";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
 import {VarCodingClassicComponent} from "./var-coding/var-coding-classic.component";
+import {ConfirmDialogComponent} from "./dialogs/confirm-dialog.component";
+import {MessageDialogComponent} from "./dialogs/message-dialog.component";
+import {SelectVariableDialogComponent} from "./dialogs/select-variable-dialog.component";
+import {SimpleInputDialogComponent} from "./dialogs/simple-input-dialog.component";
+import {ShowCodingResultsComponent} from "./scheme-checker/show-coding-results.component";
 
 
 
@@ -36,7 +41,12 @@ import {VarCodingClassicComponent} from "./var-coding/var-coding-classic.compone
     RichTextEditDialogComponent,
     RichTextEditorComponent,
     SchemeCheckerComponent,
-    VarCodingClassicComponent
+    VarCodingClassicComponent,
+    ConfirmDialogComponent,
+    MessageDialogComponent,
+    SelectVariableDialogComponent,
+    SimpleInputDialogComponent,
+    ShowCodingResultsComponent
   ],
   exports: [
     SchemerComponent
@@ -52,6 +62,7 @@ import {VarCodingClassicComponent} from "./var-coding/var-coding-classic.compone
     MatMenuModule,
     MatDialogModule,
     MatFormFieldModule,
+    MatChipsModule,
     ReactiveFormsModule,
     MatTooltipModule,
     MatInputModule,

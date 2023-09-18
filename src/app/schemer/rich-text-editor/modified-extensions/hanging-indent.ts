@@ -27,8 +27,8 @@ export const HangingIndent = Extension.create({
         attributes: {
           hangingIndent: {
             default: false,
-            renderHTML: attributes => (attributes.hangingIndent ?
-              { style: `text-indent: -${attributes.indentSize}px` } :
+            renderHTML: attributes => (attributes['hangingIndent'] ?
+              { style: `text-indent: -${attributes['indentSize']}px` } :
               { style: 'text-indent: 0px' }
             ),
             parseHTML: element => element.style.textIndent !== '0px'
@@ -47,7 +47,7 @@ export const HangingIndent = Extension.create({
       (tr: Transaction, pos: number, hangingIndent: boolean, indentSize: number): Transaction => {
         const node = tr?.doc?.nodeAt(pos);
         if (node) {
-          if (hangingIndent !== node.attrs.indent) {
+          if (hangingIndent !== node.attrs['indent']) {
             const nodeAttrs = { ...node.attrs, hangingIndent, indentSize };
             return tr.setNodeMarkup(pos, node.type, nodeAttrs, node.marks);
           }
