@@ -1,19 +1,19 @@
-<div fxLayout="column" *ngIf="codeData" fxLayoutGap="5px">
-  <div fxLayout="row" fxLayoutGap="10px" class="code-main-data">
-    <mat-form-field fxFlex="140px" [class]="uniqueNumberValidator(codeData.id) ? '' : 'not-unique-id'">
+<div *ngIf="codeData" class="fx-gap-5">
+  <div class="code-main-data fx-row-start-center">
+    <mat-form-field [class]="uniqueNumberValidator(codeData.id) ? '' : 'not-unique-id'">
       <input matInput
              [placeholder]="'code.id' | translate"
              [(ngModel)]="codeData.id"
              (ngModelChange)="setCodeDataChanged()"
              type="number">
     </mat-form-field>
-    <mat-form-field fxFlex>
+    <mat-form-field>
       <input matInput
              [placeholder]="'code.description' | translate"
              [(ngModel)]="codeData.label"
              (ngModelChange)="setCodeDataChanged()">
     </mat-form-field>
-    <mat-form-field fxFlex="140px">
+    <mat-form-field>
       <input matInput
              type="number"
              required
@@ -22,17 +22,17 @@
              (ngModelChange)="setCodeDataChanged()">
     </mat-form-field>
   </div>
-  <div fxLayout="row" fxLayoutGap="10px">
-    <mat-card fxFlex>
+  <div class="fx-row-start-center">
+    <mat-card>
       <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
-      <mat-card-content fxLayout="column">
-        <div *ngFor="let rule of codeData.rules" fxLayout="row wrap" fxLayoutAlign="space-between center"
+      <mat-card-content class="fx-row-start-center">
+        <div *ngFor="let rule of codeData.rules" class="fx-row-start-center"
              (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
-          <div fxLayout="row wrap" fxLayoutAlign="start center" fxLayoutGap="5px" fxFlex>
-            <div [matTooltip]="('rule.' + rule.method + '.description') | translate" fxFlex="120px"
+          <div>
+            <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
                  matTooltipShowDelay="500">
               {{('rule.' + rule.method) | translate}}</div>
-            <mat-form-field *ngIf="getParamCountWrapper(rule.method) < 0" fxFlex>
+            <mat-form-field *ngIf="getParamCountWrapper(rule.method) < 0">
               <textarea matInput
                         [(ngModel)]="rule.parameters[0]"
                         (ngModelChange)="setCodeDataChanged()"
@@ -46,20 +46,20 @@
                      [(ngModel)]="rule.parameters[0]"
                      (ngModelChange)="setCodeDataChanged()">
             </mat-form-field>
-            <mat-form-field fxFlex="80px" *ngIf="getParamCountWrapper(rule.method) > 1">
+            <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 1">
               <input matInput
                      [(ngModel)]="rule.parameters[1]"
                      (ngModelChange)="setCodeDataChanged()">
             </mat-form-field>
           </div>
-          <div fxFlex="30px">
+          <div>
             <button mat-flat-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(rule.method)"
                     [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
         </div>
-        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="20px">
+        <div class="fx-row-start-center">
           <button mat-flat-button [matMenuTriggerFor]="menu" *ngIf="getNewRules().length > 0"
                   [matTooltip]="'rule.prompt.add' | translate">
             <mat-icon>add</mat-icon>
@@ -74,8 +74,8 @@
         </div>
       </mat-card-content>
     </mat-card>
-    <mat-card fxFlex>
-      <mat-card-subtitle fxLayout="row" fxLayoutAlign="space-between stretch">
+    <mat-card>
+      <mat-card-subtitle class="fx-row-space-between-center">
         {{'manual-instruction.prompt-code' | translate}}
         <button mat-flat-button (click)="editTextDialog_manualInstruction()">
           <mat-icon>edit</mat-icon>
