@@ -1,9 +1,9 @@
-<div fxLayout="column" class="check-host">
-  <div fxLayout="row" fxLayoutAlign="start center"
-       *ngFor="let scheme of mainDataService.filteredCodings(mainDataService.codings, true)">
-    <mat-label fxFlex="50%">{{scheme.id}}</mat-label>
-    <mat-form-field fxFlex>
-      <input matInput (change)="updateInputValue($event.target, scheme.id)">
+<div class="check-host fx-column-start-center">
+  <div class="fx-row-start-center"
+       *ngFor="let baseVar of getBaseVariableIds()">
+    <mat-label >{{baseVar}}</mat-label>
+    <mat-form-field>
+      <input matInput (change)="updateInputValue($event.target, baseVar)">
     </mat-form-field>
   </div>
   <button mat-raised-button (click)="startEvaluation()">Start</button>

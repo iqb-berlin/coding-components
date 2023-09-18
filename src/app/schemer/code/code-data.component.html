@@ -37,11 +37,10 @@
                         [(ngModel)]="rule.parameters[0]"
                         (ngModelChange)="setCodeDataChanged()"
                         cdkTextareaAutosize
-                        #autosize="cdkTextareaAutosize"
                         cdkAutosizeMinRows="2"
                         cdkAutosizeMaxRows="8"></textarea>
             </mat-form-field>
-            <mat-form-field fxFlex="80px" *ngIf="getParamCountWrapper(rule.method) > 0">
+            <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 0">
               <input matInput
                      [(ngModel)]="rule.parameters[0]"
                      (ngModelChange)="setCodeDataChanged()">

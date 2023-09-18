@@ -37,7 +37,7 @@
       <legend>Schrift</legend>
       <mat-form-field class="small-dropdown">
         <mat-label>Schriftgröße</mat-label>
-        <mat-select [value]="editor.getAttributes('textStyle').fontSize?.toString() || selectedFontSize">
+        <mat-select [value]="editor.getAttributes('textStyle')['fontSize']?.toString() || selectedFontSize">
           <mat-option (click)="applyFontSize('8px')" value="8px">8px</mat-option>
           <mat-option (click)="applyFontSize('10px')" value="10px">10px</mat-option>
           <mat-option (click)="applyFontSize('12px')" value="12px">12px</mat-option>
@@ -53,7 +53,7 @@
           <mat-option (click)="applyFontSize('36px')" value="36px">36px</mat-option>
         </mat-select>
       </mat-form-field>
-      <div class="combo-button" class="fx-row-start-center"
+      <div class="combo-button fx-row-start-center"
            [style.background-color]="selectedFontColor">
         <button mat-icon-button matTooltip="Textfarbe"
                 (click)="applyFontColor()">
@@ -63,7 +63,7 @@
         <input matInput type="color" #textColorInput hidden
                (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
       </div>
-      <div class="combo-button" class="fx-row-start-center"
+      <div class="combo-button fx-row-start-center"
            [style.background-color]="selectedHighlightColor">
         <button mat-icon-button matTooltip="Texthintergrund"
                 (click)="applyHighlightColor()">
@@ -78,7 +78,7 @@
       <legend>Absatz</legend>
       <mat-form-field class="dropdown">
         <mat-label>Absatztyp</mat-label>
-        <mat-select [value]="editor.getAttributes('heading').level?.toString() || ''"
+        <mat-select [value]="editor.getAttributes('heading')['level']?.toString() || ''"
                     (valueChange)="toggleHeading($event)">
           <mat-option value="1">H1</mat-option>
           <mat-option value="2">H2</mat-option>
@@ -90,7 +90,7 @@
       <mat-form-field class="dropdown">
         <mat-label>Absatzabstand</mat-label>
         <mat-select matTooltip="Achtung: Gilt nur für zukünftig angelegte Absätze" [matTooltipShowDelay]="300"
-                    [value]="editor.getAttributes('paragraph').margin?.toString() || '0'"
+                    [value]="editor.getAttributes('paragraph')['margin']?.toString() || '0'"
                     (click)="$any($event).stopPropagation()" (valueChange)="applyParagraphStyle($event)">
           <mat-option value="0">0px</mat-option>
           <mat-option value="10">10px</mat-option>
@@ -156,7 +156,7 @@
                 (click)="toggleBulletList()">
           <mat-icon>format_list_bulleted</mat-icon>
         </button>
-        <mat-select [value]="editor.getAttributes('bulletList').listStyle"
+        <mat-select [value]="editor.getAttributes('bulletList')['listStyle']"
                     (valueChange)="applyListStyle('bulletList', $event)">
           <mat-option value="disc">disc</mat-option>
           <mat-option value="circle">circle</mat-option>
@@ -169,7 +169,7 @@
                 (click)="toggleOrderedList()">
           <mat-icon>format_list_numbered</mat-icon>
         </button>
-          <mat-select [value]="editor.getAttributes('orderedList').listStyle"
+          <mat-select [value]="editor.getAttributes('orderedList')['listStyle']"
                       (valueChange)="applyListStyle('orderedList', $event)">
             <mat-option value="decimal"
                         (click)="applyListStyle('orderedList', 'decimal')">

@@ -14,7 +14,7 @@ export const BulletListExtension = BulletList.extend({
       listStyle: {
         default: 'disc',
         parseHTML: element => element.style.listStyleType,
-        renderHTML: attributes => ({ style: `list-style: ${attributes.listStyle};` })
+        renderHTML: attributes => ({ style: `list-style: ${attributes['listStyle']};` })
       }
     };
   },

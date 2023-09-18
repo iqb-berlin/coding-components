@@ -36,9 +36,9 @@ export const Indent = Extension.create<IndentOptions>({
           indent: {
             renderHTML: attributes => (
               {
-                style: `padding-left: ${attributes.indent * attributes.indentSize}px`,
-                indent: attributes.indent,
-                indentSize: attributes.indentSize
+                style: `padding-left: ${attributes['indent'] * attributes['indentSize']}px`,
+                indent: attributes['indent'],
+                indentSize: attributes['indentSize']
               }
             ),
             parseHTML: element => Number(element.getAttribute('indent'))
@@ -57,7 +57,7 @@ export const Indent = Extension.create<IndentOptions>({
       const node = tr?.doc?.nodeAt(pos);
 
       if (node) {
-        const nextLevel = (node.attrs.indent || 0) + delta;
+        const nextLevel = (node.attrs['indent'] || 0) + delta;
         const { minLevel, maxLevel } = this.options;
         let indent: number;
         if (nextLevel < minLevel) {
@@ -66,7 +66,7 @@ export const Indent = Extension.create<IndentOptions>({
           indent = nextLevel > maxLevel ? maxLevel : nextLevel;
         }
 
-        if (indent !== node.attrs.indent) {
+        if (indent !== node.attrs['indent']) {
           const nodeAttrs = { ...node.attrs, indent, indentSize };
           return tr.setNodeMarkup(pos, node.type, nodeAttrs, node.marks);
         }

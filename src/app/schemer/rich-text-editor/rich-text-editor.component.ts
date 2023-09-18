@@ -217,19 +217,4 @@ export class RichTextEditorComponent implements OnInit, AfterViewInit {
   toggleBlockquote(): void {
     this.editor.commands.toggleBlockquote();
   }
-
-  insertToggleButton(): void {
-    this.editor.commands.insertContent('<aspect-nodeview-toggle-button></aspect-nodeview-toggle-button>');
-    this.editor.commands.focus();
-  }
-
-  insertDropList(): void {
-    this.editor.commands.insertContent('<aspect-nodeview-drop-list></aspect-nodeview-drop-list>');
-    this.editor.commands.focus();
-  }
-
-  insertTextField(): void {
-    this.editor.commands.insertContent('<aspect-nodeview-text-field></aspect-nodeview-text-field>');
-    this.editor.commands.focus();
-  }
 }
