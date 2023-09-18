@@ -21,12 +21,14 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatChipsModule} from "@angular/material/chips";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {CodeDataComponent} from "./code/code-data.component";
 
 
 
 @NgModule({
   declarations: [
     SchemerComponent,
+    CodeDataComponent,
     RichTextEditDialogComponent,
     RichTextEditorComponent
   ],
