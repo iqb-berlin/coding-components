@@ -1,8 +1,8 @@
-<div class="scheme-body" fxLayout="row" fxLayoutAlign="space-between stretch">
-  <div class="navi-bar" fxLayout="column" fxFlex="200px" *ngIf="mainDataService.varList.length > 0">
+<div class="scheme-body fx-row-space-between-stretch">
+  <div class="navi-bar fx-column-end-stretch" *ngIf="mainDataService.varList.length > 0">
     <div fxFlex class="var-scheme-list">
       <div class="basic-var-list-header">Basisvariablen</div>
-      <mat-nav-list *ngFor="let varBasic of mainDataService.filteredCodings(mainDataService.codings, true)" fxLayout="column">
+      <mat-nav-list *ngFor="let varBasic of basic" fxLayout="column">
         <div fxLayout="row" fxLayoutAlign="start center">
           <div [class]="'var-marker-' + varBasic.status" [matTooltip]="('coding-status.base-' + varBasic.status) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"

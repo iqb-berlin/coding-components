@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
-import { ResponseData } from '@iqb/responses';
+import { Response } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
-import { MainDataService } from '../../services/main-data.service';
 import { ShowCodingResultsComponent } from './show-coding-results.component';
 import { CoderService } from './coder.service';
 
@@ -24,8 +23,8 @@ export class SchemeCheckerComponent {
   }
 
   startEvaluation() {
-    const myValues: ResponseData[] = [];
-    this.mainDataService.filteredCodings(this.mainDataService.codings, true).forEach(cs => {
+    const myValues: Response[] = [];
+    this.mainDataService.filteredCodings(this.mainDataService.codings, true).forEach((cs: { id: string | number; }) => {
       if (this.values[cs.id]) {
         myValues.push({
           id: cs.id,

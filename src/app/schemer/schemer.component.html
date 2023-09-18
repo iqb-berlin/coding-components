@@ -1,18 +1,56 @@
-<div class="response-list">
-  <div class="response-row" [style.grid-template-columns]="'2fr 5fr 2fr' + (showCode ? ' 1fr' : '') + (showScore ? ' 1fr' : '')">
-    <div>Variable</div>
-    <div>Wert</div>
-    <div>Status</div>
-    <div *ngIf="showCode" class="centered-column">Code</div>
-    <div *ngIf="showScore" class="centered-column">Bew.</div>
+<div class="scheme-body fx-row-space-between-stretch">
+  <div class="navi-bar fx-column-start-center" *ngIf="localVarList.length > 0">
+    <div class="var-scheme-list">
+      <div class="basic-var-list-header">Basisvariablen</div>
+      <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-center">
+        <div class="fx-row-start-center">
+          <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.base-' + codingStatus[varBasic.id]) | translate"></div>
+          <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+             class="var-list-entry"
+             fxFlex
+             [class]="varBasic.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'"
+             (click)="selectVarScheme(varBasic)">
+            {{ varBasic.id }}
+          </a>
+        </div>
+      </mat-nav-list>
+      <div class="var-scheme-list-header">Abgeleitete Variablen</div>
+      <mat-nav-list *ngFor="let varScheme of derivedVariables" class="fx-column-start-center">
+        <div class="fx-row-start-center">
+          <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.derived-' + codingStatus[varScheme.id]) | translate"></div>
+          <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+             class="var-list-entry"
+             fxFlex
+             (click)="selectVarScheme(varScheme)"
+             [class]="varScheme.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'">
+            {{ varScheme.id }}
+          </a>
+        </div>
+      </mat-nav-list>
+    </div>
+    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
+    <div class="var-list-buttons fx-row-start-center">
+      <button mat-button (click)="addVarScheme()" matTooltip="Variable hinzufügen" matTooltipPosition="above">
+        <mat-icon>add</mat-icon>
+      </button>
+      <button mat-button [disabled]="(selectedCoding$ | async) === null || ((selectedCoding$ | async)?.sourceType === 'BASE' && codingStatus[(selectedCoding$ | async)?.id] !== 'INVALID_SOURCE')"
+              (click)="deleteVarScheme()" matTooltip="Variable löschen" matTooltipPosition="above">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
+              (click)="renameVarScheme()" matTooltip="Variable umbenennen" matTooltipPosition="above">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-button [disabled]="(selectedCoding$ | async) === null"
+              (click)="copyVarScheme()" matTooltip="Kodierung kopieren" matTooltipPosition="above">
+        <mat-icon>content_copy</mat-icon>
+      </button>
+    </div>
   </div>
-  <div class="response-row"
-       [style.grid-template-columns]="'2fr 5fr 2fr' + (showCode ? ' 1fr' : '') + (showScore ? ' 1fr' : '')"
-       *ngFor="let rd of data">
-    <div>{{rd.id}}</div>
-    <div>{{rd.value}}</div>
-    <div>{{rd.status}}</div>
-    <div *ngIf="showCode" class="centered-column">{{rd.code || rd.code === 0 ? rd.code : '-'}}</div>
-    <div *ngIf="showScore" class="centered-column">{{rd.score || rd.score === 0 ? rd.score : '-'}}</div>
-  </div>
+
+  <div *ngIf="allVariableIds.length === 0"
+       style="margin: 20px;">{{'data-error.base-variables-missing' | translate}}</div>
+  <var-scheme [codingScheme]="selectedCoding$ | async" class="var-scheme-container"
+              [allVariables]="allVariableIds">
+  </var-scheme>
 </div>

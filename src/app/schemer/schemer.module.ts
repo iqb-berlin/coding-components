@@ -1,7 +1,8 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { SchemerComponent } from './schemer.component';
-import { NgxTiptapModule } from 'ngx-tiptap';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { SchemerComponent } from "./schemer.component";
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { NgxTiptapModule } from "ngx-tiptap";
 import {MatSelectModule} from "@angular/material/select";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -22,6 +23,9 @@ import {MatChipsModule} from "@angular/material/chips";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {CodeDataComponent} from "./code/code-data.component";
+import {AppTranslateLoader} from "./app-translate-loader";
+import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
+import {CodingSchemeComponent} from "./coding-scheme/coding-scheme.component";
 
 
 
@@ -30,7 +34,9 @@ import {CodeDataComponent} from "./code/code-data.component";
     SchemerComponent,
     CodeDataComponent,
     RichTextEditDialogComponent,
-    RichTextEditorComponent
+    RichTextEditorComponent,
+    SchemeCheckerComponent,
+    CodingSchemeComponent
   ],
   exports: [
     SchemerComponent
@@ -42,12 +48,12 @@ import {CodeDataComponent} from "./code/code-data.component";
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule,
     MatListModule,
     MatMenuModule,
     MatDialogModule,
     MatFormFieldModule,
     ReactiveFormsModule,
+    MatTooltipModule,
     MatInputModule,
     FormsModule,
     MatSelectModule,
@@ -55,7 +61,14 @@ import {CodeDataComponent} from "./code/code-data.component";
     MatCheckboxModule,
     MatCardModule,
     MatSidenavModule,
-    NgxTiptapModule
+    NgxTiptapModule,
+    TranslateModule.forRoot({
+      defaultLanguage: 'de',
+      loader: {
+        provide: TranslateLoader,
+        useClass: AppTranslateLoader
+      }
+    })
   ]
 })
 export class SchemerModule { }
