@@ -25,7 +25,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {CodeDataComponent} from "./code/code-data.component";
 import {AppTranslateLoader} from "./app-translate-loader";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
-import {CodingSchemeComponent} from "./coding-scheme/coding-scheme.component";
+import {VarCodingClassicComponent} from "./var-coding/var-coding-classic.component";
 
 
 
@@ -36,7 +36,7 @@ import {CodingSchemeComponent} from "./coding-scheme/coding-scheme.component";
     RichTextEditDialogComponent,
     RichTextEditorComponent,
     SchemeCheckerComponent,
-    CodingSchemeComponent
+    VarCodingClassicComponent
   ],
   exports: [
     SchemerComponent

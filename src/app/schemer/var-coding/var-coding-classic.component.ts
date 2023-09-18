@@ -5,15 +5,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import {VariableCodingData} from "@iqb/responses/src/response-scheme/response-scheme";
+import {CodeData, ValueTransformation} from "@iqb/responses";
 
 @Component({
-  selector: 'var-scheme',
-  templateUrl: './coding-scheme.component.html',
-  styleUrls: ['./coding-scheme.component.scss']
+  selector: 'var-coding-classic',
+  templateUrl: './var-coding-classic.component.html',
+  styleUrls: ['./var-coding-classic.component.scss']
 })
-export class CodingSchemeComponent {
-  @Output() codingSchemeChanged = new EventEmitter<Coding | null>();
-  @Input() codingScheme: Coding | null = null;
+export class VarCodingClassicComponent {
+  @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
+  @Input() varCoding: VariableCodingData | null = null;
   @Input() allVariables: string[] = [];
 
   constructor(
@@ -25,37 +27,37 @@ export class CodingSchemeComponent {
   getNewSources(usedVars: string[]) {
     const returnSources: string[] = [];
     this.allVariables.forEach(v => {
-      if (this.codingScheme && usedVars.indexOf(v) < 0 && v !== this.codingScheme.id) returnSources.push(v);
+      if (this.varCoding && usedVars.indexOf(v) < 0 && v !== this.varCoding.id) returnSources.push(v);
     });
     returnSources.sort();
     return returnSources;
   }
 
   deleteDeriveSource(source: string) {
-    if (this.codingScheme) {
-      const sourcePos = this.codingScheme.deriveSources.indexOf(source);
-      if (sourcePos >= 0) this.codingScheme.deriveSources.splice(sourcePos, 1);
-      this.setCodingSchemeChanged();
+    if (this.varCoding) {
+      const sourcePos = this.varCoding.deriveSources.indexOf(source);
+      if (sourcePos >= 0) this.varCoding.deriveSources.splice(sourcePos, 1);
+      this.varCodingChanged.emit(this.varCoding);
     }
   }
 
   addDeriveSource(v: string) {
-    if (this.codingScheme) {
-      this.codingScheme.deriveSources.push(v);
-      this.codingScheme.deriveSources.sort();
-      this.setCodingSchemeChanged();
+    if (this.varCoding) {
+      this.varCoding.deriveSources.push(v);
+      this.varCoding.deriveSources.sort();
+      this.varCodingChanged.emit(this.varCoding);
     }
   }
 
   alterValueTransformation(transId: ValueTransformation, checked: boolean) {
-    if (this.codingScheme) {
-      const transPos = this.codingScheme.valueTransformations.indexOf(transId);
+    if (this.varCoding) {
+      const transPos = this.varCoding.valueTransformations.indexOf(transId);
       if (checked && transPos < 0) {
-        this.codingScheme.valueTransformations.push(transId);
+        this.varCoding.valueTransformations.push(transId);
       } else if (!checked && transPos >= 0) {
-        this.codingScheme.valueTransformations.splice(transPos, 1);
+        this.varCoding.valueTransformations.splice(transPos, 1);
       }
-      this.setCodingSchemeChanged();
+      this.varCodingChanged.emit(this.varCoding);
     }
   }
 
@@ -64,12 +66,12 @@ export class CodingSchemeComponent {
   }
 
   editTextDialog_manualInstruction(): void {
-    if (this.codingScheme) {
+    if (this.varCoding) {
       const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
         width: '860px',
         data: {
           title: this.translateService.instant('manual-instruction.prompt-general'),
-          content: this.codingScheme.manualInstruction || '',
+          content: this.varCoding.manualInstruction || '',
           defaultFontSize: 20,
           editorHeightPx: 400
         },
@@ -77,9 +79,9 @@ export class CodingSchemeComponent {
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (typeof dialogResult !== 'undefined') {
-          if (dialogResult !== false && this.codingScheme) {
-            this.codingScheme.manualInstruction = dialogResult;
-            this.setCodingSchemeChanged();
+          if (dialogResult !== false && this.varCoding) {
+            this.varCoding.manualInstruction = dialogResult;
+            this.varCodingChanged.emit(this.varCoding);
           }
         }
       });
@@ -87,32 +89,26 @@ export class CodingSchemeComponent {
   }
 
   addCode() {
-    if (this.codingScheme) {
-      this.codingScheme.codes.push({
+    if (this.varCoding) {
+      this.varCoding.codes.push({
         id: 1,
         label: '',
         score: 0,
         rules: [],
         manualInstruction: ''
       });
-      this.setCodingSchemeChanged();
-    }
-  }
-
-  setCodingSchemeChanged(): void {
-    if (this.codingScheme) {
-      this.codingSchemeChanged.emit(this.codingScheme);
+      this.varCodingChanged.emit(this.varCoding);
     }
   }
 
   deleteCode(codeToDeleteId: number) {
-    if (this.codingScheme) {
+    if (this.varCoding) {
       let codePos = -1;
-      this.codingScheme.codes.forEach((c: CodeData, i: number) => {
+      this.varCoding.codes.forEach((c: CodeData, i: number) => {
         if (c.id === codeToDeleteId) codePos = i;
       });
-      if (codePos >= 0) this.codingScheme.codes.splice(codePos, 1);
-      this.setCodingSchemeChanged();
+      if (codePos >= 0) this.varCoding.codes.splice(codePos, 1);
+      this.varCodingChanged.emit(this.varCoding);
     }
   }
 }
