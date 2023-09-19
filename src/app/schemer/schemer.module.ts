@@ -31,6 +31,7 @@ import {MessageDialogComponent} from "./dialogs/message-dialog.component";
 import {SelectVariableDialogComponent} from "./dialogs/select-variable-dialog.component";
 import {SimpleInputDialogComponent} from "./dialogs/simple-input-dialog.component";
 import {ShowCodingResultsComponent} from "./scheme-checker/show-coding-results.component";
+import {SchemerToolbarComponent} from "./schemer-toolbar.component";
 
 
 
@@ -43,6 +44,7 @@ import {ShowCodingResultsComponent} from "./scheme-checker/show-coding-results.c
     SchemeCheckerComponent,
     VarCodingClassicComponent,
     ConfirmDialogComponent,
+    SchemerToolbarComponent,
     MessageDialogComponent,
     SelectVariableDialogComponent,
     SimpleInputDialogComponent,

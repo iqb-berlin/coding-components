@@ -1,5 +1,5 @@
 <div class="scheme-body fx-row-space-between-stretch">
-  <div class="navi-bar fx-column-start-center" *ngIf="localVarList.length > 0">
+  <div class="navi-bar fx-column-start-center" *ngIf="_varList.length > 0">
     <div class="var-scheme-list">
       <div class="basic-var-list-header">Basisvariablen</div>
       <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-center">
@@ -31,7 +31,7 @@
       <button mat-button (click)="addVarScheme()" matTooltip="Variable hinzufügen" matTooltipPosition="above">
         <mat-icon>add</mat-icon>
       </button>
-      <button mat-button [disabled]="(selectedCoding$ | async) === null || ((selectedCoding$ | async)?.sourceType === 'BASE' && codingStatus[(selectedCoding$ | async)?.id] !== 'INVALID_SOURCE')"
+      <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
               (click)="deleteVarScheme()" matTooltip="Variable löschen" matTooltipPosition="above">
         <mat-icon>delete</mat-icon>
       </button>
@@ -51,5 +51,14 @@
   <var-coding-classic [varCoding]="selectedCoding$ | async" class="var-scheme-container"
               [allVariables]="allVariableIds">
   </var-coding-classic>
-  <schema-checker *ngIf="showChecker"></schema-checker>
+  <mat-drawer #drawer *ngIf="showChecker" mode="over" class="fx-column-start-center">
+    <mat-toolbar class="fx-row-space-between-center">
+      Antwortschema prüfen
+      <button mat-button (click)="drawer.toggle()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+    </mat-toolbar>
+    <schema-checker></schema-checker>
+  </mat-drawer>
+  <schemer-load-save *ngIf="showFileMenu" [varList]="_varList" [responseScheme]="_responseScheme"></schemer-load-save>
 </div>
