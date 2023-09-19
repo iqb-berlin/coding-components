@@ -1,6 +1,6 @@
 <div class="check-host fx-column-start-center">
   <div class="fx-row-start-center"
-       *ngFor="let baseVar of getBaseVariableIds()">
+       *ngFor="let baseVar of Object.keys(values)">
     <mat-label >{{baseVar}}</mat-label>
     <mat-form-field>
       <input matInput (change)="updateInputValue($event.target, baseVar)">

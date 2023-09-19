@@ -7,7 +7,6 @@
           <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.base-' + codingStatus[varBasic.id]) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"
              class="var-list-entry"
-             fxFlex
              [class]="varBasic.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'"
              (click)="selectVarScheme(varBasic)">
             {{ varBasic.id }}
@@ -20,7 +19,6 @@
           <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.derived-' + codingStatus[varScheme.id]) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"
              class="var-list-entry"
-             fxFlex
              (click)="selectVarScheme(varScheme)"
              [class]="varScheme.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'">
             {{ varScheme.id }}
@@ -50,7 +48,8 @@
 
   <div *ngIf="allVariableIds.length === 0"
        style="margin: 20px;">{{'data-error.base-variables-missing' | translate}}</div>
-  <var-coding-classic [codingScheme]="selectedCoding$ | async" class="var-scheme-container"
+  <var-coding-classic [varCoding]="selectedCoding$ | async" class="var-scheme-container"
               [allVariables]="allVariableIds">
   </var-coding-classic>
+  <schema-checker *ngIf="showChecker"></schema-checker>
 </div>
