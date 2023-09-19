@@ -16,31 +16,54 @@ import {TranslateService} from "@ngx-translate/core";
   encapsulation: ViewEncapsulation.ShadowDom
 })
 export class SchemerComponent {
-  @Output() responseSchemeChanged = new EventEmitter<ResponseScheme>();
+  @Output() responseSchemeChanged = new EventEmitter<ResponseScheme | null>();
 
-  localResponseScheme: ResponseScheme | null = null;
-
-  set responseScheme (value: ResponseScheme) {
-    this.localResponseScheme = value || null;
-    this.updateVariableLists();
+  _responseScheme: ResponseScheme | null = null;
+  @Input()
+  set responseScheme(value: any) {
+      this._responseScheme = null;
+      if (value) {
+          if (typeof value === 'string') {
+              this._responseScheme = value ? JSON.parse(value) : null;
+          } else {
+              this._responseScheme = value;
+          }
+      }
+      this.updateVariableLists();
   }
-  @Input('response-scheme')
-  set responseSchemeStr(value: string) {
-    this.localResponseScheme = value ? JSON.parse(value) : null;
-    this.updateVariableLists();
+  get responseScheme(): ResponseScheme | null {
+    return this._responseScheme;
   }
 
   @Input() showChecker: boolean = false;
-  localVarList: VariableInfo[] = [];
-
-  set varList (value: VariableInfo[]) {
-    this.localVarList = value || [];
+  @Input() showFileMenu: boolean = false;
+  _varList: VariableInfo[] = [];
+  @Input()
+  set varList(value: any) {
+    this._varList = [];
+    console.log('#3');
+    if (value) {
+      if (typeof value === 'string') {
+        this._varList = value ? JSON.parse(value) : [];
+        console.log('#1');
+      } else {
+        this._varList = value;
+        console.log('#2');
+      }
+      this._responseScheme = new ResponseScheme();
+      this._responseScheme.variableCodings = [];
+      this._varList.forEach(c => {
+        if (this._responseScheme) {
+          this._responseScheme.variableCodings.push(ResponseScheme.fromVariableInfo(c));
+          console.log('#4');
+        }
+      });
+      this.updateVariableLists();
+    }
   }
-  @Input('var-list')
-  set varListStr(value: string) {
-    this.localVarList = value ? JSON.parse(value) : null;
+  get varList(): VariableInfo[] {
+    return this._varList;
   }
-
   basicVariables: VariableCodingData[] = [];
   derivedVariables: VariableCodingData[] = [];
   allVariableIds: string[] = [];
@@ -56,8 +79,8 @@ export class SchemerComponent {
   ) { }
 
   updateVariableLists() {
-    this.basicVariables = this.localResponseScheme && this.localResponseScheme.variableCodings ?
-      this.localResponseScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
+    this.basicVariables = this._responseScheme && this._responseScheme.variableCodings ?
+      this._responseScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
         .sort((a, b) => {
           const idA = a.id.toUpperCase();
           const idB = b.id.toUpperCase();
@@ -65,8 +88,8 @@ export class SchemerComponent {
           if (idA > idB) return 1;
           return 0;
         }) : [];
-    this.derivedVariables = this.localResponseScheme && this.localResponseScheme.variableCodings ?
-      this.localResponseScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
+    this.derivedVariables = this._responseScheme && this._responseScheme.variableCodings ?
+      this._responseScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
         .sort((a, b) => {
           const idA = a.id.toUpperCase();
           const idB = b.id.toUpperCase();
@@ -74,11 +97,11 @@ export class SchemerComponent {
           if (idA > idB) return 1;
           return 0;
         }) : [];
-    this.allVariableIds = this.localResponseScheme ?
-      this.localResponseScheme.variableCodings.map(c => c.id) : [];
+    this.allVariableIds = this._responseScheme ?
+      this._responseScheme.variableCodings.map(c => c.id) : [];
     this.codingStatus = {};
-    if (this.localResponseScheme && this.localResponseScheme.variableCodings) {
-      this.localResponseScheme.variableCodings.forEach(v => {
+    if (this._responseScheme && this._responseScheme.variableCodings) {
+      this._responseScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = this.getCodingStatus(v);
       })
     }
@@ -86,7 +109,7 @@ export class SchemerComponent {
 
   getCodingStatus(c: VariableCodingData): string {
     if (c.sourceType === 'BASE') {
-      const myVarInfo = this.localVarList.find(v => v.id === c.id);
+      const myVarInfo = this._varList.find(v => v.id === c.id);
       if (myVarInfo) {
         return (c.codes.length > 0 || c.manualInstruction.length > 0) ? 'HAS_CODES' : 'EMPTY';
       } else {
@@ -131,16 +154,18 @@ export class SchemerComponent {
           if (idAlreadyExists) {
             errorMessage = 'data-error.variable-id.double';
           } else {
-            this.responseScheme.variableCodings.push(<VariableCodingData>{
-              id: result,
-              label: result,
-              sourceType: 'DERIVE_CONCAT',
-              deriveSources: [],
-              deriveSourceType: 'CODE',
-              valueTransformations: [],
-              manualInstruction: '',
-              codes: []
-            });
+            if (this._responseScheme) {
+                this._responseScheme.variableCodings.push(<VariableCodingData>{
+                    id: result,
+                    label: result,
+                    sourceType: 'DERIVE_CONCAT',
+                    deriveSources: [],
+                    deriveSourceType: 'CODE',
+                    valueTransformations: [],
+                    manualInstruction: '',
+                    codes: []
+                });
+            }
           }
         } else {
           errorMessage = 'data-error.variable-id.character';
@@ -156,7 +181,7 @@ export class SchemerComponent {
           }
         });
       } else {
-        this.responseSchemeChanged.emit(this.responseScheme);
+        this.responseSchemeChanged.emit(this._responseScheme);
         this.updateVariableLists();
       }
     });
@@ -175,11 +200,11 @@ export class SchemerComponent {
         }
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false) {
+        if (result !== false && this._responseScheme) {
           this.selectedCoding$.next(null);
-          this.responseScheme.variableCodings = this.responseScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
+          this._responseScheme.variableCodings = this._responseScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
           this.updateVariableLists();
-          this.responseSchemeChanged.emit(this.responseScheme);
+          this.responseSchemeChanged.emit(this._responseScheme);
         }
       });
     } else {
@@ -236,7 +261,7 @@ export class SchemerComponent {
             });
           } else {
             this.updateVariableLists();
-            this.responseSchemeChanged.emit(this.responseScheme);
+            this.responseSchemeChanged.emit(this._responseScheme);
           }
         }
       });
@@ -254,11 +279,11 @@ export class SchemerComponent {
 
   copyVarScheme() {
     const selectedCoding = this.selectedCoding$.getValue();
-    if (selectedCoding) {
+    if (selectedCoding && this._responseScheme) {
       const dialogData = <SelectVariableDialogData>{
         title: 'Kodierung kopieren',
         prompt: 'Bitte Zielvariable wählen! Achtung: Die Kodierungsdaten der Zielvariable werden komplett überschrieben.',
-        variables: this.responseScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
+        variables: this._responseScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
@@ -266,15 +291,15 @@ export class SchemerComponent {
         data: dialogData
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false) {
-          const targetCoding = this.responseScheme.variableCodings.find(c => c.id === result);
+        if (result !== false && this._responseScheme) {
+          const targetCoding = this._responseScheme.variableCodings.find(c => c.id === result);
           if (targetCoding) {
             const newCoding = ResponseScheme.copy(selectedCoding);
             newCoding.id = targetCoding.id;
-            this.responseScheme.variableCodings = this.responseScheme.variableCodings.filter(c => c.id !== targetCoding.id);
-            this.responseScheme.variableCodings.push(newCoding);
+            this._responseScheme.variableCodings = this._responseScheme.variableCodings.filter(c => c.id !== targetCoding.id);
+            this._responseScheme.variableCodings.push(newCoding);
             this.updateVariableLists();
-            this.responseSchemeChanged.emit(this.responseScheme);
+            this.responseSchemeChanged.emit(this._responseScheme);
           }
         }
       });

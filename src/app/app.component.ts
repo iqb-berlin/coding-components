@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {Response} from "@iqb/responses";
+import {VariableInfo} from "@iqb/responses";
 
 @Component({
   selector: 'app-root',
@@ -8,21 +8,39 @@ import {Response} from "@iqb/responses";
 })
 export class AppComponent {
   title = 'coding-components';
-  sampleData: Response[] = [
+  sampleVarList: VariableInfo[] = [
       {
-        id: "Otto",
-        status: "UNSET",
-        value: 2
+          id: "Otto",
+          type: "string",
+          format: "",
+          multiple: false,
+          nullable: false,
+          values: [],
+          valuePositionLabels: [],
+          valuesComplete: false,
+          page: ""
       },
       {
           id: "Paul",
-          status: "UNSET",
-          value: 5
+          type: "string",
+          format: "",
+          multiple: false,
+          nullable: false,
+          values: [],
+          valuePositionLabels: [],
+          valuesComplete: false,
+          page: ""
       },
       {
           id: "Susi",
-          status: "UNSET",
-          value: 7
+          type: "string",
+          format: "",
+          multiple: false,
+          nullable: false,
+          values: [],
+          valuePositionLabels: [],
+          valuesComplete: false,
+          page: ""
       }
   ]
 }
