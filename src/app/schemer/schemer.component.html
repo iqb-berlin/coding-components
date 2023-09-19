@@ -1,7 +1,7 @@
 <div class="scheme-body fx-row-space-between-stretch">
   <div class="navi-bar fx-column-start-center" *ngIf="_varList.length > 0">
     <div class="var-scheme-list">
-      <div class="basic-var-list-header">Basisvariablen</div>
+      <div class="basic-var-list-header">{{'varlist.base' | translate}}</div>
       <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-center">
         <div class="fx-row-start-center">
           <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.base-' + codingStatus[varBasic.id]) | translate"></div>
@@ -13,7 +13,7 @@
           </a>
         </div>
       </mat-nav-list>
-      <div class="var-scheme-list-header">Abgeleitete Variablen</div>
+      <div class="var-scheme-list-header">{{'varlist.derived' | translate}}</div>
       <mat-nav-list *ngFor="let varScheme of derivedVariables" class="fx-column-start-center">
         <div class="fx-row-start-center">
           <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.derived-' + codingStatus[varScheme.id]) | translate"></div>
@@ -28,19 +28,19 @@
     </div>
     <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
     <div class="var-list-buttons fx-row-start-center">
-      <button mat-button (click)="addVarScheme()" matTooltip="Variable hinzufügen" matTooltipPosition="above">
+      <button mat-button (click)="addVarScheme()" [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
         <mat-icon>add</mat-icon>
       </button>
       <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
-              (click)="deleteVarScheme()" matTooltip="Variable löschen" matTooltipPosition="above">
+              (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
         <mat-icon>delete</mat-icon>
       </button>
       <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
-              (click)="renameVarScheme()" matTooltip="Variable umbenennen" matTooltipPosition="above">
+              (click)="renameVarScheme()" [matTooltip]="'varlist.rename' | translate" matTooltipPosition="above">
         <mat-icon>edit</mat-icon>
       </button>
       <button mat-button [disabled]="(selectedCoding$ | async) === null"
-              (click)="copyVarScheme()" matTooltip="Kodierung kopieren" matTooltipPosition="above">
+              (click)="copyVarScheme()" [matTooltip]="'varlist.copy' | translate" matTooltipPosition="above">
         <mat-icon>content_copy</mat-icon>
       </button>
     </div>
