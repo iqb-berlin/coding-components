@@ -109,7 +109,9 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/material-icons.css",
+              "src/assets/customTheme.scss"
             ],
             "scripts": []
           },
