@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
-import {Response, ResponseScheme, VariableInfo} from "@iqb/responses";
+import {ResponseScheme, VariableInfo} from "@iqb/responses";
 import {VariableCodingData} from "@iqb/responses/src/response-scheme/response-scheme";
 import {BehaviorSubject} from "rxjs";
 import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
@@ -30,6 +30,7 @@ export class SchemerComponent {
     this.updateVariableLists();
   }
 
+  @Input() showChecker: boolean = false;
   localVarList: VariableInfo[] = [];
 
   set varList (value: VariableInfo[]) {
