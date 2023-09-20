@@ -1,15 +1,13 @@
-<div *ngIf="varCoding" class="element-host fx-column-space-between-end">
-  <div class="fx-flex-row-10">
-    <mat-form-field>
-      <input matInput [placeholder]="'description' | translate" [(ngModel)]="varCoding.label"
-             (change)="varCodingChanged.emit(varCoding)"
-      >
-    </mat-form-field>
-  </div>
-  <div *ngIf="varCoding.sourceType !== 'BASE'" class="fx-row-center-stretch">
+<div *ngIf="varCoding" class="fx-column-space-between-stretch" [style.padding]="'10px'">
+  <mat-form-field [style.width.%]="100">
+    <mat-label>{{'description-position' | translate}}</mat-label>
+    <input matInput [(ngModel)]="varCoding.label"
+           (change)="varCodingChanged.emit(varCoding)">
+  </mat-form-field>
+  <div *ngIf="varCoding.sourceType !== 'BASE'" class="fx-row-start-stretch">
     <div class="fx-column-start-center">
       <mat-form-field>
-        <mat-label>Methode der Ableitung</mat-label>
+        <mat-label>{{'derive-method' | translate}}</mat-label>
         <mat-select [(value)]="varCoding.sourceType">
           <mat-option [value]="'DERIVE_CONCAT'">
             {{'scheme-type.DERIVE_CONCAT' | translate}}
@@ -57,8 +55,8 @@
       </mat-menu>
     </div>
   </div>
-  <div class="fx-row-start-center">
-    <mat-card>
+  <div class="fx-row-start-stretch fx-gap-10">
+    <mat-card [style.flex.%]="50">
       <mat-card-subtitle>{{'value-transformation.prompt' | translate}}</mat-card-subtitle>
       <mat-card-content class="fx-column-start-center">
         <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TO_UPPER') >= 0) : false"
@@ -85,7 +83,7 @@
         -->
       </mat-card-content>
     </mat-card>
-    <mat-card>
+    <mat-card [style.flex.%]="50">
       <mat-card-subtitle class="fx-row-space-between-stretch">
         {{'manual-instruction.prompt-general' | translate}}
         <button mat-flat-button (click)="editTextDialog_manualInstruction()">
@@ -97,22 +95,20 @@
       </mat-card-content>
     </mat-card>
   </div>
-  <div class="fx-column-start-center">
-    <h3>{{'code.header' | translate}}</h3>
-    <div *ngFor="let cd of varCoding.codes" class="fx-row-start-start">
-      <code-data [codeData]="cd"
-                 [allCodes]="varCoding.codes"
-                 (codeDataChanged)="varCodingChanged.emit(varCoding)"></code-data>
-      <button mat-raised-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </div>
-    <div class="fx-row-start-center">
-      <button mat-raised-button (click)="addCode()">
-        <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
-      </button>
-      <div *ngIf="varCoding.codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
-    </div>
+  <h3>{{'code.header' | translate}}</h3>
+  <div *ngFor="let cd of varCoding.codes" class="fx-row-start-start">
+    <code-data [codeData]="cd"
+               [allCodes]="varCoding.codes"
+               (codeDataChanged)="varCodingChanged.emit(varCoding)"></code-data>
+    <button mat-raised-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+  <div class="fx-row-start-center">
+    <button mat-raised-button (click)="addCode()">
+      <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
+    </button>
+    <div *ngIf="varCoding.codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
   </div>
 </div>
 
