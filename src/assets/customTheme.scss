@@ -1,37 +1,37 @@
 @use "@angular/material" as mat;
 @import "@angular/material/theming";
 
-$aspect-typography: mat.define-typography-config(
+$schemer-typography: mat.define-typography-config(
         $font-family: 'NunitoSans',
 );
-@include angular-material-typography($aspect-typography);
+@include angular-material-typography($schemer-typography);
 
-$aspect-element-border-color: #ccc;
-$aspect-element-border-hover-color: #333;
-$aspect-primary: mat.define-palette(mat.$pink-palette);
-$aspect-accent: mat.define-palette(mat.$cyan-palette, 900);
-$aspect-theme: mat.define-light-theme((
-  color: (primary: $aspect-primary, accent: $aspect-accent),
+$schemer-element-border-color: #ccc;
+$schemer-element-border-hover-color: #333;
+$schemer-primary: mat.define-palette(mat.$pink-palette);
+$schemer-accent: mat.define-palette(mat.$cyan-palette, 900);
+$schemer-theme: mat.define-light-theme((
+  color: (primary: $schemer-primary, accent: $schemer-accent),
 ));
 
-@include mat.legacy-checkbox-color($aspect-theme);
-@include mat.radio-color($aspect-theme);
-@include mat.slider-color($aspect-theme);
+@include mat.legacy-checkbox-color($schemer-theme);
+@include mat.radio-color($schemer-theme);
+@include mat.slider-color($schemer-theme);
 
 
 .mat-button-toggle-group-appearance-standard {
-  border-color: $aspect-element-border-color;
+  border-color: $schemer-element-border-color;
   .mat-button-toggle+.mat-button-toggle {
-    border-left-color: $aspect-element-border-color;
+    border-left-color: $schemer-element-border-color;
   }
 }
 
 math-field {
   border-radius: 4px;
-  border: 1px solid $aspect-element-border-color;
+  border: 1px solid $schemer-element-border-color;
   padding: 8px;
   &:hover {
-    border-color: $aspect-element-border-hover-color
+    border-color: $schemer-element-border-hover-color
   };
   &:focus {
     outline-color: #3f51b5; //TODO $outline-color-primary
@@ -40,5 +40,6 @@ math-field {
 
 :root {
   --mdc-typography-button-letter-spacing: normal;
+  font-family: 'NunitoSans', sans-serif;
 }
 
