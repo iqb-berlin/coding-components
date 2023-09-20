@@ -12,8 +12,8 @@ import {TranslateService} from "@ngx-translate/core";
 @Component({
   selector: 'iqb-schemer',
   templateUrl: './schemer.component.html',
-  styleUrls: ['./schemer.component.scss'],
-  encapsulation: ViewEncapsulation.ShadowDom
+  styleUrls: ['./schemer.component.scss'] //,
+  // encapsulation: ViewEncapsulation.ShadowDom
 })
 export class SchemerComponent {
   @Output() responseSchemeChanged = new EventEmitter<ResponseScheme | null>();
