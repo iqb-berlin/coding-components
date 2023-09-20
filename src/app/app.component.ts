@@ -3,8 +3,13 @@ import {VariableInfo} from "@iqb/responses";
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  template: `
+      <iqb-schemer
+              [varList]="sampleVarList"
+              [showChecker]="false"
+              [showFileMenu]="true"
+      ></iqb-schemer>
+  `
 })
 export class AppComponent {
   title = 'coding-components';
