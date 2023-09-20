@@ -52,7 +52,7 @@
   <var-coding-classic [varCoding]="selectedCoding$ | async" class="var-scheme-container fx-flex-row-100"
               [allVariables]="allVariableIds">
   </var-coding-classic>
-  <mat-drawer #drawer *ngIf="showChecker" mode="over" class="fx-column-start-center" [style.background-color]="'red'">
+  <mat-drawer #drawer *ngIf="showChecker" mode="over" class="fx-column-start-center">
     <mat-toolbar class="fx-row-space-between-center">
       Antwortschema prüfen
       <button mat-button (click)="drawer.toggle()">

@@ -1,24 +1,25 @@
-<div *ngIf="codeData" class="fx-gap-5">
+<div *ngIf="codeData" class="fx-column-start-stretch">
   <div class="code-main-data fx-row-start-center">
-    <mat-form-field [class]="uniqueNumberValidator(codeData.id) ? '' : 'not-unique-id'">
+    <mat-form-field [class]="uniqueNumberValidator(codeData.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
+      <mat-label>{{'code.id' | translate}}</mat-label>
       <input matInput
-             [placeholder]="'code.id' | translate"
+             required
              [(ngModel)]="codeData.id"
              (ngModelChange)="setCodeDataChanged()"
              type="number">
+    </mat-form-field>
+    <mat-form-field [class]="codeData.score > 0 ? 'correct' : 'not-correct'" [style.width.px]="100">
+      <mat-label>{{'code.score' | translate}}</mat-label>
+      <input matInput
+             type="number"
+             required
+             [(ngModel)]="codeData.score"
+             (ngModelChange)="setCodeDataChanged()">
     </mat-form-field>
     <mat-form-field>
       <input matInput
              [placeholder]="'code.description' | translate"
              [(ngModel)]="codeData.label"
-             (ngModelChange)="setCodeDataChanged()">
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput
-             type="number"
-             required
-             [placeholder]="'code.score' | translate"
-             [(ngModel)]="codeData.score"
              (ngModelChange)="setCodeDataChanged()">
     </mat-form-field>
   </div>
