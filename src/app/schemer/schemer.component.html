@@ -2,7 +2,7 @@
   <div *ngIf="_varList.length > 0" class="navi-bar fx-column-space-between-stretch">
     <div class="var-scheme-list fx-flex">
       <div class="var-list-header">{{'varlist.base' | translate}}</div>
-      <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-center">
+      <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-stretch">
         <div class="fx-row-start-center">
           <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.base-' + codingStatus[varBasic.id]) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"
@@ -14,7 +14,7 @@
         </div>
       </mat-nav-list>
       <div class="var-list-header">{{'varlist.derived' | translate}}</div>
-      <mat-nav-list *ngFor="let varScheme of derivedVariables" class="fx-column-start-center">
+      <mat-nav-list *ngFor="let varScheme of derivedVariables" class="fx-column-start-stretch">
         <div class="fx-row-start-center">
           <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.derived-' + codingStatus[varScheme.id]) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"
