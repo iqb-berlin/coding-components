@@ -1,6 +1,5 @@
-import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
-import {ResponseScheme, VariableInfo} from "@iqb/responses";
-import {VariableCodingData} from "@iqb/responses/src/response-scheme/response-scheme";
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ResponseScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject} from "rxjs";
 import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
 import {MessageDialogComponent, MessageDialogData, MessageType} from "./dialogs/message-dialog.component";
@@ -52,6 +51,7 @@ export class SchemerComponent {
       }
       this._responseScheme = new ResponseScheme();
       this._responseScheme.variableCodings = [];
+      console.log(this._varList);
       this._varList.forEach(c => {
         if (this._responseScheme) {
           this._responseScheme.variableCodings.push(ResponseScheme.fromVariableInfo(c));
@@ -156,14 +156,15 @@ export class SchemerComponent {
           } else {
             if (this._responseScheme) {
                 this._responseScheme.variableCodings.push(<VariableCodingData>{
-                    id: result,
-                    label: result,
-                    sourceType: 'DERIVE_CONCAT',
-                    deriveSources: [],
-                    deriveSourceType: 'CODE',
-                    valueTransformations: [],
-                    manualInstruction: '',
-                    codes: []
+                  id: result,
+                  label: result,
+                  pattern: null,
+                  sourceType: 'DERIVE_CONCAT',
+                  deriveSources: [],
+                  deriveSourceType: 'CODE',
+                  valueTransformations: [],
+                  manualInstruction: '',
+                  codes: []
                 });
             }
           }
@@ -239,9 +240,9 @@ export class SchemerComponent {
           let errorMessage = '';
           const checkPattern = /^[a-zA-Z0-9_]+$/;
           if (checkPattern.exec(result)) {
-            const modifyiedVariableIds = this.allVariableIds.filter(v => v !== selectedCoding.id);
+            const modifiedVariableIds = this.allVariableIds.filter(v => v !== selectedCoding.id);
             const normalisedId = result.toUpperCase();
-            const idAlreadyExists = modifyiedVariableIds.find(v => v.toUpperCase() === normalisedId);
+            const idAlreadyExists = modifiedVariableIds.find(v => v.toUpperCase() === normalisedId);
             if (idAlreadyExists) {
               errorMessage = 'data-error.variable-id.double';
             } else {

@@ -1,0 +1,34 @@
+{
+  "variableCodings": [
+    {
+      "id":"Otto",
+      "label":"Otto",
+      "sourceType":"BASE",
+      "deriveSources":[],
+      "deriveSourceType":"CODE",
+      "valueTransformations":["TO_UPPER","REMOVE_WHITE_SPACES"],
+      "manualInstruction":"",
+      "codes":[]
+    },
+    {
+      "id":"Paul",
+      "label":"Paul",
+      "sourceType":"BASE",
+      "deriveSources":[],
+      "deriveSourceType":"CODE",
+      "valueTransformations":[],
+      "manualInstruction":"",
+      "codes":[]
+    },
+    {
+      "id":"Susi",
+      "label":"Susi",
+      "sourceType":"BASE",
+      "deriveSources":[],
+      "deriveSourceType":"CODE",
+      "valueTransformations":[],
+      "manualInstruction":"",
+      "codes":[]
+    }
+  ]
+}
