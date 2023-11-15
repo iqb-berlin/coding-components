@@ -11,14 +11,14 @@ import {FileService} from "./services/file.service";
 
     <mat-menu #menu="matMenu">
       <button mat-menu-item (click)="loadVariables()">
-        <mat-icon>input</mat-icon>{{'toolbar.loadVarList' | translate}}
+        <mat-icon>input</mat-icon>Variablenliste laden
       </button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="loadCodingScheme()">
-        <mat-icon>input</mat-icon>{{'toolbar.loadCodingScheme' | translate}}
+        <mat-icon>input</mat-icon>Antwortschema laden
       </button>
       <button mat-menu-item (click)="saveCodingScheme()">
-        <mat-icon>get_app</mat-icon>{{'toolbar.saveCodingScheme' | translate}}
+        <mat-icon>get_app</mat-icon>Antwortschema speichern
       </button>
     </mat-menu>
   `,

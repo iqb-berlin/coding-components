@@ -1,34 +1,53 @@
-{
-  "variableCodings": [
-    {
-      "id":"Otto",
-      "label":"Otto",
-      "sourceType":"BASE",
-      "deriveSources":[],
-      "deriveSourceType":"CODE",
-      "valueTransformations":["TO_UPPER","REMOVE_WHITE_SPACES"],
-      "manualInstruction":"",
-      "codes":[]
-    },
-    {
-      "id":"Paul",
-      "label":"Paul",
-      "sourceType":"BASE",
-      "deriveSources":[],
-      "deriveSourceType":"CODE",
-      "valueTransformations":[],
-      "manualInstruction":"",
-      "codes":[]
-    },
-    {
-      "id":"Susi",
-      "label":"Susi",
-      "sourceType":"BASE",
-      "deriveSources":[],
-      "deriveSourceType":"CODE",
-      "valueTransformations":[],
-      "manualInstruction":"",
-      "codes":[]
-    }
-  ]
-}
+[
+  {
+    "id": "Otto",
+    "label": "Otto",
+    "pattern": null,
+    "sourceType": "BASE",
+    "deriveSources": [],
+    "deriveSourceType": "CODE",
+    "valueTransformations": [
+      "TO_UPPER",
+      "REMOVE_WHITE_SPACES"
+    ],
+    "manualInstruction": "",
+    "codes": []
+  },
+  {
+    "id": "Paul",
+    "label": "Paul",
+    "pattern": null,
+    "sourceType": "BASE",
+    "deriveSources": [],
+    "deriveSourceType": "CODE",
+    "valueTransformations": [],
+    "manualInstruction": "",
+    "codes": []
+  },
+  {
+    "id": "Susi",
+    "label": "Susi",
+    "pattern": null,
+    "sourceType": "BASE",
+    "deriveSources": [],
+    "deriveSourceType": "CODE",
+    "valueTransformations": [],
+    "manualInstruction": "",
+    "codes": [
+      {
+        "id": 1,
+        "label": "",
+        "score": 0,
+        "rules": [
+          {
+            "method": "MATCH",
+            "parameters": [
+              "22222"
+            ]
+          }
+        ],
+        "manualInstruction": ""
+      }
+    ]
+  }
+]

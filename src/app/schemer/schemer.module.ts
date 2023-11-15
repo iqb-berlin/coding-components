@@ -44,14 +44,16 @@ import {SchemerToolbarComponent} from "./schemer-toolbar.component";
     SchemeCheckerComponent,
     VarCodingClassicComponent,
     ConfirmDialogComponent,
-    SchemerToolbarComponent,
     MessageDialogComponent,
     SelectVariableDialogComponent,
     SimpleInputDialogComponent,
-    ShowCodingResultsComponent
+    ShowCodingResultsComponent,
+    SchemerToolbarComponent
   ],
   exports: [
-    SchemerComponent
+    SchemerComponent,
+    SchemeCheckerComponent,
+    SchemerToolbarComponent
   ],
   imports: [
     CommonModule,

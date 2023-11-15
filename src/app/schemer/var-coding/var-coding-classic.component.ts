@@ -5,8 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
-import {VariableCodingData} from "@iqb/responses/src/response-scheme/response-scheme";
-import {CodeData, ValueTransformation} from "@iqb/responses";
+import {CodeData, ValueTransformation, VariableCodingData} from "@iqb/responses";
 
 @Component({
   selector: 'var-coding-classic',

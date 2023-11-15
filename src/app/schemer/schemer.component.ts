@@ -34,8 +34,6 @@ export class SchemerComponent {
     return this._responseScheme;
   }
 
-  @Input() showChecker: boolean = false;
-  @Input() showFileMenu: boolean = false;
   _varList: VariableInfo[] = [];
   @Input()
   set varList(value: any) {
