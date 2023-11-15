@@ -52,14 +52,4 @@
   <var-coding-classic [varCoding]="selectedCoding$ | async" class="var-scheme-container fx-flex-row-100"
               [allVariables]="allVariableIds">
   </var-coding-classic>
-  <mat-drawer #drawer *ngIf="showChecker" mode="over" class="fx-column-start-center">
-    <mat-toolbar class="fx-row-space-between-center">
-      Antwortschema prüfen
-      <button mat-button (click)="drawer.toggle()">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-    </mat-toolbar>
-    <schema-checker></schema-checker>
-  </mat-drawer>
-  <schemer-load-save *ngIf="showFileMenu" [varList]="_varList" [responseScheme]="_responseScheme"></schemer-load-save>
 </div>
