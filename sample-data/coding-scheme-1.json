@@ -1,7 +1,7 @@
 [
   {
     "id": "Otto",
-    "label": "Otto",
+    "label": "",
     "pattern": null,
     "sourceType": "BASE",
     "deriveSources": [],
@@ -15,7 +15,7 @@
   },
   {
     "id": "Paul",
-    "label": "Paul",
+    "label": "",
     "pattern": null,
     "sourceType": "BASE",
     "deriveSources": [],
@@ -26,7 +26,7 @@
   },
   {
     "id": "Susi",
-    "label": "Susi",
+    "label": "",
     "pattern": null,
     "sourceType": "BASE",
     "deriveSources": [],
@@ -49,5 +49,19 @@
         "manualInstruction": ""
       }
     ]
+  },
+  {
+    "id": "ss",
+    "label": "",
+    "pattern": "CHOICE",
+    "sourceType": "DERIVE_SUM",
+    "deriveSources": [
+      "Otto",
+      "Paul"
+    ],
+    "deriveSourceType": "VALUE",
+    "valueTransformations": [],
+    "manualInstruction": "",
+    "codes": []
   }
 ]

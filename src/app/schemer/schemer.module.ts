@@ -25,13 +25,14 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {CodeDataComponent} from "./code/code-data.component";
 import {AppTranslateLoader} from "./app-translate-loader";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
-import {VarCodingClassicComponent} from "./var-coding/var-coding-classic.component";
+import {VarCodingComponent} from "./var-coding/var-coding.component";
 import {ConfirmDialogComponent} from "./dialogs/confirm-dialog.component";
 import {MessageDialogComponent} from "./dialogs/message-dialog.component";
 import {SelectVariableDialogComponent} from "./dialogs/select-variable-dialog.component";
 import {SimpleInputDialogComponent} from "./dialogs/simple-input-dialog.component";
 import {ShowCodingResultsComponent} from "./scheme-checker/show-coding-results.component";
 import {SchemerToolbarComponent} from "./schemer-toolbar.component";
+import {VarCodingClassicComponent} from "./var-coding/var-coding-classic/var-coding-classic.component";
 
 
 
@@ -42,12 +43,13 @@ import {SchemerToolbarComponent} from "./schemer-toolbar.component";
     RichTextEditDialogComponent,
     RichTextEditorComponent,
     SchemeCheckerComponent,
-    VarCodingClassicComponent,
+    VarCodingComponent,
     ConfirmDialogComponent,
     MessageDialogComponent,
     SelectVariableDialogComponent,
     SimpleInputDialogComponent,
     ShowCodingResultsComponent,
+    VarCodingClassicComponent,
     SchemerToolbarComponent
   ],
   exports: [
