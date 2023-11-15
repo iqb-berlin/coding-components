@@ -1,0 +1,18 @@
+<div *ngIf="varCoding" class="fx-column-space-between-stretch" [style.padding]="'10px'">
+  <h3>{{'code.header' | translate}}</h3>
+  <div *ngFor="let cd of varCoding.codes" class="fx-row-start-start">
+    <code-data [codeData]="cd"
+               [allCodes]="varCoding.codes"
+               (codeDataChanged)="varCodingChanged.emit(varCoding)"></code-data>
+    <button mat-raised-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+  <div class="fx-row-start-center">
+    <button mat-raised-button (click)="addCode()">
+      <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
+    </button>
+    <div *ngIf="varCoding.codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
+  </div>
+</div>
+

@@ -8,11 +8,11 @@ import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-
 import {CodeData, ValueTransformation, VariableCodingData} from "@iqb/responses";
 
 @Component({
-  selector: 'var-coding-classic',
-  templateUrl: './var-coding-classic.component.html',
-  styleUrls: ['./var-coding-classic.component.scss']
+  selector: 'var-coding',
+  templateUrl: './var-coding.component.html',
+  styleUrls: ['./var-coding.component.scss']
 })
-export class VarCodingClassicComponent {
+export class VarCodingComponent {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
   @Input() varCoding: VariableCodingData | null = null;
   @Input() allVariables: string[] = [];

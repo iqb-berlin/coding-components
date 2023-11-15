@@ -1,0 +1,125 @@
+<div *ngIf="varCoding" class="fx-column-space-between-stretch" [style.padding]="'10px'">
+  <div class="fx-row-start-stretch fx-gap-10">
+    <div class="fx-column-start-stretch" [style.width.%]="50">
+      <mat-form-field>
+        <mat-label>{{'description-position' | translate}}</mat-label>
+        <input matInput [(ngModel)]="varCoding.label"
+               (change)="varCodingChanged.emit(varCoding)">
+      </mat-form-field>
+      <mat-card *ngIf="varCoding.sourceType !== 'BASE'" [style.margin-top.px]="4" [style.margin-bottom.px]="4">
+        <mat-card-subtitle class="fx-row-space-between-stretch">
+          {{'derive-header' | translate}}
+        </mat-card-subtitle>
+        <mat-card-content>
+          <div class="fx-row-start-stretch fx-gap-10">
+            <mat-form-field [style.width.%]="50">
+              <mat-label>{{ 'derive-source-type.prompt' | translate }}</mat-label>
+              <mat-select [(value)]="varCoding.deriveSourceType">
+                <mat-option [value]="'VALUE'">
+                  {{'derive-source-type.VALUE' | translate}}
+                </mat-option>
+                <mat-option [value]="'CODE'">
+                  {{'derive-source-type.CODE' | translate}}
+                </mat-option>
+                <mat-option [value]="'SCORE'">
+                  {{'derive-source-type.SCORE' | translate}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field [style.width.%]="50">
+              <mat-label>{{'derive-method' | translate}}</mat-label>
+              <mat-select [(value)]="varCoding.sourceType">
+                <mat-option [value]="'DERIVE_CONCAT'">
+                  {{'scheme-type.DERIVE_CONCAT' | translate}}
+                </mat-option>
+                <mat-option [value]="'DERIVE_SUM'">
+                  {{'scheme-type.DERIVE_SUM' | translate}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="fx-row-start-center">
+            <mat-label>{{ 'derive-sources.prompt' | translate }}</mat-label>
+            <mat-chip-listbox>
+              <mat-chip *ngIf="varCoding.deriveSources.length === 0" [matMenuTriggerFor]="menu" class="no-sources">{{ 'derive-sources.error' | translate }}</mat-chip>
+              <mat-chip *ngFor="let source of varCoding.deriveSources"
+                        [class]="allVariables.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
+                        removable="true" (removed)="deleteDeriveSource(source)">
+                {{source}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip>
+              <button mat-flat-button [matMenuTriggerFor]="menu" *ngIf="getNewSources(varCoding.deriveSources).length > 0">
+                <mat-icon>add</mat-icon>
+              </button>
+            </mat-chip-listbox>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item *ngFor="let newSource of getNewSources(varCoding.deriveSources)" (click)="addDeriveSource(newSource)">
+                {{newSource}}
+              </button>
+            </mat-menu>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <mat-card [style.width.%]="50">
+      <mat-card-subtitle class="fx-row-space-between-stretch">
+        {{'manual-instruction.prompt-general' | translate}}
+        <button mat-flat-button (click)="editTextDialog_manualInstruction()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </mat-card-subtitle>
+      <mat-card-content class="instructions">
+        <div [innerHTML]="varCoding ? getSanitizedText(varCoding.manualInstruction) : null"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <div class="fx-row-start-center fx-gap-10" [style.margin-top.px]="4">
+    <mat-form-field [style.width.%]="50">
+      <mat-label>{{ 'coding-pattern.prompt' | translate }}</mat-label>
+      <mat-select [(value)]="varCoding.pattern">
+        <mat-option [value]="'UNSET'">
+          {{'coding-pattern.UNSET' | translate}}
+        </mat-option>
+        <mat-option [value]="'CHOICE'">
+          {{'coding-pattern.CHOICE' | translate}}
+        </mat-option>
+        <mat-option [value]="'INPUT_INTEGER'">
+          {{'coding-pattern.INPUT_INTEGER' | translate}}
+        </mat-option>
+        <mat-option [value]="'INPUT_STRING'">
+          {{'coding-pattern.INPUT_STRING' | translate}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-card [style.width.%]="50">
+      <mat-card-subtitle>{{'value-transformation.prompt' | translate}}</mat-card-subtitle>
+      <mat-card-content class="fx-column-start-center">
+        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TO_UPPER') >= 0) : false"
+                      (change)="alterValueTransformation('TO_UPPER', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'value-transformation.TO_UPPER' | translate}}
+          </div>
+        </mat-checkbox>
+        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
+                      (change)="alterValueTransformation('REMOVE_WHITE_SPACES', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'value-transformation.REMOVE_WHITE_SPACES' | translate}}
+          </div>
+        </mat-checkbox>
+        <!--
+        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('DATE_TO_ISO') >= 0) : false"
+                      (change)="alterValueTransformation('DATE_TO_ISO', $event.checked)">
+          {{'value-transformation.DATE_TO_ISO' | translate}}
+        </mat-checkbox>
+        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TIME_TO_ISO') >= 0) : false"
+                      (change)="alterValueTransformation('TIME_TO_ISO', $event.checked)">
+          {{'value-transformation.TIME_TO_ISO' | translate}}
+        </mat-checkbox>
+        -->
+      </mat-card-content>
+    </mat-card>
+  </div>
+  <var-coding-classic [varCoding]="varCoding" class="var-scheme-container fx-flex-row-100"
+                      [allVariables]="allVariables"></var-coding-classic>
+</div>
+
