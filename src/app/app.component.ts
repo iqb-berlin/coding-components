@@ -11,9 +11,11 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
             <schema-checker [responseScheme]="codings1"></schema-checker>
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
-          <button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
+          <div>
+            <button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
               <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
-          </button>
+            </button>
+          </div>
           <iqb-schemer class="drawer-schemer"
                   [varList]="varList1"
                   [responseScheme]="codings1"

@@ -1,12 +1,13 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {ResponseScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, debounceTime, fromEvent} from "rxjs";
 import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
 import {MessageDialogComponent, MessageDialogData, MessageType} from "./dialogs/message-dialog.component";
 import {ConfirmDialogComponent, ConfirmDialogData} from "./dialogs/confirm-dialog.component";
 import {SelectVariableDialogComponent, SelectVariableDialogData} from "./dialogs/select-variable-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {TranslateService} from "@ngx-translate/core";
+import {VarCodingComponent} from "./var-coding/var-coding.component";
 
 @Component({
   selector: 'iqb-schemer',
@@ -15,6 +16,7 @@ import {TranslateService} from "@ngx-translate/core";
   // encapsulation: ViewEncapsulation.ShadowDom
 })
 export class SchemerComponent {
+  @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
   @Output() responseSchemeChanged = new EventEmitter<ResponseScheme | null>();
 
   _responseScheme: ResponseScheme | null = null;
@@ -38,22 +40,17 @@ export class SchemerComponent {
   @Input()
   set varList(value: any) {
     this._varList = [];
-    console.log('#3');
     if (value) {
       if (typeof value === 'string') {
         this._varList = value ? JSON.parse(value) : [];
-        console.log('#1');
       } else {
         this._varList = value;
-        console.log('#2');
       }
       this._responseScheme = new ResponseScheme();
       this._responseScheme.variableCodings = [];
-      console.log(this._varList);
       this._varList.forEach(c => {
         if (this._responseScheme) {
           this._responseScheme.variableCodings.push(ResponseScheme.fromVariableInfo(c));
-          console.log('#4');
         }
       });
       this.updateVariableLists();
@@ -76,6 +73,15 @@ export class SchemerComponent {
     private inputDialog: MatDialog
   ) { }
 
+  ngAfterViewInit() {
+    if (this.varCodingElement) {
+      this.varCodingElement.varCodingChanged.pipe(
+        debounceTime(500)
+      ).subscribe(() => {
+        this.updateVariableLists();
+      });
+    }
+  }
   updateVariableLists() {
     this.basicVariables = this._responseScheme && this._responseScheme.variableCodings ?
       this._responseScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
