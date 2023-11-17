@@ -1,18 +1,22 @@
 import {
-  Component, EventEmitter, Input, Output
+  AfterViewInit,
+  Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
-import {CodeData, ValueTransformation, VariableCodingData} from "@iqb/responses";
+import {ValueTransformation, VariableCodingData} from "@iqb/responses";
+import {VarCodingClassicComponent} from "./var-coding-classic/var-coding-classic.component";
+import {debounceTime} from "rxjs";
 
 @Component({
   selector: 'var-coding',
   templateUrl: './var-coding.component.html',
   styleUrls: ['./var-coding.component.scss']
 })
-export class VarCodingComponent {
+export class VarCodingComponent implements AfterViewInit {
+  @ViewChild(VarCodingClassicComponent) codesElement: VarCodingClassicComponent | undefined;
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
   @Input() varCoding: VariableCodingData | null = null;
   @Input() allVariables: string[] = [];
@@ -23,6 +27,15 @@ export class VarCodingComponent {
     private editTextDialog: MatDialog
   ) { }
 
+  ngAfterViewInit() {
+    if (this.codesElement) {
+      this.codesElement.codesChanged.pipe(
+        debounceTime(500)
+      ).subscribe(() => {
+        this.varCodingChanged.emit(this.varCoding);
+      });
+    }
+  }
   getNewSources(usedVars: string[]) {
     const returnSources: string[] = [];
     this.allVariables.forEach(v => {
@@ -84,30 +97,6 @@ export class VarCodingComponent {
           }
         }
       });
-    }
-  }
-
-  addCode() {
-    if (this.varCoding) {
-      this.varCoding.codes.push({
-        id: 1,
-        label: '',
-        score: 0,
-        rules: [],
-        manualInstruction: ''
-      });
-      this.varCodingChanged.emit(this.varCoding);
-    }
-  }
-
-  deleteCode(codeToDeleteId: number) {
-    if (this.varCoding) {
-      let codePos = -1;
-      this.varCoding.codes.forEach((c: CodeData, i: number) => {
-        if (c.id === codeToDeleteId) codePos = i;
-      });
-      if (codePos >= 0) this.varCoding.codes.splice(codePos, 1);
-      this.varCodingChanged.emit(this.varCoding);
     }
   }
 }
