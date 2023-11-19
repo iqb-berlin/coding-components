@@ -7,13 +7,10 @@
                (change)="varCodingChanged.emit(varCoding)">
       </mat-form-field>
       <mat-card *ngIf="varCoding.sourceType !== 'BASE'" [style.margin-top.px]="4" [style.margin-bottom.px]="4">
-        <mat-card-subtitle class="fx-row-space-between-stretch">
-          {{'derive-header' | translate}}
-        </mat-card-subtitle>
         <mat-card-content>
           <div class="fx-row-start-stretch fx-gap-10">
             <mat-form-field [style.width.%]="50">
-              <mat-label>{{ 'derive-source-type.prompt' | translate }}</mat-label>
+              <mat-label>{{ 'derive-method.prompt' | translate }}</mat-label>
               <mat-select [(value)]="varCoding.deriveSourceType">
                 <mat-option [value]="'VALUE'">
                   {{'derive-source-type.VALUE' | translate}}
