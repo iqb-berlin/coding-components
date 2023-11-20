@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {ResponseScheme, VariableInfo} from "@iqb/responses";
+import {CodingScheme, VariableInfo} from "@iqb/responses";
 import {FileService} from "./services/file.service";
 
 @Component({
@@ -27,17 +27,17 @@ import {FileService} from "./services/file.service";
   ]
 })
 export class SchemerToolbarComponent {
-  @Input() responseScheme: ResponseScheme | null = null;
+  @Input() codingScheme: CodingScheme | null = null;
   @Input() varList: VariableInfo[] = [];
 
   saveCodingScheme(): void {
-    FileService.saveToFile(JSON.stringify(this.responseScheme), 'coding-scheme.json');
+    FileService.saveToFile(JSON.stringify(this.codingScheme), 'coding-scheme.json');
   }
 
   async loadVariables(): Promise<void> {
     this.varList = JSON.parse(await FileService.loadFile(['.json']));
   }
   async loadCodingScheme(): Promise<void> {
-      this.responseScheme = JSON.parse(await FileService.loadFile(['.json']));
+      this.codingScheme = JSON.parse(await FileService.loadFile(['.json']));
   }
 }

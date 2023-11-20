@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {ResponseScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
+import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, fromEvent} from "rxjs";
 import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
 import {MessageDialogComponent, MessageDialogData, MessageType} from "./dialogs/message-dialog.component";
@@ -8,6 +8,7 @@ import {SelectVariableDialogComponent, SelectVariableDialogData} from "./dialogs
 import {MatDialog} from "@angular/material/dialog";
 import {TranslateService} from "@ngx-translate/core";
 import {VarCodingComponent} from "./var-coding/var-coding.component";
+import {CodingFactory} from "@iqb/responses/coding-factory";
 
 @Component({
   selector: 'iqb-schemer',
@@ -17,23 +18,23 @@ import {VarCodingComponent} from "./var-coding/var-coding.component";
 })
 export class SchemerComponent {
   @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
-  @Output() responseSchemeChanged = new EventEmitter<ResponseScheme | null>();
+  @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
-  _responseScheme: ResponseScheme | null = null;
+  _codingScheme: CodingScheme | null = null;
   @Input()
-  set responseScheme(value: any) {
-      this._responseScheme = null;
+  set codingScheme(value: any) {
+      this._codingScheme = null;
       if (value) {
           if (typeof value === 'string') {
-              this._responseScheme = value ? JSON.parse(value) : null;
+              this._codingScheme = value ? JSON.parse(value) : null;
           } else {
-              this._responseScheme = value;
+              this._codingScheme = value;
           }
       }
       this.updateVariableLists();
   }
-  get responseScheme(): ResponseScheme | null {
-    return this._responseScheme;
+  get codingScheme(): CodingScheme | null {
+    return this._codingScheme;
   }
 
   _varList: VariableInfo[] = [];
@@ -46,13 +47,13 @@ export class SchemerComponent {
       } else {
         this._varList = value;
       }
-      this._responseScheme = new ResponseScheme();
-      this._responseScheme.variableCodings = [];
+      const variableCodings: VariableCodingData[] = [];
       this._varList.forEach(c => {
-        if (this._responseScheme) {
-          this._responseScheme.variableCodings.push(ResponseScheme.fromVariableInfo(c));
+        if (this._codingScheme) {
+          variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(c));
         }
       });
+      this._codingScheme = new CodingScheme(variableCodings);
       this.updateVariableLists();
     }
   }
@@ -83,8 +84,8 @@ export class SchemerComponent {
     }
   }
   updateVariableLists() {
-    this.basicVariables = this._responseScheme && this._responseScheme.variableCodings ?
-      this._responseScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
+    this.basicVariables = this._codingScheme && this._codingScheme.variableCodings ?
+      this._codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
         .sort((a, b) => {
           const idA = a.id.toUpperCase();
           const idB = b.id.toUpperCase();
@@ -92,8 +93,8 @@ export class SchemerComponent {
           if (idA > idB) return 1;
           return 0;
         }) : [];
-    this.derivedVariables = this._responseScheme && this._responseScheme.variableCodings ?
-      this._responseScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
+    this.derivedVariables = this._codingScheme && this._codingScheme.variableCodings ?
+      this._codingScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
         .sort((a, b) => {
           const idA = a.id.toUpperCase();
           const idB = b.id.toUpperCase();
@@ -101,11 +102,11 @@ export class SchemerComponent {
           if (idA > idB) return 1;
           return 0;
         }) : [];
-    this.allVariableIds = this._responseScheme ?
-      this._responseScheme.variableCodings.map(c => c.id) : [];
+    this.allVariableIds = this._codingScheme ?
+      this._codingScheme.variableCodings.map(c => c.id) : [];
     this.codingStatus = {};
-    if (this._responseScheme && this._responseScheme.variableCodings) {
-      this._responseScheme.variableCodings.forEach(v => {
+    if (this._codingScheme && this._codingScheme.variableCodings) {
+      this._codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = this.getCodingStatus(v);
       })
     }
@@ -158,14 +159,12 @@ export class SchemerComponent {
           if (idAlreadyExists) {
             errorMessage = 'data-error.variable-id.double';
           } else {
-            if (this._responseScheme) {
-                this._responseScheme.variableCodings.push(<VariableCodingData>{
+            if (this._codingScheme) {
+                this._codingScheme.variableCodings.push(<VariableCodingData>{
                   id: result,
                   label: result,
-                  pattern: null,
-                  sourceType: 'DERIVE_CONCAT',
+                  sourceType: 'SUM_CODE',
                   deriveSources: [],
-                  deriveSourceType: 'CODE',
                   valueTransformations: [],
                   manualInstruction: '',
                   codes: []
@@ -186,7 +185,7 @@ export class SchemerComponent {
           }
         });
       } else {
-        this.responseSchemeChanged.emit(this._responseScheme);
+        this.codingSchemeChanged.emit(this._codingScheme);
         this.updateVariableLists();
       }
     });
@@ -205,11 +204,11 @@ export class SchemerComponent {
         }
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this._responseScheme) {
+        if (result !== false && this._codingScheme) {
           this.selectedCoding$.next(null);
-          this._responseScheme.variableCodings = this._responseScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
+          this._codingScheme.variableCodings = this._codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
           this.updateVariableLists();
-          this.responseSchemeChanged.emit(this._responseScheme);
+          this.codingSchemeChanged.emit(this._codingScheme);
         }
       });
     } else {
@@ -266,7 +265,7 @@ export class SchemerComponent {
             });
           } else {
             this.updateVariableLists();
-            this.responseSchemeChanged.emit(this._responseScheme);
+            this.codingSchemeChanged.emit(this._codingScheme);
           }
         }
       });
@@ -284,11 +283,11 @@ export class SchemerComponent {
 
   copyVarScheme() {
     const selectedCoding = this.selectedCoding$.getValue();
-    if (selectedCoding && this._responseScheme) {
+    if (selectedCoding && this._codingScheme) {
       const dialogData = <SelectVariableDialogData>{
         title: 'Kodierung kopieren',
         prompt: 'Bitte Zielvariable wählen! Achtung: Die Kodierungsdaten der Zielvariable werden komplett überschrieben.',
-        variables: this._responseScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
+        variables: this._codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
@@ -296,15 +295,16 @@ export class SchemerComponent {
         data: dialogData
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this._responseScheme) {
-          const targetCoding = this._responseScheme.variableCodings.find(c => c.id === result);
+        if (result !== false && this._codingScheme) {
+          const targetCoding = this._codingScheme.variableCodings.find(c => c.id === result);
           if (targetCoding) {
-            const newCoding = ResponseScheme.copy(selectedCoding);
+            const stringifiedCoding = JSON.stringify(selectedCoding)
+            const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
             newCoding.id = targetCoding.id;
-            this._responseScheme.variableCodings = this._responseScheme.variableCodings.filter(c => c.id !== targetCoding.id);
-            this._responseScheme.variableCodings.push(newCoding);
+            this._codingScheme.variableCodings = this._codingScheme.variableCodings.filter(c => c.id !== targetCoding.id);
+            this._codingScheme.variableCodings.push(newCoding);
             this.updateVariableLists();
-            this.responseSchemeChanged.emit(this._responseScheme);
+            this.codingSchemeChanged.emit(this._codingScheme);
           }
         }
       });
