@@ -4,7 +4,12 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class FileService {
-
+  static saveToFile(fileContent: string, filename: string): void {
+    const anchor = document.createElement('a');
+    anchor.download = 'export.json';
+    anchor.href = window.URL.createObjectURL(new File([fileContent], filename));
+    anchor.click();
+  }
   static async loadFile(fileTypes: string[] = [], asBase64: boolean = false): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const fileUploadElement = document.createElement('input');

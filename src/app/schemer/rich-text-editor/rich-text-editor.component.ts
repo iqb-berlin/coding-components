@@ -1,6 +1,6 @@
 import {
   Component, EventEmitter, Input, Output,
-  AfterViewInit, Injector
+  AfterViewInit
 } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import { Underline } from '@tiptap/extension-underline';
@@ -20,7 +20,6 @@ import { Bold } from '@tiptap/extension-bold';
 import { Italic } from '@tiptap/extension-italic';
 import { Strike } from '@tiptap/extension-strike';
 import { InlineImage } from './extensions/inline-image';
-import { Tooltip } from './extensions/tooltip';
 import { AnchorId } from './extensions/anchorId';
 import { Indent } from './extensions/indent';
 import { HangingIndent } from './extensions/hanging-indent';
@@ -39,6 +38,7 @@ import {FileService} from "../services/file.service";
 export class RichTextEditorComponent implements AfterViewInit {
   @Input() content!: string | Record<string, any>;
   @Input() defaultFontSize!: number;
+  @Input() editorHeightPx!: number;
   @Input() clozeMode: boolean = false;
   @Output() contentChange = new EventEmitter<string | Record<string, any>>();
 
@@ -78,15 +78,12 @@ export class RichTextEditorComponent implements AfterViewInit {
     HangingIndent,
     InlineImage,
     BlockImage,
-    Blockquote,
-    Tooltip
+    Blockquote
   ];
 
   editor: Editor = new Editor({
     extensions: this.defaultExtensions
   });
-
-  constructor(private injector: Injector) { }
 
   ngAfterViewInit(): void {
     this.editor.commands.focus();

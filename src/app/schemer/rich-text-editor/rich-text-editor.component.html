@@ -1,6 +1,6 @@
-<div class="editor-control-panel fx-column-start-stretch" mat-dialog-title>
+<div class="editor-control-panel fx-column-start-stretch">
   <div class="fx-row-space-between-stretch">
-    <fieldset class="fx-row-start-stretch">
+    <fieldset class="fx-row-start-stretch" [style.background-color]="'transparent'">
       <legend>Schriftauszeichnung</legend>
       <button mat-icon-button matTooltip="Fett" [matTooltipPosition]="'above'" [matTooltipShowDelay]="300"
               [class.active]="editor.isActive('bold')"
@@ -37,7 +37,7 @@
       <legend>Schrift</legend>
       <mat-form-field class="dropdown" appearance="outline" [style.width.px]="90">
         <mat-label>Größe</mat-label>
-        <mat-select [value]="editor.getAttributes('textStyle').fontSize?.toString() || selectedFontSize">
+        <mat-select [value]="editor.getAttributes('textStyle')['fontSize']?.toString() || selectedFontSize">
           <mat-option (click)="applyFontSize('8px')" value="8px">8px</mat-option>
           <mat-option (click)="applyFontSize('10px')" value="10px">10px</mat-option>
           <mat-option (click)="applyFontSize('12px')" value="12px">12px</mat-option>
@@ -68,7 +68,7 @@
       <legend>Absatz</legend>
       <mat-form-field class="dropdown" appearance="outline" [style.width.px]="135">
         <mat-label>Typ</mat-label>
-        <mat-select [value]="editor.getAttributes('heading').level?.toString() || ''"
+        <mat-select [value]="editor.getAttributes('heading')['level']?.toString() || ''"
                     (valueChange)="toggleHeading($event)">
           <mat-option value="1">H1</mat-option>
           <mat-option value="2">H2</mat-option>
@@ -80,7 +80,7 @@
       <mat-form-field class="dropdown" appearance="outline" [style.width.px]="90">
         <mat-label>Abstand</mat-label>
         <mat-select matTooltip="Achtung: Gilt nur für zukünftig angelegte Absätze" [matTooltipShowDelay]="300"
-                    [value]="editor.getAttributes('paragraph').margin?.toString() || '0'"
+                    [value]="editor.getAttributes('paragraph')['margin']?.toString() || '0'"
                     (click)="$any($event).stopPropagation()" (valueChange)="applyParagraphStyle($event)">
           <mat-option value="0">0px</mat-option>
           <mat-option value="10">10px</mat-option>
@@ -92,7 +92,7 @@
     <fieldset class="fx-row-start-stretch" [style.gap.px]="5">
       <legend>Listen</legend>
       <aspect-combo-button [inputType]="'list'"
-                           [selectedValue]="editor.getAttributes('bulletList').listStyle"
+                           [selectedValue]="editor.getAttributes('bulletList')['listStyle']"
                            [availableValues]="['disc', 'circle', 'square']"
                            [tooltip]="'Aufzählung'" [icon]="'format_list_bulleted'"
                            [isActive]="editor.isActive('bulletList')"
@@ -100,7 +100,7 @@
                            (selectionChanged)="applyListStyle('bulletList', $event)">
       </aspect-combo-button>
       <aspect-combo-button [inputType]="'list'"
-                           [selectedValue]="editor.getAttributes('orderedList').listStyle"
+                           [selectedValue]="editor.getAttributes('orderedList')['listStyle']"
                            [availableValues]="['decimal', 'lower-latin', 'upper-latin',
                                                'lower-roman', 'upper-roman', 'lower-greek']"
                            [tooltip]="'Aufzählung (nummeriert)'" [icon]="'format_list_numbered'"
@@ -180,12 +180,7 @@
     </fieldset>
 
     <fieldset class="fx-row-start-stretch">
-      <legend>Sonderelemente</legend>
-      <button mat-icon-button matTooltip="Tooltip" [matTooltipPosition]="'above'" [matTooltipShowDelay]="300"
-              [class.active]="editor.isActive('tooltip')"
-              (click)="showTooltipPropertiesDialog()">
-        <mat-icon>announcement</mat-icon>
-      </button>
+      <legend>Sonderzeichen</legend>
       <button mat-icon-button class="special-chars-button" matTooltip="Sonderzeichen" [matTooltipShowDelay]="300"
               [matMenuTriggerFor]="specialCharsMenu">
         <mat-icon>emoji_symbols</mat-icon>
@@ -258,39 +253,14 @@
               (click)="toggleBlockquote()">
         <mat-icon>format_quote</mat-icon>
       </button>
-      <aspect-combo-button *ngIf="!clozeMode"
-                           [inputType]="'color'" [selectedValue]="selectedAnchorColor"
-                           [tooltip]="'Bereich markieren'" [icon]="'read_more'"
-                           (applySelection)="applyAnchorId()"
-                           (selectionChanged)="selectedAnchorColor = $event">
-      </aspect-combo-button>
     </fieldset>
   </div>
-  <div *ngIf="clozeMode" class="fx-row-space-around-center" >
-    <button mat-icon-button matTooltip="Eingabefeld" [matTooltipShowDelay]="300"
-            (click)="insertTextField()">
-      <mat-icon>edit</mat-icon>
-    </button>
-    <button mat-icon-button matTooltip="Ablegeliste" [matTooltipShowDelay]="300"
-            (click)="insertDropList()">
-      <mat-icon>drag_indicator</mat-icon>
-    </button>
-    <button mat-icon-button matTooltip="Optionsfeld" [matTooltipShowDelay]="300"
-            (click)="insertToggleButton()">
-      <mat-icon>radio_button_checked</mat-icon>
-    </button>
-    <button mat-icon-button matTooltip="Knopf" [matTooltipShowDelay]="300"
-            (click)="insertButton()">
-      <mat-icon>smart_button</mat-icon>
-    </button>
-    <button mat-icon-button matTooltip="Kontrollkästchen" [matTooltipShowDelay]="300"
-            (click)="insertCheckbox()">
-      <mat-icon>check_box</mat-icon>
-    </button>
-  </div>
 </div>
-<tiptap-editor [editor]="editor" [ngModel]="content" mat-dialog-content
-               [outputFormat]="clozeMode ? 'json' : 'html'"
-               [style.font-size.px]="defaultFontSize"
-               (ngModelChange)="contentChange.emit($event)">
-</tiptap-editor>
+<div class="editor-wrapper"
+     [style.height.px]="editorHeightPx">
+  <tiptap-editor [editor]="editor" [ngModel]="content"
+                 [outputFormat]="clozeMode ? 'json' : 'html'"
+                 [style.font-size.px]="defaultFontSize"
+                 (ngModelChange)="contentChange.emit($event)">
+  </tiptap-editor>
+</div>

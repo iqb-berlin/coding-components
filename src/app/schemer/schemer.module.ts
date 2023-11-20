@@ -33,6 +33,8 @@ import {SimpleInputDialogComponent} from "./dialogs/simple-input-dialog.componen
 import {ShowCodingResultsComponent} from "./scheme-checker/show-coding-results.component";
 import {SchemerToolbarComponent} from "./schemer-toolbar.component";
 import {VarCodingClassicComponent} from "./var-coding/var-coding-classic/var-coding-classic.component";
+import {ComboButtonComponent} from "./rich-text-editor/combo-button.component";
+import {CdkConnectedOverlay, CdkOverlayOrigin} from "@angular/cdk/overlay";
 
 
 
@@ -50,6 +52,7 @@ import {VarCodingClassicComponent} from "./var-coding/var-coding-classic/var-cod
     SimpleInputDialogComponent,
     ShowCodingResultsComponent,
     VarCodingClassicComponent,
+    ComboButtonComponent,
     SchemerToolbarComponent
   ],
   exports: [
@@ -85,7 +88,9 @@ import {VarCodingClassicComponent} from "./var-coding/var-coding-classic/var-cod
         provide: TranslateLoader,
         useClass: AppTranslateLoader
       }
-    })
+    }),
+    CdkConnectedOverlay,
+    CdkOverlayOrigin
   ]
 })
 export class SchemerModule { }
