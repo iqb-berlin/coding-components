@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {Response, ResponseScheme} from '@iqb/responses';
+import {Response, CodingScheme} from '@iqb/responses';
 import {MatDialog} from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from './show-coding-results.component';
 
@@ -10,19 +10,19 @@ import { ShowCodingResultsComponent } from './show-coding-results.component';
 })
 export class SchemeCheckerComponent {
   values: { [Key in string]: string } = {};
-  _responseScheme: ResponseScheme | null = null;
+  _codingScheme: CodingScheme | null = null;
   @Input()
-  set responseScheme(value: any) {
+  set codingScheme(value: any) {
     this.values = {};
-    this._responseScheme = null;
+    this._codingScheme = null;
     if (value) {
       if (typeof value === 'string') {
-        this._responseScheme = JSON.parse(value);
+        this._codingScheme = JSON.parse(value);
       } else {
-        this._responseScheme = value;
+        this._codingScheme = value;
       }
-      if (this._responseScheme) {
-        this._responseScheme.variableCodings.filter(v => v.sourceType === 'BASE')
+      if (this._codingScheme) {
+        this._codingScheme.variableCodings.filter(v => v.sourceType === 'BASE')
           .map(v => v.id)
           .sort()
           .forEach(v => this.values[v] = '')
@@ -39,9 +39,9 @@ export class SchemeCheckerComponent {
   }
 
   startEvaluation() {
-    if (this._responseScheme) {
+    if (this._codingScheme) {
       const myValues: Response[] = [];
-      this._responseScheme.variableCodings.forEach((cs: { id: string | number; }) => {
+      this._codingScheme.variableCodings.forEach((cs: { id: string | number; }) => {
         if (this.values[cs.id]) {
           myValues.push(<Response>{
             id: cs.id,
@@ -58,7 +58,7 @@ export class SchemeCheckerComponent {
       });
       this.showCodingResultsDialog.open(ShowCodingResultsComponent, {
         width: '800px',
-        data: this._responseScheme.codeAndScore(myValues)
+        data: this._codingScheme.code(myValues)
       });
     }
   }

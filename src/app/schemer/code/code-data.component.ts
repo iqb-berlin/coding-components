@@ -1,7 +1,7 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { CodeData, CodingRule, RuleMethod } from '@iqb/responses';
+import {CodeData, CodingRule, RuleMethod, RuleMethodParameterCount} from '@iqb/responses';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
@@ -81,29 +81,19 @@ export class CodeDataComponent {
   }
 
   static getParamCount(ruleMethod: RuleMethod): number {
-    // eslint-disable-next-line default-case
-    switch (ruleMethod) {
-      case 'MATCH':
-      case 'MATCH_REGEX':
-        return -1;
-      case 'NUMERIC_RANGE':
-        return 2;
-      case 'ELSE':
-      case 'IS_EMPTY':
-        return 0;
-    }
-    return 1;
+    return RuleMethodParameterCount[ruleMethod];
   }
 
   addRule(newRuleMethod: RuleMethod) {
     if (this.codeData) {
       const newRule: CodingRule = {
-        method: newRuleMethod,
-        parameters: []
+        method: newRuleMethod
       };
       const paramCount = CodeDataComponent.getParamCount(newRuleMethod);
-      if (paramCount !== 0) newRule.parameters.push('');
-      if (paramCount > 1) newRule.parameters.push('');
+      if (paramCount !== 0) {
+        newRule.parameters = [''];
+        if (paramCount > 1) newRule.parameters.push('');
+      }
       this.codeData.rules.push(newRule);
       this.setCodeDataChanged();
     }

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {ResponseScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
+import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
 
@@ -8,7 +8,7 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
   template: `
       <mat-drawer-container class="coder-body">
         <mat-drawer #drawer mode="side">
-            <schema-checker [responseScheme]="codings1"></schema-checker>
+            <schema-checker [codingScheme]="codings1"></schema-checker>
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
           <div>
@@ -18,11 +18,11 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
           </div>
           <iqb-schemer class="drawer-schemer"
                   [varList]="varList1"
-                  [responseScheme]="codings1"
+                  [codingScheme]="codings1"
           ></iqb-schemer>
         </mat-drawer-content>
       </mat-drawer-container>
-      <schemer-load-save [varList]="varList1" [responseScheme]="codings1" [style.height.px]="0"></schemer-load-save>
+      <schemer-load-save [varList]="varList1" [codingScheme]="codings1" [style.height.px]="0"></schemer-load-save>
   `,
     styles: [
       `
@@ -63,7 +63,7 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
-  codings1 = new ResponseScheme(sampleCodings1 as VariableCodingData[]);
+  codings1 = new CodingScheme(sampleCodings1 as VariableCodingData[]);
   title = 'coding-components';
 
   constructor() {

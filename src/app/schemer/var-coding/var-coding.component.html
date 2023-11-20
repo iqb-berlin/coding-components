@@ -10,27 +10,19 @@
         <mat-card-content>
           <div class="fx-row-start-stretch fx-gap-10">
             <mat-form-field [style.width.%]="50">
-              <mat-label>{{ 'derive-method.prompt' | translate }}</mat-label>
-              <mat-select [(value)]="varCoding.deriveSourceType">
-                <mat-option [value]="'VALUE'">
-                  {{'derive-source-type.VALUE' | translate}}
-                </mat-option>
-                <mat-option [value]="'CODE'">
-                  {{'derive-source-type.CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SCORE'">
-                  {{'derive-source-type.SCORE' | translate}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field [style.width.%]="50">
-              <mat-label>{{'derive-method' | translate}}</mat-label>
+              <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
               <mat-select [(value)]="varCoding.sourceType">
-                <mat-option [value]="'DERIVE_CONCAT'">
-                  {{'scheme-type.DERIVE_CONCAT' | translate}}
+                <mat-option [value]="'COPY_FIRST_VALUE'">
+                  {{'derive-method.COPY_FIRST_VALUE' | translate}}
                 </mat-option>
-                <mat-option [value]="'DERIVE_SUM'">
-                  {{'scheme-type.DERIVE_SUM' | translate}}
+                <mat-option [value]="'CONCAT_CODE'">
+                  {{'derive-method.CONCAT_CODE' | translate}}
+                </mat-option>
+                <mat-option [value]="'SUM_CODE'">
+                  {{'derive-method.SUM_CODE' | translate}}
+                </mat-option>
+                <mat-option [value]="'SUM_SCORE'">
+                  {{'derive-method.SUM_SCORE' | translate}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -70,31 +62,34 @@
       </mat-card-content>
     </mat-card>
   </div>
-  <div class="fx-row-start-center fx-gap-10" [style.margin-top.px]="4">
+  <div class="fx-row-start-end fx-gap-10" [style.margin-top.px]="4">
     <mat-form-field [style.width.%]="50">
-      <mat-label>{{ 'coding-pattern.prompt' | translate }}</mat-label>
-      <mat-select [(value)]="varCoding.pattern">
-        <mat-option [value]="'UNSET'">
-          {{'coding-pattern.UNSET' | translate}}
+      <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
+      <mat-select [(value)]="varCoding.codeModel">
+        <mat-option [value]="'NONE'">
+          {{'code-model.NONE' | translate}}
         </mat-option>
         <mat-option [value]="'CHOICE'">
-          {{'coding-pattern.CHOICE' | translate}}
+          {{'code-model.CHOICE' | translate}}
         </mat-option>
-        <mat-option [value]="'INPUT_INTEGER'">
-          {{'coding-pattern.INPUT_INTEGER' | translate}}
+        <mat-option [value]="'VALUE_LIST'">
+          {{'code-model.VALUE_LIST' | translate}}
         </mat-option>
-        <mat-option [value]="'INPUT_STRING'">
-          {{'coding-pattern.INPUT_STRING' | translate}}
+        <mat-option [value]="'NUMBER'">
+          {{'code-model.NUMBER' | translate}}
+        </mat-option>
+        <mat-option [value]="'MANUAL'">
+          {{'code-model.MANUAL' | translate}}
         </mat-option>
       </mat-select>
     </mat-form-field>
     <mat-card [style.width.%]="50">
       <mat-card-subtitle>{{'value-transformation.prompt' | translate}}</mat-card-subtitle>
-      <mat-card-content class="fx-column-start-center">
+      <mat-card-content>
         <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TO_UPPER') >= 0) : false"
                       (change)="alterValueTransformation('TO_UPPER', $event.checked)">
           <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'value-transformation.TO_UPPER' | translate}}
+            {{'value-transformation.IGNORE_CASE' | translate}}
           </div>
         </mat-checkbox>
         <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
@@ -103,16 +98,12 @@
             {{'value-transformation.REMOVE_WHITE_SPACES' | translate}}
           </div>
         </mat-checkbox>
-        <!--
-        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('DATE_TO_ISO') >= 0) : false"
-                      (change)="alterValueTransformation('DATE_TO_ISO', $event.checked)">
-          {{'value-transformation.DATE_TO_ISO' | translate}}
+        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TO_NUMBER') >= 0) : false"
+                      (change)="alterValueTransformation('TO_NUMBER', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'value-transformation.TO_NUMBER' | translate}}
+          </div>
         </mat-checkbox>
-        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TIME_TO_ISO') >= 0) : false"
-                      (change)="alterValueTransformation('TIME_TO_ISO', $event.checked)">
-          {{'value-transformation.TIME_TO_ISO' | translate}}
-        </mat-checkbox>
-        -->
       </mat-card-content>
     </mat-card>
   </div>
