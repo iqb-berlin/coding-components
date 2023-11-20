@@ -80,7 +80,7 @@ export class VarCodingComponent implements AfterViewInit {
   editTextDialog_manualInstruction(): void {
     if (this.varCoding) {
       const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
-        width: '860px',
+        width: '1100px',
         data: {
           title: this.translateService.instant('manual-instruction.prompt-general'),
           content: this.varCoding.manualInstruction || '',

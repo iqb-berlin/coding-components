@@ -3,20 +3,19 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   template: `
-    <div fxLayout="column" style="height: 100%">
       <h1 mat-dialog-title>{{data.title}}</h1>
-      <rich-text-editor [(content)]="data.content"
-                        [editorHeightPx]="data.editorHeightPx"
-                        [defaultFontSize]="data.defaultFontSize">
-      </rich-text-editor>
-      <mat-dialog-actions class="fx-row-space-between-center">
-        <div class="fx-row-start-center">
+      <aspect-rich-text-editor [(content)]="data.content" mat-dialog-content
+                               [clozeMode]="false"
+                               [editorHeightPx]="400"
+                               [defaultFontSize]="data.defaultFontSize">
+      </aspect-rich-text-editor>
+      <div class="fx-row-space-between-center" [style.margin]="'0 26px 18px'">
+        <div class="fx-gap-10">
           <button mat-raised-button [mat-dialog-close]="data.content">{{'dialog-save' | translate }}</button>
           <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate }}</button>
         </div>
         <button mat-raised-button [mat-dialog-close]="''">{{'dialog-empty' | translate }}</button>
-      </mat-dialog-actions>
-    </div>
+      </div>
   `
 })
 export class RichTextEditDialogComponent {
