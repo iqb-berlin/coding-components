@@ -1,5 +1,4 @@
 import { Command, Extension } from '@tiptap/core';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { TextSelection, Transaction } from 'prosemirror-state';
 
 export interface IndentOptions {

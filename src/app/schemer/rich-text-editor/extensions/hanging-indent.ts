@@ -1,6 +1,5 @@
 import { Command, Extension } from '@tiptap/core';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { TextSelection, Transaction } from 'prosemirror-state';
+import { TextSelection, AllSelection, Transaction } from 'prosemirror-state';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {

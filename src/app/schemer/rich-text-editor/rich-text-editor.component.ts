@@ -1,6 +1,6 @@
 import {
   Component, EventEmitter, Input, Output,
-  AfterViewInit, OnInit
+  AfterViewInit, Injector
 } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import { Underline } from '@tiptap/extension-underline';
@@ -11,34 +11,41 @@ import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Heading } from '@tiptap/extension-heading';
-import { Image } from '@tiptap/extension-image';
 import { Blockquote } from '@tiptap/extension-blockquote';
 import { Document } from '@tiptap/extension-document';
+import { History } from '@tiptap/extension-history';
 import { Text } from '@tiptap/extension-text';
 import { ListItem } from '@tiptap/extension-list-item';
 import { Bold } from '@tiptap/extension-bold';
 import { Italic } from '@tiptap/extension-italic';
 import { Strike } from '@tiptap/extension-strike';
-import { Indent } from './modified-extensions/indent';
-import { HangingIndent } from './modified-extensions/hanging-indent';
-import { ParagraphExtension } from './modified-extensions/paragraph-extension';
-import { FontSize } from './modified-extensions/font-size';
-import { BulletListExtension } from './modified-extensions/bullet-list';
-import { OrderedListExtension } from './modified-extensions/ordered-list';
+import { InlineImage } from './extensions/inline-image';
+import { Tooltip } from './extensions/tooltip';
+import { AnchorId } from './extensions/anchorId';
+import { Indent } from './extensions/indent';
+import { HangingIndent } from './extensions/hanging-indent';
+import { ParagraphExtension } from './extensions/paragraph-extension';
+import { FontSize } from './extensions/font-size';
+import { BulletListExtension } from './extensions/bullet-list';
+import { OrderedListExtension } from './extensions/ordered-list';
+import {BlockImage} from "./extensions/block-image";
+import {FileService} from "../services/file.service";
 
 @Component({
-  selector: 'rich-text-editor',
+  selector: 'aspect-rich-text-editor',
   templateUrl: './rich-text-editor.component.html',
-  styleUrls: ['./rich-text-editor.component.css']
+  styleUrls: ['./rich-text-editor.component.scss']
 })
-export class RichTextEditorComponent implements OnInit, AfterViewInit {
+export class RichTextEditorComponent implements AfterViewInit {
   @Input() content!: string | Record<string, any>;
   @Input() defaultFontSize!: number;
-  @Input() editorHeightPx!: number;
+  @Input() clozeMode: boolean = false;
   @Output() contentChange = new EventEmitter<string | Record<string, any>>();
 
   selectedFontColor = 'lightgrey';
   selectedHighlightColor = 'lightgrey';
+  selectedAnchorColor = '#adff2f';
+  selectedAnchorIdText = '';
   selectedFontSize = '20px';
   selectedIndentSize = 20;
   bulletListStyle: string = 'disc';
@@ -48,10 +55,11 @@ export class RichTextEditorComponent implements OnInit, AfterViewInit {
     Document, Text, ListItem,
     Underline, Superscript, Subscript,
     TextStyle, Color,
-    Bold, Italic, Strike,
+    Bold, Italic, Strike, History,
     Highlight.configure({
       multicolor: true
     }),
+    AnchorId,
     TextAlign.configure({
       types: ['paragraph', 'heading']
     }),
@@ -68,27 +76,17 @@ export class RichTextEditorComponent implements OnInit, AfterViewInit {
     BulletListExtension,
     OrderedListExtension,
     HangingIndent,
-    Image.configure({
-      inline: true,
-      allowBase64: true,
-      HTMLAttributes: {
-        style: 'display: inline-block; height: 1em; vertical-align: middle'
-      }
-    }),
-    Blockquote
+    InlineImage,
+    BlockImage,
+    Blockquote,
+    Tooltip
   ];
 
   editor: Editor = new Editor({
     extensions: this.defaultExtensions
   });
 
-  ngOnInit(): void {
-    this.editor = new Editor({
-      extensions: this.defaultExtensions,
-      enablePasteRules: false,
-      enableInputRules: false
-    });
-  }
+  constructor(private injector: Injector) { }
 
   ngAfterViewInit(): void {
     this.editor.commands.focus();
@@ -129,6 +127,52 @@ export class RichTextEditorComponent implements OnInit, AfterViewInit {
 
   applyHighlightColor(): void {
     this.editor.chain().focus().toggleHighlight({ color: this.selectedHighlightColor }).run();
+  }
+
+  applyAnchorId(): void {
+    const id = this.getAnchorIdFromSelection();
+    if (id) {
+      const activeAnchorId = this.editor.getAttributes('anchorId')['anchorId'];
+      const activeAnchorColor = this.editor.getAttributes('anchorId')['anchorColor'];
+      const activeParentAnchorId = this.editor.getAttributes('anchorId')['parentAnchorId'];
+      const activeParentAnchorColor = this.editor.getAttributes('anchorId')['parentAnchorColor'];
+      if (activeParentAnchorId) { // reset nested child
+        if (this.selectedAnchorColor === activeParentAnchorColor || this.selectedAnchorColor === activeAnchorColor) {
+          this.editor.chain().focus().setAnchorId({
+            anchorId: activeParentAnchorId,
+            parentAnchorId: '',
+            anchorColor: activeParentAnchorColor,
+            parentAnchorColor: ''
+          }).run();
+        } else { // set new color for nested Child
+          this.editor.chain().focus().setAnchorId({
+            anchorId: activeAnchorId,
+            parentAnchorId: activeParentAnchorId,
+            anchorColor: this.selectedAnchorColor,
+            parentAnchorColor: activeParentAnchorColor
+          }).run();
+        }
+      } else { // standard toggle
+        this.editor.chain().focus().toggleAnchorId({
+          anchorId: id,
+          parentAnchorId: (activeAnchorId !== id) ? activeAnchorId : '',
+          anchorColor: this.selectedAnchorColor,
+          parentAnchorColor: (activeAnchorId !== id) ? activeAnchorColor : ''
+        }).run();
+      }
+      this.resetSelectedAnchorIdText();
+    } else {
+      console.warn('No text selected for anchor!');
+    }
+  }
+
+  private getAnchorIdFromSelection(): string {
+    const selection = window?.getSelection()?.toString() || this.selectedAnchorIdText;
+    return selection.replace(/[^0-9a-zA-Z]/g, '_').substring(0, 20);
+  }
+
+  private resetSelectedAnchorIdText(): void {
+    this.selectedAnchorIdText = '';
   }
 
   alignText(direction: string): void {
@@ -198,23 +242,53 @@ export class RichTextEditorComponent implements OnInit, AfterViewInit {
   }
 
   async insertImage(): Promise<void> {
-    const mediaSrc = await new Promise<string>((resolve, reject) => {
-      const fileUploadElement = document.createElement('input');
-      fileUploadElement.type = 'file';
-      fileUploadElement.accept = '[image/*]';
-      fileUploadElement.addEventListener('change', event => {
-        const uploadedFile = (event.target as HTMLInputElement).files?.[0];
-        const reader = new FileReader();
-        reader.onload = loadEvent => resolve(loadEvent.target?.result as string);
-        reader.onerror = errorEvent => reject(errorEvent);
-        if (uploadedFile) reader.readAsDataURL(uploadedFile);
-      });
-      fileUploadElement.click();
-    });
-    this.editor.commands.setImage({ src: mediaSrc });
+    const mediaSrc = await FileService.loadImage();
+    this.editor.commands.insertInlineImage({ src: mediaSrc });
+  }
+
+  async insertBlockImage(alignment: 'none' | 'right' | 'left'): Promise<void> {
+    const mediaSrc = await FileService.loadImage();
+    switch (alignment) {
+      case 'left': {
+        this.editor.commands.insertBlockImage({ src: mediaSrc, style: 'float: left; margin-right: 10px;' });
+        break;
+      }
+      case 'right': {
+        this.editor.commands.insertBlockImage({ src: mediaSrc, style: 'float: right; margin-left: 10px' });
+        break;
+      }
+      default: {
+        this.editor.commands.insertBlockImage({ src: mediaSrc });
+      }
+    }
   }
 
   toggleBlockquote(): void {
     this.editor.commands.toggleBlockquote();
+  }
+
+  insertToggleButton(): void {
+    this.editor.commands.insertContent('<aspect-nodeview-toggle-button></aspect-nodeview-toggle-button>');
+    this.editor.commands.focus();
+  }
+
+  insertDropList(): void {
+    this.editor.commands.insertContent('<aspect-nodeview-drop-list></aspect-nodeview-drop-list>');
+    this.editor.commands.focus();
+  }
+
+  insertTextField(): void {
+    this.editor.commands.insertContent('<aspect-nodeview-text-field></aspect-nodeview-text-field>');
+    this.editor.commands.focus();
+  }
+
+  insertButton() {
+    this.editor.commands.insertContent('<aspect-nodeview-button></aspect-nodeview-button>');
+    this.editor.commands.focus();
+  }
+
+  insertCheckbox() {
+    this.editor.commands.insertContent('<aspect-nodeview-checkbox></aspect-nodeview-checkbox>');
+    this.editor.commands.focus();
   }
 }
