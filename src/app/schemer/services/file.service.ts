@@ -4,14 +4,8 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class FileService {
-  static saveToFile(unitJSON: string, fileName: string): void {
-    const anchor = document.createElement('a');
-    anchor.download = fileName;
-    anchor.href = window.URL.createObjectURL(new File([unitJSON], fileName));
-    anchor.click();
-  }
 
-  static async loadFile(fileTypes: string[] = []): Promise<string> {
+  static async loadFile(fileTypes: string[] = [], asBase64: boolean = false): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const fileUploadElement = document.createElement('input');
       fileUploadElement.type = 'file';
@@ -22,10 +16,14 @@ export class FileService {
         reader.onload = loadEvent => resolve(loadEvent.target?.result as string);
         reader.onerror = errorEvent => reject(errorEvent);
         if (uploadedFile) {
-          reader.readAsText(uploadedFile);
+          asBase64 ? reader.readAsDataURL(uploadedFile) : reader.readAsText(uploadedFile);
         }
       });
       fileUploadElement.click();
     });
+  }
+
+  static loadImage(): Promise<string> {
+    return FileService.loadFile(['image/*'], true);
   }
 }

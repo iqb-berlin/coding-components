@@ -1,6 +1,5 @@
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Command } from '@tiptap/core';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Transaction } from 'prosemirror-state';
 
 declare module '@tiptap/core' {
@@ -18,7 +17,7 @@ export const ParagraphExtension = Paragraph.extend({
         default: 0,
         parseHTML: element => Number(element.style.marginBottom.slice(0, -2)),
         renderHTML: attributes => ({
-          style: `margin-bottom: ${attributes['margin']}px; margin-top: 0`
+          style: `margin-bottom: ${attributes.margin}px; margin-top: 0`
         })
       }
     };

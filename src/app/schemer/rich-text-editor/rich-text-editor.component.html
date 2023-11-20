@@ -1,6 +1,6 @@
-<div class="fx-column-center-end">
-  <div class="fx-row-space-between-center editor-control-panel">
-    <fieldset class="fx-row-start-center">
+<div class="editor-control-panel fx-column-start-stretch" mat-dialog-title>
+  <div class="fx-row-space-between-stretch">
+    <fieldset class="fx-row-start-stretch">
       <legend>Schriftauszeichnung</legend>
       <button mat-icon-button matTooltip="Fett" [matTooltipPosition]="'above'" [matTooltipShowDelay]="300"
               [class.active]="editor.isActive('bold')"
@@ -33,11 +33,11 @@
         <mat-icon>strikethrough_s</mat-icon>
       </button>
     </fieldset>
-    <fieldset class="fx-row-start-center">
+    <fieldset class="fx-row-start-start" [style.gap.px]="5">
       <legend>Schrift</legend>
-      <mat-form-field class="small-dropdown">
-        <mat-label>Schriftgröße</mat-label>
-        <mat-select [value]="editor.getAttributes('textStyle')['fontSize']?.toString() || selectedFontSize">
+      <mat-form-field class="dropdown" appearance="outline" [style.width.px]="90">
+        <mat-label>Größe</mat-label>
+        <mat-select [value]="editor.getAttributes('textStyle').fontSize?.toString() || selectedFontSize">
           <mat-option (click)="applyFontSize('8px')" value="8px">8px</mat-option>
           <mat-option (click)="applyFontSize('10px')" value="10px">10px</mat-option>
           <mat-option (click)="applyFontSize('12px')" value="12px">12px</mat-option>
@@ -53,32 +53,22 @@
           <mat-option (click)="applyFontSize('36px')" value="36px">36px</mat-option>
         </mat-select>
       </mat-form-field>
-      <div class="combo-button fx-row-start-center"
-           [style.background-color]="selectedFontColor">
-        <button mat-icon-button matTooltip="Textfarbe"
-                (click)="applyFontColor()">
-          <mat-icon>format_color_text</mat-icon>
-        </button>
-        <mat-select (click)="textColorInput.click()"></mat-select>
-        <input matInput type="color" #textColorInput hidden
-               (input)="selectedFontColor = $any($event.target).value; applyFontColor()">
-      </div>
-      <div class="combo-button fx-row-start-center"
-           [style.background-color]="selectedHighlightColor">
-        <button mat-icon-button matTooltip="Texthintergrund"
-                (click)="applyHighlightColor()">
-          <mat-icon>format_color_fill</mat-icon>
-        </button>
-        <mat-select (click)="textHighlightColorInput.click()"></mat-select>
-        <input matInput type="color" #textHighlightColorInput hidden
-               (input)="selectedHighlightColor = $any($event.target).value; applyHighlightColor()">
-      </div>
+      <aspect-combo-button [inputType]="'color'" [selectedValue]="selectedFontColor"
+                           [tooltip]="'Textfarbe'" [icon]="'format_color_text'"
+                           (applySelection)="applyFontColor()"
+                           (selectionChanged)="selectedFontColor = $event">
+      </aspect-combo-button>
+      <aspect-combo-button [inputType]="'color'" [selectedValue]="selectedHighlightColor"
+                           [tooltip]="'Texthintergrund'" [icon]="'format_color_fill'"
+                           (applySelection)="applyHighlightColor()"
+                           (selectionChanged)="selectedHighlightColor = $event">
+      </aspect-combo-button>
     </fieldset>
-    <fieldset class="fx-row-start-center">
+    <fieldset class="fx-row-start-start" [style.gap.px]="5" >
       <legend>Absatz</legend>
-      <mat-form-field class="dropdown">
-        <mat-label>Absatztyp</mat-label>
-        <mat-select [value]="editor.getAttributes('heading')['level']?.toString() || ''"
+      <mat-form-field class="dropdown" appearance="outline" [style.width.px]="135">
+        <mat-label>Typ</mat-label>
+        <mat-select [value]="editor.getAttributes('heading').level?.toString() || ''"
                     (valueChange)="toggleHeading($event)">
           <mat-option value="1">H1</mat-option>
           <mat-option value="2">H2</mat-option>
@@ -87,10 +77,10 @@
           <mat-option value="">Paragraph</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="dropdown">
-        <mat-label>Absatzabstand</mat-label>
+      <mat-form-field class="dropdown" appearance="outline" [style.width.px]="90">
+        <mat-label>Abstand</mat-label>
         <mat-select matTooltip="Achtung: Gilt nur für zukünftig angelegte Absätze" [matTooltipShowDelay]="300"
-                    [value]="editor.getAttributes('paragraph')['margin']?.toString() || '0'"
+                    [value]="editor.getAttributes('paragraph').margin?.toString() || '0'"
                     (click)="$any($event).stopPropagation()" (valueChange)="applyParagraphStyle($event)">
           <mat-option value="0">0px</mat-option>
           <mat-option value="10">10px</mat-option>
@@ -98,10 +88,31 @@
         </mat-select>
       </mat-form-field>
     </fieldset>
+
+    <fieldset class="fx-row-start-stretch" [style.gap.px]="5">
+      <legend>Listen</legend>
+      <aspect-combo-button [inputType]="'list'"
+                           [selectedValue]="editor.getAttributes('bulletList').listStyle"
+                           [availableValues]="['disc', 'circle', 'square']"
+                           [tooltip]="'Aufzählung'" [icon]="'format_list_bulleted'"
+                           [isActive]="editor.isActive('bulletList')"
+                           (applySelection)="toggleBulletList()"
+                           (selectionChanged)="applyListStyle('bulletList', $event)">
+      </aspect-combo-button>
+      <aspect-combo-button [inputType]="'list'"
+                           [selectedValue]="editor.getAttributes('orderedList').listStyle"
+                           [availableValues]="['decimal', 'lower-latin', 'upper-latin',
+                                               'lower-roman', 'upper-roman', 'lower-greek']"
+                           [tooltip]="'Aufzählung (nummeriert)'" [icon]="'format_list_numbered'"
+                           [isActive]="editor.isActive('orderedList')"
+                           (applySelection)="toggleOrderedList()"
+                           (selectionChanged)="applyListStyle('orderedList', $event)">
+      </aspect-combo-button>
+    </fieldset>
   </div>
 
-  <div class="fx-row-space-between-center editor-control-panel">
-    <fieldset class="fx-row-start-center">
+  <div class="fx-row-space-between-stretch">
+    <fieldset class="fx-row-start-stretch">
       <legend>Textausrichtung</legend>
       <button mat-icon-button matTooltip="Linksbündig" [matTooltipShowDelay]="300"
               [class.active]="editor.isActive({ textAlign: 'left' })"
@@ -124,7 +135,7 @@
         <mat-icon>format_align_justify</mat-icon>
       </button>
     </fieldset>
-    <fieldset class="fx-row-start-center">
+    <fieldset class="fx-row-start-start">
       <legend>Einrückung</legend>
       <button mat-icon-button matTooltip="Einrücken" [matTooltipShowDelay]="300"
               (click)="indent()">
@@ -142,94 +153,83 @@
               (click)="unhangIndent()">
         <mat-icon>view_headline</mat-icon>
       </button>
-      <mat-form-field class="indent-size-input" appearance="fill">
-        <mat-label>Einrücktiefe</mat-label>
+      <mat-form-field class="indent-size-input" appearance="outline" [style.width.px]="90">
+        <mat-label>Tiefe</mat-label>
         <input matInput type="text" [(ngModel)]="selectedIndentSize">
       </mat-form-field>
     </fieldset>
-    <fieldset class="fx-row-start-center">
-      <legend>Listen</legend>
-      <div class="combo-button fx-row-start-center"
-           [style.background-color]="editor.isActive('bulletList') ? 'lightgrey' : ''">
-        <button mat-icon-button matTooltip="Aufzählung" [matTooltipShowDelay]="300"
-                [class.active]="editor.isActive('bulletList')"
-                (click)="toggleBulletList()">
-          <mat-icon>format_list_bulleted</mat-icon>
-        </button>
-        <mat-select [value]="editor.getAttributes('bulletList')['listStyle']"
-                    (valueChange)="applyListStyle('bulletList', $event)">
-          <mat-option value="disc">disc</mat-option>
-          <mat-option value="circle">circle</mat-option>
-          <mat-option value="square">square</mat-option>
-        </mat-select>
-      </div>
-      <div class="combo-button fx-row-start-center" [style.background-color]="editor.isActive('orderedList') ? 'lightgrey' : ''">
-        <button mat-icon-button matTooltip="Aufzählung (nummeriert)" [matTooltipShowDelay]="300"
-                [class.active]="editor.isActive('orderedList')"
-                (click)="toggleOrderedList()">
-          <mat-icon>format_list_numbered</mat-icon>
-        </button>
-          <mat-select [value]="editor.getAttributes('orderedList')['listStyle']"
-                      (valueChange)="applyListStyle('orderedList', $event)">
-            <mat-option value="decimal"
-                        (click)="applyListStyle('orderedList', 'decimal')">
-              decimal
-            </mat-option>
-            <mat-option value="lower-latin"
-                        (click)="applyListStyle('orderedList', 'lower-latin')">
-              lower-latin
-            </mat-option>
 
-            <mat-option value="upper-latin"
-                        (click)="applyListStyle('orderedList', 'upper-latin')">
-              upper-latin
-            </mat-option>
-            <mat-option value="lower-roman"
-                        (click)="applyListStyle('orderedList', 'lower-roman')">
-              lower-roman
-            </mat-option>
-            <mat-option value="upper-roman"
-                        (click)="applyListStyle('orderedList', 'upper-roman')">
-              upper-roman
-            </mat-option>
-            <mat-option value="lower-greek"
-                        (click)="applyListStyle('orderedList', 'lower-greek')">
-              lower-greek
-            </mat-option>
-          </mat-select>
-      </div>
+    <fieldset class="fx-row-start-stretch">
+      <legend>Bild</legend>
+      <button mat-icon-button matTooltip="Bild in Zeile einfügen" [matTooltipShowDelay]="300"
+              (click)="insertImage()">
+        <mat-icon style="transform: scale(1.1);">burst_mode</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Bild in eigenem Absatz einfügen" [matTooltipShowDelay]="300"
+              (click)="insertBlockImage('none')">
+        <mat-icon style="transform: scale(0.9);">image</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Bild rechts einfügen" [matTooltipShowDelay]="300"
+              (click)="insertBlockImage('right')">
+        <mat-icon style="transform: scale(-1.5, 1.5);">art_track</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Bild links einfügen" [matTooltipShowDelay]="300"
+              (click)="insertBlockImage('left')">
+        <mat-icon style="transform: scale(1.5);">art_track</mat-icon>
+      </button>
     </fieldset>
-    <fieldset>
+
+    <fieldset class="fx-row-start-stretch">
       <legend>Sonderelemente</legend>
+      <button mat-icon-button matTooltip="Tooltip" [matTooltipPosition]="'above'" [matTooltipShowDelay]="300"
+              [class.active]="editor.isActive('tooltip')"
+              (click)="showTooltipPropertiesDialog()">
+        <mat-icon>announcement</mat-icon>
+      </button>
       <button mat-icon-button class="special-chars-button" matTooltip="Sonderzeichen" [matTooltipShowDelay]="300"
               [matMenuTriggerFor]="specialCharsMenu">
         <mat-icon>emoji_symbols</mat-icon>
       </button>
       <mat-menu #specialCharsMenu="matMenu" yPosition="above">
         <button mat-button (click)="insertSpecialChar('&nbsp;')"
-                [matTooltip]="'Geschütztes Leerzeichen'">&blank;</button>
+                [matTooltip]="'Nicht umbrechendes Leerzeichen'">&blank;</button>
         <button mat-button (click)="insertSpecialChar('&#8239;')"
-                [matTooltip]="'Geschütztes Leerzeichen (schmal)'">&blank;<sub>2</sub></button>
-        <button mat-button (click)="insertSpecialChar('&ndash;')">&ndash;</button>
-        <button mat-button (click)="insertSpecialChar('&female;')">&female;</button>
-        <button mat-button (click)="insertSpecialChar('&male;')">&male;</button>
+                [matTooltip]="'Schmales nicht umbrechendes Leerzeichen'">&blank;<sub>2</sub></button>
+        <button mat-button (click)="insertSpecialChar('&ndash;')"
+                [matTooltip]="'Halbgeviertstrich'">&ndash;</button>
+        <button mat-button (click)="insertSpecialChar('&#8209;')"
+                [matTooltip]="'Nicht umbrechender Viertelgeviertstrich'">—</button>
         <br>
-        <button mat-button (click)="insertSpecialChar('&lsquo;')">&lsquo;</button>
-        <button mat-button (click)="insertSpecialChar('&rsquo;')">&rsquo;</button>
-        <button mat-button (click)="insertSpecialChar('&sbquo;')">&sbquo;</button>
-        <button mat-button (click)="insertSpecialChar('&bdquo;')">&bdquo;</button>
-        <button mat-button (click)="insertSpecialChar('&ldquo;')">&ldquo;</button>
-        <button mat-button (click)="insertSpecialChar('&rdquo;')">&rdquo;</button>
+        <button mat-button (click)="insertSpecialChar('&lsquo;')"
+                [matTooltip]="'Einfaches Anführungszeichen links'">&lsquo;</button>
+        <button mat-button (click)="insertSpecialChar('&rsquo;')"
+                [matTooltip]="'Einfaches Anführungszeichen rechts'">&rsquo;</button>
+        <button mat-button (click)="insertSpecialChar('&sbquo;')"
+                [matTooltip]="'Niedriges Komma-Anführungszeichen'">&sbquo;</button>
+        <br>
+        <button mat-button (click)="insertSpecialChar('&bdquo;')"
+                [matTooltip]="'Doppeltes Anführungszeichen unten'">&bdquo;</button>
+        <button mat-button (click)="insertSpecialChar('&ldquo;')"
+                [matTooltip]="'Doppeltes Anführungszeichen oben'">&ldquo;</button>
+        <button mat-button (click)="insertSpecialChar('&rdquo;')"
+                [matTooltip]="'Rechtes doppeltes Anführungszeichen'">&rdquo;</button>
+        <br>
+        <button mat-button (click)="insertSpecialChar('&lsaquo;')"
+                [matTooltip]="'Einfaches spitzes Anführungszeichen links'">&lsaquo;</button>
+        <button mat-button (click)="insertSpecialChar('&rsaquo;')"
+                [matTooltip]="'Einfaches spitzes Anführungszeichen rechts'">&rsaquo;</button>
+        <button mat-button (click)="insertSpecialChar('&laquo;')"
+                [matTooltip]="'Doppeltes spitzes Anführungszeichen links'">&laquo;</button>
+        <button mat-button (click)="insertSpecialChar('&raquo;')"
+                [matTooltip]="'Doppeltes spitzes Anführungszeichen rechts'">&raquo;</button>
+        <br>
         <button mat-button (click)="insertSpecialChar('&micro;')">&micro;</button>
-        <br>
         <button mat-button (click)="insertSpecialChar('&ccedil;')">&ccedil;</button>
         <button mat-button (click)="insertSpecialChar('&Ccedil;')">&Ccedil;</button>
         <button mat-button (click)="insertSpecialChar('&AElig;')">&AElig;</button>
         <br>
-        <button mat-button (click)="insertSpecialChar('&lsaquo;')">&lsaquo;</button>
-        <button mat-button (click)="insertSpecialChar('&rsaquo;')">&rsaquo;</button>
-        <button mat-button (click)="insertSpecialChar('&laquo;')">&laquo;</button>
-        <button mat-button (click)="insertSpecialChar('&raquo;')">&raquo;</button>
+        <button mat-button (click)="insertSpecialChar('&female;')">&female;</button>
+        <button mat-button (click)="insertSpecialChar('&male;')">&male;</button>
         <br>
         <button mat-button (click)="insertSpecialChar('&cent;')">&cent;</button>
         <button mat-button (click)="insertSpecialChar('&pound;')">&pound;</button>
@@ -253,21 +253,44 @@
         <button mat-button (click)="insertSpecialChar('&hearts;')">&hearts;</button>
         <button mat-button (click)="insertSpecialChar('&diams;')">&diams;</button>
       </mat-menu>
-      <button mat-icon-button matTooltip="Bild" [matTooltipShowDelay]="300"
-              (click)="insertImage()">
-        <mat-icon>image</mat-icon>
-      </button>
       <button mat-icon-button matTooltip="Zitat" [matTooltipShowDelay]="300"
               [class.active]="editor.isActive('blockquote')"
               (click)="toggleBlockquote()">
         <mat-icon>format_quote</mat-icon>
       </button>
+      <aspect-combo-button *ngIf="!clozeMode"
+                           [inputType]="'color'" [selectedValue]="selectedAnchorColor"
+                           [tooltip]="'Bereich markieren'" [icon]="'read_more'"
+                           (applySelection)="applyAnchorId()"
+                           (selectionChanged)="selectedAnchorColor = $event">
+      </aspect-combo-button>
     </fieldset>
   </div>
-  <tiptap-editor [editor]="editor" [ngModel]="content"
-                 outputFormat="html"
-                 [style.font-size.px]="defaultFontSize"
-                 [style.height.px]="editorHeightPx"
-                 (ngModelChange)="contentChange.emit($event)">
-  </tiptap-editor>
+  <div *ngIf="clozeMode" class="fx-row-space-around-center" >
+    <button mat-icon-button matTooltip="Eingabefeld" [matTooltipShowDelay]="300"
+            (click)="insertTextField()">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Ablegeliste" [matTooltipShowDelay]="300"
+            (click)="insertDropList()">
+      <mat-icon>drag_indicator</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Optionsfeld" [matTooltipShowDelay]="300"
+            (click)="insertToggleButton()">
+      <mat-icon>radio_button_checked</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Knopf" [matTooltipShowDelay]="300"
+            (click)="insertButton()">
+      <mat-icon>smart_button</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Kontrollkästchen" [matTooltipShowDelay]="300"
+            (click)="insertCheckbox()">
+      <mat-icon>check_box</mat-icon>
+    </button>
+  </div>
 </div>
+<tiptap-editor [editor]="editor" [ngModel]="content" mat-dialog-content
+               [outputFormat]="clozeMode ? 'json' : 'html'"
+               [style.font-size.px]="defaultFontSize"
+               (ngModelChange)="contentChange.emit($event)">
+</tiptap-editor>

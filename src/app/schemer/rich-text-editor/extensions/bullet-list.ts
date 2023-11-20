@@ -14,7 +14,9 @@ export const BulletListExtension = BulletList.extend({
       listStyle: {
         default: 'disc',
         parseHTML: element => element.style.listStyleType,
-        renderHTML: attributes => ({ style: `list-style: ${attributes['listStyle']};` })
+        renderHTML: attributes => {
+          return { style: `list-style: ${attributes['listStyle']};` };
+        }
       }
     };
   },
@@ -22,7 +24,13 @@ export const BulletListExtension = BulletList.extend({
   addCommands() {
     return {
       ...this.parent?.(),
-      setBulletListStyle: (newStyle: string) => ({ commands }) => commands.updateAttributes(this.name, { listStyle: newStyle })
+      setBulletListStyle: (newStyle: string) => ({ commands }) => {
+        return commands.updateAttributes(this.name, { listStyle: newStyle });
+      }
     };
+  },
+
+  addInputRules() {
+    return [];
   }
 });
