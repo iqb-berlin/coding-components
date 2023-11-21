@@ -1,25 +1,24 @@
 import {
-  AfterViewInit,
-  Component, EventEmitter, Input, Output, ViewChild
+  Component, EventEmitter, Input, OnDestroy, OnInit, Output
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
-import {ValueTransformation, VariableCodingData} from "@iqb/responses";
-import {VarCodingClassicComponent} from "./var-coding-classic/var-coding-classic.component";
-import {debounceTime} from "rxjs";
+import {VariableCodingData} from "@iqb/responses";
+import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 
 @Component({
   selector: 'var-coding',
   templateUrl: './var-coding.component.html',
   styleUrls: ['./var-coding.component.scss']
 })
-export class VarCodingComponent implements AfterViewInit {
-  @ViewChild(VarCodingClassicComponent) codesElement: VarCodingClassicComponent | undefined;
+export class VarCodingComponent implements OnInit, OnDestroy {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
   @Input() varCoding: VariableCodingData | null = null;
   @Input() allVariables: string[] = [];
+  lastChangeFrom$ = new BehaviorSubject<string>('');
+  lastChangeFromSubscription: Subscription | null = null;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -27,15 +26,14 @@ export class VarCodingComponent implements AfterViewInit {
     private editTextDialog: MatDialog
   ) { }
 
-  ngAfterViewInit() {
-    if (this.codesElement) {
-      this.codesElement.codesChanged.pipe(
+  ngOnInit() {
+    this.lastChangeFromSubscription = this.lastChangeFrom$.pipe(
         debounceTime(500)
       ).subscribe(() => {
         this.varCodingChanged.emit(this.varCoding);
       });
-    }
   }
+
   getNewSources(usedVars: string[]) {
     const returnSources: string[] = [];
     this.allVariables.forEach(v => {
@@ -57,18 +55,6 @@ export class VarCodingComponent implements AfterViewInit {
     if (this.varCoding) {
       this.varCoding.deriveSources.push(v);
       this.varCoding.deriveSources.sort();
-      this.varCodingChanged.emit(this.varCoding);
-    }
-  }
-
-  alterValueTransformation(transId: ValueTransformation, checked: boolean) {
-    if (this.varCoding) {
-      const transPos = this.varCoding.valueTransformations.indexOf(transId);
-      if (checked && transPos < 0) {
-        this.varCoding.valueTransformations.push(transId);
-      } else if (!checked && transPos >= 0) {
-        this.varCoding.valueTransformations.splice(transPos, 1);
-      }
       this.varCodingChanged.emit(this.varCoding);
     }
   }
@@ -98,5 +84,9 @@ export class VarCodingComponent implements AfterViewInit {
         }
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.lastChangeFromSubscription !== null) this.lastChangeFromSubscription.unsubscribe();
   }
 }
