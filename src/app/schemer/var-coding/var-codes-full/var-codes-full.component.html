@@ -1,40 +1,37 @@
 <div class="fx-column-start-stretch">
-  <mat-card>
-    <mat-card-subtitle>{{'processing.prompt' | translate}}</mat-card-subtitle>
-    <mat-card-content>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
-                    (change)="alterProcessing('IGNORE_CASE', $event.checked)">
-        <div [style.white-space]="'normal'" [style.line-height]="1.2">
-          {{'processing.IGNORE_CASE' | translate}}
-        </div>
-      </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
-                    (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
-        <div [style.white-space]="'normal'" [style.line-height]="1.2">
-          {{'processing.REMOVE_WHITE_SPACES' | translate}}
-        </div>
-      </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
-                    (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
-        <div [style.white-space]="'normal'" [style.line-height]="1.2">
-          {{'processing.REPLAY_REQUIRED' | translate}}
-        </div>
-      </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
-                    (change)="alterProcessing('ATTACHMENT', $event.checked)">
-        <div [style.white-space]="'normal'" [style.line-height]="1.2">
-          {{'processing.ATTACHMENT' | translate}}
-        </div>
-      </mat-checkbox>
-    </mat-card-content>
-  </mat-card>
-  <div *ngIf="codes" class="fx-column-space-between-stretch" [style.padding]="'10px'">
-    <h3>{{'code.header' | translate}}</h3>
-    <div *ngFor="let cd of codes" class="fx-row-start-start">
-      <code-data [codeData]="cd"
+  <div class="fx-row-space-between-end">
+    <div>
+      <h3>{{'code.header' | translate}}</h3>
+    </div>
+    <div class="processing">
+        <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
+                      (change)="alterProcessing('IGNORE_CASE', $event.checked)">
+            {{'processing.IGNORE_CASE' | translate}}
+        </mat-checkbox>
+        <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
+                      (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
+            {{'processing.REMOVE_WHITE_SPACES' | translate}}
+        </mat-checkbox>
+        <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
+                      (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'processing.REPLAY_REQUIRED' | translate}}
+          </div>
+        </mat-checkbox>
+        <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
+                      (change)="alterProcessing('ATTACHMENT', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'processing.ATTACHMENT' | translate}}
+          </div>
+        </mat-checkbox>
+    </div>
+  </div>
+  <div *ngIf="codes" class="fx-column-start-stretch">
+    <div *ngFor="let cd of codes" class="fx-row-start-stretch">
+      <code-full [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
                  [allCodes]="codes"
-                 (codeDataChanged)="codesChanged.emit(codes)"></code-data>
-      <button mat-raised-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
+                 (codeChanged)="codesChanged.emit(codes)"></code-full>
+      <button mat-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
     </div>
