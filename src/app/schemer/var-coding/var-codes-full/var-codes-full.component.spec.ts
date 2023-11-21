@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { VarCodingClassicComponent } from './var-coding-classic.component';
+import { VarCodesFullComponent } from './var-codes-full.component';
 
-describe('CodingSchemeComponent', () => {
-  let component: VarCodingClassicComponent;
-  let fixture: ComponentFixture<VarCodingClassicComponent>;
+describe('VarCodesFullComponent', () => {
+  let component: VarCodesFullComponent;
+  let fixture: ComponentFixture<VarCodesFullComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [VarCodingClassicComponent]
+      declarations: [VarCodesFullComponent]
     })
       .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(VarCodingClassicComponent);
+    fixture = TestBed.createComponent(VarCodesFullComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

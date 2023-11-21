@@ -1,56 +1,72 @@
 <div *ngIf="varCoding" class="fx-column-space-between-stretch" [style.padding]="'10px'">
   <div class="fx-row-start-stretch fx-gap-10">
-    <div class="fx-column-start-stretch" [style.width.%]="50">
+    <div class="fx-column-start-stretch" [style.width.%]="30">
       <mat-form-field>
         <mat-label>{{'description-position' | translate}}</mat-label>
         <input matInput [(ngModel)]="varCoding.label"
                (change)="varCodingChanged.emit(varCoding)">
       </mat-form-field>
-      <mat-card *ngIf="varCoding.sourceType !== 'BASE'" [style.margin-top.px]="4" [style.margin-bottom.px]="4">
-        <mat-card-content>
-          <div class="fx-row-start-stretch fx-gap-10">
-            <mat-form-field [style.width.%]="50">
-              <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
-              <mat-select [(value)]="varCoding.sourceType">
-                <mat-option [value]="'COPY_FIRST_VALUE'">
-                  {{'derive-method.COPY_FIRST_VALUE' | translate}}
-                </mat-option>
-                <mat-option [value]="'CONCAT_CODE'">
-                  {{'derive-method.CONCAT_CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SUM_CODE'">
-                  {{'derive-method.SUM_CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SUM_SCORE'">
-                  {{'derive-method.SUM_SCORE' | translate}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="fx-row-start-center fx-gap-5">
-            <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
-            <mat-chip-listbox>
-              <mat-chip *ngIf="varCoding.deriveSources.length === 0" [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
-              <mat-chip *ngFor="let source of varCoding.deriveSources"
-                        [class]="allVariables.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
-                        removable="true" (removed)="deleteDeriveSource(source)">
-                {{source}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-              <button mat-flat-button [matMenuTriggerFor]="menu" *ngIf="getNewSources(varCoding.deriveSources).length > 0">
-                <mat-icon>add</mat-icon>
-              </button>
-            </mat-chip-listbox>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item *ngFor="let newSource of getNewSources(varCoding.deriveSources)" (click)="addDeriveSource(newSource)">
-                {{newSource}}
-              </button>
-            </mat-menu>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <div *ngIf="varCoding.sourceType !== 'BASE'" [style.margin]="'4px 0 4px 20px'" class="fx-column-start-stretch">
+        <mat-form-field>
+          <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
+          <mat-select [(value)]="varCoding.sourceType">
+            <mat-option [value]="'COPY_FIRST_VALUE'">
+              {{'derive-method.COPY_FIRST_VALUE' | translate}}
+            </mat-option>
+            <mat-option [value]="'CONCAT_CODE'">
+              {{'derive-method.CONCAT_CODE' | translate}}
+            </mat-option>
+            <mat-option [value]="'SUM_CODE'">
+              {{'derive-method.SUM_CODE' | translate}}
+            </mat-option>
+            <mat-option [value]="'SUM_SCORE'">
+              {{'derive-method.SUM_SCORE' | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="fx-row-start-center fx-gap-5">
+          <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
+          <mat-chip-listbox>
+            <mat-chip *ngIf="varCoding.deriveSources.length === 0" [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
+            <mat-chip *ngFor="let source of varCoding.deriveSources"
+                      [class]="allVariables.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
+                      removable="true" (removed)="deleteDeriveSource(source)">
+              {{source}}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            <button mat-flat-button [matMenuTriggerFor]="menu" *ngIf="getNewSources(varCoding.deriveSources).length > 0">
+              <mat-icon>add</mat-icon>
+            </button>
+          </mat-chip-listbox>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item *ngFor="let newSource of getNewSources(varCoding.deriveSources)" (click)="addDeriveSource(newSource)">
+              {{newSource}}
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+      <mat-form-field>
+        <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
+        <mat-select [(value)]="varCoding.codeModel">
+          <mat-option [value]="'NONE'">
+            {{'code-model.NONE' | translate}}
+          </mat-option>
+          <mat-option [value]="'CHOICE'">
+            {{'code-model.CHOICE' | translate}}
+          </mat-option>
+          <mat-option [value]="'VALUE_LIST'">
+            {{'code-model.VALUE_LIST' | translate}}
+          </mat-option>
+          <mat-option [value]="'NUMBER'">
+            {{'code-model.NUMBER' | translate}}
+          </mat-option>
+          <mat-option [value]="'MANUAL'">
+            {{'code-model.MANUAL' | translate}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
-    <mat-card [style.width.%]="50">
+    <mat-card [style.flex]="'1 1 auto'">
       <mat-card-subtitle class="fx-row-space-between-stretch">
         {{'manual-instruction.prompt-general' | translate}}
         <button mat-flat-button (click)="editTextDialog_manualInstruction()">
@@ -62,53 +78,15 @@
       </mat-card-content>
     </mat-card>
   </div>
-  <div class="fx-row-start-end fx-gap-10" [style.margin-top.px]="4">
-    <mat-form-field [style.width.%]="50">
-      <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
-      <mat-select [(value)]="varCoding.codeModel">
-        <mat-option [value]="'NONE'">
-          {{'code-model.NONE' | translate}}
-        </mat-option>
-        <mat-option [value]="'CHOICE'">
-          {{'code-model.CHOICE' | translate}}
-        </mat-option>
-        <mat-option [value]="'VALUE_LIST'">
-          {{'code-model.VALUE_LIST' | translate}}
-        </mat-option>
-        <mat-option [value]="'NUMBER'">
-          {{'code-model.NUMBER' | translate}}
-        </mat-option>
-        <mat-option [value]="'MANUAL'">
-          {{'code-model.MANUAL' | translate}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-card [style.width.%]="50">
-      <mat-card-subtitle>{{'value-transformation.prompt' | translate}}</mat-card-subtitle>
-      <mat-card-content>
-        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TO_UPPER') >= 0) : false"
-                      (change)="alterValueTransformation('TO_UPPER', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'value-transformation.IGNORE_CASE' | translate}}
-          </div>
-        </mat-checkbox>
-        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
-                      (change)="alterValueTransformation('REMOVE_WHITE_SPACES', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'value-transformation.REMOVE_WHITE_SPACES' | translate}}
-          </div>
-        </mat-checkbox>
-        <mat-checkbox [checked]="varCoding ? (varCoding.valueTransformations.indexOf('TO_NUMBER') >= 0) : false"
-                      (change)="alterValueTransformation('TO_NUMBER', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'value-transformation.TO_NUMBER' | translate}}
-          </div>
-        </mat-checkbox>
-      </mat-card-content>
-    </mat-card>
-  </div>
+  <var-codes-full class="fx-flex-row-100" [style.margin-top.px]="10"
+                  [codes]="varCoding.codes"
+                  (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+                  [processing]="varCoding.processing"
+                  (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                  [codeModelParameters]="varCoding.codeModelParameters"
+                  (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
+                  [allVariables]="allVariables">
+  </var-codes-full>
 </div>
-<var-coding-classic [codes]="varCoding?.codes" class="var-scheme-container fx-flex-row-100"
-                    [allVariables]="allVariables"></var-coding-classic>
 
 

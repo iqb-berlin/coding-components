@@ -32,7 +32,7 @@ import {SelectVariableDialogComponent} from "./dialogs/select-variable-dialog.co
 import {SimpleInputDialogComponent} from "./dialogs/simple-input-dialog.component";
 import {ShowCodingResultsComponent} from "./scheme-checker/show-coding-results.component";
 import {SchemerToolbarComponent} from "./schemer-toolbar.component";
-import {VarCodingClassicComponent} from "./var-coding/var-coding-classic/var-coding-classic.component";
+import {VarCodesFullComponent} from "./var-coding/var-codes-full/var-codes-full.component";
 import {ComboButtonComponent} from "./rich-text-editor/combo-button.component";
 import {CdkConnectedOverlay, CdkOverlayOrigin} from "@angular/cdk/overlay";
 
@@ -51,7 +51,7 @@ import {CdkConnectedOverlay, CdkOverlayOrigin} from "@angular/cdk/overlay";
     SelectVariableDialogComponent,
     SimpleInputDialogComponent,
     ShowCodingResultsComponent,
-    VarCodingClassicComponent,
+    VarCodesFullComponent,
     ComboButtonComponent,
     SchemerToolbarComponent
   ],

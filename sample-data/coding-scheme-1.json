@@ -2,11 +2,9 @@
   {
     "id": "Otto",
     "label": "",
-    "pattern": null,
     "sourceType": "BASE",
     "deriveSources": [],
-    "valueTransformations": [
-      "TO_UPPER",
+    "processing": [
       "REMOVE_WHITE_SPACES"
     ],
     "manualInstruction": "",
@@ -15,20 +13,18 @@
   {
     "id": "Paul",
     "label": "",
-    "pattern": null,
     "sourceType": "BASE",
     "deriveSources": [],
-    "valueTransformations": [],
+    "processing": [],
     "manualInstruction": "",
     "codes": []
   },
   {
     "id": "Susi",
     "label": "",
-    "pattern": null,
     "sourceType": "BASE",
     "deriveSources": [],
-    "valueTransformations": [],
+    "processing": [],
     "manualInstruction": "",
     "codes": [
       {
@@ -50,13 +46,12 @@
   {
     "id": "ss",
     "label": "",
-    "pattern": "CHOICE",
     "sourceType": "CONCAT_CODE",
     "deriveSources": [
       "Otto",
       "Paul"
     ],
-    "valueTransformations": [],
+    "processing": [],
     "manualInstruction": "",
     "codes": []
   }

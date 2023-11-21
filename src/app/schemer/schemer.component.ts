@@ -1,6 +1,6 @@
-import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
-import {BehaviorSubject, debounceTime, fromEvent} from "rxjs";
+import {BehaviorSubject, debounceTime} from "rxjs";
 import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
 import {MessageDialogComponent, MessageDialogData, MessageType} from "./dialogs/message-dialog.component";
 import {ConfirmDialogComponent, ConfirmDialogData} from "./dialogs/confirm-dialog.component";
@@ -165,7 +165,7 @@ export class SchemerComponent {
                   label: result,
                   sourceType: 'SUM_CODE',
                   deriveSources: [],
-                  valueTransformations: [],
+                  processing: [],
                   manualInstruction: '',
                   codes: []
                 });
