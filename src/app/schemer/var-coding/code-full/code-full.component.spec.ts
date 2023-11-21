@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CodeDataComponent } from './code-data.component';
+import { CodeFullComponent } from './code-full.component';
 
 describe('CodeComponent', () => {
-  let component: CodeDataComponent;
-  let fixture: ComponentFixture<CodeDataComponent>;
+  let component: CodeFullComponent;
+  let fixture: ComponentFixture<CodeFullComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CodeDataComponent]
+      declarations: [CodeFullComponent]
     })
       .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CodeDataComponent);
+    fixture = TestBed.createComponent(CodeFullComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

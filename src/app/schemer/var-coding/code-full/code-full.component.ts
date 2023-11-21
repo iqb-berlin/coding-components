@@ -1,41 +1,39 @@
-import {
-  Component, EventEmitter, Input, Output
-} from '@angular/core';
-import {CodeData, CodingRule, RuleMethod, RuleMethodParameterCount} from '@iqb/responses';
+import { Component } from '@angular/core';
+import { CodingRule, RuleMethod, RuleMethodParameterCount} from '@iqb/responses';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import { RichTextEditDialogComponent } from '../../rich-text-editor/rich-text-edit-dialog.component';
+import {CodeDirective} from "../code.directive";
 
 @Component({
-  selector: 'code-data',
-  templateUrl: './code-data.component.html',
-  styleUrls: ['./code-data.component.scss']
+  selector: 'code-full',
+  templateUrl: './code-full.component.html',
+  styleUrls: ['./code-full.component.scss']
 })
-export class CodeDataComponent {
-  @Output() codeDataChanged = new EventEmitter<CodeData[]>();
-  @Input() codeData: CodeData | null = null;
-  @Input() allCodes: CodeData[] = [];
+export class CodeFullComponent extends CodeDirective {
   showCodeButtonsOf = '';
-  getParamCountWrapper = CodeDataComponent.getParamCount;
+  getParamCountWrapper = CodeFullComponent.getParamCount;
 
   constructor(
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
     private editTextDialog: MatDialog
-  ) { }
+  ) {
+    super();
+  }
 
   getSanitizedText(text: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(text);
   }
 
   editTextDialog_manualInstruction(): void {
-    if (this.codeData) {
+    if (this.code) {
       const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
         width: '860px',
         data: {
           title: this.translateService.instant('manual-instruction.prompt-code'),
-          content: this.codeData.manualInstruction || '',
+          content: this.code.manualInstruction || '',
           defaultFontSize: 20,
           editorHeightPx: 400
         },
@@ -43,9 +41,9 @@ export class CodeDataComponent {
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (typeof dialogResult !== 'undefined') {
-          if (dialogResult !== false && this.codeData) {
-            this.codeData.manualInstruction = dialogResult;
-            this.setCodeDataChanged();
+          if (dialogResult !== false && this.code) {
+            this.code.manualInstruction = dialogResult;
+            this.setCodeChanged();
           }
         }
       });
@@ -54,14 +52,14 @@ export class CodeDataComponent {
 
   getNewRules(): RuleMethod[] {
     let returnSources: RuleMethod[] = [];
-    if (this.codeData) {
-      if (this.codeData.rules.length === 0) {
+    if (this.code) {
+      if (this.code.rules.length === 0) {
         returnSources = ['MATCH', 'MATCH_REGEX', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
           'NUMERIC_MAX', 'NUMERIC_MIN'];
         if (!this.hasEmptyRule()) returnSources.push('IS_EMPTY');
         if (!this.hasElseRule()) returnSources.push('ELSE');
       } else {
-        const usedMethods = this.codeData.rules.map(rule => rule.method);
+        const usedMethods = this.code.rules.map(rule => rule.method);
         if (usedMethods.indexOf('ELSE') < 0 && usedMethods.indexOf('IS_EMPTY') < 0) {
           if (usedMethods.indexOf('MATCH') < 0) returnSources.push('MATCH');
           if (usedMethods.indexOf('MATCH_REGEX') < 0) returnSources.push('MATCH_REGEX');
@@ -85,22 +83,22 @@ export class CodeDataComponent {
   }
 
   addRule(newRuleMethod: RuleMethod) {
-    if (this.codeData) {
+    if (this.code) {
       const newRule: CodingRule = {
         method: newRuleMethod
       };
-      const paramCount = CodeDataComponent.getParamCount(newRuleMethod);
+      const paramCount = CodeFullComponent.getParamCount(newRuleMethod);
       if (paramCount !== 0) {
         newRule.parameters = [''];
         if (paramCount > 1) newRule.parameters.push('');
       }
-      this.codeData.rules.push(newRule);
-      this.setCodeDataChanged();
+      this.code.rules.push(newRule);
+      this.setCodeChanged();
     }
   }
 
   uniqueNumberValidator(codeToValidate: number): boolean {
-    const allCodeIds = this.allCodes.map(c => c.id);
+    const allCodeIds = this.allCodes ? this.allCodes.map(c => c.id) : [];
     const newArray: number[] = [];
     const notUnique: number[] = [];
     allCodeIds.forEach(u => {
@@ -114,35 +112,39 @@ export class CodeDataComponent {
   }
 
   deleteRule(ruleMethod: RuleMethod) {
-    if (this.codeData) {
-      const ruleMethods = this.codeData.rules.map(r => r.method);
+    if (this.code) {
+      const ruleMethods = this.code.rules.map(r => r.method);
       const methodIndex = ruleMethods.indexOf(ruleMethod);
-      if (methodIndex >= 0) this.codeData.rules.splice(methodIndex, 1);
-      this.setCodeDataChanged();
+      if (methodIndex >= 0) this.code.rules.splice(methodIndex, 1);
+      this.setCodeChanged();
     }
   }
 
   hasEmptyRule(): boolean {
     let emptyRuleFound = false;
-    this.allCodes.forEach(c => {
-      c.rules.forEach(r => {
-        if (r.method === 'IS_EMPTY') emptyRuleFound = true;
+    if (this.allCodes) {
+      this.allCodes.forEach(c => {
+        c.rules.forEach(r => {
+          if (r.method === 'IS_EMPTY') emptyRuleFound = true;
+        });
       });
-    });
+    }
     return emptyRuleFound;
   }
 
   hasElseRule(): boolean {
     let elseRuleFound = false;
-    this.allCodes.forEach(c => {
-      c.rules.forEach(r => {
-        if (r.method === 'ELSE') elseRuleFound = true;
+    if (this.allCodes) {
+      this.allCodes.forEach(c => {
+        c.rules.forEach(r => {
+          if (r.method === 'ELSE') elseRuleFound = true;
+        });
       });
-    });
+    }
     return elseRuleFound;
   }
 
-  setCodeDataChanged() {
-    this.codeDataChanged.emit(this.allCodes);
+  setCodeChanged() {
+    this.codeChanged.emit(this.allCodes);
   }
 }
