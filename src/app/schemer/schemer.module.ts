@@ -22,7 +22,7 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatChipsModule} from "@angular/material/chips";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {CodeFullComponent} from "./var-coding/code-full/code-full.component";
+import {CodeFullComponent} from "./var-coding/var-codes-full/code-full.component";
 import {AppTranslateLoader} from "./app-translate-loader";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
 import {VarCodingComponent} from "./var-coding/var-coding.component";

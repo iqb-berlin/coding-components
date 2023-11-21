@@ -3,7 +3,6 @@ import { CodingRule, RuleMethod, RuleMethodParameterCount} from '@iqb/responses'
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { RichTextEditDialogComponent } from '../../rich-text-editor/rich-text-edit-dialog.component';
 import {CodeDirective} from "../code.directive";
 
 @Component({
@@ -17,37 +16,14 @@ export class CodeFullComponent extends CodeDirective {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private translateService: TranslateService,
-    private editTextDialog: MatDialog
+    public translateService: TranslateService,
+    public editTextDialog: MatDialog
   ) {
     super();
   }
 
   getSanitizedText(text: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(text);
-  }
-
-  editTextDialog_manualInstruction(): void {
-    if (this.code) {
-      const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
-        width: '860px',
-        data: {
-          title: this.translateService.instant('manual-instruction.prompt-code'),
-          content: this.code.manualInstruction || '',
-          defaultFontSize: 20,
-          editorHeightPx: 400
-        },
-        autoFocus: false
-      });
-      dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult !== 'undefined') {
-          if (dialogResult !== false && this.code) {
-            this.code.manualInstruction = dialogResult;
-            this.setCodeChanged();
-          }
-        }
-      });
-    }
   }
 
   getNewRules(): RuleMethod[] {
@@ -131,6 +107,6 @@ export class CodeFullComponent extends CodeDirective {
   }
 
   setCodeChanged() {
-    this.codeChanged.emit(this.allCodes);
+    this.codeChanged.emit(this.code);
   }
 }

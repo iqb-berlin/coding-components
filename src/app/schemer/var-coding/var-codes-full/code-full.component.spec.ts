@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CodeFullComponent } from './code-full.component';
 
-describe('CodeComponent', () => {
+describe('CodeFullComponent', () => {
   let component: CodeFullComponent;
   let fixture: ComponentFixture<CodeFullComponent>;
 
