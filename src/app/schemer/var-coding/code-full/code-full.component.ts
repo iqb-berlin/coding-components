@@ -51,27 +51,29 @@ export class CodeFullComponent extends CodeDirective {
   }
 
   getNewRules(): RuleMethod[] {
+    const singletonRules: RuleMethod[] = [
+      'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
+    ]
     let returnSources: RuleMethod[] = [];
     if (this.code) {
       if (this.code.rules.length === 0) {
         returnSources = ['MATCH', 'MATCH_REGEX', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
           'NUMERIC_MAX', 'NUMERIC_MIN'];
-        if (!this.hasEmptyRule()) returnSources.push('IS_EMPTY');
-        if (!this.hasElseRule()) returnSources.push('ELSE');
-      } else {
+        singletonRules.forEach(r => {
+          if (!this.hasRule(r)) returnSources.push(r);
+        })
+      } else if (singletonRules.indexOf(this.code.rules[0].method) < 0) {
         const usedMethods = this.code.rules.map(rule => rule.method);
-        if (usedMethods.indexOf('ELSE') < 0 && usedMethods.indexOf('IS_EMPTY') < 0) {
-          if (usedMethods.indexOf('MATCH') < 0) returnSources.push('MATCH');
-          if (usedMethods.indexOf('MATCH_REGEX') < 0) returnSources.push('MATCH_REGEX');
-          if (usedMethods.indexOf('NUMERIC_RANGE') < 0 && usedMethods.indexOf('NUMERIC_MIN') < 0 &&
-            usedMethods.indexOf('NUMERIC_MORE_THEN') < 0 && usedMethods.indexOf('NUMERIC_MAX') < 0 &&
-            usedMethods.indexOf('NUMERIC_LESS_THEN') < 0) {
-            returnSources.push('NUMERIC_MIN');
-            returnSources.push('NUMERIC_MORE_THEN');
-            returnSources.push('NUMERIC_RANGE');
-            returnSources.push('NUMERIC_MAX');
-            returnSources.push('NUMERIC_LESS_THEN');
-          }
+        if (usedMethods.indexOf('MATCH') < 0) returnSources.push('MATCH');
+        if (usedMethods.indexOf('MATCH_REGEX') < 0) returnSources.push('MATCH_REGEX');
+        if (usedMethods.indexOf('NUMERIC_RANGE') < 0 && usedMethods.indexOf('NUMERIC_MIN') < 0 &&
+          usedMethods.indexOf('NUMERIC_MORE_THEN') < 0 && usedMethods.indexOf('NUMERIC_MAX') < 0 &&
+          usedMethods.indexOf('NUMERIC_LESS_THEN') < 0) {
+          returnSources.push('NUMERIC_MIN');
+          returnSources.push('NUMERIC_MORE_THEN');
+          returnSources.push('NUMERIC_RANGE');
+          returnSources.push('NUMERIC_MAX');
+          returnSources.push('NUMERIC_LESS_THEN');
         }
       }
     }
@@ -120,28 +122,12 @@ export class CodeFullComponent extends CodeDirective {
     }
   }
 
-  hasEmptyRule(): boolean {
-    let emptyRuleFound = false;
+  hasRule(ruleCode: RuleMethod): boolean {
     if (this.allCodes) {
-      this.allCodes.forEach(c => {
-        c.rules.forEach(r => {
-          if (r.method === 'IS_EMPTY') emptyRuleFound = true;
-        });
-      });
+      const myRule = this.allCodes.find(c => !!c.rules.find(r => r.method === ruleCode));
+      return !!myRule;
     }
-    return emptyRuleFound;
-  }
-
-  hasElseRule(): boolean {
-    let elseRuleFound = false;
-    if (this.allCodes) {
-      this.allCodes.forEach(c => {
-        c.rules.forEach(r => {
-          if (r.method === 'ELSE') elseRuleFound = true;
-        });
-      });
-    }
-    return elseRuleFound;
+    return false;
   }
 
   setCodeChanged() {
