@@ -23,7 +23,7 @@
       <mat-form-field class="fx-flex-fill">
         <mat-label>{{'code.description' | translate}}</mat-label>
         <input matInput
-               [readonly]="maxScore < 2"
+               [placeholder]="'code.description' | translate"
                [(ngModel)]="code.label"
                (ngModelChange)="setCodeChanged()">
       </mat-form-field>
@@ -35,10 +35,10 @@
       </div>
       <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
         <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
-        <mat-card-content class="fx-row-start-center">
-          <div *ngFor="let rule of code.rules" class="fx-row-start-center"
+        <mat-card-content class="fx-row-start-center fx-flex-fill">
+          <div *ngFor="let rule of code.rules" class="fx-row-start-center fx-flex-fill"
                (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
-            <div>
+            <div class="fx-column-start-stretch fx-flex-fill">
               <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
                    matTooltipShowDelay="500">
                 {{('rule.' + rule.method) | translate}}</div>
@@ -61,14 +61,14 @@
                        (ngModelChange)="setCodeChanged()">
               </mat-form-field>
             </div>
-            <button mat-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(rule.method)"
+            <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(rule.method)"
                     *ngIf="singletonRules.indexOf(rule.method) < 0"
                     [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
           <div class="fx-row-start-center">
-            <button mat-flat-button [matMenuTriggerFor]="menu" *ngIf="getNewRules().length > 0"
+            <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="getNewRules().length > 0"
                     [matTooltip]="'rule.prompt.add' | translate">
               <mat-icon>add</mat-icon>
             </button>

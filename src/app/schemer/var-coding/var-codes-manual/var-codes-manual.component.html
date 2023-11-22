@@ -24,7 +24,7 @@
                    [isEmptyCodeExists]="isEmptyCodeExists"
                    [allCodes]="codes"
                    (codeChanged)="codesChanged.emit(codes)"></code-manual>
-      <button mat-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
+      <button mat-icon-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
     </div>

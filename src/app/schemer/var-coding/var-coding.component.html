@@ -34,7 +34,7 @@
               {{source}}
               <mat-icon matChipRemove>cancel</mat-icon>
             </mat-chip>
-            <button mat-flat-button [matMenuTriggerFor]="menu" *ngIf="getNewSources(varCoding.deriveSources).length > 0">
+            <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="getNewSources(varCoding.deriveSources).length > 0">
               <mat-icon>add</mat-icon>
             </button>
           </mat-chip-listbox>
@@ -45,31 +45,39 @@
           </mat-menu>
         </div>
       </div>
-      <mat-form-field>
-        <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
-        <mat-select [(value)]="varCoding.codeModel">
-          <mat-option [value]="'CHOICE'">
-            {{'code-model.CHOICE' | translate}}
-          </mat-option>
-          <mat-option [value]="'VALUE_LIST'">
-            {{'code-model.VALUE_LIST' | translate}}
-          </mat-option>
-          <mat-option [value]="'NUMBER'">
-            {{'code-model.NUMBER' | translate}}
-          </mat-option>
-          <mat-option [value]="'MANUAL'">
-            {{'code-model.MANUAL' | translate}}
-          </mat-option>
-          <mat-option [value]="'NONE'">
-            {{'code-model.NONE' | translate}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="fx-row-start-center">
+        <mat-form-field class="fx-flex-fill">
+          <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
+          <mat-select [(value)]="varCoding.codeModel">
+  <!--          <mat-option [value]="'CHOICE'">
+              {{'code-model.CHOICE' | translate}}
+            </mat-option>-->
+            <mat-option [value]="'VALUE_LIST'">
+              {{'code-model.VALUE_LIST' | translate}}
+            </mat-option>
+            <mat-option [value]="'NUMBER'">
+              {{'code-model.NUMBER' | translate}}
+            </mat-option>
+            <mat-option [value]="'MANUAL'">
+              {{'code-model.MANUAL' | translate}}
+            </mat-option>
+            <mat-option [value]="'NONE'">
+              {{'code-model.NONE' | translate}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button (click)="smartSchemer()" [matTooltip]="'click.smart-schemer' | translate">
+          <mat-icon>bolt</mat-icon>
+        </button>
+        <button mat-icon-button (click)="codingAsText()" [matTooltip]="'click.coding-as-text' | translate">
+          <mat-icon>description</mat-icon>
+        </button>
+      </div>
     </div>
     <mat-card [style.flex]="'1 1 auto'">
       <mat-card-subtitle class="fx-row-space-between-stretch">
         {{'manual-instruction.prompt-general' | translate}}
-        <button mat-flat-button (click)="editTextDialog_manualInstruction()">
+        <button mat-icon-button (click)="editTextDialog_manualInstruction()">
           <mat-icon>edit</mat-icon>
         </button>
       </mat-card-subtitle>

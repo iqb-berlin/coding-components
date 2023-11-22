@@ -41,6 +41,7 @@ import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-
 import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-value-list.component";
 import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-number.component";
 import {CodeNumberComponent} from "./var-coding/var-codes-number/code-number.component";
+import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component";
 
 
 
@@ -49,6 +50,7 @@ import {CodeNumberComponent} from "./var-coding/var-codes-number/code-number.com
     SchemerComponent,
     CodeFullComponent,
     RichTextEditDialogComponent,
+    ShowCodingDialogComponent,
     RichTextEditorComponent,
     SchemeCheckerComponent,
     VarCodingComponent,

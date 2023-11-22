@@ -1,12 +1,11 @@
-import {
-  Component, EventEmitter, Input, OnDestroy, OnInit, Output
-} from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
-import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {MatDialog} from '@angular/material/dialog';
+import {TranslateService} from '@ngx-translate/core';
+import {RichTextEditDialogComponent} from '../rich-text-editor/rich-text-edit-dialog.component';
 import {VariableCodingData} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
+import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
 
 @Component({
   selector: 'var-coding',
@@ -23,7 +22,8 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   constructor(
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
-    private editTextDialog: MatDialog
+    private editTextDialog: MatDialog,
+    private showCodingDialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -84,6 +84,20 @@ export class VarCodingComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  codingAsText() {
+    if (this.varCoding) {
+      const dialogRef = this.showCodingDialog.open(ShowCodingDialogComponent, {
+        width: '1000px',
+        data: this.varCoding
+      });
+      dialogRef.afterClosed().subscribe();
+    }
+  }
+
+  smartSchemer() {
+
   }
 
   ngOnDestroy(): void {

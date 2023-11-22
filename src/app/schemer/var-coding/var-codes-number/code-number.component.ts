@@ -33,7 +33,7 @@ export class CodeNumberComponent extends CodeDirective {
     if (this.code) {
       if (this.code.rules.length === 0) {
         returnSources = ['MATCH', 'MATCH_REGEX', ...exclusiveNumericRules];
-        singletonRules.forEach(r => {
+        singletonRules.filter(r => r !== "IS_TRUE" && r !== 'IS_FALSE').forEach(r => {
           if (!this.hasRule(r)) returnSources.push(r);
         })
       } else if (singletonRules.indexOf(this.code.rules[0].method) < 0) {
