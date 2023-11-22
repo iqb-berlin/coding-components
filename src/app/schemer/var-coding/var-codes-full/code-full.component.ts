@@ -4,6 +4,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import {CodeDirective} from "../code.directive";
+import {singletonRules} from "../var-codes.directive";
 
 @Component({
   selector: 'code-full',
@@ -27,9 +28,6 @@ export class CodeFullComponent extends CodeDirective {
   }
 
   getNewRules(): RuleMethod[] {
-    const singletonRules: RuleMethod[] = [
-      'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
-    ]
     let returnSources: RuleMethod[] = [];
     if (this.code) {
       if (this.code.rules.length === 0) {
@@ -82,13 +80,5 @@ export class CodeFullComponent extends CodeDirective {
       if (methodIndex >= 0) this.code.rules.splice(methodIndex, 1);
       this.setCodeChanged();
     }
-  }
-
-  hasRule(ruleCode: RuleMethod): boolean {
-    if (this.allCodes) {
-      const myRule = this.allCodes.find(c => !!c.rules.find(r => r.method === ruleCode));
-      return !!myRule;
-    }
-    return false;
   }
 }

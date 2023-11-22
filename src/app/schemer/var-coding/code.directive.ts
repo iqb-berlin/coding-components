@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData} from "@iqb/responses";
+import {CodeData, RuleMethod} from "@iqb/responses";
 import {RichTextEditDialogComponent} from "../rich-text-editor/rich-text-edit-dialog.component";
 import {TranslateService} from "@ngx-translate/core";
 import {MatDialog} from "@angular/material/dialog";
@@ -45,6 +45,14 @@ export abstract class CodeDirective {
       }
     });
     return notUnique.indexOf(codeToValidate) < 0;
+  }
+
+  hasRule(ruleCode: RuleMethod): boolean {
+    if (this.allCodes) {
+      const myRule = this.allCodes.find(c => !!c.rules.find(r => r.method === ruleCode));
+      return !!myRule;
+    }
+    return false;
   }
 
   setCodeChanged() {
