@@ -1,0 +1,37 @@
+<div class="fx-column-start-stretch">
+  <div class="fx-row-space-between-end">
+    <div>
+      <h3>{{'code.header' | translate}}</h3>
+    </div>
+    <div class="processing">
+        <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
+                      (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'processing.REPLAY_REQUIRED' | translate}}
+          </div>
+        </mat-checkbox>
+        <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
+                      (change)="alterProcessing('ATTACHMENT', $event.checked)">
+          <div [style.white-space]="'normal'" [style.line-height]="1.2">
+            {{'processing.ATTACHMENT' | translate}}
+          </div>
+        </mat-checkbox>
+    </div>
+  </div>
+  <div *ngIf="codes" class="fx-column-start-stretch">
+    <div *ngFor="let cd of codes" class="fx-row-start-stretch">
+      <code-manual [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
+                 [allCodes]="codes"
+                 (codeChanged)="codesChanged.emit(codes)"></code-manual>
+      <button mat-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+    <div class="fx-row-start-center">
+      <button mat-raised-button (click)="addCode()">
+        <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
+      </button>
+      <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
+    </div>
+  </div>
+</div>
