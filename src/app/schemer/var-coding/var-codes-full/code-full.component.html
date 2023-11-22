@@ -34,12 +34,12 @@
                  matTooltipShowDelay="500">
               {{('rule.' + rule.method) | translate}}</div>
             <mat-form-field *ngIf="getParamCountWrapper(rule.method) < 0">
-            <textarea matInput *ngIf="rule.parameters"
-                      [(ngModel)]="rule.parameters[0]"
-                      (ngModelChange)="setCodeChanged()"
-                      cdkTextareaAutosize
-                      cdkAutosizeMinRows="2"
-                      cdkAutosizeMaxRows="8"></textarea>
+              <textarea matInput *ngIf="rule.parameters"
+                        [(ngModel)]="rule.parameters[0]"
+                        (ngModelChange)="setCodeChanged()"
+                        cdkTextareaAutosize
+                        cdkAutosizeMinRows="2"
+                        cdkAutosizeMaxRows="8"></textarea>
             </mat-form-field>
             <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 0">
               <input matInput *ngIf="rule.parameters"

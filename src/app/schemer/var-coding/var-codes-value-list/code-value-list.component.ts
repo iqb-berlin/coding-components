@@ -21,7 +21,6 @@ export class CodeValueListComponent extends CodeDirective {
     return this._maxScore;
   }
   showCodeButtonsOf = '';
-  getParamCountWrapper = 1;
 
   constructor(
     private sanitizer: DomSanitizer,
