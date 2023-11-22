@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
-import {BehaviorSubject, debounceTime} from "rxjs";
+import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
+import {CodingScheme, CodingSchemeProblem, VariableCodingData, VariableInfo} from "@iqb/responses";
+import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
 import {MessageDialogComponent, MessageDialogData, MessageType} from "./dialogs/message-dialog.component";
 import {ConfirmDialogComponent, ConfirmDialogData} from "./dialogs/confirm-dialog.component";
@@ -9,6 +9,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {TranslateService} from "@ngx-translate/core";
 import {VarCodingComponent} from "./var-coding/var-coding.component";
 import {CodingFactory} from "@iqb/responses/coding-factory";
+import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
 
 @Component({
   selector: 'iqb-schemer',
@@ -16,7 +17,7 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
   styleUrls: ['./schemer.component.scss'] //,
   // encapsulation: ViewEncapsulation.ShadowDom
 })
-export class SchemerComponent {
+export class SchemerComponent implements OnDestroy, AfterViewInit {
   @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
@@ -65,18 +66,21 @@ export class SchemerComponent {
   allVariableIds: string[] = [];
   codingStatus: { [id: string] : string; } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
+  problems: CodingSchemeProblem[] = [];
+  varCodingChangedSubscription: Subscription | null = null;
 
   constructor(
     private translateService: TranslateService,
     private confirmDialog: MatDialog,
     private messageDialog: MatDialog,
+    private showCodingProblemsDialog: MatDialog,
     private selectVariableDialog: MatDialog,
     private inputDialog: MatDialog
   ) { }
 
   ngAfterViewInit() {
     if (this.varCodingElement) {
-      this.varCodingElement.varCodingChanged.pipe(
+      this.varCodingChangedSubscription = this.varCodingElement.varCodingChanged.pipe(
         debounceTime(500)
       ).subscribe(() => {
         this.updateVariableLists();
@@ -106,29 +110,21 @@ export class SchemerComponent {
       this._codingScheme.variableCodings.map(c => c.id) : [];
     this.codingStatus = {};
     if (this._codingScheme && this._codingScheme.variableCodings) {
+      this.problems = this._codingScheme?.validate(this._varList);
       this._codingScheme.variableCodings.forEach(v => {
-        this.codingStatus[v.id] = this.getCodingStatus(v);
-      })
-    }
-  }
-
-  getCodingStatus(c: VariableCodingData): string {
-    if (c.sourceType === 'BASE') {
-      const myVarInfo = this._varList.find(v => v.id === c.id);
-      if (myVarInfo) {
-        return (c.codes.length > 0 || c.manualInstruction.length > 0) ? 'HAS_CODES' : 'EMPTY';
-      } else {
-        return 'INVALID_SOURCE';
-      }
-    } else if (c.deriveSources.length > 0) {
-      const invalidSources = c.deriveSources.filter(cc => cc === c.id || this.allVariableIds.indexOf(cc) < 0);
-      if (invalidSources.length > 0) {
-        return 'INVALID_SOURCE';
-      } else {
-        return (c.codes.length > 0 || c.manualInstruction.length > 0) ? 'HAS_CODES' : 'EMPTY';
-      }
-    } else {
-      return 'INVALID_SOURCE';
+        this.codingStatus[v.id] = 'OK';
+        const breakingProblem = this.problems
+          .find(p => p.variableId === v.id && p.breaking);
+        if (breakingProblem) {
+          this.codingStatus[v.id] = 'ERROR';
+        } else {
+          const minorProblem = this.problems
+            .find(p => p.variableId === v.id && !p.breaking);
+          if (minorProblem) this.codingStatus[v.id] = 'WARNING';
+        }
+      });
+      console.log(this.problems);
+      console.log(this.codingStatus);
     }
   }
 
@@ -310,5 +306,18 @@ export class SchemerComponent {
       });
     }
   }
-}
 
+  checkVarScheme() {
+    if (this.problems) {
+      const dialogRef = this.showCodingProblemsDialog.open(ShowCodingProblemsDialogComponent, {
+        width: '1000px',
+        data: this.problems
+      });
+      dialogRef.afterClosed().subscribe();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
+  }
+}
