@@ -37,6 +37,8 @@ import {ComboButtonComponent} from "./rich-text-editor/combo-button.component";
 import {CdkConnectedOverlay, CdkOverlayOrigin} from "@angular/cdk/overlay";
 import {VarCodesManualComponent} from "./var-coding/var-codes-manual/var-codes-manual.component";
 import {CodeManualComponent} from "./var-coding/var-codes-manual/code-manual.component";
+import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
+import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-value-list.component";
 
 
 
@@ -56,6 +58,8 @@ import {CodeManualComponent} from "./var-coding/var-codes-manual/code-manual.com
     VarCodesFullComponent,
     VarCodesManualComponent,
     CodeManualComponent,
+    VarCodesValueListComponent,
+    CodeValueListComponent,
     ComboButtonComponent,
     SchemerToolbarComponent
   ],

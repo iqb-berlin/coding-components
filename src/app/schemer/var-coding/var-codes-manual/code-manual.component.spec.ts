@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CodeManualComponent } from './code-manual.component';
 
-describe('CodeFullComponent', () => {
+describe('CodeManualComponent', () => {
   let component: CodeManualComponent;
   let fixture: ComponentFixture<CodeManualComponent>;
 

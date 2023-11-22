@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { VarCodesManualComponent } from './var-codes-manual.component';
+import { VarCodesValueListComponent } from './var-codes-value-list.component';
 
-describe('VarCodesManualComponent', () => {
-  let component: VarCodesManualComponent;
-  let fixture: ComponentFixture<VarCodesManualComponent>;
+describe('VarCodesValueListComponent', () => {
+  let component: VarCodesValueListComponent;
+  let fixture: ComponentFixture<VarCodesValueListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [VarCodesManualComponent]
+      declarations: [VarCodesValueListComponent]
     })
       .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(VarCodesManualComponent);
+    fixture = TestBed.createComponent(VarCodesValueListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
