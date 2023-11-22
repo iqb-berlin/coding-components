@@ -30,7 +30,7 @@
                        [elseCodeExists]="elseCodeExists" [isEmptyCodeExists]="isEmptyCodeExists"
                        [allCodes]="codes" [maxScore]="codeModelParameters ? codeModelParameters[0] : '1'"
                        (codeChanged)="codesChanged.emit(codes)"></code-value-list>
-      <button mat-button (click)="deleteCode(cd.id); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+      <button mat-icon-button (click)="deleteCode(cd.id); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
     </div>

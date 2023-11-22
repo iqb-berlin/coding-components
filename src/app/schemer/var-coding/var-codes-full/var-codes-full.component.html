@@ -31,7 +31,7 @@
       <code-full [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
                  [allCodes]="codes"
                  (codeChanged)="codesChanged.emit(codes)"></code-full>
-      <button mat-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
+      <button mat-icon-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
     </div>
