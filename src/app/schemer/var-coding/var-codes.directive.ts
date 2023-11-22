@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, ProcessingParameterType} from "@iqb/responses";
+import {CodeData, CodingRule, ProcessingParameterType} from "@iqb/responses";
 
 @Directive()
 export abstract class VarCodesDirective {
@@ -20,6 +20,30 @@ export abstract class VarCodesDirective {
         this.processing.splice(processPos, 1);
       }
       this.processingChanged.emit(this.processing);
+    }
+  }
+
+  addCode(newRules: CodingRule[] = []): number | null {
+    if (this.codes) {
+      const myCodeIds = this.codes.map(c => c.id);
+      const newId = Math.max(...myCodeIds) + 1;
+      this.codes.push({
+        id: newId,
+        label: '',
+        score: 0,
+        rules: newRules,
+        manualInstruction: ''
+      });
+      this.codesChanged.emit(this.codes);
+      return newId;
+    }
+    return null;
+  }
+
+  deleteCode(codeToDeleteId: number) {
+    if (this.codes) {
+      this.codes = this.codes.filter(c => c.id !== codeToDeleteId);
+      this.codesChanged.emit(this.codes);
     }
   }
 }

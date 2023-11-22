@@ -75,20 +75,6 @@ export class CodeFullComponent extends CodeDirective {
     }
   }
 
-  uniqueNumberValidator(codeToValidate: number): boolean {
-    const allCodeIds = this.allCodes ? this.allCodes.map(c => c.id) : [];
-    const newArray: number[] = [];
-    const notUnique: number[] = [];
-    allCodeIds.forEach(u => {
-      if (newArray.indexOf(u) >= 0) {
-        notUnique.push(u);
-      } else {
-        newArray.push(u);
-      }
-    });
-    return notUnique.indexOf(codeToValidate) < 0;
-  }
-
   deleteRule(ruleMethod: RuleMethod) {
     if (this.code) {
       const ruleMethods = this.code.rules.map(r => r.method);
@@ -104,9 +90,5 @@ export class CodeFullComponent extends CodeDirective {
       return !!myRule;
     }
     return false;
-  }
-
-  setCodeChanged() {
-    this.codeChanged.emit(this.code);
   }
 }

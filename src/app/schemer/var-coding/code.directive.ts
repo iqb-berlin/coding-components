@@ -32,4 +32,22 @@ export abstract class CodeDirective {
       });
     }
   }
+
+  uniqueNumberValidator(codeToValidate: number): boolean {
+    const allCodeIds = this.allCodes ? this.allCodes.map(c => c.id) : [];
+    const newArray: number[] = [];
+    const notUnique: number[] = [];
+    allCodeIds.forEach(u => {
+      if (newArray.indexOf(u) >= 0) {
+        notUnique.push(u);
+      } else {
+        newArray.push(u);
+      }
+    });
+    return notUnique.indexOf(codeToValidate) < 0;
+  }
+
+  setCodeChanged() {
+    this.codeChanged.emit(this.code);
+  }
 }

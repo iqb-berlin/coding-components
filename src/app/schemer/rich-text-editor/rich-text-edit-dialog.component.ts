@@ -6,7 +6,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
       <h1 mat-dialog-title>{{data.title}}</h1>
       <aspect-rich-text-editor [(content)]="data.content" mat-dialog-content
                                [clozeMode]="false"
-                               [editorHeightPx]="400"
+                               [editorHeightPx]="data.editorHeightPx"
                                [defaultFontSize]="data.defaultFontSize">
       </aspect-rich-text-editor>
       <div class="fx-row-space-between-center" [style.margin]="'0 26px 18px'">

@@ -1,0 +1,42 @@
+<div *ngIf="code" class="fx-column-start-stretch">
+  <div class="code-main-data fx-row-start-center">
+    <mat-form-field [class]="uniqueNumberValidator(code.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
+      <mat-label>{{'code.id' | translate}}</mat-label>
+      <input matInput
+             required
+             [(ngModel)]="code.id"
+             (ngModelChange)="setCodeChanged()"
+             type="number">
+    </mat-form-field>
+    <mat-form-field [class]="code.score > 0 ? 'correct' : 'not-correct'" [style.width.px]="100">
+      <mat-label>{{'code.score' | translate}}</mat-label>
+      <input matInput
+             type="number"
+             required
+             [(ngModel)]="code.score"
+             (ngModelChange)="setCodeChanged()">
+    </mat-form-field>
+    <mat-form-field class="fx-flex-fill">
+      <input matInput
+             [placeholder]="'code.description' | translate"
+             [(ngModel)]="code.label"
+             (ngModelChange)="setCodeChanged()">
+    </mat-form-field>
+  </div>
+  <div class="fx-row-start-start">
+    <div class="has-rules-warning">
+      <p *ngIf="code.rules.length > 0" matTooltip="Dieser Code enthält Regeln für das automatische Kodieren.">!!</p>
+    </div>
+    <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
+      <mat-card-subtitle class="fx-row-space-between-center">
+        {{'manual-instruction.prompt-code' | translate}}
+        <button mat-flat-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </mat-card-subtitle>
+      <mat-card-content class="instructions">
+        <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
