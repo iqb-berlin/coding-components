@@ -6,7 +6,7 @@ import { Response } from '@iqb/responses';
   template: `
       <h1 mat-dialog-title>{{'coding.result-header' | translate}}</h1>
 
-      <mat-dialog-content class="result-table">
+      <mat-dialog-content>
         <div class="response-list">
           <div class="response-row" [style.grid-template-columns]="'2fr 5fr 2fr 1fr 1fr'">
             <div>Variable</div>
@@ -20,7 +20,7 @@ import { Response } from '@iqb/responses';
                *ngFor="let rd of data">
             <div>{{rd.id}}</div>
             <div>{{rd.value}}</div>
-            <div>{{rd.status}}: {{rd.status}}</div>
+            <div>{{rd.status}}: {{'status-label.' + rd.status | translate}}</div>
             <div class="centered-column">{{rd.code || rd.code === 0 ? rd.code : '-'}}</div>
             <div class="centered-column">{{rd.score || rd.score === 0 ? rd.score : '-'}}</div>
           </div>
@@ -32,10 +32,8 @@ import { Response } from '@iqb/responses';
       </mat-dialog-actions>
     `,
   styles: [
-    '.result-table .result-entry:nth-child(even) {background-color: #f1f1f1;}',
-    '.centered-column {text-align: center}',
     '.response-list .response-row {display: grid; grid-template-rows: auto; column-gap: 10px}',
-    '.response-list .result-entry:nth-child(even) {background-color: #f1f1f1;}',
+    '.response-list .response-row:nth-child(even) {background-color: #f1f1f1;}',
     '.centered-column {text-align: center}'
   ]
 })

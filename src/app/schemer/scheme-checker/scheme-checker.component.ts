@@ -51,8 +51,8 @@ export class SchemeCheckerComponent {
         } else {
           myValues.push(<Response>{
             id: cs.id,
-            value: null,
-            status: 'UNSET'
+            value: '',
+            status: 'DISPLAYED'
           });
         }
       });
