@@ -9,7 +9,7 @@
       <div *ngIf="varCoding.sourceType !== 'BASE'" [style.margin]="'4px 0 4px 20px'" class="fx-column-start-stretch">
         <mat-form-field>
           <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
-          <mat-select [(value)]="varCoding.sourceType">
+          <mat-select [(value)]="varCoding.sourceType" (change)="varCodingChanged.emit(varCoding)">
             <mat-option [value]="'COPY_FIRST_VALUE'">
               {{'derive-method.COPY_FIRST_VALUE' | translate}}
             </mat-option>

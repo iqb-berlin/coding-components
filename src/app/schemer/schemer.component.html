@@ -16,7 +16,7 @@
       <div class="var-list-header">{{'varlist.derived' | translate}}</div>
       <mat-nav-list *ngFor="let varScheme of derivedVariables" class="fx-column-start-stretch">
         <div class="fx-row-start-center">
-          <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.derived-' + codingStatus[varScheme.id]) | translate"></div>
+          <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.' + codingStatus[varScheme.id]) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"
              class="var-list-entry"
              (click)="selectVarScheme(varScheme)"
@@ -43,6 +43,10 @@
       <button mat-button [disabled]="(selectedCoding$ | async) === null"
               (click)="copyVarScheme()" [matTooltip]="'varlist.copy' | translate" matTooltipPosition="above">
         <mat-icon>content_copy</mat-icon>
+      </button>
+      <button mat-button
+              (click)="checkVarScheme()" [matTooltip]="'varlist.check' | translate" matTooltipPosition="above">
+        <mat-icon>check</mat-icon>
       </button>
     </div>
   </div>

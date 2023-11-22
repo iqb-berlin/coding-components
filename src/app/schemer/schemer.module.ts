@@ -42,6 +42,7 @@ import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-val
 import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-number.component";
 import {CodeNumberComponent} from "./var-coding/var-codes-number/code-number.component";
 import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component";
+import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
 
 
 
@@ -62,6 +63,7 @@ import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component"
     VarCodesFullComponent,
     VarCodesManualComponent,
     CodeManualComponent,
+    ShowCodingProblemsDialogComponent,
     VarCodesValueListComponent,
     CodeValueListComponent,
     ComboButtonComponent,
