@@ -99,6 +99,16 @@
                       (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
                       [allVariables]="allVariables">
     </var-codes-value-list>
+    <var-codes-number *ngSwitchCase="'NUMBER'"
+                          class="fx-flex-row-100" [style.margin-top.px]="10"
+                          [codes]="varCoding.codes"
+                          (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+                          [processing]="varCoding.processing"
+                          (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                          [codeModelParameters]="varCoding.codeModelParameters"
+                          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
+                          [allVariables]="allVariables">
+    </var-codes-number>
     <var-codes-full *ngSwitchDefault
                     class="fx-flex-row-100" [style.margin-top.px]="10"
                     [codes]="varCoding.codes"

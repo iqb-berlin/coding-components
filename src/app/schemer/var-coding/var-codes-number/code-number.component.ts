@@ -1,9 +1,9 @@
 import {Component, Input} from '@angular/core';
 import {CodingRule, RuleMethod} from '@iqb/responses';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import {CodeDirective} from "../code.directive";
+import {exclusiveNumericRules, singletonRules} from "../var-codes.directive";
 
 @Component({
   selector: 'code-number',
@@ -21,27 +21,49 @@ export class CodeNumberComponent extends CodeDirective {
     return this._maxScore;
   }
   showCodeButtonsOf = '';
-  getParamCountWrapper = 1;
 
   constructor(
-    private sanitizer: DomSanitizer,
     public translateService: TranslateService,
     public editTextDialog: MatDialog
   ) {
     super();
   }
-
-  getSanitizedText(text: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(text);
+  getNewRules(): RuleMethod[] {
+    let returnSources: RuleMethod[] = [];
+    if (this.code) {
+      if (this.code.rules.length === 0) {
+        returnSources = ['MATCH', 'MATCH_REGEX', ...exclusiveNumericRules];
+        singletonRules.forEach(r => {
+          if (!this.hasRule(r)) returnSources.push(r);
+        })
+      } else if (singletonRules.indexOf(this.code.rules[0].method) < 0) {
+        const usedMethods = this.code.rules.map(rule => rule.method);
+        if (usedMethods.indexOf('MATCH') < 0) returnSources.push('MATCH');
+        if (usedMethods.indexOf('MATCH_REGEX') < 0) returnSources.push('MATCH_REGEX');
+        if (usedMethods.indexOf('NUMERIC_RANGE') < 0 && usedMethods.indexOf('NUMERIC_MIN') < 0 &&
+          usedMethods.indexOf('NUMERIC_MORE_THEN') < 0 && usedMethods.indexOf('NUMERIC_MAX') < 0 &&
+          usedMethods.indexOf('NUMERIC_LESS_THEN') < 0) {
+          returnSources.push('NUMERIC_MIN');
+          returnSources.push('NUMERIC_MORE_THEN');
+          returnSources.push('NUMERIC_RANGE');
+          returnSources.push('NUMERIC_MAX');
+          returnSources.push('NUMERIC_LESS_THEN');
+        }
+      }
+    }
+    return returnSources;
   }
 
-  addRule() {
-    if (this.code && this.code.rules && this.code.rules[0]) {
-      const existingRuleMethod = this.code.rules[0].method;
+  addRule(newRuleMethod: RuleMethod) {
+    if (this.code) {
       const newRule: CodingRule = {
-        method: existingRuleMethod === 'MATCH' ? 'MATCH_REGEX' : 'MATCH',
-        parameters: ['']
+        method: newRuleMethod
       };
+      const paramCount = CodeDirective.getParamCount(newRuleMethod);
+      if (paramCount !== 0) {
+        newRule.parameters = [''];
+        if (paramCount > 1) newRule.parameters.push('');
+      }
       this.code.rules.push(newRule);
       this.setCodeChanged();
     }
@@ -66,4 +88,6 @@ export class CodeNumberComponent extends CodeDirective {
       this.setCodeChanged();
     }
   }
+
+  protected readonly singletonRules = singletonRules;
 }

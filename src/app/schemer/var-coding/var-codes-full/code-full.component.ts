@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { CodingRule, RuleMethod, RuleMethodParameterCount} from '@iqb/responses';
+import { CodingRule, RuleMethod } from '@iqb/responses';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import {CodeDirective} from "../code.directive";
-import {singletonRules} from "../var-codes.directive";
+import {exclusiveNumericRules, singletonRules} from "../var-codes.directive";
 
 @Component({
   selector: 'code-full',
@@ -13,7 +13,6 @@ import {singletonRules} from "../var-codes.directive";
 })
 export class CodeFullComponent extends CodeDirective {
   showCodeButtonsOf = '';
-  getParamCountWrapper = CodeFullComponent.getParamCount;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -31,9 +30,8 @@ export class CodeFullComponent extends CodeDirective {
     let returnSources: RuleMethod[] = [];
     if (this.code) {
       if (this.code.rules.length === 0) {
-        returnSources = ['MATCH', 'MATCH_REGEX', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
-          'NUMERIC_MAX', 'NUMERIC_MIN'];
-        singletonRules.forEach(r => {
+        returnSources = ['MATCH', 'MATCH_REGEX', ...exclusiveNumericRules];
+        singletonRules.filter(r => r !== "IS_TRUE" && r !== 'IS_FALSE').forEach(r => {
           if (!this.hasRule(r)) returnSources.push(r);
         })
       } else if (singletonRules.indexOf(this.code.rules[0].method) < 0) {
@@ -54,16 +52,12 @@ export class CodeFullComponent extends CodeDirective {
     return returnSources;
   }
 
-  static getParamCount(ruleMethod: RuleMethod): number {
-    return RuleMethodParameterCount[ruleMethod];
-  }
-
   addRule(newRuleMethod: RuleMethod) {
     if (this.code) {
       const newRule: CodingRule = {
         method: newRuleMethod
       };
-      const paramCount = CodeFullComponent.getParamCount(newRuleMethod);
+      const paramCount = CodeDirective.getParamCount(newRuleMethod);
       if (paramCount !== 0) {
         newRule.parameters = [''];
         if (paramCount > 1) newRule.parameters.push('');

@@ -28,10 +28,7 @@ export class VarCodesNumberComponent extends VarCodesDirective implements OnInit
       }
       newCode.score = maxScore;
       newCode.label = 'Richtig';
-      newCode.rules = [{
-        method: 'MATCH',
-        parameters: ['']
-      }];
+      newCode.rules = [];
       this.codesChanged.emit(this.codes);
     }
   }
@@ -41,10 +38,7 @@ export class VarCodesNumberComponent extends VarCodesDirective implements OnInit
     if (newCode) {
       newCode.score = 0;
       newCode.label = 'Falsch';
-      newCode.rules = [{
-        method: 'MATCH',
-        parameters: ['']
-      }];
+      newCode.rules = [];
       this.codesChanged.emit(this.codes);
     }
   }

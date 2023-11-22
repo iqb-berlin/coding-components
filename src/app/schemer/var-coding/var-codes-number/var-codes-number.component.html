@@ -3,19 +3,9 @@
     <div class="fx-flex-fill">
       <h3>{{'code.header' | translate}}</h3>
     </div>
-    <div class="processing">
-        <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
-                      (change)="alterProcessing('IGNORE_CASE', $event.checked)">
-            {{'processing.IGNORE_CASE' | translate}}
-        </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
-                      (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
-            {{'processing.REMOVE_WHITE_SPACES' | translate}}
-        </mat-checkbox>
-    </div>
     <div [style.padding-bottom.px]="4">
       <mat-form-field [style.width.px]="150">
-        <mat-label>{{'code-model-parameter.value-list-max-score' | translate}}</mat-label>
+        <mat-label>{{'code-model-parameter.max-score' | translate}}</mat-label>
         <input matInput
                type="number"
                required
@@ -26,10 +16,10 @@
   </div>
   <div *ngIf="codes" class="fx-column-start-stretch">
     <div *ngFor="let cd of codes" class="fx-row-start-stretch">
-      <code-value-list [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
-                       [elseCodeExists]="elseCodeExists"
-                       [allCodes]="codes" [maxScore]="codeModelParameters ? codeModelParameters[0] : '1'"
-                       (codeChanged)="codesChanged.emit(codes)"></code-value-list>
+      <code-number [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
+                   [elseCodeExists]="elseCodeExists" [isEmptyCodeExists]="isEmptyCodeExists" [isNullCodeExists]="isNullCodeExists"
+                   [allCodes]="codes" [maxScore]="codeModelParameters ? codeModelParameters[0] : '1'"
+                   (codeChanged)="codesChanged.emit(codes)"></code-number>
       <button mat-button (click)="deleteCode(cd.id); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
@@ -45,7 +35,10 @@
         <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
       </button>
       <button mat-raised-button (click)="addCodeSingleton('IS_EMPTY', translateService); updateCodeExistences()" [disabled]="!!isEmptyCodeExists">
-        <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
+        <mat-icon>add</mat-icon>{{'code.prompt.add-is-empty' | translate}}
+      </button>
+      <button mat-raised-button (click)="addCodeSingleton('IS_NULL', translateService); updateCodeExistences()" [disabled]="!!isNullCodeExists">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-is-null' | translate}}
       </button>
     </div>
   </div>

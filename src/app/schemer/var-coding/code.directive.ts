@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, RuleMethod} from "@iqb/responses";
+import {CodeData, RuleMethod, RuleMethodParameterCount} from "@iqb/responses";
 import {RichTextEditDialogComponent} from "../rich-text-editor/rich-text-edit-dialog.component";
 import {TranslateService} from "@ngx-translate/core";
 import {MatDialog} from "@angular/material/dialog";
@@ -12,6 +12,7 @@ export abstract class CodeDirective {
   @Input() elseCodeExists: Boolean | undefined;
   @Input() isEmptyCodeExists: Boolean | undefined;
   @Input() isNullCodeExists: Boolean | undefined;
+  getParamCountWrapper = CodeDirective.getParamCount;
 
   editTextDialog_manualInstruction(translateService: TranslateService, editTextDialog: MatDialog): void {
     if (this.code) {
@@ -34,6 +35,10 @@ export abstract class CodeDirective {
         }
       });
     }
+  }
+
+  static getParamCount(ruleMethod: RuleMethod): number {
+    return RuleMethodParameterCount[ruleMethod];
   }
 
   uniqueNumberValidator(codeToValidate: number): boolean {

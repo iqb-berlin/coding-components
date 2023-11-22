@@ -5,6 +5,10 @@ import {TranslateService} from "@ngx-translate/core";
 export const singletonRules: RuleMethod[] = [
   'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
 ]
+export const exclusiveNumericRules: RuleMethod[] = [
+  'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
+  'NUMERIC_MAX', 'NUMERIC_MIN'
+]
 
 @Directive()
 export abstract class VarCodesDirective {
