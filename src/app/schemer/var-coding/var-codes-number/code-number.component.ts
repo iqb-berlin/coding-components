@@ -6,11 +6,11 @@ import { TranslateService } from '@ngx-translate/core';
 import {CodeDirective} from "../code.directive";
 
 @Component({
-  selector: 'code-value-list',
-  templateUrl: './code-value-list.component.html',
-  styleUrls: ['./code-value-list.component.scss']
+  selector: 'code-number',
+  templateUrl: './code-number.component.html',
+  styleUrls: ['./code-number.component.scss']
 })
-export class CodeValueListComponent extends CodeDirective {
+export class CodeNumberComponent extends CodeDirective {
   _maxScore: number = 1;
   @Input()
   set maxScore(value: string) {

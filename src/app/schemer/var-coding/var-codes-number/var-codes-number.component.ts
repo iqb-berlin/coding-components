@@ -4,10 +4,10 @@ import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'var-codes-value-list',
-  templateUrl: './var-codes-value-list.component.html',
-  styleUrls: ['./var-codes-value-list.component.scss']
+  templateUrl: './var-codes-number.component.html',
+  styleUrls: ['./var-codes-number.component.scss']
 })
-export class VarCodesValueListComponent extends VarCodesDirective implements OnInit {
+export class VarCodesNumberComponent extends VarCodesDirective implements OnInit {
   constructor(
     public translateService: TranslateService
   ) {

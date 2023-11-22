@@ -21,8 +21,9 @@
   <div *ngIf="codes" class="fx-column-start-stretch">
     <div *ngFor="let cd of codes" class="fx-row-start-stretch">
       <code-manual [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
-                 [allCodes]="codes"
-                 (codeChanged)="codesChanged.emit(codes)"></code-manual>
+                   [isEmptyCodeExists]="isEmptyCodeExists"
+                   [allCodes]="codes"
+                   (codeChanged)="codesChanged.emit(codes)"></code-manual>
       <button mat-button (click)="deleteCode(cd.id)" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
@@ -31,7 +32,9 @@
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
       </button>
-      <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
+      <button mat-raised-button (click)="addCodeSingleton('IS_EMPTY', translateService); updateCodeExistences()" [disabled]="!!isEmptyCodeExists">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-is-empty' | translate}}
+      </button>
     </div>
   </div>
 </div>
