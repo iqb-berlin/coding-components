@@ -9,6 +9,9 @@ export abstract class CodeDirective {
   @Output() codeChanged = new EventEmitter<CodeData>();
   @Input() public code: CodeData | undefined;
   @Input() allCodes: CodeData[] | undefined;
+  @Input() elseCodeExists: Boolean | undefined;
+  @Input() isEmptyCodeExists: Boolean | undefined;
+  @Input() isNullCodeExists: Boolean | undefined;
 
   editTextDialog_manualInstruction(translateService: TranslateService, editTextDialog: MatDialog): void {
     if (this.code) {

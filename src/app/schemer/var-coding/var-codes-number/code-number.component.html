@@ -42,11 +42,11 @@
               <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
                    matTooltipShowDelay="500">
                 {{('rule.' + rule.method) | translate}}
-                <span *ngIf="rule.method !== 'ELSE' && rule.method !== 'IS_EMPTY'" class="multiline-text">
+                <span *ngIf="rule.method !== 'ELSE'" class="multiline-text">
                   Mehrzeilig: Neues Wort in neue Zeile schreiben
                 </span>
               </div>
-              <mat-form-field *ngIf="rule.method !== 'ELSE' && rule.method !== 'IS_EMPTY'">
+              <mat-form-field *ngIf="rule.method !== 'ELSE'">
                 <textarea matInput *ngIf="rule.parameters"
                           [(ngModel)]="rule.parameters[0]"
                           (ngModelChange)="setCodeChanged()"

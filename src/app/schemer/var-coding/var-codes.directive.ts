@@ -1,5 +1,6 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData, ProcessingParameterType, RuleMethod} from "@iqb/responses";
+import {TranslateService} from "@ngx-translate/core";
 
 export const singletonRules: RuleMethod[] = [
   'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
@@ -14,6 +15,9 @@ export abstract class VarCodesDirective {
   @Input() public allVariables: string[] = [];
   @Input() public processing: ProcessingParameterType[] | undefined;
   @Input() public codeModelParameters: string[] | undefined;
+  elseCodeExists: Boolean | undefined;
+  isEmptyCodeExists: Boolean | undefined;
+  isNullCodeExists: Boolean | undefined;
 
   alterProcessing(processingId: ProcessingParameterType, checked: boolean) {
     if (this.processing) {
@@ -25,6 +29,12 @@ export abstract class VarCodesDirective {
       }
       this.processingChanged.emit(this.processing);
     }
+  }
+
+  updateCodeExistences() {
+    this.elseCodeExists = this.hasRule('ELSE');
+    this.isEmptyCodeExists = this.hasRule('IS_EMPTY');
+    this.isNullCodeExists = this.hasRule('IS_NULL');
   }
 
   addCode(emitChangeEvent = true): CodeData | null {
@@ -62,6 +72,19 @@ export abstract class VarCodesDirective {
     if (this.codes) {
       this.codes = this.codes.filter(c => c.id !== codeToDeleteId);
       this.codesChanged.emit(this.codes);
+    }
+  }
+
+  addCodeSingleton(newCodeMethod: RuleMethod, translateService: TranslateService) {
+    if (!this.hasRule(newCodeMethod)) {
+      const newCode = this.addCode(false);
+      if (newCode) {
+        newCode.label = translateService.instant(`rule.${newCodeMethod}`);
+        newCode.rules = [{
+          method: newCodeMethod
+        }];
+        this.codesChanged.emit(this.codes);
+      }
     }
   }
 

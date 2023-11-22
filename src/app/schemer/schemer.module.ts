@@ -39,6 +39,8 @@ import {VarCodesManualComponent} from "./var-coding/var-codes-manual/var-codes-m
 import {CodeManualComponent} from "./var-coding/var-codes-manual/code-manual.component";
 import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
 import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-value-list.component";
+import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-number.component";
+import {CodeNumberComponent} from "./var-coding/var-codes-number/code-number.component";
 
 
 
@@ -61,6 +63,8 @@ import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-val
     VarCodesValueListComponent,
     CodeValueListComponent,
     ComboButtonComponent,
+    VarCodesNumberComponent,
+    CodeNumberComponent,
     SchemerToolbarComponent
   ],
   exports: [
