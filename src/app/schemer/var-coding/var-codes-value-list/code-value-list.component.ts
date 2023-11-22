@@ -52,7 +52,7 @@ export class CodeValueListComponent extends CodeDirective {
       if (this.code.rules.length > 1) return false;
       if (this.code.rules[0]) {
         const existingRuleMethod = this.code.rules[0].method;
-        return existingRuleMethod !== 'ELSE';
+        return existingRuleMethod !== 'ELSE' && existingRuleMethod !== 'IS_EMPTY';
       }
     }
     return false;
