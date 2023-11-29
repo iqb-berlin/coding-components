@@ -123,8 +123,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           if (minorProblem) this.codingStatus[v.id] = 'WARNING';
         }
       });
-      console.log(this.problems);
-      console.log(this.codingStatus);
     }
   }
 

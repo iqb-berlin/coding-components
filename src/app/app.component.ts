@@ -12,7 +12,7 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
           <div>
-            <button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
+            <button mat-icon-button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
               <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
             </button>
           </div>
