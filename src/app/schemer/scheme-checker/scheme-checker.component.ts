@@ -41,14 +41,14 @@ export class SchemeCheckerComponent {
   startEvaluation() {
     if (this._codingScheme) {
       const myValues: Response[] = [];
-      this._codingScheme.variableCodings.forEach((cs: { id: string | number; }) => {
+      this._codingScheme.variableCodings.forEach(cs => {
         if (this.values[cs.id]) {
           myValues.push(<Response>{
             id: cs.id,
             value: this.values[cs.id],
             status: 'VALUE_CHANGED'
           });
-        } else {
+        } else if (cs.sourceType === 'BASE') {
           myValues.push(<Response>{
             id: cs.id,
             value: '',
