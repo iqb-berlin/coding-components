@@ -53,7 +53,9 @@
 
   <div *ngIf="allVariableIds.length === 0"
        style="margin: 20px;">{{'data-error.base-variables-missing' | translate}}</div>
-  <var-coding [varCoding]="selectedCoding$ | async" class="var-coding-container fx-flex-row-100"
+  <var-coding [varCoding]="selectedCoding$ | async"
+              [varInfo]="selectedVarInfo$ | async"
+              class="var-coding-container fx-flex-row-100"
               [allVariables]="allVariableIds">
   </var-coding>
 </div>

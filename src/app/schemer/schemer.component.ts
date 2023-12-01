@@ -66,6 +66,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   allVariableIds: string[] = [];
   codingStatus: { [id: string] : string; } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
+  selectedVarInfo$ = new BehaviorSubject<VariableInfo | null>(null);
   problems: CodingSchemeProblem[] = [];
   varCodingChangedSubscription: Subscription | null = null;
 
@@ -128,6 +129,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   selectVarScheme(coding: VariableCodingData | null = null) {
     this.selectedCoding$.next(coding);
+    this.selectedVarInfo$.next(this._varList.find(vi => vi.id === coding?.id) || null)
   }
 
   addVarScheme() {

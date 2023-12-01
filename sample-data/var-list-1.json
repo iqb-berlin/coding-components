@@ -16,9 +16,26 @@
     "format": "",
     "multiple": false,
     "nullable": false,
-    "values": [],
+    "values": [
+      {
+        "value": "1",
+        "label": "erste Option"
+      },
+      {
+        "value": "2",
+        "label": "zweite Option"
+      },
+      {
+        "value": "3",
+        "label": "dritte Option"
+      },
+      {
+        "value": "4",
+        "label": "vierte Option"
+      }
+    ],
     "valuePositionLabels": [],
-    "valuesComplete": false,
+    "valuesComplete": true,
     "page": ""
   },
   {

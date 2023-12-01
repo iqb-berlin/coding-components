@@ -3,9 +3,10 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {MatDialog} from '@angular/material/dialog';
 import {TranslateService} from '@ngx-translate/core';
 import {RichTextEditDialogComponent} from '../rich-text-editor/rich-text-edit-dialog.component';
-import {VariableCodingData} from "@iqb/responses";
+import {VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
+import { CodeData,  CodeModelType} from "@iqb/responses/coding-interfaces";
 
 @Component({
   selector: 'var-coding',
@@ -15,6 +16,7 @@ import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component
 export class VarCodingComponent implements OnInit, OnDestroy {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
   @Input() varCoding: VariableCodingData | null = null;
+  @Input() varInfo: VariableInfo | null = null;
   @Input() allVariables: string[] = [];
   lastChangeFrom$ = new BehaviorSubject<string>('');
   lastChangeFromSubscription: Subscription | null = null;
@@ -97,9 +99,35 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   }
 
   smartSchemer() {
-
+    if (this.varCoding && this.varInfo) {
+      this.varCoding.codeModel = VarCodingComponent.guessCodeModel(this.varInfo);
+      this.varCoding.codes = VarCodingComponent.guessCodes(this.varInfo);
+    }
   }
 
+  static guessCodeModel(varInfo: VariableInfo): CodeModelType {
+    return (varInfo.type === "string" && !varInfo.multiple && varInfo.valuesComplete) ? 'VALUE_LIST' : 'NONE';
+  }
+  static guessCodes(varInfo: VariableInfo): CodeData[] {
+    let returnData: CodeData[] = [];
+    if (varInfo.type === "string" && !varInfo.multiple && varInfo.valuesComplete) {
+      returnData = varInfo.values.filter(v => typeof v.value === "string").map((v, index) => {
+        return {
+          id: index + 1,
+          label: v.label,
+          score: 0,
+          rules: [
+            {
+              method: 'MATCH',
+              parameters: [v.value as string]
+            }
+          ],
+          manualInstruction: ''
+        }
+      })
+    }
+    return returnData;
+  }
   ngOnDestroy(): void {
     if (this.lastChangeFromSubscription !== null) this.lastChangeFromSubscription.unsubscribe();
   }
