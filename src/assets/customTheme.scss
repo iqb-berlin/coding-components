@@ -1,25 +1,43 @@
-@use "@angular/material" as mat;
-@import "@angular/material/theming";
+@use '../../node_modules/@angular/material/index' as mat;
+@import '../../node_modules/@angular/material/theming';
 
-$schemer-typography: mat.define-typography-config(
-        $font-family: 'NunitoSans',
+$aspect-typography: mat.define-typography-config(
+  $font-family: 'NunitoSans',
 );
-@include angular-material-typography($schemer-typography);
+@include angular-material-typography($aspect-typography);
 
-$schemer-element-border-color: #ccc;
-$schemer-element-border-hover-color: #333;
-$schemer-primary: mat.define-palette(mat.$pink-palette);
-$schemer-accent: mat.define-palette(mat.$cyan-palette, 900);
-$schemer-theme: mat.define-light-theme((
-  color: (primary: $schemer-primary, accent: $schemer-accent),
+$aspect-element-border-color: #ccc;
+$aspect-element-border-hover-color: #333;
+$aspect-primary: mat.define-palette(mat.$pink-palette);
+$aspect-accent: mat.define-palette(mat.$cyan-palette, 900);
+$aspect-theme: mat.define-light-theme((
+  color: (primary: $aspect-primary, accent: $aspect-accent),
 ));
 
-@include mat.legacy-checkbox-color($schemer-theme);
-@include mat.radio-color($schemer-theme);
-@include mat.slider-color($schemer-theme);
+@include mat.legacy-checkbox-color($aspect-theme);
+@include mat.radio-color($aspect-theme);
+@include mat.slider-color($aspect-theme);
+
+
+.mat-button-toggle-group-appearance-standard {
+  border-color: $aspect-element-border-color;
+  .mat-button-toggle+.mat-button-toggle {
+    border-left-color: $aspect-element-border-color;
+  }
+}
+
+math-field {
+  border-radius: 4px;
+  border: 1px solid $aspect-element-border-color;
+  padding: 8px;
+  &:hover {
+    border-color: $aspect-element-border-hover-color
+  };
+  &:focus {
+    outline-color: #3f51b5; //TODO $outline-color-primary
+  }
+}
 
 :root {
   --mdc-typography-button-letter-spacing: normal;
-  font-family: 'NunitoSans', sans-serif;
 }
-

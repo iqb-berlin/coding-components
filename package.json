@@ -2,7 +2,7 @@
   "name": "coding-components",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --project=coding-components-serve",
+    "start": "ng serve --project=coding-components",
     "build": "ng run coding-components:build",
     "build_cc": "ng build ngx-coding-components",
     "watch": "ng build --watch --configuration development",
