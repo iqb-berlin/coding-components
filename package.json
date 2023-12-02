@@ -5,8 +5,10 @@
     "ng": "ng",
     "start": "ng serve --project=coding-components-serve",
     "build": "ng run coding-components:build",
+    "build_cc": "ng build ngx-coding-components",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "npm_publish": "cd dist/ngx-coding-components && npm publish --access public"
   },
   "private": true,
   "dependencies": {
