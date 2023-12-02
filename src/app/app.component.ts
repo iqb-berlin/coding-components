@@ -66,6 +66,5 @@ export class AppComponent {
   codings1 = new CodingScheme(sampleCodings1 as VariableCodingData[]);
   title = 'coding-components';
 
-  constructor() {
-  }
+  constructor() {  }
 }
