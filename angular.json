@@ -4,201 +4,22 @@
   "newProjectRoot": "projects",
   "projects": {
     "coding-components": {
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "root": "",
-      "sourceRoot": "src",
-      "prefix": "iqb",
-      "architect": {
-        "build": {
-          "builder": "ngx-build-plus:build",
-          "options": {
-            "outputPath": "dist/coding-components",
-            "index": "src/index.html",
-            "main": "src/main.element.ts",
-            "tsConfig": "tsconfig.element.json",
-            "inlineStyleLanguage": "scss",
-            "singleBundle": true
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
-                }
-              ],
-              "outputHashing": "none"
-            },
-            "development": {
-              "buildOptimizer": false,
-              "optimization": false,
-              "vendorChunk": true,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "serve": {
-          "builder": "ngx-build-plus:dev-server",
-          "configurations": {
-            "production": {
-              "browserTarget": "coding-components:build:production"
-            },
-            "development": {
-              "browserTarget": "coding-components:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "extract-i18n": {
-          "builder": "ngx-build-plus:extract-i18n",
-          "options": {
-            "browserTarget": "coding-components:build"
-          }
-        },
-        "test": {
-          "builder": "ngx-build-plus:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss"
-          }
-        }
-      }
-    },
-    "coding-components-serve": {
-      "projectType": "application",
-      "schematics": {
-        "@schematics/angular:component": {
-          "style": "scss"
-        }
-      },
-      "root": "",
-      "sourceRoot": "src",
-      "prefix": "iqb",
-      "architect": {
-        "build": {
-          "builder": "ngx-build-plus:browser",
-          "options": {
-            "outputPath": "dist/coding-components-serve",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
-            "tsConfig": "tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss",
-              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-              "src/assets/material-icons.css",
-              "src/assets/customTheme.scss"
-            ],
-            "scripts": []
-          },
-          "configurations": {
-            "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
-                }
-              ],
-              "outputHashing": "all"
-            },
-            "development": {
-              "buildOptimizer": false,
-              "optimization": false,
-              "vendorChunk": true,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "namedChunks": true
-            }
-          },
-          "defaultConfiguration": "production"
-        },
-        "serve": {
-          "builder": "ngx-build-plus:dev-server",
-          "configurations": {
-            "production": {
-              "browserTarget": "coding-components-serve:build:production"
-            },
-            "development": {
-              "browserTarget": "coding-components-serve:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
-        },
-        "extract-i18n": {
-          "builder": "ngx-build-plus:extract-i18n",
-          "options": {
-            "browserTarget": "coding-components-serve:build"
-          }
-        },
-        "test": {
-          "builder": "ngx-build-plus:karma",
-          "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
-            "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.scss"
-            ],
-            "scripts": []
-          }
-        }
-      }
-    },
-    "ngx-coding-components": {
       "projectType": "library",
-      "root": "projects/ngx-coding-components",
-      "sourceRoot": "projects/ngx-coding-components/src",
+      "root": "projects/coding-components",
+      "sourceRoot": "projects/coding-components/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/ngx-coding-components/ng-package.json"
+            "project": "projects/coding-components/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/ngx-coding-components/tsconfig.lib.prod.json"
+              "tsConfig": "projects/coding-components/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/ngx-coding-components/tsconfig.lib.json"
+              "tsConfig": "projects/coding-components/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -206,11 +27,9 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "projects/ngx-coding-components/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "main": "projects/coding-components/src/test.ts",
+            "tsConfig": "projects/coding-components/tsconfig.spec.json",
+            "karmaConfig": "projects/coding-components/karma.conf.js"
           }
         }
       }
