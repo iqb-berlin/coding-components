@@ -12,6 +12,11 @@
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "paths": {
+      "ngx-coding-components": [
+        "dist/ngx-coding-components"
+      ]
+    },
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,

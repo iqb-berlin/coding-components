@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { SchemerModule } from './schemer/schemer.module';
+import { NgxCodingComponentsModule } from 'ngx-coding-components';
 import {MatMenuModule} from "@angular/material/menu";
 import {MatDividerModule} from "@angular/material/divider";
 import {MatIconModule} from "@angular/material/icon";
@@ -17,7 +17,7 @@ import {MatToolbarModule} from "@angular/material/toolbar";
   ],
   imports: [
     BrowserModule,
-    SchemerModule,
+    NgxCodingComponentsModule,
     MatMenuModule,
     MatDividerModule,
     MatIconModule,

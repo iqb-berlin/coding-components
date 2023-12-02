@@ -1,7 +1,6 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { SchemerComponent } from "./schemer.component";
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { SchemerComponent } from "./schemer/schemer.component";
 import { NgxTiptapModule } from "ngx-tiptap";
 import {MatSelectModule} from "@angular/material/select";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -23,7 +22,6 @@ import {MatChipsModule} from "@angular/material/chips";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {CodeFullComponent} from "./var-coding/var-codes-full/code-full.component";
-import {AppTranslateLoader} from "./app-translate-loader";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
 import {VarCodingComponent} from "./var-coding/var-coding.component";
 import {ConfirmDialogComponent} from "./dialogs/confirm-dialog.component";
@@ -43,8 +41,8 @@ import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-n
 import {CodeNumberComponent} from "./var-coding/var-codes-number/code-number.component";
 import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component";
 import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
-
-
+import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
+import {NgxCodingComponentsTranslateLoader} from "./translations/ngx-coding-components.translate-loader";
 
 @NgModule({
   declarations: [
@@ -74,7 +72,8 @@ import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-
   exports: [
     SchemerComponent,
     SchemeCheckerComponent,
-    SchemerToolbarComponent
+    SchemerToolbarComponent,
+    VarCodingComponent
   ],
   imports: [
     CommonModule,
@@ -102,11 +101,11 @@ import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-
       defaultLanguage: 'de',
       loader: {
         provide: TranslateLoader,
-        useClass: AppTranslateLoader
+        useClass: NgxCodingComponentsTranslateLoader
       }
     }),
     CdkConnectedOverlay,
     CdkOverlayOrigin
   ]
 })
-export class SchemerModule { }
+export class NgxCodingComponentsModule { }

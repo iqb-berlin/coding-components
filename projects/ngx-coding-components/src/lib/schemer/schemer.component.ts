@@ -1,15 +1,15 @@
 import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
 import {CodingScheme, CodingSchemeProblem, VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
-import {SimpleInputDialogComponent, SimpleInputDialogData} from "./dialogs/simple-input-dialog.component";
-import {MessageDialogComponent, MessageDialogData, MessageType} from "./dialogs/message-dialog.component";
-import {ConfirmDialogComponent, ConfirmDialogData} from "./dialogs/confirm-dialog.component";
-import {SelectVariableDialogComponent, SelectVariableDialogData} from "./dialogs/select-variable-dialog.component";
+import {SimpleInputDialogComponent, SimpleInputDialogData} from "../dialogs/simple-input-dialog.component";
+import {MessageDialogComponent, MessageDialogData, MessageType} from "../dialogs/message-dialog.component";
+import {ConfirmDialogComponent, ConfirmDialogData} from "../dialogs/confirm-dialog.component";
+import {SelectVariableDialogComponent, SelectVariableDialogData} from "../dialogs/select-variable-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {TranslateService} from "@ngx-translate/core";
-import {VarCodingComponent} from "./var-coding/var-coding.component";
+import {VarCodingComponent} from "../var-coding/var-coding.component";
 import {CodingFactory} from "@iqb/responses/coding-factory";
-import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
+import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
 
 @Component({
   selector: 'iqb-schemer',
