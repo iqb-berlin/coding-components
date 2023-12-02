@@ -1,6 +1,17 @@
 {
-  "name": "ngx-coding-components",
+  "name": "@iqb/ngx-coding-components",
   "version": "0.0.1",
+  "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
+  "license": "MIT",
+  "description": "Angular components for coding responses in assessments of IQB.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iqb-berlin/coding-components.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iqb-berlin/coding-components/issues"
+  },
+  "homepage": "https://github.com/iqb-berlin/coding-components#readme",
   "peerDependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/common": "^16.2.0",
