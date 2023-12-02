@@ -1,6 +1,5 @@
 {
   "name": "coding-components",
-  "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --project=coding-components-serve",

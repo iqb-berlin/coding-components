@@ -1,3 +1,5 @@
+[![npm](https://img.shields.io/npm/v/%40iqb%2Fngx-coding-components)](https://www.npmjs.com/package/@iqb/ngx-coding-components)
+
 # CodingComponents
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.1.
