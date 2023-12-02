@@ -3,23 +3,23 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "coding-components": {
+    "ngx-coding-components": {
       "projectType": "library",
-      "root": "projects/coding-components",
-      "sourceRoot": "projects/coding-components/src",
+      "root": "projects/ngx-coding-components",
+      "sourceRoot": "projects/ngx-coding-components/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/coding-components/ng-package.json"
+            "project": "projects/ngx-coding-components/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/coding-components/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngx-coding-components/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/coding-components/tsconfig.lib.json"
+              "tsConfig": "projects/ngx-coding-components/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -27,9 +27,11 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "projects/coding-components/src/test.ts",
-            "tsConfig": "projects/coding-components/tsconfig.spec.json",
-            "karmaConfig": "projects/coding-components/karma.conf.js"
+            "tsConfig": "projects/ngx-coding-components/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
           }
         }
       }
