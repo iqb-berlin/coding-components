@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CodingScheme, VariableInfo} from "@iqb/responses";
 import {FileService} from "./services/file.service";
 
@@ -29,6 +29,8 @@ import {FileService} from "./services/file.service";
 export class SchemerToolbarComponent {
   @Input() codingScheme: CodingScheme | null = null;
   @Input() varList: VariableInfo[] = [];
+  @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
+  @Output() varListChanged = new EventEmitter<VariableInfo[] | null>();
 
   saveCodingScheme(): void {
     FileService.saveToFile(JSON.stringify(this.codingScheme), 'coding-scheme.json');
@@ -36,8 +38,11 @@ export class SchemerToolbarComponent {
 
   async loadVariables(): Promise<void> {
     this.varList = JSON.parse(await FileService.loadFile(['.json']));
+    this.varListChanged.emit(this.varList);
   }
   async loadCodingScheme(): Promise<void> {
-      this.codingScheme = JSON.parse(await FileService.loadFile(['.json']));
+    const codingsParsed = JSON.parse(await FileService.loadFile(['.json']))
+    this.codingScheme = new CodingScheme(codingsParsed.variableCodings);
+    this.codingSchemeChanged.emit(this.codingScheme);
   }
 }

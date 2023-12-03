@@ -8,7 +8,6 @@ import {SelectVariableDialogComponent, SelectVariableDialogData} from "../dialog
 import {MatDialog} from "@angular/material/dialog";
 import {TranslateService} from "@ngx-translate/core";
 import {VarCodingComponent} from "../var-coding/var-coding.component";
-import {CodingFactory} from "@iqb/responses/coding-factory";
 import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
 
 @Component({
@@ -48,13 +47,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       } else {
         this._varList = value;
       }
-      const variableCodings: VariableCodingData[] = [];
-      this._varList.forEach(c => {
-        if (this._codingScheme) {
-          variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(c));
-        }
-      });
-      this._codingScheme = new CodingScheme(variableCodings);
       this.updateVariableLists();
     }
   }

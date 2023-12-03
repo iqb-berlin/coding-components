@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
+import {CodingFactory} from "@iqb/responses/coding-factory";
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,12 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
           ></iqb-schemer>
         </mat-drawer-content>
       </mat-drawer-container>
-      <schemer-load-save [varList]="varList1" [codingScheme]="codings1" [style.height.px]="0"></schemer-load-save>
+      <schemer-load-save
+        [varList]="varList1"
+        [codingScheme]="codings1"
+        (varListChanged)="setNewVarlist($event)"
+        (codingSchemeChanged)="setNewCodingScheme($event)"
+        [style.height.px]="0"></schemer-load-save>
   `,
   styles: [
     `
@@ -66,6 +72,18 @@ export class AppComponent {
   codings1 = new CodingScheme(sampleCodings1 as VariableCodingData[]);
   title = 'coding-components';
 
-  constructor() {
+  setNewVarlist(varList: VariableInfo[] | null) {
+    if (varList) {
+      this.varList1 = varList;
+      const variableCodings: VariableCodingData[] = [];
+      this.varList1.forEach(c => {
+        variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(c));
+      });
+      this.codings1 = new CodingScheme(variableCodings);
+    }
+  }
+
+  setNewCodingScheme(codings: CodingScheme | null) {
+    if (codings) this.codings1 = codings;
   }
 }
