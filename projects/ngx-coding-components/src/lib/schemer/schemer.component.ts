@@ -77,6 +77,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         debounceTime(500)
       ).subscribe(() => {
         this.updateVariableLists();
+        this.codingSchemeChanged.emit(this._codingScheme);
       });
     }
   }

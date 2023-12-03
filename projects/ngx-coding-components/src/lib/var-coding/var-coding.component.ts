@@ -18,7 +18,7 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   @Input() varCoding: VariableCodingData | null = null;
   @Input() varInfo: VariableInfo | null = null;
   @Input() allVariables: string[] = [];
-  lastChangeFrom$ = new BehaviorSubject<string>('');
+  lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
 
   constructor(
@@ -31,8 +31,8 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.lastChangeFromSubscription = this.lastChangeFrom$.pipe(
         debounceTime(500)
-      ).subscribe(() => {
-        this.varCodingChanged.emit(this.varCoding);
+      ).subscribe(source => {
+        if (source !== 'init') this.varCodingChanged.emit(this.varCoding);
       });
   }
 

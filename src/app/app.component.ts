@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import { Component } from '@angular/core';
 import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
@@ -18,8 +18,9 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
             </button>
           </div>
           <iqb-schemer class="drawer-schemer"
-                  [varList]="varList1"
-                  [codingScheme]="codings1"
+                       [varList]="varList1"
+                       [codingScheme]="codings1"
+                       (codingSchemeChanged)="updateCodingScheme()"
           ></iqb-schemer>
         </mat-drawer-content>
       </mat-drawer-container>
@@ -71,6 +72,10 @@ export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
   codings1 = new CodingScheme(sampleCodings1 as VariableCodingData[]);
   title = 'coding-components';
+
+  updateCodingScheme() {
+    console.log(this.codings1)
+  }
 
   setNewVarlist(varList: VariableInfo[] | null) {
     if (varList) {
