@@ -1,12 +1,16 @@
 {
   "name": "coding-components",
+  "config": {
+    "schemer_version": "1.2.0-beta2"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve --project=coding-components",
     "build": "ng run coding-components:build",
-    "build_cc": "ng build ngx-coding-components",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "build_cc": "rm -rf dist/ngx-coding-components && ng build ngx-coding-components",
+    "build_sc": "rm -f dist/*.* && rm -rf dist/schemer && ng build --project schemer --output-hashing=none",
+    "pack_sc": "node scripts/wrap_and_pack.js schemer $npm_package_config_schemer_version projects/schemer/src/html_wrapper/index.html",
+    "buildAndPack_sc": "npm run build_sc && npm run pack_sc",
     "npm_publish": "cd dist/ngx-coding-components && npm publish --access public"
   },
   "private": true,
@@ -33,6 +37,7 @@
     "@angular/cli": "~16.2.1",
     "@angular/compiler-cli": "^16.2.0",
     "@types/jasmine": "~4.3.0",
+    "iqb-dev-components": "^1.4.1",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
