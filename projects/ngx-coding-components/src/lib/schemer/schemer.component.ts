@@ -47,6 +47,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       } else {
         this._varList = value;
       }
+      this.selectVarScheme();
       this.updateVariableLists();
     }
   }

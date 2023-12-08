@@ -43,6 +43,7 @@ import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component"
 import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
 import {NgxCodingComponentsTranslateLoader} from "./translations/ngx-coding-components.translate-loader";
+import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.component";
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import {NgxCodingComponentsTranslateLoader} from "./translations/ngx-coding-comp
     ShowCodingProblemsDialogComponent,
     VarCodesValueListComponent,
     CodeValueListComponent,
+    GenerateCodingDialogComponent,
     ComboButtonComponent,
     VarCodesNumberComponent,
     CodeNumberComponent,

@@ -7,6 +7,7 @@ import {VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
 import { CodeData,  CodeModelType} from "@iqb/responses/coding-interfaces";
+import {GenerateCodingDialogComponent} from "../dialogs/generate-coding-dialog.component";
 
 @Component({
   selector: 'var-coding',
@@ -25,7 +26,8 @@ export class VarCodingComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
     private editTextDialog: MatDialog,
-    private showCodingDialog: MatDialog
+    private showCodingDialog: MatDialog,
+    private generateCodingDialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -99,10 +101,19 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   }
 
   smartSchemer() {
+    if (this.varInfo) {
+      const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
+        width: '1000px',
+        data: this.varInfo
+      });
+      dialogRef.afterClosed().subscribe();
+    }
+    /**
     if (this.varCoding && this.varInfo) {
       this.varCoding.codeModel = VarCodingComponent.guessCodeModel(this.varInfo);
       this.varCoding.codes = VarCodingComponent.guessCodes(this.varInfo);
     }
+    **/
   }
 
   static guessCodeModel(varInfo: VariableInfo): CodeModelType {
@@ -116,6 +127,7 @@ export class VarCodingComponent implements OnInit, OnDestroy {
           id: index + 1,
           label: v.label,
           score: 0,
+          ruleOperatorAnd: false,
           rules: [
             {
               method: 'MATCH',

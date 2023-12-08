@@ -82,7 +82,14 @@ export class AppComponent implements OnInit, OnDestroy {
         if (message.codingScheme) {
             const codingScheme = JSON.parse(message.codingScheme);
             this.codings = new CodingScheme(codingScheme.variableCodings || []);
+        } else {
+          this.codings = new CodingScheme([]);
         }
+        this.varList.forEach(vi => {
+          let codingForBaseVariable;
+          if (this.codings && this.codings.variableCodings) codingForBaseVariable = this.codings.variableCodings.find(v => v.id === vi.id);
+          if (!codingForBaseVariable && this.codings) this.codings.variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(vi));
+        })
       });
   }
 

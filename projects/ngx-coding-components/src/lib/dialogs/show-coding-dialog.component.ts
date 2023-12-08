@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import {CodingAsText, VariableCodingData} from "@iqb/responses";
-import {CodingFactory} from "@iqb/responses/coding-factory";
+import {CodingAsText, ToTextFactory, VariableCodingData} from "@iqb/responses";
 
 @Component({
   template: `
@@ -54,10 +53,10 @@ export class ShowCodingDialogComponent {
     this.varCodingText = {
       id: this.varCoding.id,
       label: this.varCoding.label,
-      source: CodingFactory.sourceAsText(this.varCoding.id, this.varCoding.sourceType, this.varCoding.deriveSources),
-      processing: CodingFactory.processingAsText(this.varCoding.processing),
+      source: ToTextFactory.sourceAsText(this.varCoding.id, this.varCoding.sourceType, this.varCoding.deriveSources),
+      processing: ToTextFactory.processingAsText(this.varCoding.processing),
       hasManualInstruction: !!this.varCoding.manualInstruction,
-      codes: this.varCoding.codes.map(code => CodingFactory.codeAsText(code))
+      codes: this.varCoding.codes.map(code => ToTextFactory.codeAsText(code))
     };
   }
 }

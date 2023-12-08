@@ -54,6 +54,7 @@ export abstract class VarCodesDirective {
         id: newCodeId,
         label: '',
         score: 0,
+        ruleOperatorAnd: false,
         rules: [],
         manualInstruction: ''
       };
