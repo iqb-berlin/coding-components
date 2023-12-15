@@ -1,6 +1,6 @@
 {
   "name": "@iqb/ngx-coding-components",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "description": "Angular components for coding responses in assessments of IQB.",
@@ -23,7 +23,7 @@
     "@angular/platform-browser": "^16.2.0",
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
-    "@iqb/responses": "^0.19.0",
+    "@iqb/responses": "^0.20.0",
     "@ngx-translate/core": "^15.0.0",
     "@tiptap/core": "^2.1.10",
     "@tiptap/extension-blockquote": "^2.1.10",
