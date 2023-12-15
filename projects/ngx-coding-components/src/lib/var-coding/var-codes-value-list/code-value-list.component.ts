@@ -35,22 +35,22 @@ export class CodeValueListComponent extends CodeDirective {
   }
 
   addRule() {
-    if (this.code && this.code.rules && this.code.rules[0]) {
-      const existingRuleMethod = this.code.rules[0].method;
+    if (this.firstRuleSet && this.firstRuleSet.rules && this.firstRuleSet.rules[0]) {
+      const existingRuleMethod = this.firstRuleSet.rules[0].method;
       const newRule: CodingRule = {
         method: existingRuleMethod === 'MATCH' ? 'MATCH_REGEX' : 'MATCH',
         parameters: ['']
       };
-      this.code.rules.push(newRule);
+      this.firstRuleSet.rules.push(newRule);
       this.setCodeChanged();
     }
   }
 
   canAddRule(): Boolean {
-    if (this.code && this.code.rules) {
-      if (this.code.rules.length > 1) return false;
-      if (this.code.rules[0]) {
-        const existingRuleMethod = this.code.rules[0].method;
+    if (this.firstRuleSet && this.firstRuleSet.rules) {
+      if (this.firstRuleSet.rules.length > 1) return false;
+      if (this.firstRuleSet.rules[0]) {
+        const existingRuleMethod = this.firstRuleSet.rules[0].method;
         return existingRuleMethod !== 'ELSE' && existingRuleMethod !== 'IS_EMPTY';
       }
     }
@@ -58,10 +58,10 @@ export class CodeValueListComponent extends CodeDirective {
   }
 
   deleteRule(ruleMethod: RuleMethod) {
-    if (this.code) {
-      const ruleMethods = this.code.rules.map(r => r.method);
+    if (this.firstRuleSet) {
+      const ruleMethods = this.firstRuleSet.rules.map(r => r.method);
       const methodIndex = ruleMethods.indexOf(ruleMethod);
-      if (methodIndex >= 0) this.code.rules.splice(methodIndex, 1);
+      if (methodIndex >= 0) this.firstRuleSet.rules.splice(methodIndex, 1);
       this.setCodeChanged();
     }
   }

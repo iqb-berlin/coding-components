@@ -1,6 +1,6 @@
 import {Inject, Injectable} from '@angular/core';
 import { fromEvent, Observable, Subject } from 'rxjs';
-import {CodingScheme, VariableInfo} from "@iqb/responses";
+import {CodingScheme, VariableInfo, VariableInfoShort} from "@iqb/responses";
 import {DOCUMENT} from "@angular/common";
 
 @Injectable({
@@ -56,7 +56,11 @@ export class VeronaAPIService {
       timeStamp: String(Date.now()),
       codingScheme: JSON.stringify(scheme),
       codingSchemeType: 'iqb@1.2',
-      variables: []
+      variables: scheme ? scheme.variableCodings.map(c => <VariableInfoShort>{
+        id: c.id,
+        label: c.label,
+        page: c.page || ''
+      }) : []
     });
   }
 
@@ -79,5 +83,5 @@ export interface VosSchemeChangedData {
   timeStamp: string,
   codingScheme: string,
   codingSchemeType: 'iqb@1.2',
-  variables: VariableInfo[]
+  variables: VariableInfoShort[]
 }

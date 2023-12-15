@@ -47,6 +47,13 @@ export class VarCodingComponent implements OnInit, OnDestroy {
     return returnSources;
   }
 
+  setFragmenting(newFragmenting: string) {
+    if (this.varCoding) {
+      this.varCoding.fragmenting = newFragmenting;
+      this.lastChangeFrom$.next('var-codes-full fragmenting')
+    }
+  }
+
   deleteDeriveSource(source: string) {
     if (this.varCoding) {
       const sourcePos = this.varCoding.deriveSources.indexOf(source);
@@ -127,13 +134,16 @@ export class VarCodingComponent implements OnInit, OnDestroy {
           id: index + 1,
           label: v.label,
           score: 0,
-          ruleOperatorAnd: false,
-          rules: [
-            {
-              method: 'MATCH',
-              parameters: [v.value as string]
-            }
-          ],
+          ruleSetOperatorAnd: false,
+          ruleSets: [{
+            ruleOperatorAnd: false,
+            rules: [
+              {
+                method: 'MATCH',
+                parameters: [v.value as string]
+              }
+            ],
+          }],
           manualInstruction: ''
         }
       })

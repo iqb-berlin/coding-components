@@ -54,7 +54,7 @@ export class ShowCodingDialogComponent {
       id: this.varCoding.id,
       label: this.varCoding.label,
       source: ToTextFactory.sourceAsText(this.varCoding.id, this.varCoding.sourceType, this.varCoding.deriveSources),
-      processing: ToTextFactory.processingAsText(this.varCoding.processing),
+      processing: ToTextFactory.processingAsText(this.varCoding.processing, this.varCoding.fragmenting),
       hasManualInstruction: !!this.varCoding.manualInstruction,
       codes: this.varCoding.codes.map(code => ToTextFactory.codeAsText(code))
     };

@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, ProcessingParameterType, RuleMethod} from "@iqb/responses";
+import {CodeData, ProcessingParameterType, RuleMethod, RuleSet} from "@iqb/responses";
 import {TranslateService} from "@ngx-translate/core";
 
 export const singletonRules: RuleMethod[] = [
@@ -14,10 +14,12 @@ export const exclusiveNumericRules: RuleMethod[] = [
 export abstract class VarCodesDirective {
   @Output() codesChanged = new EventEmitter<CodeData[]>();
   @Output() processingChanged = new EventEmitter<ProcessingParameterType[]>();
+  @Output() fragmentingChanged = new EventEmitter<string>();
   @Output() codeModelParametersChanged = new EventEmitter<string[]>();
   @Input() public codes: CodeData[] | undefined;
   @Input() public allVariables: string[] = [];
   @Input() public processing: ProcessingParameterType[] | undefined;
+  @Input() public fragmenting: string | undefined;
   @Input() public codeModelParameters: string[] | undefined;
   elseCodeExists: Boolean | undefined;
   isEmptyCodeExists: Boolean | undefined;
@@ -54,8 +56,11 @@ export abstract class VarCodesDirective {
         id: newCodeId,
         label: '',
         score: 0,
-        ruleOperatorAnd: false,
-        rules: [],
+        ruleSetOperatorAnd: false,
+        ruleSets: [<RuleSet>{
+          ruleOperatorAnd: false,
+          rules: []
+        }],
         manualInstruction: ''
       };
       this.codes.push(newCode);
@@ -67,7 +72,8 @@ export abstract class VarCodesDirective {
 
   hasRule(ruleCode: RuleMethod): boolean {
     if (this.codes) {
-      const myRule = this.codes.find(c => !!c.rules.find(r => r.method === ruleCode));
+      const myRule = this.codes.find(
+        c => !!c.ruleSets.find(rs => !!rs.rules.find(r => r.method === ruleCode)));
       return !!myRule;
     }
     return false;
@@ -85,7 +91,7 @@ export abstract class VarCodesDirective {
       const newCode = this.addCode(false);
       if (newCode) {
         newCode.label = translateService.instant(`rule.${newCodeMethod}`);
-        newCode.rules = [{
+        newCode.ruleSets[0].rules = [{
           method: newCodeMethod
         }];
         this.codesChanged.emit(this.codes);

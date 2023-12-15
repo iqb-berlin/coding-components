@@ -24,7 +24,7 @@
     </mat-form-field>
   </div>
   <div class="fx-row-start-start">
-    <ng-container *ngIf="code.rules[0] && code.rules[0].method === 'IS_EMPTY'">
+    <ng-container *ngIf="firstRuleSet && firstRuleSet.rules[0] && firstRuleSet.rules[0].method === 'IS_EMPTY'">
       <div class="has-rules-warning">
         <p *ngIf="code.manualInstruction"
            matTooltip="Es gibt Instruktionen für das manuelle Kodieren">!!</p>
@@ -32,16 +32,16 @@
       <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
         <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
         <mat-card-content class="fx-row-start-center">
-          <div [matTooltip]="('rule.' + code.rules[0].method + '.description') | translate"
+          <div [matTooltip]="('rule.' + firstRuleSet.rules[0].method + '.description') | translate"
                matTooltipShowDelay="500">
-            {{('rule.' + code.rules[0].method) | translate}}
+            {{('rule.' + firstRuleSet.rules[0].method) | translate}}
           </div>
         </mat-card-content>
       </mat-card>
     </ng-container>
-    <ng-container *ngIf="!code.rules[0] || code.rules[0].method !== 'IS_EMPTY'">
+    <ng-container *ngIf="firstRuleSet && (!firstRuleSet.rules[0] || firstRuleSet.rules[0].method !== 'IS_EMPTY')">
       <div class="has-rules-warning">
-        <p *ngIf="code.rules.length > 0" matTooltip="Dieser Code enthält Regeln für das automatische Kodieren.">!!</p>
+        <p *ngIf="firstRuleSet.rules.length > 0" matTooltip="Dieser Code enthält Regeln für das automatische Kodieren.">!!</p>
       </div>
       <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
         <mat-card-subtitle class="fx-row-space-between-center">

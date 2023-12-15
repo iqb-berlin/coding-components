@@ -70,7 +70,7 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
-  codings1 = new CodingScheme(sampleCodings1 as VariableCodingData[]);
+  codings1 = new CodingScheme(sampleCodings1);
   title = 'coding-components';
 
   updateCodingScheme() {

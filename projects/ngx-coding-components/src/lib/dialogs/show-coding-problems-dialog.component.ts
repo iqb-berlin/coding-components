@@ -4,7 +4,7 @@ import { CodingSchemeProblem} from "@iqb/responses";
 
 @Component({
   template: `
-    <h1 mat-dialog-title>Kodierschema Syntax prüfen</h1>
+    <h1 mat-dialog-title>Kodierschema prüfen</h1>
 
     <mat-dialog-content>
       <div *ngFor="let v of allVariables" class="fx-column-start-stretch">

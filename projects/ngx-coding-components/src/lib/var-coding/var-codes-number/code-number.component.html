@@ -36,7 +36,7 @@
       <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
         <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
         <mat-card-content class="fx-row-start-center fx-flex-fill">
-          <div *ngFor="let rule of code.rules" class="fx-row-start-center fx-flex-fill"
+          <div *ngFor="let rule of firstRuleSet?.rules" class="fx-row-start-center fx-flex-fill"
                (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
             <div class="fx-column-start-stretch fx-flex-fill">
               <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
@@ -77,7 +77,7 @@
                 {{('rule.' + newSource) | translate}}
               </button>
             </mat-menu>
-            <div *ngIf="code.rules.length === 0" [matMenuTriggerFor]="menu"
+            <div *ngIf="firstRuleSet && firstRuleSet.rules.length === 0" [matMenuTriggerFor]="menu"
                  class="no-rules">{{'rule.no-rules' | translate}}</div>
           </div>
         </mat-card-content>

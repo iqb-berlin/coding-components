@@ -25,6 +25,12 @@
           </div>
         </mat-checkbox>
     </div>
+    <mat-form-field matTooltip="Regulärer Ausdruck, um Teile der Antwort zu extrahieren">
+      <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
+      <input matInput
+             [(ngModel)]="fragmenting"
+             (ngModelChange)="fragmentingChanged.emit(fragmenting)">
+    </mat-form-field>
   </div>
   <div *ngIf="codes" class="fx-column-start-stretch">
     <div *ngFor="let cd of codes" class="fx-row-start-stretch">

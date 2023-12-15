@@ -28,9 +28,12 @@ export class VarCodesValueListComponent extends VarCodesDirective implements OnI
       }
       newCode.score = maxScore;
       newCode.label = 'Richtig';
-      newCode.rules = [{
-        method: 'MATCH',
-        parameters: ['']
+      newCode.ruleSets = [{
+        ruleOperatorAnd: false,
+        rules: [{
+          method: 'MATCH',
+          parameters: ['']
+        }]
       }];
       this.codesChanged.emit(this.codes);
     }
@@ -41,9 +44,12 @@ export class VarCodesValueListComponent extends VarCodesDirective implements OnI
     if (newCode) {
       newCode.score = 0;
       newCode.label = 'Falsch';
-      newCode.rules = [{
-        method: 'MATCH',
-        parameters: ['']
+      newCode.ruleSets = [{
+        ruleOperatorAnd: false,
+        rules: [{
+          method: 'MATCH',
+          parameters: ['']
+        }]
       }];
       this.codesChanged.emit(this.codes);
     }

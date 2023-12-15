@@ -30,14 +30,14 @@ export class CodeNumberComponent extends CodeDirective {
   }
   getNewRules(): RuleMethod[] {
     let returnSources: RuleMethod[] = [];
-    if (this.code) {
-      if (this.code.rules.length === 0) {
+    if (this.firstRuleSet) {
+      if (this.firstRuleSet.rules.length === 0) {
         returnSources = ['MATCH', 'MATCH_REGEX', ...exclusiveNumericRules];
         singletonRules.filter(r => r !== "IS_TRUE" && r !== 'IS_FALSE').forEach(r => {
           if (!this.hasRule(r)) returnSources.push(r);
         })
-      } else if (singletonRules.indexOf(this.code.rules[0].method) < 0) {
-        const usedMethods = this.code.rules.map(rule => rule.method);
+      } else if (singletonRules.indexOf(this.firstRuleSet.rules[0].method) < 0) {
+        const usedMethods = this.firstRuleSet.rules.map(rule => rule.method);
         if (usedMethods.indexOf('MATCH') < 0) returnSources.push('MATCH');
         if (usedMethods.indexOf('MATCH_REGEX') < 0) returnSources.push('MATCH_REGEX');
         if (usedMethods.indexOf('NUMERIC_RANGE') < 0 && usedMethods.indexOf('NUMERIC_MIN') < 0 &&
@@ -55,7 +55,7 @@ export class CodeNumberComponent extends CodeDirective {
   }
 
   addRule(newRuleMethod: RuleMethod) {
-    if (this.code) {
+    if (this.firstRuleSet) {
       const newRule: CodingRule = {
         method: newRuleMethod
       };
@@ -64,16 +64,16 @@ export class CodeNumberComponent extends CodeDirective {
         newRule.parameters = [''];
         if (paramCount > 1) newRule.parameters.push('');
       }
-      this.code.rules.push(newRule);
+      this.firstRuleSet.rules.push(newRule);
       this.setCodeChanged();
     }
   }
 
   canAddRule(): Boolean {
-    if (this.code && this.code.rules) {
-      if (this.code.rules.length > 1) return false;
-      if (this.code.rules[0]) {
-        const existingRuleMethod = this.code.rules[0].method;
+    if (this.firstRuleSet && this.firstRuleSet.rules) {
+      if (this.firstRuleSet.rules.length > 1) return false;
+      if (this.firstRuleSet.rules[0]) {
+        const existingRuleMethod = this.firstRuleSet.rules[0].method;
         return existingRuleMethod !== 'ELSE';
       }
     }
@@ -81,10 +81,10 @@ export class CodeNumberComponent extends CodeDirective {
   }
 
   deleteRule(ruleMethod: RuleMethod) {
-    if (this.code) {
-      const ruleMethods = this.code.rules.map(r => r.method);
+    if (this.firstRuleSet) {
+      const ruleMethods = this.firstRuleSet.rules.map(r => r.method);
       const methodIndex = ruleMethods.indexOf(ruleMethod);
-      if (methodIndex >= 0) this.code.rules.splice(methodIndex, 1);
+      if (methodIndex >= 0) this.firstRuleSet.rules.splice(methodIndex, 1);
       this.setCodeChanged();
     }
   }

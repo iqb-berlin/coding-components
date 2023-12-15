@@ -44,6 +44,7 @@ import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
 import {NgxCodingComponentsTranslateLoader} from "./translations/ngx-coding-components.translate-loader";
 import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.component";
+import {MatRadioModule} from "@angular/material/radio";
 
 @NgModule({
   declarations: [
@@ -77,37 +78,38 @@ import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.co
     SchemerToolbarComponent,
     VarCodingComponent
   ],
-  imports: [
-    CommonModule,
-    BrowserModule,
-    BrowserAnimationsModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatListModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatChipsModule,
-    ReactiveFormsModule,
-    MatTooltipModule,
-    MatInputModule,
-    FormsModule,
-    MatSelectModule,
-    MatChipsModule,
-    MatCheckboxModule,
-    MatCardModule,
-    MatSidenavModule,
-    NgxTiptapModule,
-    TranslateModule.forRoot({
-      defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useClass: NgxCodingComponentsTranslateLoader
-      }
-    }),
-    CdkConnectedOverlay,
-    CdkOverlayOrigin
-  ]
+    imports: [
+        CommonModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        MatToolbarModule,
+        MatButtonModule,
+        MatIconModule,
+        MatListModule,
+        MatMenuModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatChipsModule,
+        ReactiveFormsModule,
+        MatTooltipModule,
+        MatInputModule,
+        FormsModule,
+        MatSelectModule,
+        MatChipsModule,
+        MatCheckboxModule,
+        MatCardModule,
+        MatSidenavModule,
+        NgxTiptapModule,
+        TranslateModule.forRoot({
+            defaultLanguage: 'de',
+            loader: {
+                provide: TranslateLoader,
+                useClass: NgxCodingComponentsTranslateLoader
+            }
+        }),
+        CdkConnectedOverlay,
+        CdkOverlayOrigin,
+        MatRadioModule
+    ]
 })
 export class NgxCodingComponentsModule { }

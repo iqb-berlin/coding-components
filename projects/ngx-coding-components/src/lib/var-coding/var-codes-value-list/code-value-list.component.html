@@ -36,7 +36,7 @@
       <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
         <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
         <mat-card-content class="fx-row-start-center">
-          <div *ngFor="let rule of code.rules" class="fx-row-start-center fx-flex-fill"
+          <div *ngFor="let rule of firstRuleSet?.rules" class="fx-row-start-center fx-flex-fill"
                (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
             <div class="fx-flex-fill fx-column-start-stretch">
               <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
@@ -56,7 +56,7 @@
               </mat-form-field>
             </div>
             <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(rule.method)"
-                    *ngIf="code.rules.length > 1"
+                    *ngIf="firstRuleSet && firstRuleSet.rules.length > 1"
                     [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
               <mat-icon>delete</mat-icon>
             </button>

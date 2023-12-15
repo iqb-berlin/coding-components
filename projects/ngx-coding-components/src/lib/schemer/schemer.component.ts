@@ -157,7 +157,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
                   deriveSources: [],
                   processing: [],
                   manualInstruction: '',
-                  codes: []
+                  codes: [],
+                  page: ''
                 });
             }
           }

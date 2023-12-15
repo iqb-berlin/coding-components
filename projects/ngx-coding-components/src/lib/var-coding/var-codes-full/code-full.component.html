@@ -27,7 +27,7 @@
     <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
       <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
       <mat-card-content class="fx-row-start-center fx-flex-fill">
-        <div *ngFor="let rule of code.rules" class="fx-row-start-center fx-flex-fill"
+        <div *ngFor="let rule of firstRuleSet?.rules" class="fx-row-start-center fx-flex-fill"
              (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
           <div class="fx-column-start-stretch fx-flex-fill">
             <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
@@ -57,7 +57,7 @@
             <mat-icon>delete</mat-icon>
           </button>
         </div>
-        <div class="fx-row-start-center">
+        <div class="fx-row-space-between-center">
           <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="getNewRules().length > 0"
                   [matTooltip]="'rule.prompt.add' | translate">
             <mat-icon>add</mat-icon>
@@ -67,8 +67,17 @@
               {{('rule.' + newSource) | translate}}
             </button>
           </mat-menu>
-          <div *ngIf="code.rules.length === 0" [matMenuTriggerFor]="menu"
+          <div *ngIf="firstRuleSet && firstRuleSet.rules.length === 0" [matMenuTriggerFor]="menu"
                class="no-rules">{{'rule.no-rules' | translate}}</div>
+          <div class="fx-column-start-stretch" *ngIf="firstRuleSet && firstRuleSet.rules.length > 1">
+            <label>{{"rule.prompt.operator" | translate }}</label>
+            <mat-radio-group [(ngModel)]="firstRuleSet.ruleOperatorAnd"
+                             (ngModelChange)="setCodeChanged()"
+                             class="fx-row-space-between-center">
+              <mat-radio-button [value]="false">{{"rule.operator.false" | translate }}</mat-radio-button>
+              <mat-radio-button [value]="true">{{"rule.operator.true" | translate }}</mat-radio-button>
+            </mat-radio-group>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>

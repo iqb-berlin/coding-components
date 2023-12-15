@@ -69,7 +69,9 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <button mat-icon-button (click)="smartSchemer()" [matTooltip]="'click.smart-schemer' | translate">
+        <button mat-icon-button (click)="smartSchemer()"
+                [disabled]="varCoding.sourceType !== 'BASE'"
+                [matTooltip]="'click.smart-schemer' | translate">
           <mat-icon>bolt</mat-icon>
         </button>
         <button mat-icon-button (click)="codingAsText()" [matTooltip]="'click.coding-as-text' | translate">
@@ -95,6 +97,8 @@
                     [codes]="varCoding.codes"
                     (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
                     [processing]="varCoding.processing"
+                    [fragmenting]="varCoding.fragmenting"
+                    (fragmentingChanged)="setFragmenting($event)"
                     (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
                     [codeModelParameters]="varCoding.codeModelParameters"
                     (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
@@ -106,6 +110,8 @@
                       (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
                       [processing]="varCoding.processing"
                       (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                      [fragmenting]="varCoding.fragmenting"
+                      (fragmentingChanged)="setFragmenting($event)"
                       [codeModelParameters]="varCoding.codeModelParameters"
                       (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
                       [allVariables]="allVariables">
@@ -116,6 +122,8 @@
                           (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
                           [processing]="varCoding.processing"
                           (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                          [fragmenting]="varCoding.fragmenting"
+                          (fragmentingChanged)="setFragmenting($event)"
                           [codeModelParameters]="varCoding.codeModelParameters"
                           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
                           [allVariables]="allVariables">
@@ -126,6 +134,8 @@
                     (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
                     [processing]="varCoding.processing"
                     (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                    [fragmenting]="varCoding.fragmenting"
+                    (fragmentingChanged)="setFragmenting($event)"
                     [codeModelParameters]="varCoding.codeModelParameters"
                     (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
                     [allVariables]="allVariables">

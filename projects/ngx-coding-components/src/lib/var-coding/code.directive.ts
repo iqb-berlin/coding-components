@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, RuleMethod, RuleMethodParameterCount} from "@iqb/responses";
+import {CodeData, RuleMethod, RuleMethodParameterCount, RuleSet} from "@iqb/responses";
 import {RichTextEditDialogComponent} from "../rich-text-editor/rich-text-edit-dialog.component";
 import {TranslateService} from "@ngx-translate/core";
 import {MatDialog} from "@angular/material/dialog";
@@ -13,6 +13,10 @@ export abstract class CodeDirective {
   @Input() isEmptyCodeExists: Boolean | undefined;
   @Input() isNullCodeExists: Boolean | undefined;
   getParamCountWrapper = CodeDirective.getParamCount;
+  get firstRuleSet(): RuleSet | undefined {
+    if (this.code) return this.code.ruleSets[0];
+    return undefined;
+  }
 
   editTextDialog_manualInstruction(translateService: TranslateService, editTextDialog: MatDialog): void {
     if (this.code) {
@@ -57,7 +61,8 @@ export abstract class CodeDirective {
 
   hasRule(ruleCode: RuleMethod): boolean {
     if (this.allCodes) {
-      const myRule = this.allCodes.find(c => !!c.rules.find(r => r.method === ruleCode));
+      const myRule = this.allCodes.find(
+        c => !!c.ruleSets.find(rs => !!rs.rules.find(r => r.method === ruleCode)));
       return !!myRule;
     }
     return false;

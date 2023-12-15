@@ -4,13 +4,13 @@ import { ToTextFactory, VariableInfo} from "@iqb/responses";
 
 @Component({
   template: `
-    <h1 mat-dialog-title>Kodierschema Syntax prüfen</h1>
+    <h1 mat-dialog-title>Kodierung vorschlagen: Basisvariable '{{varInfo.id}}'</h1>
 
     <mat-dialog-content>
-      <h3>Variable '{{varInfo.id}}'</h3>
       <div *ngFor="let info of ToTextFactory.varInfoAsText(varInfo)">
         <p>{{info}}</p>
       </div>
+      <div [style.font-style]="'italic'">coming soon...</div>
     </mat-dialog-content>
 
     <mat-dialog-actions>
