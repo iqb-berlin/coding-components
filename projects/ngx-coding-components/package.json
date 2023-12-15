@@ -1,6 +1,10 @@
 {
   "name": "@iqb/ngx-coding-components",
-  "version": "0.1.2",
+  "type": "module",
+  "exports": {
+    "./lib/ngx-coding-components.module": "./lib/ngx-coding-components.module.d.ts"
+  },
+  "version": "0.1.5",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "description": "Angular components for coding responses in assessments of IQB.",
