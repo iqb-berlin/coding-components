@@ -75,7 +75,14 @@ import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.co
     SchemerComponent,
     SchemeCheckerComponent,
     SchemerToolbarComponent,
-    VarCodingComponent
+    VarCodingComponent,
+    ConfirmDialogComponent,
+    GenerateCodingDialogComponent,
+    MessageDialogComponent,
+    SelectVariableDialogComponent,
+    ShowCodingDialogComponent,
+    ShowCodingProblemsDialogComponent,
+    SimpleInputDialogComponent
   ],
   imports: [
     CommonModule,
