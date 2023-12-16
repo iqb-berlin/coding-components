@@ -11,12 +11,16 @@ import {VarCodingComponent} from "../var-coding/var-coding.component";
 import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
 import {CodingFactory} from "@iqb/responses/coding-factory";
 
+export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
+
 @Component({
   selector: 'iqb-schemer',
   templateUrl: './schemer.component.html',
   styleUrls: ['./schemer.component.scss'] //,
   // encapsulation: ViewEncapsulation.ShadowDom
 })
+
+
 export class SchemerComponent implements OnDestroy, AfterViewInit {
   @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
@@ -93,7 +97,9 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
       const allBaseVariableIds = this.basicVariables.map(bv => bv.id);
       this._varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
-        this.basicVariables.push(CodingFactory.createCodingVariableFromVarInfo(vi));
+        const newBaseVariable = CodingFactory.createCodingVariableFromVarInfo(vi);
+        this.basicVariables.push(newBaseVariable);
+        if (this._codingScheme) this._codingScheme.variableCodings.push(newBaseVariable);
       })
     }
     this.basicVariables = this.basicVariables.sort((a, b) => {
@@ -159,8 +165,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       let errorMessage = '';
       if (result !== false) {
-        const checkPattern = /^[a-zA-Z0-9_]+$/;
-        if (checkPattern.exec(result)) {
+        if (VARIABLE_NAME_CHECK_PATTERN.exec(result)) {
           const normalisedId = result.toUpperCase();
           const idAlreadyExists = this.allVariableIds.find(v => v.toUpperCase() === normalisedId);
           if (idAlreadyExists) {
@@ -264,16 +269,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false) {
           let errorMessage = '';
-          const checkPattern = /^[a-zA-Z0-9_]+$/;
-          if (checkPattern.exec(result)) {
+          if (VARIABLE_NAME_CHECK_PATTERN.exec(result)) {
             const modifiedVariableIds = this.allVariableIds.filter(v => v !== selectedCoding.id);
             const normalisedId = result.toUpperCase();
             const idAlreadyExists = modifiedVariableIds.find(v => v.toUpperCase() === normalisedId);
-            if (idAlreadyExists) {
-              errorMessage = 'data-error.variable-id.double';
-            } else {
-              selectedCoding.id = result;
-            }
+            if (idAlreadyExists) errorMessage = 'data-error.variable-id.double';
           } else {
             errorMessage = 'data-error.variable-id.character';
           }
@@ -287,6 +287,16 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
               }
             });
           } else {
+            const oldName = selectedCoding.id;
+            selectedCoding.id = result;
+            if (this._codingScheme) {
+              this._codingScheme.variableCodings.filter(vc => vc.sourceType !== 'BASE').forEach(vc => {
+                if (vc.deriveSources.indexOf(oldName) >= 0) {
+                  vc.deriveSources = vc.deriveSources.filter(s => s !== oldName);
+                  vc.deriveSources.push(selectedCoding.id);
+                }
+              })
+            }
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this._codingScheme);
           }
