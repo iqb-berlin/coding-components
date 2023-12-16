@@ -32,7 +32,7 @@
               [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
         <mat-icon>add</mat-icon>
       </button>
-      <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
+      <button mat-button [disabled]="(selectedCoding$ | async) === null"
               (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
         <mat-icon>delete</mat-icon>
       </button>

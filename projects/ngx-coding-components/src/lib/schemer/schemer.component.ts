@@ -9,6 +9,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {TranslateService} from "@ngx-translate/core";
 import {VarCodingComponent} from "../var-coding/var-coding.component";
 import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
+import {CodingFactory} from "@iqb/responses/coding-factory";
 
 @Component({
   selector: 'iqb-schemer',
@@ -84,14 +85,24 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   }
   updateVariableLists() {
     this.basicVariables = this._codingScheme && this._codingScheme.variableCodings ?
-      this._codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
-        .sort((a, b) => {
-          const idA = a.id.toUpperCase();
-          const idB = b.id.toUpperCase();
-          if (idA < idB) return -1;
-          if (idA > idB) return 1;
-          return 0;
-        }) : [];
+      this._codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE')) : [];
+    if (this._varList && this._varList.length > 0) {
+      const varListIds = this._varList.map(v => v.id);
+      this.basicVariables = this.basicVariables.filter(bv => {
+        return varListIds.indexOf(bv.id) >= 0 || !SchemerComponent.isEmptyCoding(bv)
+      });
+      const allBaseVariableIds = this.basicVariables.map(bv => bv.id);
+      this._varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
+        this.basicVariables.push(CodingFactory.createCodingVariableFromVarInfo(vi));
+      })
+    }
+    this.basicVariables = this.basicVariables.sort((a, b) => {
+      const idA = a.id.toUpperCase();
+      const idB = b.id.toUpperCase();
+      if (idA < idB) return -1;
+      if (idA > idB) return 1;
+      return 0;
+    })
     this.derivedVariables = this._codingScheme && this._codingScheme.variableCodings ?
       this._codingScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
         .sort((a, b) => {
@@ -124,6 +135,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   selectVarScheme(coding: VariableCodingData | null = null) {
     this.selectedCoding$.next(coding);
     this.selectedVarInfo$.next(this._varList.find(vi => vi.id === coding?.id) || null)
+  }
+
+  private static isEmptyCoding(coding: VariableCodingData): boolean {
+    if (coding.label && coding.label !== coding.id) return false;
+    if (coding.processing.length > 0 || coding.fragmenting || coding.codes.length > 0) return false;
+    return !(coding.manualInstruction.length > 0 || coding.codeModel !== 'NONE');
   }
 
   addVarScheme() {
@@ -184,12 +201,27 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   deleteVarScheme() {
     const selectedCoding = this.selectedCoding$.getValue();
-    if (selectedCoding && (selectedCoding.sourceType !== 'BASE' || (this.codingStatus[selectedCoding.id] && this.codingStatus[selectedCoding.id] === 'INVALID_SOURCE'))) {
+    if (selectedCoding) {
+      let warningMessageText;
+      if (selectedCoding.sourceType !== 'BASE') {
+        warningMessageText = `Die Variable "${selectedCoding.id}" wird gelöscht. Fortsetzen?`;
+      } else {
+        const varListIds = this._varList.map(v => v.id);
+        if (varListIds.indexOf(selectedCoding.id) < 0) {
+          if (SchemerComponent.isEmptyCoding(selectedCoding)) {
+            warningMessageText = 'Die verschollene Basisvariable wird gelöscht. Fortsetzen?';
+          } else {
+            warningMessageText = 'Achtung: Die verschollene Basisvariable wird einschließlich aller Kodierungsinformationen gelöscht. Fortsetzen?';
+          }
+        } else {
+          warningMessageText = 'Alle Kodierinformationen der Basisvariable werden gelöscht. Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist. Fortsetzen?';
+        }
+      }
       const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: <ConfirmDialogData>{
-          title: 'Löschen Variable',
-          content: `Die Variable "${selectedCoding.id}" wird gelöscht. Fortsetzen?`,
+          title: `Löschen Variable '${selectedCoding.id}'`,
+          content: warningMessageText,
           confirmButtonLabel: 'Löschen',
           showCancel: true
         }
@@ -207,7 +239,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         width: '400px',
         data: <MessageDialogData>{
           title: 'Löschen Variable',
-          content: 'Bitte erst eine abgeleitete oder verwaiste Variable auswählen!',
+          content: 'Bitte erst eine abgeleitete Variable oder eine BasisVariable verwaiste  auswählen!',
           type: MessageType.error
         }
       });

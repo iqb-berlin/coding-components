@@ -20,6 +20,15 @@
     "codes": []
   },
   {
+    "id": "Schnecke",
+    "label": "Schnecke",
+    "sourceType": "BASE",
+    "deriveSources": [],
+    "processing": [],
+    "manualInstruction": "ss",
+    "codes": []
+  },
+  {
     "id": "Susi",
     "label": "",
     "sourceType": "BASE",
