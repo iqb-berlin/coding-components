@@ -76,7 +76,14 @@ import {MatRadioModule} from "@angular/material/radio";
     SchemerComponent,
     SchemeCheckerComponent,
     SchemerToolbarComponent,
-    VarCodingComponent
+    VarCodingComponent,
+    ConfirmDialogComponent,
+    GenerateCodingDialogComponent,
+    MessageDialogComponent,
+    SelectVariableDialogComponent,
+    ShowCodingDialogComponent,
+    ShowCodingProblemsDialogComponent,
+    SimpleInputDialogComponent
   ],
     imports: [
         CommonModule,
