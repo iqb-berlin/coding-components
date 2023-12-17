@@ -3,11 +3,24 @@
     "id": "Otto",
     "type": "string",
     "format": "",
-    "multiple": false,
+    "multiple": true,
     "nullable": false,
-    "values": [],
+    "values": [
+      {
+        "value": "Apfel",
+        "label": ""
+      },
+      {
+        "value": "Banene",
+        "label": ""
+      },
+      {
+        "value": "Birne",
+        "label": ""
+      }
+    ],
     "valuePositionLabels": [],
-    "valuesComplete": false,
+    "valuesComplete": true,
     "page": ""
   },
   {

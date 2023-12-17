@@ -113,14 +113,21 @@ export class VarCodingComponent implements OnInit, OnDestroy {
         width: '1000px',
         data: this.varInfo
       });
-      dialogRef.afterClosed().subscribe();
+      dialogRef.afterClosed().subscribe(dialogResult => {
+        if (typeof dialogResult !== 'undefined') {
+          if (dialogResult !== false && this.varCoding) {
+            const newCoding = dialogResult as VariableCodingData;
+            this.varCoding.manualInstruction = newCoding.manualInstruction;
+            this.varCoding.codeModel = newCoding.codeModel;
+            this.varCoding.processing = newCoding.processing;
+            this.varCoding.fragmenting = newCoding.fragmenting;
+            this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+            this.varCoding.codes = newCoding.codes;
+            this.varCodingChanged.emit(this.varCoding);
+          }
+        }
+      });
     }
-    /**
-    if (this.varCoding && this.varInfo) {
-      this.varCoding.codeModel = VarCodingComponent.guessCodeModel(this.varInfo);
-      this.varCoding.codes = VarCodingComponent.guessCodes(this.varInfo);
-    }
-    **/
   }
 
   static guessCodeModel(varInfo: VariableInfo): CodeModelType {
