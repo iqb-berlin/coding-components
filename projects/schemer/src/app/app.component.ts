@@ -109,7 +109,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   setNewCodingScheme(codings: CodingScheme | null) {
-    console.log(codings);
     if (codings) this.codings = codings;
   }
 

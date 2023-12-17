@@ -116,7 +116,7 @@
                       (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
                       [allVariables]="allVariables">
     </var-codes-value-list>
-    <var-codes-value-list *ngSwitchCase="'CHOICE'"
+    <var-codes-choice *ngSwitchCase="'CHOICE'"
                           class="fx-flex-row-100" [style.margin-top.px]="10"
                           [codes]="varCoding.codes"
                           (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
@@ -127,7 +127,7 @@
                           [codeModelParameters]="varCoding.codeModelParameters"
                           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
                           [allVariables]="allVariables">
-    </var-codes-value-list>
+    </var-codes-choice>
     <var-codes-number *ngSwitchCase="'NUMBER'"
                           class="fx-flex-row-100" [style.margin-top.px]="10"
                           [codes]="varCoding.codes"

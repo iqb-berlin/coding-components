@@ -1,0 +1,23 @@
+<div class="fx-column-start-stretch">
+  <div class="fx-row-start-end">
+    <div class="fx-flex-fill">
+      <h3>{{'code.header' | translate}}</h3>
+    </div>
+  </div>
+  <div *ngIf="codes" class="fx-column-start-stretch">
+    <div *ngFor="let cd of codes" class="fx-row-start-stretch">
+      <code-choice [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
+                       [elseCodeExists]="elseCodeExists" [isEmptyCodeExists]="isEmptyCodeExists"
+                       [allCodes]="codes"
+                       (codeChanged)="codesChanged.emit(codes)"></code-choice>
+      <button mat-icon-button (click)="deleteCode(cd.id); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+    <div class="fx-row-start-center" [style.margin-top.px]="6">
+      <button mat-raised-button (click)="addCodeChoice()" *ngIf="codes.length < 2">
+        <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
+      </button>
+    </div>
+  </div>
+</div>

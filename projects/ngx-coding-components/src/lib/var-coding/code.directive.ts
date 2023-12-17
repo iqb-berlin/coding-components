@@ -47,6 +47,7 @@ export abstract class CodeDirective {
 
   uniqueNumberValidator(codeToValidate: number): boolean {
     const allCodeIds = this.allCodes ? this.allCodes.map(c => c.id) : [];
+    console.log(allCodeIds);
     const newArray: number[] = [];
     const notUnique: number[] = [];
     allCodeIds.forEach(u => {

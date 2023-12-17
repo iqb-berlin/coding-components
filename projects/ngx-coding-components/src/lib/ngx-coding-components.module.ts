@@ -45,6 +45,8 @@ import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
 import {NgxCodingComponentsTranslateLoader} from "./translations/ngx-coding-components.translate-loader";
 import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.component";
 import {MatRadioModule} from "@angular/material/radio";
+import {CodeChoiceComponent} from "./var-coding/var-codes-choice/code-choice.component";
+import {VarCodesChoiceComponent} from "./var-coding/var-codes-choice/var-codes-choice.component";
 
 @NgModule({
   declarations: [
@@ -61,6 +63,8 @@ import {MatRadioModule} from "@angular/material/radio";
     SimpleInputDialogComponent,
     ShowCodingResultsComponent,
     VarCodesFullComponent,
+    CodeChoiceComponent,
+    VarCodesChoiceComponent,
     VarCodesManualComponent,
     CodeManualComponent,
     ShowCodingProblemsDialogComponent,
