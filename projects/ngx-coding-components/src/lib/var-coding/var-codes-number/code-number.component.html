@@ -10,7 +10,6 @@
                type="number">
       </mat-form-field>
       <mat-form-field
-        *ngIf="maxScore > 1"
         [class]="code.score > 0 ? 'correct' : 'not-correct'"
         [style.width.px]="100">
         <mat-label>{{'code.score' | translate}}</mat-label>

@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component} from '@angular/core';
 import {CodingRule, RuleMethod} from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
@@ -11,15 +11,6 @@ import {exclusiveNumericRules, singletonRules} from "../var-codes.directive";
   styleUrls: ['./code-number.component.scss']
 })
 export class CodeNumberComponent extends CodeDirective {
-  _maxScore: number = 1;
-  @Input()
-  set maxScore(value: string) {
-    const newValue = Number.parseInt(value, 10);
-    this._maxScore = Number.isNaN(newValue) ? 1 : newValue;
-  }
-  get maxScore(): number {
-    return this._maxScore;
-  }
   showCodeButtonsOf = '';
 
   constructor(

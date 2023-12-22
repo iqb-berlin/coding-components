@@ -3,22 +3,12 @@
     <div class="fx-flex-fill">
       <h3>{{'code.header' | translate}}</h3>
     </div>
-    <div [style.padding-bottom.px]="4">
-      <mat-form-field [style.width.px]="150">
-        <mat-label>{{'code-model-parameter.max-score' | translate}}</mat-label>
-        <input matInput
-               type="number"
-               required
-               [ngModel]="codeModelParameters ? (codeModelParameters[0] || 1) : 1"
-               (ngModelChange)="setCodingModelParameter(0, $event)">
-      </mat-form-field>
-    </div>
   </div>
   <div *ngIf="codes" class="fx-column-start-stretch">
     <div *ngFor="let cd of codes" class="fx-row-start-stretch">
       <code-number [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
                    [elseCodeExists]="elseCodeExists" [isEmptyCodeExists]="isEmptyCodeExists" [isNullCodeExists]="isNullCodeExists"
-                   [allCodes]="codes" [maxScore]="codeModelParameters ? codeModelParameters[0] : '1'"
+                   [allCodes]="codes"
                    (codeChanged)="codesChanged.emit(codes)"></code-number>
       <button mat-icon-button (click)="deleteCode(cd.id); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
