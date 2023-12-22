@@ -88,27 +88,43 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     }
   }
   updateVariableLists() {
-    this.basicVariables = this._codingScheme && this._codingScheme.variableCodings ?
-      this._codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE')) : [];
-    if (this._varList && this._varList.length > 0) {
+    let hasChanged = false;
+    if (this._varList && this._varList.length > 0 && this._codingScheme && this._codingScheme.variableCodings) {
+      // remove orphan and empty base variables
       const varListIds = this._varList.map(v => v.id);
-      this.basicVariables = this.basicVariables.filter(bv => {
-        return varListIds.indexOf(bv.id) >= 0 || !SchemerComponent.isEmptyCoding(bv)
-      });
-      const allBaseVariableIds = this.basicVariables.map(bv => bv.id);
+      const varCodingsToDelete = this._codingScheme.variableCodings.filter(bv => {
+        return bv.sourceType !== 'BASE' || varListIds.indexOf(bv.id) >= 0 || !SchemerComponent.isEmptyCoding(bv)
+      }).map(bv => bv.id);
+      if (varCodingsToDelete.length > 0) {
+        hasChanged = true;
+        varCodingsToDelete.forEach(vc => {
+          if (this._codingScheme) {
+            const varCodingIndexToDelete = this._codingScheme.variableCodings.findIndex(vcd => {
+              return vcd.id === vc;
+            });
+            if (varCodingIndexToDelete >= 0) this._codingScheme.variableCodings.splice(varCodingIndexToDelete, 1);
+          }
+        })
+      }
+      // add new base variables
+      const allBaseVariableIds = this._codingScheme.variableCodings
+        .filter(v => v.sourceType === 'BASE').map(bv => bv.id);
       this._varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
         const newBaseVariable = CodingFactory.createCodingVariableFromVarInfo(vi);
-        this.basicVariables.push(newBaseVariable);
         if (this._codingScheme) this._codingScheme.variableCodings.push(newBaseVariable);
+        hasChanged = true;
       })
     }
-    this.basicVariables = this.basicVariables.sort((a, b) => {
-      const idA = a.id.toUpperCase();
-      const idB = b.id.toUpperCase();
-      if (idA < idB) return -1;
-      if (idA > idB) return 1;
-      return 0;
-    })
+
+    this.basicVariables = this._codingScheme && this._codingScheme.variableCodings ?
+      this._codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
+        .sort((a, b) => {
+          const idA = a.id.toUpperCase();
+          const idB = b.id.toUpperCase();
+          if (idA < idB) return -1;
+          if (idA > idB) return 1;
+          return 0;
+        }) : [];
     this.derivedVariables = this._codingScheme && this._codingScheme.variableCodings ?
       this._codingScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
         .sort((a, b) => {
@@ -136,6 +152,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         }
       });
     }
+    if (hasChanged) this.codingSchemeChanged.emit(this._codingScheme);
   }
 
   selectVarScheme(coding: VariableCodingData | null = null) {
@@ -172,17 +189,19 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             errorMessage = 'data-error.variable-id.double';
           } else {
             if (this._codingScheme) {
-                this._codingScheme.variableCodings.push(<VariableCodingData>{
-                  id: result,
-                  label: result,
-                  sourceType: 'SUM_SCORE',
-                  deriveSources: [],
-                  processing: [],
-                  codeModel: 'NUMBER',
-                  manualInstruction: '',
-                  codes: [],
-                  page: ''
-                });
+              const newVarScheme = <VariableCodingData>{
+                id: result,
+                label: result,
+                sourceType: 'SUM_SCORE',
+                deriveSources: [],
+                processing: [],
+                codeModel: 'NUMBER',
+                manualInstruction: '',
+                codes: [],
+                page: ''
+              }
+              this._codingScheme.variableCodings.push(newVarScheme);
+              this.selectVarScheme(newVarScheme);
             }
           }
         } else {

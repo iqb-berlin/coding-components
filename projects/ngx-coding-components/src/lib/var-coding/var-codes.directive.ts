@@ -81,12 +81,9 @@ export abstract class VarCodesDirective {
 
   deleteCode(codeToDeleteId: number) {
     if (this.codes) {
-      let codeTodeleteIndex = -1;
-      this.codes.forEach((c, i) => {
-        if (c.id === codeToDeleteId) codeTodeleteIndex = i
-      });
-      if (codeTodeleteIndex >= 0) {
-        this.codes.splice(codeTodeleteIndex, 1);
+      const codeToDeleteIndex = this.codes.findIndex(c => c.id === codeToDeleteId);
+      if (codeToDeleteIndex >= 0) {
+        this.codes.splice(codeToDeleteIndex, 1);
         this.codesChanged.emit(this.codes);
       }
     }
