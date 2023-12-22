@@ -236,7 +236,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           if (SchemerComponent.isEmptyCoding(selectedCoding)) {
             warningMessageText = 'Die verschollene Basisvariable wird gelöscht. Fortsetzen?';
           } else {
-            warningMessageText = 'Achtung: Die verschollene Basisvariable wird einschließlich aller Kodierungsinformationen gelöscht. Fortsetzen?';
+            warningMessageText = 'Achtung: Die verschollene Basisvariable wird einschließlich aller Kodierinformationen gelöscht. Fortsetzen?';
           }
         } else {
           warningMessageText = 'Alle Kodierinformationen der Basisvariable werden gelöscht. Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist. Fortsetzen?';
