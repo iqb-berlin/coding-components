@@ -117,10 +117,9 @@ export class VarCodingComponent implements OnInit, OnDestroy {
         if (typeof dialogResult !== 'undefined') {
           if (dialogResult !== false && this.varCoding) {
             const newCoding = dialogResult as VariableCodingData;
-            this.varCoding.manualInstruction = newCoding.manualInstruction;
-            this.varCoding.codeModel = newCoding.codeModel;
             this.varCoding.processing = newCoding.processing;
             this.varCoding.fragmenting = newCoding.fragmenting;
+            this.varCoding.codeModel = newCoding.codeModel;
             this.varCoding.codeModelParameters = newCoding.codeModelParameters;
             this.varCoding.codes = newCoding.codes;
             this.varCodingChanged.emit(this.varCoding);
