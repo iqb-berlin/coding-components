@@ -7,7 +7,7 @@ import {VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
 import { CodeData,  CodeModelType} from "@iqb/responses/coding-interfaces";
-import {GenerateCodingDialogComponent} from "../dialogs/generate-coding-dialog.component";
+import {GenerateCodingDialogComponent, GenerateCodingDialogData} from "../dialogs/generate-coding-dialog.component";
 
 @Component({
   selector: 'var-coding',
@@ -108,25 +108,26 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   }
 
   smartSchemer() {
-    if (this.varInfo) {
-      const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
-        width: '1000px',
-        data: this.varInfo
-      });
-      dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult !== 'undefined') {
-          if (dialogResult !== false && this.varCoding) {
-            const newCoding = dialogResult as VariableCodingData;
-            this.varCoding.processing = newCoding.processing;
-            this.varCoding.fragmenting = newCoding.fragmenting;
-            this.varCoding.codeModel = newCoding.codeModel;
-            this.varCoding.codeModelParameters = newCoding.codeModelParameters;
-            this.varCoding.codes = newCoding.codes;
-            this.varCodingChanged.emit(this.varCoding);
-          }
+    const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
+      width: '1000px',
+      data: <GenerateCodingDialogData>{
+        varInfo: this.varInfo,
+        varCoding: this.varCoding
+      }
+    });
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (typeof dialogResult !== 'undefined') {
+        if (dialogResult !== false && this.varCoding) {
+          const newCoding = dialogResult as VariableCodingData;
+          this.varCoding.processing = newCoding.processing;
+          this.varCoding.fragmenting = newCoding.fragmenting;
+          this.varCoding.codeModel = newCoding.codeModel;
+          this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+          this.varCoding.codes = newCoding.codes;
+          this.varCodingChanged.emit(this.varCoding);
         }
-      });
-    }
+      }
+    });
   }
 
   static guessCodeModel(varInfo: VariableInfo): CodeModelType {

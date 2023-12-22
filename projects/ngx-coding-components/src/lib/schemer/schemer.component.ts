@@ -175,9 +175,10 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
                 this._codingScheme.variableCodings.push(<VariableCodingData>{
                   id: result,
                   label: result,
-                  sourceType: 'SUM_CODE',
+                  sourceType: 'SUM_SCORE',
                   deriveSources: [],
                   processing: [],
+                  codeModel: 'NUMBER',
                   manualInstruction: '',
                   codes: [],
                   page: ''
