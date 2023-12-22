@@ -88,15 +88,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     }
   }
   updateVariableLists() {
-    let hasChanged = false;
     if (this._varList && this._varList.length > 0 && this._codingScheme && this._codingScheme.variableCodings) {
       // remove orphan and empty base variables
       const varListIds = this._varList.map(v => v.id);
       const varCodingsToDelete = this._codingScheme.variableCodings.filter(bv => {
-        return bv.sourceType !== 'BASE' || varListIds.indexOf(bv.id) >= 0 || !SchemerComponent.isEmptyCoding(bv)
+        return bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv)
       }).map(bv => bv.id);
       if (varCodingsToDelete.length > 0) {
-        hasChanged = true;
         varCodingsToDelete.forEach(vc => {
           if (this._codingScheme) {
             const varCodingIndexToDelete = this._codingScheme.variableCodings.findIndex(vcd => {
@@ -112,7 +110,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this._varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
         const newBaseVariable = CodingFactory.createCodingVariableFromVarInfo(vi);
         if (this._codingScheme) this._codingScheme.variableCodings.push(newBaseVariable);
-        hasChanged = true;
       })
     }
 
@@ -152,7 +149,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         }
       });
     }
-    if (hasChanged) this.codingSchemeChanged.emit(this._codingScheme);
   }
 
   selectVarScheme(coding: VariableCodingData | null = null) {

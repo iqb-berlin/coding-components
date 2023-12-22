@@ -8,7 +8,7 @@ import { CodingSchemeProblem} from "@iqb/responses";
 
     <mat-dialog-content>
       <div *ngFor="let v of allVariables" class="fx-column-start-stretch">
-        <h3>Variable '{{v}}'</h3>
+        <h2>{{v}}</h2>
         <div class="fx-row-start-center code-row" *ngFor="let p of codingProblemsGrouped[v]">
           <div [class]="(p.breaking ? 'problem-error' : 'problem-warning') + ' fx-flex-row-5'" [style.text-align]="'center'">&nbsp;</div>
           <div class="fx-flex-fill">{{'coding-problem.' + p.type | translate}}</div>
@@ -24,6 +24,7 @@ import { CodingSchemeProblem} from "@iqb/responses";
   `,
   styles: [
     '.code-row:nth-child(even) {background-color: #f1f1f1;}',
+    '.code-row {margin-left: 12px}',
     '.problem-warning {background-color: #ffcc00; margin-right: 5px}',
     '.problem-error {background-color: #ff3300; margin-right: 5px}'
   ]})
