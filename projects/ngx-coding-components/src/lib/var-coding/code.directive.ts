@@ -45,16 +45,18 @@ export abstract class CodeDirective {
     return RuleMethodParameterCount[ruleMethod];
   }
 
-  uniqueNumberValidator(codeToValidate: number): boolean {
+  uniqueNumberValidator(codeToValidate: number | null): boolean {
+    if (codeToValidate === null) return false;
     const allCodeIds = this.allCodes ? this.allCodes.map(c => c.id) : [];
-    console.log(allCodeIds);
     const newArray: number[] = [];
     const notUnique: number[] = [];
     allCodeIds.forEach(u => {
-      if (newArray.indexOf(u) >= 0) {
-        notUnique.push(u);
-      } else {
-        newArray.push(u);
+      if (u !== null) {
+        if (newArray.indexOf(u) >= 0) {
+          notUnique.push(u);
+        } else {
+          newArray.push(u);
+        }
       }
     });
     return notUnique.indexOf(codeToValidate) < 0;
@@ -71,5 +73,19 @@ export abstract class CodeDirective {
 
   setCodeChanged() {
     this.codeChanged.emit(this.code);
+  }
+
+  setCodeInvalid() {
+    if (this.code) {
+      this.code.id = null;
+      this.codeChanged.emit(this.code);
+    }
+  }
+
+  setCodeValid() {
+    if (this.code) {
+      this.code.id = 1;
+      this.codeChanged.emit(this.code);
+    }
   }
 }

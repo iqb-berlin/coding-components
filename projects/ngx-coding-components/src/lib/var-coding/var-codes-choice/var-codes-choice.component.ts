@@ -21,13 +21,8 @@ export class VarCodesChoiceComponent extends VarCodesDirective implements OnInit
 
   addCodeChoice(): CodeData | null {
     if (this.codes) {
-      let newCodeId = 1;
-      if (this.codes.length === 1) {
-        newCodeId = this.codes[0].id + 1;
-      } else if (this.codes.length > 1) {
-        const myCodeIds = this.codes.map(c => c.id);
-        newCodeId = Math.max(...myCodeIds) + 1;
-      }
+      const myCodeIds = this.codes.map(c => c.id || 0);
+      const newCodeId = myCodeIds.length > 0 ? Math.max(...myCodeIds) + 1 : 1;
       let newCode: CodeData | undefined = undefined;
       const trueCodeExists = !!this.codes.find(c => c.score > 0);
       if (!trueCodeExists) {

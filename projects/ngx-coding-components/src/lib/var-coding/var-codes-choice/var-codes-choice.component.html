@@ -5,12 +5,12 @@
     </div>
   </div>
   <div *ngIf="codes" class="fx-column-start-stretch">
-    <div *ngFor="let cd of codes" class="fx-row-start-stretch">
+    <div *ngFor="let cd of codes; index as codeIndex" class="fx-row-start-stretch">
       <code-choice [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
                        [elseCodeExists]="elseCodeExists" [isEmptyCodeExists]="isEmptyCodeExists"
                        [allCodes]="codes"
                        (codeChanged)="codesChanged.emit(codes)"></code-choice>
-      <button mat-icon-button (click)="deleteCode(cd.id); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+      <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
     </div>

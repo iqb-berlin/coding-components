@@ -13,8 +13,8 @@
         <mat-form-field>
           <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
           <mat-select [(value)]="varCoding.sourceType" (selectionChange)="lastChangeFrom$.next('derive-method')">
-            <mat-option [value]="'COPY_FIRST_VALUE'">
-              {{'derive-method.COPY_FIRST_VALUE' | translate}}
+            <mat-option [value]="'COPY_VALUE'">
+              {{'derive-method.COPY_VALUE' | translate}}
             </mat-option>
             <mat-option [value]="'CONCAT_CODE'">
               {{'derive-method.CONCAT_CODE' | translate}}

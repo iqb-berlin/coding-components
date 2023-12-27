@@ -45,13 +45,8 @@ export abstract class VarCodesDirective {
 
   addCode(emitChangeEvent = true): CodeData | null {
     if (this.codes) {
-      let newCodeId = 1;
-      if (this.codes.length === 1) {
-        newCodeId = this.codes[0].id + 1;
-      } else if (this.codes.length > 1) {
-        const myCodeIds = this.codes.map(c => c.id);
-        newCodeId = Math.max(...myCodeIds) + 1;
-      }
+      const myCodeIds = this.codes.map(c => c.id || 0);
+      const newCodeId = myCodeIds.length > 0 ? Math.max(...myCodeIds) + 1 : 1;
       const newCode: CodeData = {
         id: newCodeId,
         label: '',
@@ -79,13 +74,11 @@ export abstract class VarCodesDirective {
     return false;
   }
 
-  deleteCode(codeToDeleteId: number) {
-    if (this.codes) {
-      const codeToDeleteIndex = this.codes.findIndex(c => c.id === codeToDeleteId);
-      if (codeToDeleteIndex >= 0) {
-        this.codes.splice(codeToDeleteIndex, 1);
-        this.codesChanged.emit(this.codes);
-      }
+  deleteCode(codeToDeleteIndex: number) {
+    if (this.codes && codeToDeleteIndex >= 0 && this.codes.length > codeToDeleteIndex) {
+      // const codeToDeleteIndex = this.codes.findIndex(c => c.id === codeToDeleteId);
+      this.codes.splice(codeToDeleteIndex, 1);
+      this.codesChanged.emit(this.codes);
     }
   }
 
