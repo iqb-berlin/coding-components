@@ -1,28 +1,5 @@
 <div *ngIf="code" class="fx-column-start-stretch">
-  <div class="code-main-data fx-row-start-center">
-    <mat-form-field [class]="uniqueNumberValidator(code.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
-      <mat-label>{{'code.id' | translate}}</mat-label>
-      <input matInput
-             required
-             [(ngModel)]="code.id"
-             (ngModelChange)="setCodeChanged()"
-             type="number">
-    </mat-form-field>
-    <mat-form-field [class]="code.score > 0 ? 'correct' : 'not-correct'" [style.width.px]="100">
-      <mat-label>{{'code.score' | translate}}</mat-label>
-      <input matInput
-             type="number"
-             required
-             [(ngModel)]="code.score"
-             (ngModelChange)="setCodeChanged()">
-    </mat-form-field>
-    <mat-form-field class="fx-flex-fill">
-      <input matInput
-             [placeholder]="'code.description' | translate"
-             [(ngModel)]="code.label"
-             (ngModelChange)="setCodeChanged()">
-    </mat-form-field>
-  </div>
+  <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
   <div class="fx-row-start-start">
     <ng-container *ngIf="firstRuleSet && firstRuleSet.rules[0] && firstRuleSet.rules[0].method === 'IS_EMPTY'">
       <div class="has-rules-warning">

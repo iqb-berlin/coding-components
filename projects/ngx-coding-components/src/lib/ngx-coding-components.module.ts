@@ -47,6 +47,7 @@ import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.co
 import {MatRadioModule} from "@angular/material/radio";
 import {CodeChoiceComponent} from "./var-coding/var-codes-choice/code-choice.component";
 import {VarCodesChoiceComponent} from "./var-coding/var-codes-choice/var-codes-choice.component";
+import {CodeHeaderComponent} from "./var-coding/code-header.component";
 
 @NgModule({
   declarations: [
@@ -65,6 +66,7 @@ import {VarCodesChoiceComponent} from "./var-coding/var-codes-choice/var-codes-c
     VarCodesFullComponent,
     CodeChoiceComponent,
     VarCodesChoiceComponent,
+    CodeHeaderComponent,
     VarCodesManualComponent,
     CodeManualComponent,
     ShowCodingProblemsDialogComponent,

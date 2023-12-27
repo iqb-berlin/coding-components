@@ -1,29 +1,6 @@
 <div *ngIf="code" class="fx-row-start-stretch fx-gap-5">
   <div class="fx-column-start-stretch" [style.width.%]="50">
-    <div class="code-main-data fx-row-start-center">
-      <mat-form-field [class]="uniqueNumberValidator(code.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
-        <mat-label>{{'code.id' | translate}}</mat-label>
-        <input matInput
-               required
-               [(ngModel)]="code.id"
-               (ngModelChange)="setCodeChanged()"
-               type="number">
-      </mat-form-field>
-      <mat-form-field [class]="code.score > 0 ? 'correct' : 'not-correct'" [style.width.px]="100">
-        <mat-label>{{'code.score' | translate}}</mat-label>
-        <input matInput
-               type="number"
-               required
-               [(ngModel)]="code.score"
-               (ngModelChange)="setCodeChanged()">
-      </mat-form-field>
-      <mat-form-field class="fx-flex-fill">
-        <input matInput
-               [placeholder]="'code.description' | translate"
-               [(ngModel)]="code.label"
-               (ngModelChange)="setCodeChanged()">
-      </mat-form-field>
-    </div>
+    <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
     <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
       <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
       <mat-card-content class="fx-row-start-center fx-flex-fill">
