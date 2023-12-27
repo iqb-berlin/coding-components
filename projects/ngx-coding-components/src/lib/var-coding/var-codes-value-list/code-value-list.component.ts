@@ -1,7 +1,5 @@
 import {Component, Input} from '@angular/core';
 import {CodingRule, RuleMethod} from '@iqb/responses';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import {CodeDirective} from "../code.directive";
 
@@ -23,15 +21,9 @@ export class CodeValueListComponent extends CodeDirective {
   showCodeButtonsOf = '';
 
   constructor(
-    private sanitizer: DomSanitizer,
-    public translateService: TranslateService,
-    public editTextDialog: MatDialog
+    public translateService: TranslateService
   ) {
     super();
-  }
-
-  getSanitizedText(text: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(text);
   }
 
   addRule() {

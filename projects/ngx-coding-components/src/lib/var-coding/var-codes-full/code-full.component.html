@@ -59,15 +59,6 @@
       </mat-card-content>
     </mat-card>
   </div>
-  <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
-    <mat-card-subtitle class="fx-row-space-between-center">
-      {{'manual-instruction.prompt-code' | translate}}
-      <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
-        <mat-icon>edit</mat-icon>
-      </button>
-    </mat-card-subtitle>
-    <mat-card-content class="instructions">
-      <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
-    </mat-card-content>
-  </mat-card>
+  <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
+                    class="fx-flex-fill" [style.max-height.px]="200"></code-instruction>
 </div>

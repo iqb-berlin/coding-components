@@ -44,15 +44,6 @@
       </mat-card>
     </div>
   </div>
-  <mat-card class="" [style.padding-left.px]="4" *ngIf="!elseCodeExists" [style.width.%]="50">
-    <mat-card-subtitle class="fx-row-space-between-center">
-      {{'manual-instruction.prompt-code' | translate}}
-      <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
-        <mat-icon>edit</mat-icon>
-      </button>
-    </mat-card-subtitle>
-    <mat-card-content class="instructions">
-      <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
-    </mat-card-content>
-  </mat-card>
+  <code-instruction *ngIf="!elseCodeExists" [style.width.%]="50"
+                    [code]="code" (codeDataChanged)="setCodeChanged()"></code-instruction>
 </div>
