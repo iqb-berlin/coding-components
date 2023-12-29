@@ -1,6 +1,6 @@
 <div *ngIf="code" class="fx-column-start-stretch">
   <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
-  <div class="fx-row-start-start">
+  <div class="fx-row-start-stretch fx-gap-10">
     <ng-container *ngIf="firstRuleSet && firstRuleSet.rules[0] && firstRuleSet.rules[0].method === 'IS_EMPTY'">
       <div class="has-rules-warning">
         <p *ngIf="code.manualInstruction"
@@ -20,8 +20,8 @@
       <div class="has-rules-warning">
         <p *ngIf="firstRuleSet.rules.length > 0" matTooltip="Dieser Code enthält Regeln für das automatische Kodieren.">!!</p>
       </div>
-      <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
-                        class="fx-flex-fill" [style.max-height.px]="200"></code-instruction>
+      <code-instruction [code]="code" [style.flex]="'1 1 auto'" [style.max-height.px]="200"
+                        (codeDataChanged)="setCodeChanged()"></code-instruction>
     </ng-container>
   </div>
 </div>

@@ -1,4 +1,4 @@
-<div *ngIf="code" class="fx-row-start-stretch fx-gap-5">
+<div *ngIf="code" class="fx-row-start-stretch fx-gap-5" [style.max-height.px]="300">
   <div class="fx-column-start-stretch" [style.width.%]="50">
     <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
     <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
@@ -59,6 +59,5 @@
       </mat-card-content>
     </mat-card>
   </div>
-  <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
-                    class="fx-flex-fill" [style.max-height.px]="200"></code-instruction>
+  <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [style.flex]="'1 1 auto'"></code-instruction>
 </div>

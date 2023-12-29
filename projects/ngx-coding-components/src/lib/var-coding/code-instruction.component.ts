@@ -8,14 +8,14 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 @Component({
   selector: 'code-instruction',
   template: `
-    <mat-card *ngIf="code" [style.padding-left.px]="4">
-      <mat-card-subtitle class="fx-row-space-between-center">
+    <mat-card *ngIf="code" [style.padding-left.px]="4" [style.height.%]="100">
+      <mat-card-subtitle class="fx-row-space-between-stretch">
         {{'manual-instruction.prompt-code' | translate}}
         <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
           <mat-icon>edit</mat-icon>
         </button>
       </mat-card-subtitle>
-      <mat-card-content class="instructions">
+      <mat-card-content [style.overflow-y]="'scroll'">
         <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
       </mat-card-content>
     </mat-card>
@@ -57,4 +57,6 @@ export class CodeInstructionComponent {
   getSanitizedText(text: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(text);
   }
+
+  protected readonly scroll = scroll;
 }
