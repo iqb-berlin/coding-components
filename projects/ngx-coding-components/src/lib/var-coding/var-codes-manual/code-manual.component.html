@@ -1,5 +1,6 @@
 <div *ngIf="code" class="fx-column-start-stretch">
-  <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
+  <code-header (codeDataChanged)="setCodeChanged()" [enableSwitchNull]="false"
+               [code]="code" [allCodes]="allCodes"></code-header>
   <div class="fx-row-start-stretch fx-gap-10">
     <ng-container *ngIf="firstRuleSet && firstRuleSet.rules[0] && firstRuleSet.rules[0].method === 'IS_EMPTY'">
       <div class="has-rules-warning">

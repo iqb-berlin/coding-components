@@ -1,6 +1,7 @@
 <div *ngIf="code" class="fx-row-start-stretch fx-gap-5">
   <div class="fx-column-start-stretch fx-flex-fill">
-    <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
+    <code-header (codeDataChanged)="setCodeChanged()" [enableSwitchNull]="false"
+                 [code]="code" [allCodes]="allCodes"></code-header>
     <div class="fx-row-start-start fx-flex-fill">
       <div class="has-rules-warning">
         <p *ngIf="elseCodeExists && code.manualInstruction"

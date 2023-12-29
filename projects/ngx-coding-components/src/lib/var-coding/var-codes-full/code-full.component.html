@@ -1,6 +1,7 @@
 <div *ngIf="code" class="fx-row-start-stretch fx-gap-5" [style.max-height.px]="300">
   <div class="fx-column-start-stretch" [style.width.%]="50">
-    <code-header (codeDataChanged)="setCodeChanged()" [code]="code" [allCodes]="allCodes"></code-header>
+    <code-header (codeDataChanged)="setCodeChanged()" [enableSwitchNull]="true"
+                 [code]="code" [allCodes]="allCodes"></code-header>
     <mat-card class="fx-flex-fill" [style.padding-left.px]="4">
       <mat-card-subtitle>{{'code.prompt-auto-coding' | translate}}</mat-card-subtitle>
       <mat-card-content class="fx-row-start-center fx-flex-fill">

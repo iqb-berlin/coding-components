@@ -13,16 +13,6 @@
             {{'processing.REMOVE_WHITE_SPACES' | translate}}
         </mat-checkbox>
     </div>
-    <div [style.padding-bottom.px]="4">
-      <mat-form-field [style.width.px]="150">
-        <mat-label>{{'code-model-parameter.max-score' | translate}}</mat-label>
-        <input matInput
-               type="number"
-               required
-               [ngModel]="codeModelParameters ? (codeModelParameters[0] || 1) : 1"
-               (ngModelChange)="setCodingModelParameter(0, $event)">
-      </mat-form-field>
-    </div>
   </div>
   <div *ngIf="codes" class="fx-column-start-stretch">
     <div *ngFor="let cd of codes; index as codeIndex" class="fx-row-start-stretch">
