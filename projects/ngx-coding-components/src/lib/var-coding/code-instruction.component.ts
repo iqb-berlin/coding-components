@@ -8,7 +8,7 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
 @Component({
   selector: 'code-instruction',
   template: `
-    <mat-card *ngIf="code" [style.padding-left.px]="4" [style.height.%]="100">
+    <mat-card *ngIf="code" [style.padding-left.px]="12" [style.height.%]="100">
       <mat-card-subtitle class="fx-row-space-between-stretch">
         {{'manual-instruction.prompt-code' | translate}}
         <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">

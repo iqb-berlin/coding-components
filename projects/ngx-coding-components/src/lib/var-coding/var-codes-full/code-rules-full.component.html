@@ -1,0 +1,82 @@
+<mat-card [style.height.%]="100">
+  <mat-card-content class="fx-column-start-stretch" [style.overflow]="'hidden'">
+    <div class="fx-row-space-between-start">
+      <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt-auto-coding' | translate}}</div>
+      <button mat-icon-button  *ngIf="code && arrayMode" [matTooltip]="'rule-set.prompt.add' | translate" (click)="addRuleSet()">
+        <mat-icon>add</mat-icon>
+      </button>
+      <div class="fx-column-start-stretch" *ngIf="code && arrayMode">
+        <label>{{"rule-set.prompt.operator" | translate }}</label>
+        <mat-radio-group [(ngModel)]="code.ruleSetOperatorAnd"
+                         (ngModelChange)="setCodeRulesChanged()"
+                         class="fx-row-space-between-center">
+          <mat-radio-button [value]="false">{{"rule.operator.false" | translate }}</mat-radio-button>
+          <mat-radio-button [value]="true">{{"rule.operator.true" | translate }}</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+    <div class="fx-row-start-stretch rulesContainer">
+      <div *ngFor="let ruleSet of code?.ruleSets; index as ruleSetIndex" class="fx-column-start-stretch"
+      [style.overflow-x]="'auto'">
+        <div class="rule-set-header">Regelsatz {{ruleSetIndex + 1}}</div>
+        <div *ngFor="let rule of ruleSet.rules; index as ruleIndex" class="fx-row-start-center fx-flex-fill"
+             (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
+          <div class="fx-column-start-stretch fx-flex-fill">
+            <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
+                 matTooltipShowDelay="500">
+              {{('rule.' + rule.method) | translate}}</div>
+            <mat-form-field *ngIf="getParamCountWrapper(rule.method) < 0">
+            <textarea matInput *ngIf="rule.parameters"
+                      [(ngModel)]="rule.parameters[0]"
+                      (ngModelChange)="setCodeRulesChanged()"
+                      cdkTextareaAutosize
+                      cdkAutosizeMinRows="2"
+                      cdkAutosizeMaxRows="8"></textarea>
+            </mat-form-field>
+            <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 0">
+              <input matInput *ngIf="rule.parameters"
+                     [(ngModel)]="rule.parameters[0]"
+                     (ngModelChange)="setCodeRulesChanged()">
+            </mat-form-field>
+            <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 1">
+              <input matInput *ngIf="rule.parameters"
+                     [(ngModel)]="rule.parameters[1]"
+                     (ngModelChange)="setCodeRulesChanged()">
+            </mat-form-field>
+          </div>
+          <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(ruleSet, ruleIndex)"
+                  [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="fx-row-space-between-center">
+          <button mat-icon-button [matMenuTriggerFor]="menu"
+                  [matTooltip]="'rule.prompt.add' | translate">
+            <mat-icon>add</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item *ngFor="let newSource of ruleSet.rules | possibleNewRules:'':false:false" (click)="addRule(ruleSet, newSource)">
+              {{('rule.' + newSource) | translate}}
+            </button>
+          </mat-menu>
+          <div *ngIf="firstRuleSet && firstRuleSet.rules.length === 0" [matMenuTriggerFor]="menu"
+               class="no-rules">{{'rule.no-rules' | translate}}</div>
+          <div class="fx-column-start-stretch" *ngIf="firstRuleSet && firstRuleSet.rules.length > 1">
+            <label>{{"rule.prompt.operator" | translate }}</label>
+            <mat-radio-group [(ngModel)]="firstRuleSet.ruleOperatorAnd"
+                             (ngModelChange)="setCodeRulesChanged()"
+                             class="fx-row-space-between-center">
+              <mat-radio-button [value]="false">{{"rule.operator.false" | translate }}</mat-radio-button>
+              <mat-radio-button [value]="true">{{"rule.operator.true" | translate }}</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+        <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate" (click)="deleteRuleSet(ruleSetIndex)">
+          <mat-icon>delete</mat-icon>
+        </button>
+
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

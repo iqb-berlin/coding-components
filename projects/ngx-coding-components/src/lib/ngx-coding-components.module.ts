@@ -21,7 +21,7 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatChipsModule} from "@angular/material/chips";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {CodeFullComponent} from "./var-coding/var-codes-full/code-full.component";
+import {CodeRulesFullComponent} from "./var-coding/var-codes-full/code-rules-full.component";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
 import {VarCodingComponent} from "./var-coding/var-coding.component";
 import {ConfirmDialogComponent} from "./dialogs/confirm-dialog.component";
@@ -49,11 +49,12 @@ import {CodeChoiceComponent} from "./var-coding/var-codes-choice/code-choice.com
 import {VarCodesChoiceComponent} from "./var-coding/var-codes-choice/var-codes-choice.component";
 import {CodeHeaderComponent} from "./var-coding/code-header.component";
 import {CodeInstructionComponent} from "./var-coding/code-instruction.component";
+import {PossibleNewRulesPipe} from "./var-coding/possible-new-rules.pipe";
 
 @NgModule({
   declarations: [
     SchemerComponent,
-    CodeFullComponent,
+    CodeRulesFullComponent,
     RichTextEditDialogComponent,
     ShowCodingDialogComponent,
     RichTextEditorComponent,
@@ -65,6 +66,7 @@ import {CodeInstructionComponent} from "./var-coding/code-instruction.component"
     SimpleInputDialogComponent,
     ShowCodingResultsComponent,
     VarCodesFullComponent,
+    PossibleNewRulesPipe,
     CodeChoiceComponent,
     VarCodesChoiceComponent,
     CodeHeaderComponent,

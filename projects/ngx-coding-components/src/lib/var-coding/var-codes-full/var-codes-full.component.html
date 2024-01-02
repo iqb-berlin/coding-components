@@ -25,21 +25,28 @@
           </div>
         </mat-checkbox>
     </div>
-    <mat-form-field matTooltip="Regulärer Ausdruck, um Teile der Antwort zu extrahieren">
+    <mat-form-field [matTooltip]="'fragmenting.tooltip' | translate">
       <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
       <input matInput
              [(ngModel)]="fragmenting"
              (ngModelChange)="fragmentingChanged.emit(fragmenting)">
     </mat-form-field>
   </div>
-  <div *ngIf="codes" class="fx-column-start-stretch">
-    <div *ngFor="let cd of codes; index as codeIndex" class="fx-row-start-stretch">
-      <code-full [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
-                 [allCodes]="codes"
-                 (codeChanged)="codesChanged.emit(codes)"></code-full>
-      <button mat-icon-button (click)="deleteCode(codeIndex)" [matTooltip]="'code.prompt.delete' | translate">
-        <mat-icon>delete</mat-icon>
-      </button>
+  <ng-container *ngIf="codes">
+    <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch" [style.max-height.px]="300">
+      <ng-container *ngIf="code">
+        <div class="fx-column-start-stretch" [style.flex]="'0 0 60%'">
+          <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
+                       [code]="code" [allCodes]="codes"></code-header>
+          <code-rules-full [style.padding-left.px]="4"
+                           [code]="code" [arrayMode]="true" [fragmentMode]="true"
+                           (codeRulesChanged)="codesChanged.emit(codes)"></code-rules-full>
+        </div>
+        <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)" [style.flex]="'0 0 36%'"></code-instruction>
+        <button mat-icon-button (click)="deleteCode(codeIndex)" [matTooltip]="'code.prompt.delete' | translate">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </ng-container>
     </div>
     <div class="fx-row-start-center">
       <button mat-raised-button (click)="addCode()">
@@ -47,5 +54,5 @@
       </button>
       <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
     </div>
-  </div>
+  </ng-container>
 </div>

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CodeFullComponent } from './code-full.component';
+import { CodeRulesFullComponent } from './code-rules-full.component';
 
-describe('CodeFullComponent', () => {
-  let component: CodeFullComponent;
-  let fixture: ComponentFixture<CodeFullComponent>;
+describe('CodeRulesFullComponent', () => {
+  let component: CodeRulesFullComponent;
+  let fixture: ComponentFixture<CodeRulesFullComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CodeFullComponent]
+      declarations: [CodeRulesFullComponent]
     })
       .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CodeFullComponent);
+    fixture = TestBed.createComponent(CodeRulesFullComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
