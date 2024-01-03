@@ -1,5 +1,5 @@
 <mat-card [style.height.%]="100">
-  <mat-card-content class="fx-column-start-stretch" [style.overflow]="'hidden'">
+  <mat-card-subtitle>
     <div class="fx-row-space-between-start">
       <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt-auto-coding' | translate}}</div>
       <button mat-icon-button  *ngIf="code && arrayMode" [matTooltip]="'rule-set.prompt.add' | translate" (click)="addRuleSet()">
@@ -15,10 +15,17 @@
         </mat-radio-group>
       </div>
     </div>
-    <div class="fx-row-start-stretch rulesContainer">
-      <div *ngFor="let ruleSet of code?.ruleSets; index as ruleSetIndex" class="fx-column-start-stretch"
-      [style.overflow-x]="'auto'">
-        <div class="rule-set-header">Regelsatz {{ruleSetIndex + 1}}</div>
+  </mat-card-subtitle>
+  <mat-card-content class="fx-column-start-stretch" [style.overflow-x]="'auto'">
+    <mat-tab-group dynamicHeight>
+      <mat-tab *ngFor="let ruleSet of code?.ruleSets; index as ruleSetIndex" class="fx-column-start-stretch"
+               [style.overflow-x]="'auto'">
+        <ng-template mat-tab-label class="fx-row-space-between-center">
+          <div>Regelsatz {{ruleSetIndex + 1}}</div>
+          <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate" (click)="deleteRuleSet(ruleSetIndex)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </ng-template>
         <div *ngFor="let rule of ruleSet.rules; index as ruleIndex" class="fx-row-start-center fx-flex-fill"
              (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
           <div class="fx-column-start-stretch fx-flex-fill">
@@ -49,7 +56,6 @@
             <mat-icon>delete</mat-icon>
           </button>
         </div>
-
         <div class="fx-row-space-between-center">
           <button mat-icon-button [matMenuTriggerFor]="menu"
                   [matTooltip]="'rule.prompt.add' | translate">
@@ -72,11 +78,7 @@
             </mat-radio-group>
           </div>
         </div>
-        <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate" (click)="deleteRuleSet(ruleSetIndex)">
-          <mat-icon>delete</mat-icon>
-        </button>
-
-      </div>
-    </div>
+      </mat-tab>
+    </mat-tab-group>
   </mat-card-content>
 </mat-card>

@@ -15,7 +15,7 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
           <mat-icon>edit</mat-icon>
         </button>
       </mat-card-subtitle>
-      <mat-card-content [style.overflow-y]="'scroll'">
+      <mat-card-content [style.overflow-x]="'auto'">
         <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
       </mat-card-content>
     </mat-card>

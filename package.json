@@ -6,8 +6,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --project=coding-components",
-    "build": "ng run coding-components:build",
+    "buildxx": "ng run coding-components:build",
     "build_cc": "rm -rf dist/ngx-coding-components && ng build ngx-coding-components",
+    "build": "npm run build_cc && npm run start",
     "build_sc": "rm -f dist/*.* && rm -rf dist/schemer && ng build --project schemer --output-hashing=none",
     "pack_sc": "node scripts/wrap_and_pack.js schemer $npm_package_config_schemer_version projects/schemer/src/html_wrapper/index.html",
     "buildAndPack_sc": "npm run build_sc && npm run pack_sc",
