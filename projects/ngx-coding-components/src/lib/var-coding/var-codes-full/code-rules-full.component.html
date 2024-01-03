@@ -3,7 +3,8 @@
     <div class="fx-row-space-between-center" [style.padding]="'0 16px'">
       <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt-auto-coding' | translate}}</div>
       <div *ngIf="code" class="fx-row-end-center">
-        <button mat-icon-button  *ngIf="arrayMode" [matTooltip]="'rule-set.prompt.add' | translate" (click)="addRuleSet()">
+        <button mat-icon-button  *ngIf="arrayMode" [matTooltip]="'rule-set.prompt.add' | translate"
+                (click)="addRuleSet(); setTab()">
           <mat-icon>add</mat-icon>
         </button>
         <mat-button-toggle-group *ngIf="code.ruleSets.length > 1" appearance="legacy"
@@ -16,15 +17,10 @@
     </div>
   </mat-card-subtitle>
   <mat-card-content class="fx-column-start-stretch" [style.overflow-x]="'auto'">
-    <mat-tab-group dynamicHeight>
+    <mat-tab-group dynamicHeight [class.header-less-tabs]="!code || code.ruleSets.length <= 1">
       <mat-tab *ngFor="let ruleSet of code?.ruleSets; index as ruleSetIndex" class="fx-column-start-stretch"
+               [label]="'Regelsatz ' + (ruleSetIndex + 1).toString(10)"
                [style.overflow-x]="'auto'">
-        <ng-template mat-tab-label class="fx-row-space-between-center">
-          <div>Regelsatz {{ruleSetIndex + 1}}</div>
-          <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate" (click)="deleteRuleSet(ruleSetIndex)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </ng-template>
         <div *ngFor="let rule of ruleSet.rules; index as ruleIndex" class="fx-row-start-center fx-flex-fill"
              (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
           <div class="fx-column-start-stretch fx-flex-fill">
@@ -50,10 +46,18 @@
                      (ngModelChange)="setCodeRulesChanged()">
             </mat-form-field>
           </div>
-          <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(ruleSet, ruleIndex)"
-                  [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
-            <mat-icon>delete</mat-icon>
-          </button>
+          <div class="fx-column-start-center">
+            <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(ruleSet, ruleIndex)"
+                    [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <div *ngIf="fragmentMode">
+              <button mat-flat-button (click)="editFragmentReference(rule)"
+                      [matTooltip]="'rule.reference.prompt' | translate">
+                {{ rule.fragment | ruleReference }}
+              </button>
+            </div>
+          </div>
         </div>
         <div class="fx-row-space-between-center">
           <button mat-icon-button [matMenuTriggerFor]="menu"
@@ -67,6 +71,17 @@
           </mat-menu>
           <div *ngIf="ruleSet.rules.length === 0" [matMenuTriggerFor]="menu"
                class="no-rules">{{'rule.no-rules' | translate}}</div>
+          <div *ngIf="arrayMode && ruleSet.rules.length > 0">
+            <button mat-flat-button (click)="editArrayReference(ruleSet)"
+                    [matTooltip]="'rule-set.reference.prompt' | translate">
+              {{ ruleSet.valueArrayPos | ruleReference }}
+            </button>
+          </div>
+          <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate"
+                  *ngIf="code && code.ruleSets.length > 1"
+                  (click)="deleteRuleSet(ruleSetIndex)">
+            <mat-icon>delete</mat-icon>
+          </button>
           <mat-button-toggle-group *ngIf="ruleSet.rules.length > 1" appearance="legacy"
                                    [(ngModel)]="ruleSet.ruleOperatorAnd"
                                    [matTooltip]="'rule.prompt.operator' | translate">

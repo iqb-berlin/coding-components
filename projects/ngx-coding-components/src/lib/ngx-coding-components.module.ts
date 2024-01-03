@@ -49,9 +49,11 @@ import {CodeChoiceComponent} from "./var-coding/var-codes-choice/code-choice.com
 import {VarCodesChoiceComponent} from "./var-coding/var-codes-choice/var-codes-choice.component";
 import {CodeHeaderComponent} from "./var-coding/code-header.component";
 import {CodeInstructionComponent} from "./var-coding/code-instruction.component";
-import {PossibleNewRulesPipe} from "./var-coding/possible-new-rules.pipe";
+import {PossibleNewRulesPipe} from "./pipes/possible-new-rules.pipe";
 import {MatTabsModule} from "@angular/material/tabs";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {SelectCodeRuleReferenceDialogComponent} from "./dialogs/select-code-rule-reference-dialog.component";
+import {RuleReferencePipe} from "./pipes/rule-reference.pipe";
 
 @NgModule({
   declarations: [
@@ -69,8 +71,10 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
     ShowCodingResultsComponent,
     VarCodesFullComponent,
     PossibleNewRulesPipe,
+    RuleReferencePipe,
     CodeChoiceComponent,
     VarCodesChoiceComponent,
+    SelectCodeRuleReferenceDialogComponent,
     CodeHeaderComponent,
     VarCodesManualComponent,
     CodeManualComponent,
