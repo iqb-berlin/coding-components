@@ -9,11 +9,13 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
   selector: 'code-instruction',
   template: `
     <mat-card *ngIf="code" [style.padding-left.px]="12" [style.height.%]="100">
-      <mat-card-subtitle class="fx-row-space-between-stretch">
-        {{'manual-instruction.prompt-code' | translate}}
-        <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
-          <mat-icon>edit</mat-icon>
-        </button>
+      <mat-card-subtitle>
+        <div class="fx-row-start-center">
+          <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.prompt-code' | translate}}</div>
+          <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
       </mat-card-subtitle>
       <mat-card-content [style.overflow-x]="'auto'">
         <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>

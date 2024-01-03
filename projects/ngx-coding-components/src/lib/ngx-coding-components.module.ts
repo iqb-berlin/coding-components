@@ -51,6 +51,7 @@ import {CodeHeaderComponent} from "./var-coding/code-header.component";
 import {CodeInstructionComponent} from "./var-coding/code-instruction.component";
 import {PossibleNewRulesPipe} from "./var-coding/possible-new-rules.pipe";
 import {MatTabsModule} from "@angular/material/tabs";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 @NgModule({
   declarations: [
@@ -128,7 +129,8 @@ import {MatTabsModule} from "@angular/material/tabs";
     CdkConnectedOverlay,
     CdkOverlayOrigin,
     MatRadioModule,
-    MatTabsModule
+    MatTabsModule,
+    MatButtonToggleModule
   ]
 })
 export class NgxCodingComponentsModule { }
