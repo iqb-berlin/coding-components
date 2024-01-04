@@ -34,7 +34,6 @@ import {VarCodesFullComponent} from "./var-coding/var-codes-full/var-codes-full.
 import {ComboButtonComponent} from "./rich-text-editor/combo-button.component";
 import {CdkConnectedOverlay, CdkOverlayOrigin} from "@angular/cdk/overlay";
 import {VarCodesManualComponent} from "./var-coding/var-codes-manual/var-codes-manual.component";
-import {CodeManualComponent} from "./var-coding/var-codes-manual/code-manual.component";
 import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
 import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-value-list.component";
 import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-number.component";
@@ -54,6 +53,7 @@ import {MatTabsModule} from "@angular/material/tabs";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {SelectCodeRuleReferenceDialogComponent} from "./dialogs/select-code-rule-reference-dialog.component";
 import {RuleReferencePipe} from "./pipes/rule-reference.pipe";
+import {HasRulePipe} from "./pipes/has-rule.pipe";
 
 @NgModule({
   declarations: [
@@ -71,13 +71,13 @@ import {RuleReferencePipe} from "./pipes/rule-reference.pipe";
     ShowCodingResultsComponent,
     VarCodesFullComponent,
     PossibleNewRulesPipe,
+    HasRulePipe,
     RuleReferencePipe,
     CodeChoiceComponent,
     VarCodesChoiceComponent,
     SelectCodeRuleReferenceDialogComponent,
     CodeHeaderComponent,
     VarCodesManualComponent,
-    CodeManualComponent,
     CodeInstructionComponent,
     ShowCodingProblemsDialogComponent,
     VarCodesValueListComponent,

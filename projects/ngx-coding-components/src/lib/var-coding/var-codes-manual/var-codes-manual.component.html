@@ -18,23 +18,28 @@
         </mat-checkbox>
     </div>
   </div>
-  <div *ngIf="codes" class="fx-column-start-stretch">
-    <div *ngFor="let cd of codes; index as codeIndex" class="fx-row-start-stretch">
-      <code-manual [code]="cd" class="fx-flex-fill" [style.margin-bottom.px]="4"
-                   [isEmptyCodeExists]="isEmptyCodeExists"
-                   [allCodes]="codes"
-                   (codeChanged)="codesChanged.emit(codes)"></code-manual>
+  <ng-container *ngIf="codes">
+    <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch"
+         [style.margin-bottom.px]="4">
+      <div class="fx-column-start-stretch fx-flex-fill">
+        <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="false"
+                     [code]="code" [allCodes]="codes"></code-header>
+        <div class="fx-row-start-stretch fx-gap-10">
+          <div class="has-rules-warning">
+            <p *ngIf="code | hasRule" [matTooltip]="'code.has-rule-warning' | translate">!!</p>
+          </div>
+          <code-instruction [code]="code" [style.flex]="'1 1 auto'" [style.max-height.px]="200"
+                            (codeDataChanged)="codesChanged.emit(codes)"></code-instruction>
+        </div>
+      </div>
       <button mat-icon-button (click)="deleteCode(codeIndex)" [matTooltip]="'code.prompt.delete' | translate">
         <mat-icon>delete</mat-icon>
       </button>
     </div>
-    <div class="fx-row-start-center">
+    <div [style.margin-top.px]="12">
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
       </button>
-      <button mat-raised-button (click)="addCodeSingleton('IS_EMPTY', translateService); updateCodeExistences()" [disabled]="!!isEmptyCodeExists">
-        <mat-icon>add</mat-icon>{{'code.prompt.add-is-empty' | translate}}
-      </button>
     </div>
-  </div>
+  </ng-container>
 </div>
