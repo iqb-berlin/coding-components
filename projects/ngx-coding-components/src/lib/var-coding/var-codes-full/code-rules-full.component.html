@@ -65,7 +65,9 @@
             <mat-icon>add</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
-            <button mat-menu-item *ngFor="let newSource of ruleSet.rules | possibleNewRules:'':false:false" (click)="addRule(ruleSet, newSource)">
+            <button mat-menu-item
+                    *ngFor="let newSource of (ruleSet.rules | possibleNewRules:'':false:fragmentMode:ruleSet.ruleOperatorAnd)"
+                    (click)="addRule(ruleSet, newSource)">
               {{('rule.' + newSource) | translate}}
             </button>
           </mat-menu>

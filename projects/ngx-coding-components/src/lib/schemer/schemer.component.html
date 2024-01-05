@@ -1,5 +1,5 @@
 <div class="scheme-body fx-row-space-between-stretch">
-  <div *ngIf="_varList.length > 0" class="navi-bar fx-column-space-between-stretch">
+  <div *ngIf="schemerService.allVariableIds.length > 0" class="navi-bar fx-column-space-between-stretch">
     <div class="var-scheme-list fx-flex">
       <div class="var-list-header">{{'varlist.base' | translate}}</div>
       <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-stretch">
@@ -51,11 +51,7 @@
     </div>
   </div>
 
-  <div *ngIf="allVariableIds.length === 0"
+  <div *ngIf="schemerService.allVariableIds.length === 0"
        style="margin: 20px;">{{'data-error.base-variables-missing' | translate}}</div>
-  <var-coding [varCoding]="selectedCoding$ | async"
-              [varInfo]="selectedVarInfo$ | async"
-              class="var-coding-container fx-flex-row-100"
-              [allVariables]="allVariableIds">
-  </var-coding>
+  <var-coding [varCoding]="selectedCoding$ | async" class="var-coding-container fx-flex-row-100"></var-coding>
 </div>

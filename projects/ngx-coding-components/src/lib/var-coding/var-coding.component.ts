@@ -7,7 +7,8 @@ import {VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
 import { CodeData,  CodeModelType} from "@iqb/responses/coding-interfaces";
-import {GenerateCodingDialogComponent, GenerateCodingDialogData} from "../dialogs/generate-coding-dialog.component";
+import {GenerateCodingDialogComponent} from "../dialogs/generate-coding-dialog.component";
+import {SchemerService} from "../services/schemer.service";
 
 @Component({
   selector: 'var-coding',
@@ -17,12 +18,11 @@ import {GenerateCodingDialogComponent, GenerateCodingDialogData} from "../dialog
 export class VarCodingComponent implements OnInit, OnDestroy {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
   @Input() varCoding: VariableCodingData | null = null;
-  @Input() varInfo: VariableInfo | null = null;
-  @Input() allVariables: string[] = [];
   lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
 
   constructor(
+    public schemerService: SchemerService,
     private sanitizer: DomSanitizer,
     private translateService: TranslateService,
     private editTextDialog: MatDialog,
@@ -40,7 +40,7 @@ export class VarCodingComponent implements OnInit, OnDestroy {
 
   getNewSources(usedVars: string[]) {
     const returnSources: string[] = [];
-    this.allVariables.forEach(v => {
+    this.schemerService.allVariableIds.forEach(v => {
       if (this.varCoding && usedVars.indexOf(v) < 0 && v !== this.varCoding.id) returnSources.push(v);
     });
     returnSources.sort();
@@ -108,26 +108,25 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   }
 
   smartSchemer() {
-    const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
-      width: '1000px',
-      data: <GenerateCodingDialogData>{
-        varInfo: this.varInfo,
-        varCoding: this.varCoding
-      }
-    });
-    dialogRef.afterClosed().subscribe(dialogResult => {
-      if (typeof dialogResult !== 'undefined') {
-        if (dialogResult !== false && this.varCoding) {
-          const newCoding = dialogResult as VariableCodingData;
-          this.varCoding.processing = newCoding.processing;
-          this.varCoding.fragmenting = newCoding.fragmenting;
-          this.varCoding.codeModel = newCoding.codeModel;
-          this.varCoding.codeModelParameters = newCoding.codeModelParameters;
-          this.varCoding.codes = newCoding.codes;
-          this.varCodingChanged.emit(this.varCoding);
-        }
-      }
-    });
+    if (this.varCoding) {
+      const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
+          width: '1000px',
+          data: this.schemerService.getVarInfoByCoding(this.varCoding)
+      });
+      dialogRef.afterClosed().subscribe(dialogResult => {
+          if (typeof dialogResult !== 'undefined') {
+              if (dialogResult !== false && this.varCoding) {
+                  const newCoding = dialogResult as VariableCodingData;
+                  this.varCoding.processing = newCoding.processing;
+                  this.varCoding.fragmenting = newCoding.fragmenting;
+                  this.varCoding.codeModel = newCoding.codeModel;
+                  this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+                  this.varCoding.codes = newCoding.codes;
+                  this.varCodingChanged.emit(this.varCoding);
+              }
+          }
+      });
+    }
   }
 
   static guessCodeModel(varInfo: VariableInfo): CodeModelType {

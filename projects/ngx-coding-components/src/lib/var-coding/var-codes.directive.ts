@@ -17,7 +17,6 @@ export abstract class VarCodesDirective {
   @Output() fragmentingChanged = new EventEmitter<string>();
   @Output() codeModelParametersChanged = new EventEmitter<string[]>();
   @Input() public codes: CodeData[] | undefined;
-  @Input() public allVariables: string[] = [];
   @Input() public processing: ProcessingParameterType[] | undefined;
   @Input() public fragmenting: string | undefined;
   @Input() public codeModelParameters: string[] | undefined;

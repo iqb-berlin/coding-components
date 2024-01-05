@@ -32,7 +32,7 @@
           <mat-chip-listbox>
             <mat-chip *ngIf="varCoding.deriveSources.length === 0" [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
             <mat-chip *ngFor="let source of varCoding.deriveSources"
-                      [class]="allVariables.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
+                      [class]="schemerService.allVariableIds.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
                       removable="true" (removed)="deleteDeriveSource(source)">
               {{source}}
               <mat-icon matChipRemove>cancel</mat-icon>
@@ -102,8 +102,7 @@
                     (fragmentingChanged)="setFragmenting($event)"
                     (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
                     [codeModelParameters]="varCoding.codeModelParameters"
-                    (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
-                    [allVariables]="allVariables">
+                    (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
     </var-codes-manual>
     <var-codes-value-list *ngSwitchCase="'VALUE_LIST'"
                       class="fx-flex-row-100" [style.margin-top.px]="10"
@@ -114,8 +113,7 @@
                       [fragmenting]="varCoding.fragmenting"
                       (fragmentingChanged)="setFragmenting($event)"
                       [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
-                      [allVariables]="allVariables">
+                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
     </var-codes-value-list>
     <var-codes-choice *ngSwitchCase="'CHOICE'"
                           class="fx-flex-row-100" [style.margin-top.px]="10"
@@ -126,8 +124,7 @@
                           [fragmenting]="varCoding.fragmenting"
                           (fragmentingChanged)="setFragmenting($event)"
                           [codeModelParameters]="varCoding.codeModelParameters"
-                          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
-                          [allVariables]="allVariables">
+                          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
     </var-codes-choice>
     <var-codes-number *ngSwitchCase="'NUMBER'"
                           class="fx-flex-row-100" [style.margin-top.px]="10"
@@ -138,8 +135,7 @@
                           [fragmenting]="varCoding.fragmenting"
                           (fragmentingChanged)="setFragmenting($event)"
                           [codeModelParameters]="varCoding.codeModelParameters"
-                          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
-                          [allVariables]="allVariables">
+                          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
     </var-codes-number>
     <var-codes-full *ngSwitchDefault
                     class="fx-flex-row-100" [style.margin-top.px]="10"
@@ -150,8 +146,7 @@
                     [fragmenting]="varCoding.fragmenting"
                     (fragmentingChanged)="setFragmenting($event)"
                     [codeModelParameters]="varCoding.codeModelParameters"
-                    (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')"
-                    [allVariables]="allVariables">
+                    (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
     </var-codes-full>
   </ng-container>
 </div>

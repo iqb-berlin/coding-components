@@ -6,8 +6,13 @@ import {CodeData} from "@iqb/responses";
 })
 export class HasRulePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(code: CodeData): boolean {
-    if (code && code.ruleSets && code.ruleSets.length > 0) return code.ruleSets[0].rules.length > 0;
+  transform(code: CodeData, specificRule?: string): boolean {
+    if (code && code.ruleSets && code.ruleSets.length > 0) {
+      if (specificRule) {
+        return !!code.ruleSets.find(rs => rs.rules && !!rs.rules.find(r => r.method === specificRule));
+      }
+      return !!code.ruleSets.find(rs => rs.rules && rs.rules.length > 0);
+    }
     return false;
   }
 }

@@ -7,46 +7,70 @@ import {RuleMethod} from "@iqb/responses/coding-interfaces";
 })
 export class PossibleNewRulesPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
-  transform(value: CodingRule[], dataType: string, nullable: boolean, fragmenting: boolean): RuleMethod[] {
-    let returnMethods: RuleMethod[];
-    const allRuleMethods = value.map(r => r.method);
-    if (allRuleMethods.indexOf('ELSE') >= 0) return [];
+  private static getNumericRules(otherRuleMethods: string[],
+                                 ruleOperatorAnd: boolean, fragmenting?: boolean): RuleMethod[] {
+    if (fragmenting) return ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MAX',
+    'NUMERIC_MORE_THEN', 'NUMERIC_MIN'];
+    const returnMethods: RuleMethod[] = [];
+    console.log(otherRuleMethods);
+    if (ruleOperatorAnd) {
+      if (otherRuleMethods.indexOf('NUMERIC_RANGE') < 0 &&
+        otherRuleMethods.indexOf('NUMERIC_MATCH') < 0) {
+        if (otherRuleMethods.indexOf('NUMERIC_LESS_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0
+          && otherRuleMethods.indexOf('NUMERIC_MORE_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
+          returnMethods.push('NUMERIC_MATCH');
+          returnMethods.push('NUMERIC_RANGE');
+        }
+        if (otherRuleMethods.indexOf('NUMERIC_LESS_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0) {
+          returnMethods.push('NUMERIC_MAX');
+          returnMethods.push('NUMERIC_LESS_THEN');
+        }
+        if (otherRuleMethods.indexOf('NUMERIC_MORE_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
+          returnMethods.push('NUMERIC_MIN');
+          returnMethods.push('NUMERIC_MORE_THEN');
+        }
+      }
+    } else {
+      returnMethods.push('NUMERIC_MATCH');
+      returnMethods.push('NUMERIC_RANGE');
+      if (otherRuleMethods.indexOf('NUMERIC_LESS_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0) {
+        returnMethods.push('NUMERIC_MAX');
+        returnMethods.push('NUMERIC_LESS_THEN');
+      }
+      if (otherRuleMethods.indexOf('NUMERIC_MORE_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
+        returnMethods.push('NUMERIC_MIN');
+        returnMethods.push('NUMERIC_MORE_THEN');
+      }
+    }
+    return returnMethods;
+  }
+  transform(value: CodingRule[], dataType: string,
+            nullable: boolean, fragmenting: boolean | undefined,
+            ruleOperatorAnd: boolean): RuleMethod[] {
+    let returnMethods: RuleMethod[] = [];
+    const otherRuleMethods = value.map(r => r.method);
+    if (otherRuleMethods.indexOf('ELSE') >= 0) return [];
+    if (ruleOperatorAnd && !fragmenting && otherRuleMethods.indexOf('IS_NULL') >= 0) return [];
+    if (ruleOperatorAnd && !fragmenting && otherRuleMethods.indexOf('IS_EMPTY') >= 0) return [];
+
     if (dataType === 'boolean') {
-      returnMethods = ['IS_FALSE', 'IS_TRUE'];
+      if (otherRuleMethods.indexOf('IS_FALSE') < 0 && otherRuleMethods.indexOf('IS_TRUE') < 0 && !fragmenting) {
+        returnMethods = ['IS_FALSE', 'IS_TRUE'];
+      }
     } else if (dataType === 'number') {
-      returnMethods = ['NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
-        'NUMERIC_MAX', 'NUMERIC_MIN', 'MATCH'];
+      returnMethods = PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd, fragmenting);
     } else if (dataType === 'string') {
       returnMethods = ['MATCH', 'MATCH_REGEX'];
     } else {
-      returnMethods = ['MATCH', 'MATCH_REGEX', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
-        'NUMERIC_MAX', 'NUMERIC_MIN', 'IS_FALSE', 'IS_TRUE'];
-    }
-    if (nullable) returnMethods.push('IS_NULL');
-    returnMethods.push('IS_EMPTY');
-    if (fragmenting) return returnMethods;
-
-    if (!dataType) {
-      value.forEach(r => {
-        if (['IS_FALSE', 'IS_TRUE'].indexOf(r.method) >= 0) {
-          dataType = 'boolean';
-        } else if (['NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
-          'NUMERIC_MAX', 'NUMERIC_MIN'].indexOf(r.method) >= 0) {
-          dataType = 'number';
-        }
-      })
-    }
-    if (dataType === 'boolean') {
-      if (allRuleMethods.length > 0) return [];
-    } else if (dataType === 'number') {
-      if (allRuleMethods.indexOf('NUMERIC_LESS_THEN') >= 0 || allRuleMethods.indexOf('NUMERIC_MAX') >= 0) {
-        returnMethods = returnMethods.filter(r => r !== 'NUMERIC_MAX' && r !== 'NUMERIC_LESS_THEN');
-      }
-      if (allRuleMethods.indexOf('NUMERIC_MORE_THEN') >= 0 || allRuleMethods.indexOf('NUMERIC_MIN') >= 0) {
-        returnMethods = returnMethods.filter(r => r !== 'NUMERIC_MORE_THEN'
-          && r !== 'NUMERIC_MIN');
+      returnMethods = ['MATCH', 'MATCH_REGEX',
+        ...PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd, fragmenting)];
+      if (otherRuleMethods.indexOf('IS_FALSE') < 0 && otherRuleMethods.indexOf('IS_TRUE') < 0 && !fragmenting) {
+        returnMethods.push('IS_FALSE');
+        returnMethods.push('IS_TRUE');
       }
     }
+    if (nullable && (otherRuleMethods.indexOf('IS_NULL') < 0 || fragmenting)) returnMethods.push('IS_NULL');
+    if (otherRuleMethods.indexOf('IS_EMPTY') < 0 || fragmenting) returnMethods.push('IS_EMPTY');
     return returnMethods;
   }
 }

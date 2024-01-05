@@ -10,6 +10,7 @@ import {TranslateService} from "@ngx-translate/core";
 import {VarCodingComponent} from "../var-coding/var-coding.component";
 import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
 import {CodingFactory} from "@iqb/responses/coding-factory";
+import {SchemerService} from "../services/schemer.service";
 
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
 
@@ -25,51 +26,48 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
-  _codingScheme: CodingScheme | null = null;
   @Input()
   set codingScheme(value: any) {
-      this._codingScheme = null;
+      this.schemerService.codingScheme = null;
       if (value) {
           if (typeof value === 'string') {
-              this._codingScheme = value ? JSON.parse(value) : null;
+              this.schemerService.codingScheme = value ? JSON.parse(value) : null;
           } else {
-              this._codingScheme = value;
+              this.schemerService.codingScheme = value;
           }
       }
       this.updateVariableLists();
   }
   get codingScheme(): CodingScheme | null {
-    return this._codingScheme;
+    return this.schemerService.codingScheme;
   }
 
-  _varList: VariableInfo[] = [];
   @Input()
   set varList(value: any) {
-    this._varList = [];
+    this.schemerService.varList = [];
     if (value) {
       if (typeof value === 'string') {
-        this._varList = value ? JSON.parse(value) : [];
+        this.schemerService.varList = value ? JSON.parse(value) : [];
       } else {
-        this._varList = value;
+        this.schemerService.varList = value;
       }
       this.selectVarScheme();
       this.updateVariableLists();
     }
   }
   get varList(): VariableInfo[] {
-    return this._varList;
+    return this.schemerService.varList;
   }
   basicVariables: VariableCodingData[] = [];
   derivedVariables: VariableCodingData[] = [];
-  allVariableIds: string[] = [];
   codingStatus: { [id: string] : string; } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
-  selectedVarInfo$ = new BehaviorSubject<VariableInfo | null>(null);
   problems: CodingSchemeProblem[] = [];
   varCodingChangedSubscription: Subscription | null = null;
 
   constructor(
     private translateService: TranslateService,
+    public schemerService: SchemerService,
     private confirmDialog: MatDialog,
     private messageDialog: MatDialog,
     private showCodingProblemsDialog: MatDialog,
@@ -80,41 +78,41 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     if (this.varCodingElement) {
       this.varCodingChangedSubscription = this.varCodingElement.varCodingChanged.pipe(
-        debounceTime(500)
+        debounceTime(300)
       ).subscribe(() => {
         this.updateVariableLists();
-        this.codingSchemeChanged.emit(this._codingScheme);
+        this.codingSchemeChanged.emit(this.schemerService.codingScheme);
       });
     }
   }
   updateVariableLists() {
-    if (this._varList && this._varList.length > 0 && this._codingScheme && this._codingScheme.variableCodings) {
+    if (this.schemerService.varList && this.schemerService.varList.length > 0 && this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
       // remove orphan and empty base variables
-      const varListIds = this._varList.map(v => v.id);
-      const varCodingsToDelete = this._codingScheme.variableCodings.filter(bv => {
+      const varListIds = this.schemerService.varList.map(v => v.id);
+      const varCodingsToDelete = this.schemerService.codingScheme.variableCodings.filter(bv => {
         return bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv)
       }).map(bv => bv.id);
       if (varCodingsToDelete.length > 0) {
         varCodingsToDelete.forEach(vc => {
-          if (this._codingScheme) {
-            const varCodingIndexToDelete = this._codingScheme.variableCodings.findIndex(vcd => {
+          if (this.schemerService.codingScheme) {
+            const varCodingIndexToDelete = this.schemerService.codingScheme.variableCodings.findIndex(vcd => {
               return vcd.id === vc;
             });
-            if (varCodingIndexToDelete >= 0) this._codingScheme.variableCodings.splice(varCodingIndexToDelete, 1);
+            if (varCodingIndexToDelete >= 0) this.schemerService.codingScheme.variableCodings.splice(varCodingIndexToDelete, 1);
           }
         })
       }
       // add new base variables
-      const allBaseVariableIds = this._codingScheme.variableCodings
+      const allBaseVariableIds = this.schemerService.codingScheme.variableCodings
         .filter(v => v.sourceType === 'BASE').map(bv => bv.id);
-      this._varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
+      this.schemerService.varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
         const newBaseVariable = CodingFactory.createCodingVariableFromVarInfo(vi);
-        if (this._codingScheme) this._codingScheme.variableCodings.push(newBaseVariable);
+        if (this.schemerService.codingScheme) this.schemerService.codingScheme.variableCodings.push(newBaseVariable);
       })
     }
 
-    this.basicVariables = this._codingScheme && this._codingScheme.variableCodings ?
-      this._codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
+    this.basicVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
+      this.schemerService.codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
         .sort((a, b) => {
           const idA = a.id.toUpperCase();
           const idB = b.id.toUpperCase();
@@ -122,8 +120,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           if (idA > idB) return 1;
           return 0;
         }) : [];
-    this.derivedVariables = this._codingScheme && this._codingScheme.variableCodings ?
-      this._codingScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
+    this.derivedVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
+      this.schemerService.codingScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
         .sort((a, b) => {
           const idA = a.id.toUpperCase();
           const idB = b.id.toUpperCase();
@@ -131,12 +129,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           if (idA > idB) return 1;
           return 0;
         }) : [];
-    this.allVariableIds = this._codingScheme ?
-      this._codingScheme.variableCodings.map(c => c.id) : [];
+    this.schemerService.allVariableIds = this.schemerService.codingScheme ?
+      this.schemerService.codingScheme.variableCodings.map(c => c.id) : [];
     this.codingStatus = {};
-    if (this._codingScheme && this._codingScheme.variableCodings) {
-      this.problems = this._codingScheme?.validate(this._varList);
-      this._codingScheme.variableCodings.forEach(v => {
+    if (this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
+      this.problems = this.schemerService.codingScheme?.validate(this.schemerService.varList);
+      this.schemerService.codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = 'OK';
         const breakingProblem = this.problems
           .find(p => p.variableId === v.id && p.breaking);
@@ -153,7 +151,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   selectVarScheme(coding: VariableCodingData | null = null) {
     this.selectedCoding$.next(coding);
-    this.selectedVarInfo$.next(this._varList.find(vi => vi.id === coding?.id) || null)
   }
 
   private static isEmptyCoding(coding: VariableCodingData): boolean {
@@ -179,12 +176,10 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       let errorMessage = '';
       if (result !== false) {
         if (VARIABLE_NAME_CHECK_PATTERN.exec(result)) {
-          const normalisedId = result.toUpperCase();
-          const idAlreadyExists = this.allVariableIds.find(v => v.toUpperCase() === normalisedId);
-          if (idAlreadyExists) {
+          if (this.schemerService.variableIdExists(result)) {
             errorMessage = 'data-error.variable-id.double';
           } else {
-            if (this._codingScheme) {
+            if (this.schemerService.codingScheme) {
               const newVarScheme = <VariableCodingData>{
                 id: result,
                 label: result,
@@ -196,7 +191,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
                 codes: [],
                 page: ''
               }
-              this._codingScheme.variableCodings.push(newVarScheme);
+              this.schemerService.codingScheme.variableCodings.push(newVarScheme);
               this.selectVarScheme(newVarScheme);
             }
           }
@@ -214,7 +209,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           }
         });
       } else {
-        this.codingSchemeChanged.emit(this._codingScheme);
+        this.codingSchemeChanged.emit(this.schemerService.codingScheme);
         this.updateVariableLists();
       }
     });
@@ -227,7 +222,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       if (selectedCoding.sourceType !== 'BASE') {
         warningMessageText = `Die Variable "${selectedCoding.id}" wird gelöscht. Fortsetzen?`;
       } else {
-        const varListIds = this._varList.map(v => v.id);
+        const varListIds = this.schemerService.varList.map(v => v.id);
         if (varListIds.indexOf(selectedCoding.id) < 0) {
           if (SchemerComponent.isEmptyCoding(selectedCoding)) {
             warningMessageText = 'Die verschollene Basisvariable wird gelöscht. Fortsetzen?';
@@ -248,11 +243,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         }
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this._codingScheme) {
+        if (result !== false && this.schemerService.codingScheme) {
           this.selectedCoding$.next(null);
-          this._codingScheme.variableCodings = this._codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
+          this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
           this.updateVariableLists();
-          this.codingSchemeChanged.emit(this._codingScheme);
+          this.codingSchemeChanged.emit(this.schemerService.codingScheme);
         }
       });
     } else {
@@ -286,10 +281,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         if (result !== false) {
           let errorMessage = '';
           if (VARIABLE_NAME_CHECK_PATTERN.exec(result)) {
-            const modifiedVariableIds = this.allVariableIds.filter(v => v !== selectedCoding.id);
-            const normalisedId = result.toUpperCase();
-            const idAlreadyExists = modifiedVariableIds.find(v => v.toUpperCase() === normalisedId);
-            if (idAlreadyExists) errorMessage = 'data-error.variable-id.double';
+            if (this.schemerService.variableIdExists(result, selectedCoding.id)) errorMessage = 'data-error.variable-id.double';
           } else {
             errorMessage = 'data-error.variable-id.character';
           }
@@ -305,8 +297,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           } else {
             const oldName = selectedCoding.id;
             selectedCoding.id = result;
-            if (this._codingScheme) {
-              this._codingScheme.variableCodings.filter(vc => vc.sourceType !== 'BASE').forEach(vc => {
+            if (this.schemerService.codingScheme) {
+              this.schemerService.codingScheme.variableCodings.filter(vc => vc.sourceType !== 'BASE').forEach(vc => {
                 if (vc.deriveSources.indexOf(oldName) >= 0) {
                   vc.deriveSources = vc.deriveSources.filter(s => s !== oldName);
                   vc.deriveSources.push(selectedCoding.id);
@@ -314,7 +306,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
               })
             }
             this.updateVariableLists();
-            this.codingSchemeChanged.emit(this._codingScheme);
+            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
           }
         }
       });
@@ -332,11 +324,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   copyVarScheme() {
     const selectedCoding = this.selectedCoding$.getValue();
-    if (selectedCoding && this._codingScheme) {
+    if (selectedCoding && this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
         title: 'Kodierung kopieren',
         prompt: 'Bitte Zielvariable wählen! Achtung: Die Kodierungsdaten der Zielvariable werden komplett überschrieben.',
-        variables: this._codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
+        variables: this.schemerService.codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
@@ -344,16 +336,16 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         data: dialogData
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this._codingScheme) {
-          const targetCoding = this._codingScheme.variableCodings.find(c => c.id === result);
+        if (result !== false && this.schemerService.codingScheme) {
+          const targetCoding = this.schemerService.codingScheme.variableCodings.find(c => c.id === result);
           if (targetCoding) {
             const stringifiedCoding = JSON.stringify(selectedCoding)
             const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
             newCoding.id = targetCoding.id;
-            this._codingScheme.variableCodings = this._codingScheme.variableCodings.filter(c => c.id !== targetCoding.id);
-            this._codingScheme.variableCodings.push(newCoding);
+            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings.filter(c => c.id !== targetCoding.id);
+            this.schemerService.codingScheme.variableCodings.push(newCoding);
             this.updateVariableLists();
-            this.codingSchemeChanged.emit(this._codingScheme);
+            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
           }
         }
       });

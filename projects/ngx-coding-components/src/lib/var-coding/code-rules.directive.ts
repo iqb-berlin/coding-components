@@ -6,11 +6,11 @@ import {CodeData, CodingRule, RuleMethod, RuleMethodParameterCount, RuleSet} fro
 export abstract class CodeRulesDirective {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
   @Input() public code: CodeData | undefined;
-  @Input() elseCodeExists: Boolean | undefined;
-  @Input() isEmptyCodeExists: Boolean | undefined;
-  @Input() isNullCodeExists: Boolean | undefined;
-  @Input() arrayMode: Boolean | undefined;
-  @Input() fragmentMode: Boolean | undefined;
+  @Input() elseCodeExists: boolean | undefined;
+  @Input() isEmptyCodeExists: boolean | undefined;
+  @Input() isNullCodeExists: boolean | undefined;
+  @Input() arrayMode: boolean | undefined;
+  @Input() fragmentMode: boolean | undefined;
   getParamCountWrapper = CodeRulesDirective.getParamCount;
   get firstRuleSet(): RuleSet | undefined {
     if (this.code && this.code.ruleSets && this.code.ruleSets.length > 0) return this.code.ruleSets[0];
