@@ -54,7 +54,7 @@
             <div *ngIf="fragmentMode">
               <button mat-flat-button (click)="editFragmentReference(rule)"
                       [matTooltip]="'rule.reference.prompt' | translate">
-                {{ rule.fragment | ruleReference }}
+                F {{ rule.fragment | ruleReference }}
               </button>
             </div>
           </div>
@@ -74,7 +74,7 @@
           <div *ngIf="arrayMode && ruleSet.rules.length > 0">
             <button mat-flat-button (click)="editArrayReference(ruleSet)"
                     [matTooltip]="'rule-set.reference.prompt' | translate">
-              {{ ruleSet.valueArrayPos | ruleReference }}
+              A {{ ruleSet.valueArrayPos | ruleReference }}
             </button>
           </div>
           <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate"

@@ -78,12 +78,14 @@
         </button>
       </div>
     </div>
-    <mat-card [style.flex]="'1 1 auto'">
-      <mat-card-subtitle class="fx-row-space-between-stretch">
-        {{'manual-instruction.prompt-general' | translate}}
-        <button mat-icon-button (click)="editTextDialog_manualInstruction()">
-          <mat-icon>edit</mat-icon>
-        </button>
+    <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">
+      <mat-card-subtitle>
+        <div class="fx-row-start-center">
+          <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.prompt-general' | translate}}</div>
+          <button mat-icon-button (click)="editTextDialog_manualInstruction()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
       </mat-card-subtitle>
       <mat-card-content class="instructions">
         <div [innerHTML]="varCoding ? getSanitizedText(varCoding.manualInstruction) : null"></div>

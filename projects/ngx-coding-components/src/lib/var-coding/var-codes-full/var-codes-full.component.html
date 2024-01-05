@@ -35,11 +35,11 @@
   <ng-container *ngIf="codes">
     <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch" [style.max-height.px]="500">
       <ng-container *ngIf="code">
-        <div class="fx-column-start-stretch" [style.max-width.%]="60">
+        <div class="fx-column-start-stretch" [style.width.%]="60">
           <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
                        [code]="code" [allCodes]="codes"></code-header>
           <code-rules-full [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
-                           [code]="code" [arrayMode]="true" [fragmentMode]="true"
+                           [code]="code" [arrayMode]="true" [fragmentMode]="!!fragmenting"
                            (codeRulesChanged)="codesChanged.emit(codes)"></code-rules-full>
         </div>
         <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)" class="fx-flex-fill"></code-instruction>
