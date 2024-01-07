@@ -1,0 +1,57 @@
+<h1 mat-dialog-title>{{ 'coding.generate.dialog-title' | translate}} '{{varInfo.id}}'</h1>
+
+<mat-dialog-content>
+  <div *ngIf="varInfo">
+    <p *ngFor="let info of ToTextFactory.varInfoAsText(varInfo)">{{info}}</p>
+  </div>
+  <div *ngIf="!varInfo">
+    <p>{{ 'coding.generate.no-var-info' | translate}}</p>
+  </div>
+  <div *ngIf="generationModel === 'none'" [style.font-style]="'italic'">{{ 'coding.generate.model.none' | translate}}</div>
+  <div *ngIf="generationModel !== 'none'" class="coding-action">
+    <p [style.font-weight]="'bold'">{{ 'coding.generate.title' | translate}}</p>
+    <p>{{ 'coding.generate.model.' + generationModel | translate}}</p>
+    <div *ngIf="generationModel === 'multi-choice'" class="fx-column-start-stretch">
+      <div class="fx-row-end-center">
+        <mat-label [style.margin-right.px]="8">{{'coding.generate.model.multi-choice-order-prompt' | translate}}</mat-label>
+        <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" disabled="true"></mat-checkbox>
+        <div>{{ 'coding.generate.model.multi-choice-' + (multiChoiceOrderMatters ? 'yes' : 'no') | translate}}</div>
+      </div>
+      <mat-selection-list *ngIf="!multiChoiceOrderMatters" [(ngModel)]="selectedOptions" multiple="true">
+        <mat-list-option *ngFor="let c of options" [value]="c.value">
+          '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+        </mat-list-option>
+      </mat-selection-list>
+      <div *ngIf="multiChoiceOrderMatters">
+        coming soon: drag'n'drop of values
+      </div>
+    </div>
+    <mat-selection-list *ngIf="generationModel === 'single-choice-some'"
+                        [(ngModel)]="selectedOption" multiple="false">
+      <mat-list-option *ngFor="let c of options" [value]="c.value">
+        '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+      </mat-list-option>
+      <div class="fx-row-end-center">
+        <mat-label>{{'coding.generate.model.single-choice-long-version' | translate}}</mat-label>
+        <mat-checkbox [(ngModel)]="singleChoiceLongVersion" [style.margin.px]="8"></mat-checkbox>
+      </div>
+      <div>{{ 'coding.generate.model.single-choice-' + (singleChoiceLongVersion ? 'long-version-text' : 'short-version-text') | translate}}</div>
+    </mat-selection-list>
+    <mat-form-field *ngIf="generationModel === 'single-choice-many'">
+      <mat-select [(value)]="selectedOption">
+        <mat-option *ngFor="let c of options" [value]="c.value">
+          '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div *ngIf="generationModel === 'integer'">
+      coming soon: integer
+    </div>
+    <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-raised-button [disabled]="generationModel === 'none'" (click)="generateButtonClick()">{{'coding.generate.action' | translate}}</button>
+  <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
+</mat-dialog-actions>
