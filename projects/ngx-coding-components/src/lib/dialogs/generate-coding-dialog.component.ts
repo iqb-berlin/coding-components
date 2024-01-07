@@ -9,6 +9,8 @@ import {
   VariableInfo
 } from "@iqb/responses";
 import {CodeModelType} from "@iqb/responses/coding-interfaces";
+import {CodingFactory} from "@iqb/responses/coding-factory";
+import {TranslateService} from "@ngx-translate/core";
 
 export interface GeneratedCodingData {
   id: string,
@@ -41,9 +43,13 @@ export class GenerateCodingDialogComponent {
     value: string,
     label: string
   }[] = [];
+  numericMoreThen = '';
+  numericMax = '';
+  numericRuleText = '';
 
   constructor(
       @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
+      public translateService: TranslateService,
       public dialogRef: MatDialogRef<GenerateCodingDialogComponent>,
   ) {
     if (varInfo) {
@@ -67,10 +73,44 @@ export class GenerateCodingDialogComponent {
     }
   }
 
+  updateNumericRuleText() {
+    const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+    const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
+    if (moreThenValue && !maxValue) {
+      this.numericRuleText = this.translateService.instant('rule.NUMERIC_MORE_THEN')
+    } else if (!moreThenValue && maxValue) {
+      this.numericRuleText = this.translateService.instant('rule.NUMERIC_MAX')
+    } else if (moreThenValue && maxValue && moreThenValue < maxValue) {
+      this.numericRuleText = this.translateService.instant('rule.NUMERIC_RANGE')
+    } else {
+      this.numericRuleText = this.translateService.instant('rule.no-rules')
+    }
+  }
+
   generateButtonClick() {
     if (this.generationModel === 'none') {
       this.dialogRef.close(null);
     } else if (this.generationModel === 'integer') {
+      const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+      const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
+      const numericRules: CodingRule[] = [];
+      if (moreThenValue && !maxValue) {
+        numericRules.push({
+          method: "NUMERIC_MORE_THEN",
+          parameters: [moreThenValue.toString(10)]
+        });
+      } else if (!moreThenValue && maxValue) {
+        numericRules.push({
+          method: "NUMERIC_MAX",
+          parameters: [maxValue.toString(10)]
+        });
+      } else if (moreThenValue && maxValue && moreThenValue < maxValue) {
+        numericRules.push({
+          method: "NUMERIC_RANGE",
+          parameters: [moreThenValue.toString(10), maxValue.toString(10)]
+        });
+      }
+
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
         processing: [],
@@ -86,10 +126,7 @@ export class GenerateCodingDialogComponent {
             ruleSetOperatorAnd: false,
             ruleSets: [<RuleSet>{
               ruleOperatorAnd: true,
-              rules: [<CodingRule>{
-                method: "NUMERIC_MATCH",
-                parameters: ['']
-              }]
+              rules: numericRules
             }],
             manualInstruction: ''
           },

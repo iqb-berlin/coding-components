@@ -44,8 +44,20 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <div *ngIf="generationModel === 'integer'">
-      coming soon: integer
+    <div *ngIf="generationModel === 'integer'" class="fx-row-start-center">
+      <mat-form-field>
+        <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
+        <input matInput
+               [(ngModel)]="numericMoreThen"
+               (ngModelChange)="updateNumericRuleText()">
+      </mat-form-field>
+      <mat-form-field [style.margin.px]="8">
+        <mat-label>{{ 'rule.NUMERIC_MAX' | translate }}</mat-label>
+        <input matInput
+               [(ngModel)]="numericMax"
+               (ngModelChange)="updateNumericRuleText()">
+      </mat-form-field>
+      <div>{{numericRuleText}}</div>
     </div>
     <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
   </div>

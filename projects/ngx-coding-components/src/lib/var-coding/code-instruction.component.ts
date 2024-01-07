@@ -12,7 +12,7 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
       <mat-card-subtitle>
         <div class="fx-row-start-center">
           <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.prompt-code' | translate}}</div>
-          <button mat-icon-button (click)="editTextDialog_manualInstruction(translateService, editTextDialog)">
+          <button mat-icon-button (click)="editTextDialog_manualInstruction()">
             <mat-icon>edit</mat-icon>
           </button>
         </div>
@@ -33,12 +33,12 @@ export class CodeInstructionComponent {
     public editTextDialog: MatDialog
   ) { }
 
-  editTextDialog_manualInstruction(translateService: TranslateService, editTextDialog: MatDialog): void {
+  editTextDialog_manualInstruction(): void {
     if (this.code) {
-      const dialogRef = editTextDialog.open(RichTextEditDialogComponent, {
+      const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
         width: '1100px',
         data: {
-          title: translateService.instant('manual-instruction.prompt-code'),
+          title: this.translateService.instant('manual-instruction.prompt-code'),
           content: this.code.manualInstruction || '',
           defaultFontSize: 20,
           editorHeightPx: 400

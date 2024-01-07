@@ -53,7 +53,7 @@
   },
   {
     "id": "Susi",
-    "type": "string",
+    "type": "integer",
     "format": "",
     "multiple": false,
     "nullable": false,
