@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {CodingScheme, DeriveConcatDelimiter, VariableCodingData, VariableInfo} from "@iqb/responses";
+import {CodingScheme, DeriveConcatDelimiter, VariableCodingData, VariableInfo, VariableValue} from "@iqb/responses";
 
 @Injectable({
   providedIn: 'root'
@@ -19,29 +19,20 @@ export class SchemerService {
     } else if (varCoding.sourceType === 'CONCAT_CODE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
         const codes: (number | null)[][] = [];
-        let newPage: string | null = '';
         varCoding.deriveSources.forEach(s => {
           if (this.codingScheme) {
             const coding = this.codingScheme.variableCodings.find(v => v.id === s);
-            if (coding) {
-              codes.push(coding.codes.map(c => c.id));
-              if (newPage !== null && coding.page) {
-                if (newPage) {
-                  if (newPage !== coding.page) newPage = null;
-                } else {
-                  newPage = coding.page;
-                }
-              }
-            }
+            codes.push(coding ? coding.codes.map(c => c.id) : []);
           }
         })
         let resultArray: string[] = [];
+        console.log(codes);
         codes.forEach(c => {
           if (resultArray.length > 0) {
             const newArray: string[] = [];
             resultArray.forEach(oldEntry => {
               c.forEach(cEntry => {
-                if (cEntry) resultArray.push(`${oldEntry}${DeriveConcatDelimiter}${cEntry}`);
+                if (cEntry) newArray.push(`${oldEntry}${DeriveConcatDelimiter}${cEntry}`);
               })
             })
             resultArray = newArray;
@@ -50,36 +41,24 @@ export class SchemerService {
               if (cEntry) resultArray.push(cEntry.toString(10))
             })
           }
-        })
+        });
+        console.log(resultArray);
         return <VariableInfo>{
           id: varCoding.id,
           type: 'string',
           format: '',
           multiple: false,
           nullable: false,
-          values: resultArray as [],
+          values: resultArray.map(r => <VariableValue>{
+            value: r, label: ''
+          }),
           valuePositionLabels: [],
           valuesComplete: true,
-          page: newPage || ''
+          page: ''
         }
       }
     } else {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
-        let newPage: string | null = '';
-        varCoding.deriveSources.forEach(s => {
-          if (this.codingScheme) {
-            const coding = this.codingScheme.variableCodings.find(v => v.id === s);
-            if (coding) {
-              if (newPage !== null && coding.page) {
-                if (newPage) {
-                  if (newPage !== coding.page) newPage = null;
-                } else {
-                  newPage = coding.page;
-                }
-              }
-            }
-          }
-        })
         return <VariableInfo>{
           id: varCoding.id,
           type: 'integer',
@@ -89,7 +68,7 @@ export class SchemerService {
           values: [],
           valuePositionLabels: [],
           valuesComplete: false,
-          page: newPage || ''
+          page: ''
         }
       }
     }
