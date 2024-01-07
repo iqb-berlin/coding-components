@@ -3,11 +3,10 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {MatDialog} from '@angular/material/dialog';
 import {TranslateService} from '@ngx-translate/core';
 import {RichTextEditDialogComponent} from '../rich-text-editor/rich-text-edit-dialog.component';
-import {VariableCodingData, VariableInfo} from "@iqb/responses";
+import {VariableCodingData} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
-import { CodeData,  CodeModelType} from "@iqb/responses/coding-interfaces";
-import {GenerateCodingDialogComponent} from "../dialogs/generate-coding-dialog.component";
+import {GenerateCodingDialogComponent, GeneratedCodingData} from "../dialogs/generate-coding-dialog.component";
 import {SchemerService} from "../services/schemer.service";
 
 @Component({
@@ -110,52 +109,23 @@ export class VarCodingComponent implements OnInit, OnDestroy {
   smartSchemer() {
     if (this.varCoding) {
       const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
-          width: '1000px',
-          data: this.schemerService.getVarInfoByCoding(this.varCoding)
+        width: '1000px',
+        data: this.schemerService.getVarInfoByCoding(this.varCoding)
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
-          if (typeof dialogResult !== 'undefined') {
-              if (dialogResult !== false && this.varCoding) {
-                  const newCoding = dialogResult as VariableCodingData;
-                  this.varCoding.processing = newCoding.processing;
-                  this.varCoding.fragmenting = newCoding.fragmenting;
-                  this.varCoding.codeModel = newCoding.codeModel;
-                  this.varCoding.codeModelParameters = newCoding.codeModelParameters;
-                  this.varCoding.codes = newCoding.codes;
-                  this.varCodingChanged.emit(this.varCoding);
-              }
-          }
+        if (typeof dialogResult !== 'undefined' && dialogResult !== false && dialogResult !== null && this.varCoding) {
+          const newCoding = dialogResult as GeneratedCodingData;
+          this.varCoding.processing = newCoding.processing;
+          this.varCoding.fragmenting = newCoding.fragmenting;
+          this.varCoding.codeModel = newCoding.codeModel;
+          this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+          this.varCoding.codes = newCoding.codes;
+          this.varCodingChanged.emit(this.varCoding);
+        }
       });
     }
   }
 
-  static guessCodeModel(varInfo: VariableInfo): CodeModelType {
-    return (varInfo.type === "string" && !varInfo.multiple && varInfo.valuesComplete) ? 'VALUE_LIST' : 'NONE';
-  }
-  static guessCodes(varInfo: VariableInfo): CodeData[] {
-    let returnData: CodeData[] = [];
-    if (varInfo.type === "string" && !varInfo.multiple && varInfo.valuesComplete) {
-      returnData = varInfo.values.filter(v => typeof v.value === "string").map((v, index) => {
-        return {
-          id: index + 1,
-          label: v.label,
-          score: 0,
-          ruleSetOperatorAnd: false,
-          ruleSets: [{
-            ruleOperatorAnd: false,
-            rules: [
-              {
-                method: 'MATCH',
-                parameters: [v.value as string]
-              }
-            ],
-          }],
-          manualInstruction: ''
-        }
-      })
-    }
-    return returnData;
-  }
   ngOnDestroy(): void {
     if (this.lastChangeFromSubscription !== null) this.lastChangeFromSubscription.unsubscribe();
   }

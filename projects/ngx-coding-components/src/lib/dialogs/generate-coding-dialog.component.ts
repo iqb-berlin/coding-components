@@ -1,7 +1,23 @@
 import { Component, Inject } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {CodingRule, RuleSet, ToTextFactory, VariableCodingData, VariableInfo} from "@iqb/responses";
-import {CodingFactory} from "@iqb/responses/coding-factory";
+import {
+  CodeData,
+  CodingRule,
+  ProcessingParameterType,
+  RuleSet,
+  ToTextFactory,
+  VariableInfo
+} from "@iqb/responses";
+import {CodeModelType} from "@iqb/responses/coding-interfaces";
+
+export interface GeneratedCodingData {
+  id: string,
+  processing: ProcessingParameterType[],
+  fragmenting: string,
+  codeModel: CodeModelType,
+  codeModelParameters: string[],
+  codes: CodeData[]
+}
 
 @Component({
   template: `
@@ -14,24 +30,47 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
       <div *ngIf="!varInfo">
         <p>{{ 'coding.generate.no-var-info' | translate}}</p>
       </div>
-      <div *ngIf="!newCodingMessage" [style.font-style]="'italic'">{{ 'coding.generate.no-suggestion' | translate}}</div>
-      <div *ngIf="newCodingMessage" class="coding-action">
+      <div *ngIf="generationModel === 'none'" [style.font-style]="'italic'">{{ 'coding.generate.model.none' | translate}}</div>
+      <div *ngIf="generationModel !== 'none'" class="coding-action">
         <p [style.font-weight]="'bold'">{{ 'coding.generate.title' | translate}}</p>
-        <p>{{ 'coding.generate.' + newCodingMessage | translate}}</p>
-        <mat-selection-list *ngIf="newCodingMessage === 'new-coding-choice'"
-                            [(ngModel)]="selectedChoice" label="Wert für 'Richtig'"
-                            multiple="false">
-          <mat-list-option *ngFor="let c of newCodingChoices" [value]="c.value">
-            '{{c.value}}' - {{c.label}}
+        <p>{{ 'coding.generate.model.' + generationModel | translate}}</p>
+        <div *ngIf="generationModel === 'multi-choice'" class="fx-column-start-stretch">
+          <div class="fx-row-end-center">
+            <mat-label [style.margin-right.px]="8">{{'coding.generate.model.multi-choice-order-prompt' | translate}}</mat-label>
+            <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" disabled="true"></mat-checkbox>
+            <div>{{ 'coding.generate.model.multi-choice-' + (multiChoiceOrderMatters ? 'yes' : 'no') | translate}}</div>
+          </div>
+          <mat-selection-list *ngIf="!multiChoiceOrderMatters" [(ngModel)]="selectedOptions" multiple="true">
+            <mat-list-option *ngFor="let c of options" [value]="c.value">
+              '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+            </mat-list-option>
+          </mat-selection-list>
+          <div *ngIf="multiChoiceOrderMatters">
+            coming soon: drag'n'drop of values
+          </div>
+        </div>
+        <mat-selection-list *ngIf="generationModel === 'single-choice-some'"
+                            [(ngModel)]="selectedOption" multiple="false">
+          <mat-list-option *ngFor="let c of options" [value]="c.value">
+            '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
           </mat-list-option>
         </mat-selection-list>
-        <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}
-        </p>
+        <mat-form-field *ngIf="generationModel === 'single-choice-many'">
+          <mat-select [(value)]="selectedOption">
+            <mat-option *ngFor="let c of options" [value]="c.value">
+              '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div *ngIf="generationModel === 'integer'">
+          coming soon: integer
+        </div>
+        <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
       </div>
     </mat-dialog-content>
 
     <mat-dialog-actions>
-      <button mat-raised-button [disabled]="!canGenerate" (click)="generateButtonClick()">{{'coding.generate.action' | translate}}</button>
+      <button mat-raised-button [disabled]="generationModel === 'none'" (click)="generateButtonClick()">{{'coding.generate.action' | translate}}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
   `,
@@ -43,15 +82,17 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
     }`
   ]
 })
+
 export class GenerateCodingDialogComponent {
-  canGenerate = false;
+  generationModel: 'none' | 'single-choice-some' | 'single-choice-many' | 'multi-choice' | 'integer';
   protected readonly ToTextFactory = ToTextFactory;
-  selectedChoice?: string;
-  newCodingChoices: {
+  selectedOption: string = '';
+  selectedOptions: string[] = [];
+  multiChoiceOrderMatters = false;
+  options: {
     value: string,
     label: string
   }[] = [];
-  newCodingMessage = '';
 
   constructor(
       @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -60,113 +101,36 @@ export class GenerateCodingDialogComponent {
     if (varInfo) {
       if (varInfo.valuesComplete && varInfo.values && varInfo.values.length > 0) {
         if (varInfo.multiple) {
-          if (varInfo.values.length < 20) {
-            this.newCodingMessage = 'new-coding-dragndrop';
-            // this.canGenerate = true;
-          }
+          this.generationModel = 'multi-choice';
         } else {
-          if (varInfo.values.length > 20) {
-            this.newCodingMessage += 'new-coding-choice-no-selection'
-          } else {
-            this.newCodingMessage += 'new-coding-choice'
-            this.newCodingChoices = varInfo.values.map(v => <{value: string, label: string}>{
-              value: (typeof v.value === 'string') ? v.value : v.value.toString(),
-              label: v.label
-            });
-          }
-          this.canGenerate = true;
+          this.generationModel = varInfo.values.length > 20 ? 'single-choice-many' : 'single-choice-some';
         }
+        this.options = varInfo.values.map(v => <{value: string, label: string}>{
+          value: (typeof v.value === 'string') ? v.value : v.value.toString(),
+          label: v.label
+        });
+      } else if (varInfo.type === 'integer') {
+        this.generationModel = 'integer'
+      } else {
+        this.generationModel = 'none'
       }
+    } else {
+      this.generationModel = 'none'
     }
   }
 
   generateButtonClick() {
-    let newCoding: VariableCodingData | null = null;
-    if (this.varInfo) {
-      if (this.varInfo.valuesComplete && this.varInfo.values && this.varInfo.values.length > 0) {
-        if (this.varInfo.multiple) {
-          if (this.varInfo.values.length < 20) {
-            this.newCodingMessage = 'new-coding-dragndrop';
-            newCoding = CodingFactory.createCodingVariableFromVarInfo(this.varInfo);
-            newCoding.codeModel = "CHOICE";
-            newCoding.codes = [
-              {
-                id: 1,
-                label: 'Richtig',
-                score: 1,
-                ruleSetOperatorAnd: false,
-                ruleSets: [<RuleSet>{
-                  ruleOperatorAnd: true,
-                  rules: this.varInfo.values.map(v => <CodingRule>{
-                    method: "MATCH",
-                    parameters: [(typeof v.value === 'string') ? v.value : v.value.toString()]
-                  })
-                }],
-                manualInstruction: ''
-              },
-              {
-                id: 2,
-                label: 'Falsch',
-                score: 0,
-                ruleSetOperatorAnd: false,
-                ruleSets: [<RuleSet>{
-                  ruleOperatorAnd: false,
-                  rules: [{
-                    method: "ELSE"
-                  }]
-                }],
-                manualInstruction: ''
-              }
-            ];
-          }
-        } else {
-          this.newCodingMessage = 'new-coding-choice';
-          newCoding = CodingFactory.createCodingVariableFromVarInfo(this.varInfo);
-          newCoding.codeModel = "CHOICE";
-          newCoding.codes = [
-            {
-              id: 1,
-              label: 'Richtig',
-              score: 1,
-              ruleSetOperatorAnd: false,
-              ruleSets: [<RuleSet>{
-                ruleOperatorAnd: true,
-                rules: [{
-                  method: "MATCH",
-                  parameters: [this.selectedChoice || '']
-                }]
-              }],
-              manualInstruction: ''
-            },
-            {
-              id: 2,
-              label: 'Falsch',
-              score: 0,
-              ruleSetOperatorAnd: false,
-              ruleSets: [<RuleSet>{
-                ruleOperatorAnd: false,
-                rules: [{
-                  method: "ELSE"
-                }]
-              }],
-              manualInstruction: ''
-            }
-          ];
-        }
-      } else if (this.varInfo.type === 'integer') {
-        const newCoding =   <VariableCodingData>{
-          id: this.varInfo.id,
-          label: '',
-          sourceType: 'SUM_SCORE',
-          deriveSources: [],
-          processing: [],
-          manualInstruction: '',
-          codeModel: 'NUMBER',
-          codeModelParameters: [],
-          codes: [],
-          page: ''
-        };
-        newCoding.codes = [
+    if (this.generationModel === 'none') {
+      this.dialogRef.close(null);
+    } else if (this.generationModel === 'integer') {
+      this.dialogRef.close(<GeneratedCodingData>{
+        id: this.varInfo.id,
+        processing: [],
+        fragmenting: '',
+        manualInstruction: '',
+        codeModel: 'NUMBER',
+        codeModelParameters: [],
+        codes: [
           {
             id: 1,
             label: 'Richtig',
@@ -176,7 +140,7 @@ export class GenerateCodingDialogComponent {
               ruleOperatorAnd: true,
               rules: [<CodingRule>{
                 method: "NUMERIC_MATCH",
-                parameters: ['2']
+                parameters: ['']
               }]
             }],
             manualInstruction: ''
@@ -194,9 +158,62 @@ export class GenerateCodingDialogComponent {
             }],
             manualInstruction: ''
           }
-        ];
+        ]
+      });
+    } else if (this.generationModel === 'single-choice-many' || this.generationModel === 'single-choice-some' ||
+        (this.generationModel === 'multi-choice' && !this.multiChoiceOrderMatters)) {
+      const fullCreditRules: CodingRule[] = [];
+      if (this.generationModel === 'multi-choice') {
+        this.selectedOptions.forEach(s => {
+          fullCreditRules.push({
+            method: "MATCH",
+            parameters: [s]
+          })
+        });
+      } else {
+        fullCreditRules.push({
+          method: "MATCH",
+          parameters: [this.selectedOption || '']
+        })
       }
+      this.dialogRef.close(<GeneratedCodingData>{
+        id: this.varInfo.id,
+        processing: [],
+        fragmenting: '',
+        codeModel: 'CHOICE',
+        codeModelParameters: [],
+        codes: [
+          {
+            id: 1,
+            label: 'Richtig',
+            score: 1,
+            ruleSetOperatorAnd: false,
+            ruleSets: [<RuleSet>{
+              ruleOperatorAnd: true,
+              rules: fullCreditRules
+            }],
+            manualInstruction: ''
+          },
+          {
+            id: 2,
+            label: 'Falsch',
+            score: 0,
+            ruleSetOperatorAnd: false,
+            ruleSets: [<RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [{
+                method: "ELSE"
+              }]
+            }],
+            manualInstruction: ''
+          }
+        ]
+      })
+    } else if (this.generationModel === 'multi-choice' && this.multiChoiceOrderMatters) {
+      console.log(this.selectedOptions);
+      this.dialogRef.close(null);
+    } else {
+      this.dialogRef.close(null);
     }
-    this.dialogRef.close(newCoding);
   }
 }
