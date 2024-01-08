@@ -194,6 +194,9 @@ export class GenerateCodingDialogComponent {
             parameters: [s]
           })
         });
+        fullCreditRules.push({
+          method: "NO_OTHER_MATCHES",
+        });
       } else {
         fullCreditRules.push({
           method: "MATCH",
