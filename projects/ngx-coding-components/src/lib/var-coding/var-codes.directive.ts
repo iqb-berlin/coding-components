@@ -1,6 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData, ProcessingParameterType, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
-import {TranslateService} from "@ngx-translate/core";
 
 export const singletonRules: RuleMethod[] = [
   'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
@@ -82,11 +81,10 @@ export abstract class VarCodesDirective {
     }
   }
 
-  addCodeSingleton(newCodeMethod: RuleMethod, translateService: TranslateService) {
+  addCodeSingleton(newCodeMethod: RuleMethod) {
     if (!this.hasRule(newCodeMethod)) {
       const newCode = this.addCode(false);
       if (newCode) {
-        newCode.label = translateService.instant(`rule.${newCodeMethod}`);
         newCode.ruleSets[0].rules = [{
           method: newCodeMethod
         }];

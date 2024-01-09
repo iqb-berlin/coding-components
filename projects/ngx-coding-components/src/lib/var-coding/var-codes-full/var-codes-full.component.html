@@ -43,7 +43,7 @@
                            (codeRulesChanged)="codesChanged.emit(codes)"></code-rules-full>
         </div>
         <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)" class="fx-flex-fill"></code-instruction>
-        <button mat-icon-button (click)="deleteCode(codeIndex)" [matTooltip]="'code.prompt.delete' | translate">
+        <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
           <mat-icon>delete</mat-icon>
         </button>
       </ng-container>
@@ -54,5 +54,8 @@
       </button>
       <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
     </div>
+    <button mat-raised-button (click)="addCodeSingleton('ELSE'); updateCodeExistences()" [disabled]="!!elseCodeExists">
+      <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
+    </button>
   </ng-container>
 </div>

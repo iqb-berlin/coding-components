@@ -43,7 +43,7 @@ export class PossibleNewRulesPipe implements PipeTransform {
     }
     return returnMethods;
   }
-  transform(value: CodingRule[], dataType: string,
+  transform(value: CodingRule[], dataType?: string,
             nullable?: boolean, fragmenting?: boolean | undefined,
             ruleOperatorAnd?: boolean): RuleMethod[] {
     let returnMethods: RuleMethod[] = [];
@@ -56,7 +56,7 @@ export class PossibleNewRulesPipe implements PipeTransform {
       if (otherRuleMethods.indexOf('IS_FALSE') < 0 && otherRuleMethods.indexOf('IS_TRUE') < 0 && !fragmenting) {
         returnMethods = ['IS_FALSE', 'IS_TRUE'];
       }
-    } else if (dataType === 'number') {
+    } else if (dataType === 'number' || dataType === 'integer') {
       returnMethods = PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd || false, fragmenting);
     } else if (dataType === 'string') {
       returnMethods = ['MATCH', 'MATCH_REGEX'];

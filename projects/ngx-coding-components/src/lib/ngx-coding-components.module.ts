@@ -37,7 +37,6 @@ import {VarCodesManualComponent} from "./var-coding/var-codes-manual/var-codes-m
 import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
 import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-value-list.component";
 import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-number.component";
-import {CodeNumberComponent} from "./var-coding/var-codes-number/code-number.component";
 import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component";
 import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
@@ -85,7 +84,6 @@ import {HasRulePipe} from "./pipes/has-rule.pipe";
     GenerateCodingDialogComponent,
     ComboButtonComponent,
     VarCodesNumberComponent,
-    CodeNumberComponent,
     SchemerToolbarComponent
   ],
   exports: [
