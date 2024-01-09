@@ -24,10 +24,8 @@
       <button mat-raised-button (click)="addCodeSingleton('ELSE', translateService); updateCodeExistences()" [disabled]="!!elseCodeExists">
         <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
       </button>
-      <button mat-raised-button (click)="addCodeSingleton('IS_EMPTY', translateService); updateCodeExistences()" [disabled]="!!isEmptyCodeExists">
-        <mat-icon>add</mat-icon>{{'code.prompt.add-is-empty' | translate}}
-      </button>
-      <button mat-raised-button (click)="addCodeSingleton('IS_NULL', translateService); updateCodeExistences()" [disabled]="!!isNullCodeExists">
+      <button mat-raised-button *ngIf="varInfo?.nullable"
+              (click)="addCodeSingleton('IS_NULL', translateService); updateCodeExistences()" [disabled]="!!isNullCodeExists">
         <mat-icon>add</mat-icon>{{'code.prompt.add-is-null' | translate}}
       </button>
     </div>

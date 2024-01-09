@@ -1,9 +1,9 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {MatDialog} from '@angular/material/dialog';
 import {TranslateService} from '@ngx-translate/core';
 import {RichTextEditDialogComponent} from '../rich-text-editor/rich-text-edit-dialog.component';
-import {VariableCodingData} from "@iqb/responses";
+import {VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
 import {GenerateCodingDialogComponent, GeneratedCodingData} from "../dialogs/generate-coding-dialog.component";
@@ -14,11 +14,12 @@ import {SchemerService} from "../services/schemer.service";
   templateUrl: './var-coding.component.html',
   styleUrls: ['./var-coding.component.scss']
 })
-export class VarCodingComponent implements OnInit, OnDestroy {
+export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
   @Input() varCoding: VariableCodingData | null = null;
   lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
+  varInfo: VariableInfo | undefined;
 
   constructor(
     public schemerService: SchemerService,
@@ -37,6 +38,9 @@ export class VarCodingComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    this.updateVarInfo();
+  }
   getNewSources(usedVars: string[]) {
     const returnSources: string[] = [];
     this.schemerService.allVariableIds.forEach(v => {
@@ -53,11 +57,17 @@ export class VarCodingComponent implements OnInit, OnDestroy {
     }
   }
 
+  updateVarInfo() {
+    console.log('#');
+    this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
+  }
+
   deleteDeriveSource(source: string) {
     if (this.varCoding) {
       const sourcePos = this.varCoding.deriveSources.indexOf(source);
       if (sourcePos >= 0) this.varCoding.deriveSources.splice(sourcePos, 1);
       this.varCodingChanged.emit(this.varCoding);
+      this.updateVarInfo();
     }
   }
 
@@ -66,6 +76,7 @@ export class VarCodingComponent implements OnInit, OnDestroy {
       this.varCoding.deriveSources.push(v);
       this.varCoding.deriveSources.sort();
       this.varCodingChanged.emit(this.varCoding);
+      this.updateVarInfo();
     }
   }
 
@@ -110,7 +121,7 @@ export class VarCodingComponent implements OnInit, OnDestroy {
     if (this.varCoding) {
       const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
         width: '1000px',
-        data: this.schemerService.getVarInfoByCoding(this.varCoding)
+        data: this.varInfo
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (typeof dialogResult !== 'undefined' && dialogResult !== false && dialogResult !== null && this.varCoding) {

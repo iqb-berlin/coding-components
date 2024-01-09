@@ -12,7 +12,6 @@ export class PossibleNewRulesPipe implements PipeTransform {
     if (fragmenting) return ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MAX',
     'NUMERIC_MORE_THEN', 'NUMERIC_MIN'];
     const returnMethods: RuleMethod[] = [];
-    console.log(otherRuleMethods);
     if (ruleOperatorAnd) {
       if (otherRuleMethods.indexOf('NUMERIC_RANGE') < 0 &&
         otherRuleMethods.indexOf('NUMERIC_MATCH') < 0) {
@@ -45,8 +44,8 @@ export class PossibleNewRulesPipe implements PipeTransform {
     return returnMethods;
   }
   transform(value: CodingRule[], dataType: string,
-            nullable: boolean, fragmenting: boolean | undefined,
-            ruleOperatorAnd: boolean): RuleMethod[] {
+            nullable?: boolean, fragmenting?: boolean | undefined,
+            ruleOperatorAnd?: boolean): RuleMethod[] {
     let returnMethods: RuleMethod[] = [];
     const otherRuleMethods = value.map(r => r.method);
     if (otherRuleMethods.indexOf('ELSE') >= 0) return [];
@@ -58,12 +57,12 @@ export class PossibleNewRulesPipe implements PipeTransform {
         returnMethods = ['IS_FALSE', 'IS_TRUE'];
       }
     } else if (dataType === 'number') {
-      returnMethods = PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd, fragmenting);
+      returnMethods = PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd || false, fragmenting);
     } else if (dataType === 'string') {
       returnMethods = ['MATCH', 'MATCH_REGEX'];
     } else {
       returnMethods = ['MATCH', 'MATCH_REGEX',
-        ...PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd, fragmenting)];
+        ...PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd || false, fragmenting)];
       if (otherRuleMethods.indexOf('IS_FALSE') < 0 && otherRuleMethods.indexOf('IS_TRUE') < 0 && !fragmenting) {
         returnMethods.push('IS_FALSE');
         returnMethods.push('IS_TRUE');

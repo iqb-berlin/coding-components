@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, ProcessingParameterType, RuleMethod, RuleSet} from "@iqb/responses";
+import {CodeData, ProcessingParameterType, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
 import {TranslateService} from "@ngx-translate/core";
 
 export const singletonRules: RuleMethod[] = [
@@ -18,6 +18,7 @@ export abstract class VarCodesDirective {
   @Output() codeModelParametersChanged = new EventEmitter<string[]>();
   @Input() public codes: CodeData[] | undefined;
   @Input() public processing: ProcessingParameterType[] | undefined;
+  @Input() public varInfo: VariableInfo | undefined;
   @Input() public fragmenting: string | undefined;
   @Input() public codeModelParameters: string[] | undefined;
   elseCodeExists: Boolean | undefined;

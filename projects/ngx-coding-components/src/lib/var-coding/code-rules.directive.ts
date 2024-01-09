@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, CodingRule, RuleMethod, RuleMethodParameterCount, RuleSet} from "@iqb/responses";
+import {CodeData, CodingRule, RuleMethod, RuleMethodParameterCount, RuleSet, VariableInfo} from "@iqb/responses";
 
 
 @Directive()
@@ -9,7 +9,7 @@ export abstract class CodeRulesDirective {
   @Input() elseCodeExists: boolean | undefined;
   @Input() isEmptyCodeExists: boolean | undefined;
   @Input() isNullCodeExists: boolean | undefined;
-  @Input() arrayMode: boolean | undefined;
+  @Input() varInfo: VariableInfo | undefined;
   @Input() fragmentMode: boolean | undefined;
   getParamCountWrapper = CodeRulesDirective.getParamCount;
   get firstRuleSet(): RuleSet | undefined {

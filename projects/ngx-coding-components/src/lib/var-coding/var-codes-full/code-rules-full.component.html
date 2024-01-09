@@ -3,7 +3,7 @@
     <div class="fx-row-space-between-center" [style.padding]="'0 16px'">
       <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt-auto-coding' | translate}}</div>
       <div *ngIf="code" class="fx-row-end-center">
-        <button mat-icon-button  *ngIf="arrayMode" [matTooltip]="'rule-set.prompt.add' | translate"
+        <button mat-icon-button *ngIf="varInfo?.multiple" [matTooltip]="'rule-set.prompt.add' | translate"
                 (click)="addRuleSet(); setTab()">
           <mat-icon>add</mat-icon>
         </button>
@@ -66,14 +66,14 @@
           </button>
           <mat-menu #menu="matMenu">
             <button mat-menu-item
-                    *ngFor="let newSource of (ruleSet.rules | possibleNewRules:'':false:fragmentMode:ruleSet.ruleOperatorAnd)"
+                    *ngFor="let newSource of (ruleSet.rules | possibleNewRules:'':varInfo?.nullable:fragmentMode:ruleSet.ruleOperatorAnd)"
                     (click)="addRule(ruleSet, newSource)">
               {{('rule.' + newSource) | translate}}
             </button>
           </mat-menu>
           <div *ngIf="ruleSet.rules.length === 0" [matMenuTriggerFor]="menu"
                class="no-rules">{{'rule.no-rules' | translate}}</div>
-          <div *ngIf="arrayMode && ruleSet.rules.length > 0">
+          <div *ngIf="varInfo && varInfo.multiple && ruleSet.rules.length > 0">
             <button mat-flat-button (click)="editArrayReference(ruleSet)"
                     [matTooltip]="'rule-set.reference.prompt' | translate">
               A {{ ruleSet.valueArrayPos | ruleReference }}
