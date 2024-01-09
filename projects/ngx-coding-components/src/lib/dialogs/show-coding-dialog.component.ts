@@ -32,7 +32,14 @@ import {CodingAsText, ToTextFactory, VariableCodingData} from "@iqb/responses";
           <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.code}}</div>
           <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.score}}</div>
           <div class="fx-flex-row-20">{{codeText.label}}</div>
-          <div class="fx-flex-fill">{{codeText.description || 'keine'}}</div>
+          <div class="fx-flex-fill">
+            <ul *ngIf="codeText.ruleSetDescriptions.length > 1">
+              <li *ngFor="let d of codeText.ruleSetDescriptions">{{d}}</li>
+            </ul>
+            <p *ngIf="codeText.ruleSetDescriptions.length > 1">Verknüpfung der Regelsätze: {{codeText.ruleSetOperatorAnd ? 'UND' : 'ODER'}}</p>
+            <p *ngIf="codeText.ruleSetDescriptions.length === 1">{{codeText.ruleSetDescriptions[0]}}</p>
+            <p *ngIf="codeText.ruleSetDescriptions.length < 1">keine</p>
+          </div>
           <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.hasManualInstruction ? 'ja' : '-'}}</div>
         </div>
       </ng-container>

@@ -26,7 +26,6 @@ export class SchemerService {
           }
         })
         let resultArray: string[] = [];
-        console.log(codes);
         codes.forEach(c => {
           if (resultArray.length > 0) {
             const newArray: string[] = [];

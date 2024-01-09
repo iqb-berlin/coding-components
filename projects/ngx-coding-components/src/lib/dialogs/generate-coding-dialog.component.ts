@@ -200,9 +200,10 @@ export class GenerateCodingDialogComponent {
       } else {
         fullCreditRules.push({
           method: "MATCH",
-          parameters: [this.selectedOption || '']
+          parameters: [this.selectedOptions[0] || '']
         })
       }
+      console.log(fullCreditRules);
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
         processing: [],

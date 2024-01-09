@@ -27,7 +27,7 @@
       </div>
     </div>
     <mat-selection-list *ngIf="generationModel === 'single-choice-some'"
-                        [(ngModel)]="selectedOption" multiple="false">
+                        [(ngModel)]="selectedOptions" multiple="false">
       <mat-list-option *ngFor="let c of options" [value]="c.value">
         '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
       </mat-list-option>
