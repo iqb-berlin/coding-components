@@ -52,10 +52,10 @@
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
       </button>
+      <button mat-raised-button (click)="addCodeSingleton('ELSE'); updateCodeExistences()" [disabled]="!!elseCodeExists">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
+      </button>
       <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
     </div>
-    <button mat-raised-button (click)="addCodeSingleton('ELSE'); updateCodeExistences()" [disabled]="!!elseCodeExists">
-      <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
-    </button>
   </ng-container>
 </div>

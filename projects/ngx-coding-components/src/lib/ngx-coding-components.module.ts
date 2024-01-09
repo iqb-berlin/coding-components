@@ -34,8 +34,6 @@ import {VarCodesFullComponent} from "./var-coding/var-codes-full/var-codes-full.
 import {ComboButtonComponent} from "./rich-text-editor/combo-button.component";
 import {CdkConnectedOverlay, CdkOverlayOrigin} from "@angular/cdk/overlay";
 import {VarCodesManualComponent} from "./var-coding/var-codes-manual/var-codes-manual.component";
-import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
-import {CodeValueListComponent} from "./var-coding/var-codes-value-list/code-value-list.component";
 import {VarCodesNumberComponent} from "./var-coding/var-codes-number/var-codes-number.component";
 import {ShowCodingDialogComponent} from "./dialogs/show-coding-dialog.component";
 import {ShowCodingProblemsDialogComponent} from "./dialogs/show-coding-problems-dialog.component";
@@ -77,8 +75,6 @@ import {HasRulePipe} from "./pipes/has-rule.pipe";
     VarCodesManualComponent,
     CodeInstructionComponent,
     ShowCodingProblemsDialogComponent,
-    VarCodesValueListComponent,
-    CodeValueListComponent,
     GenerateCodingDialogComponent,
     ComboButtonComponent,
     VarCodesNumberComponent,
