@@ -43,7 +43,6 @@ import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
 import {NgxCodingComponentsTranslateLoader} from "./translations/ngx-coding-components.translate-loader";
 import {GenerateCodingDialogComponent} from "./dialogs/generate-coding-dialog.component";
 import {MatRadioModule} from "@angular/material/radio";
-import {CodeChoiceComponent} from "./var-coding/var-codes-choice/code-choice.component";
 import {VarCodesChoiceComponent} from "./var-coding/var-codes-choice/var-codes-choice.component";
 import {CodeHeaderComponent} from "./var-coding/code-header.component";
 import {CodeInstructionComponent} from "./var-coding/code-instruction.component";
@@ -72,7 +71,6 @@ import {HasRulePipe} from "./pipes/has-rule.pipe";
     PossibleNewRulesPipe,
     HasRulePipe,
     RuleReferencePipe,
-    CodeChoiceComponent,
     VarCodesChoiceComponent,
     SelectCodeRuleReferenceDialogComponent,
     CodeHeaderComponent,

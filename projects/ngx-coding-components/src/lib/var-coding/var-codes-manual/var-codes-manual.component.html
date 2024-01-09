@@ -26,7 +26,7 @@
                      [code]="code" [allCodes]="codes"></code-header>
         <div class="fx-row-start-stretch fx-gap-10">
           <div class="has-rules-warning">
-            <p *ngIf="code | hasRule" [matTooltip]="'code.has-rule-warning' | translate">!!</p>
+            <p *ngIf="code | hasRule" [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
           </div>
           <code-instruction [code]="code" [style.flex]="'1 1 auto'" [style.max-height.px]="200"
                             (codeDataChanged)="codesChanged.emit(codes)"></code-instruction>

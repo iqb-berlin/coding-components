@@ -11,8 +11,7 @@
                      [code]="code" [allCodes]="codes"></code-header>
         <div class="fx-row-start-start fx-gap-10">
           <div class="has-rules-warning">
-            <p *ngIf="code.manualInstruction"
-               matTooltip="Es gibt Instruktionen für das manuelle Kodieren, die unnötig sind (automatische Kodierung eindeutig).">!!</p>
+            <p *ngIf="code.manualInstruction" [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
           </div>
           <code-rules-full [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
                            [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
