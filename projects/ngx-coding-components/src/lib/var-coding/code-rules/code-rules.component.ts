@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
-import {CodeRulesDirective} from "../code-rules.directive";
+import {CodeRulesDirective} from "./code-rules.directive";
 import {MatDialog} from "@angular/material/dialog";
 import {CodingRule, RuleSet} from "@iqb/responses";
 import {
@@ -10,16 +9,15 @@ import {
 import {MatTabGroup} from "@angular/material/tabs";
 
 @Component({
-  selector: 'code-rules-full',
-  templateUrl: './code-rules-full.component.html',
-  styleUrls: ['./code-rules-full.component.scss']
+  selector: 'code-rules',
+  templateUrl: './code-rules.component.html',
+  styleUrls: ['./code-rules.component.scss']
 })
-export class CodeRulesFullComponent extends CodeRulesDirective {
+export class CodeRulesComponent extends CodeRulesDirective {
   showCodeButtonsOf = '';
   @ViewChild(MatTabGroup) ruleSetElement: MatTabGroup | undefined;
 
   constructor(
-    public translateService: TranslateService,
     public editRuleReferenceDialog: MatDialog
   ) {
     super();

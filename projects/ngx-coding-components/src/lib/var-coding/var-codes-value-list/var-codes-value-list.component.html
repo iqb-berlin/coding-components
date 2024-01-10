@@ -1,6 +1,6 @@
 <div class="fx-column-start-stretch">
-  <div class="fx-row-space-between-end">
-    <div>
+  <div class="fx-row-start-end">
+    <div class="fx-flex-fill">
       <h3>{{'code.header' | translate}}</h3>
     </div>
     <div class="processing">
@@ -12,37 +12,25 @@
                       (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
             {{'processing.REMOVE_WHITE_SPACES' | translate}}
         </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
-                      (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'processing.REPLAY_REQUIRED' | translate}}
-          </div>
-        </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
-                      (change)="alterProcessing('ATTACHMENT', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'processing.ATTACHMENT' | translate}}
-          </div>
-        </mat-checkbox>
     </div>
-    <mat-form-field [matTooltip]="'fragmenting.tooltip' | translate">
-      <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
-      <input matInput
-             [(ngModel)]="fragmenting"
-             (ngModelChange)="fragmentingChanged.emit(fragmenting)">
-    </mat-form-field>
   </div>
   <ng-container *ngIf="codes">
     <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch" [style.max-height.px]="500">
       <ng-container *ngIf="code">
-        <div class="fx-column-start-stretch" [style.width.%]="60">
-          <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
+        <div class="fx-column-start-stretch fx-flex-fill">
+          <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="false"
                        [code]="code" [allCodes]="codes"></code-header>
-          <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
-                           [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
-                           (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
+          <div class="fx-row-start-start fx-gap-10">
+            <div class="has-rules-warning">
+              <p *ngIf="code.manualInstruction && elseCodeExists" [matTooltip]="'code.has-rule-warning.manual-else' | translate">!!</p>
+            </div>
+            <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
+                        [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
+                        (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
+          </div>
         </div>
-        <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)" class="fx-flex-fill"></code-instruction>
+        <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)"
+                          *ngIf="!elseCodeExists" [style.width.%]="60"></code-instruction>
         <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
           <mat-icon>delete</mat-icon>
         </button>

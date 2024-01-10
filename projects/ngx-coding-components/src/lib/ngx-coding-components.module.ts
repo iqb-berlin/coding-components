@@ -21,7 +21,7 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatChipsModule} from "@angular/material/chips";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {CodeRulesFullComponent} from "./var-coding/var-codes-full/code-rules-full.component";
+import {CodeRulesComponent} from "./var-coding/code-rules/code-rules.component";
 import {SchemeCheckerComponent} from "./scheme-checker/scheme-checker.component";
 import {VarCodingComponent} from "./var-coding/var-coding.component";
 import {ConfirmDialogComponent} from "./dialogs/confirm-dialog.component";
@@ -50,11 +50,12 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {SelectCodeRuleReferenceDialogComponent} from "./dialogs/select-code-rule-reference-dialog.component";
 import {RuleReferencePipe} from "./pipes/rule-reference.pipe";
 import {HasRulePipe} from "./pipes/has-rule.pipe";
+import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
 
 @NgModule({
   declarations: [
     SchemerComponent,
-    CodeRulesFullComponent,
+    CodeRulesComponent,
     RichTextEditDialogComponent,
     ShowCodingDialogComponent,
     RichTextEditorComponent,
@@ -73,6 +74,7 @@ import {HasRulePipe} from "./pipes/has-rule.pipe";
     SelectCodeRuleReferenceDialogComponent,
     CodeHeaderComponent,
     VarCodesManualComponent,
+    VarCodesValueListComponent,
     CodeInstructionComponent,
     ShowCodingProblemsDialogComponent,
     GenerateCodingDialogComponent,

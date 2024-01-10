@@ -55,6 +55,9 @@
             <mat-option [value]="'CHOICE'">
               {{'code-model.CHOICE' | translate}}
             </mat-option>
+            <mat-option [value]="'VALUE_LIST'">
+              {{'code-model.VALUE_LIST' | translate}}
+            </mat-option>
             <mat-option [value]="'NUMBER'">
               {{'code-model.NUMBER' | translate}}
             </mat-option>
@@ -93,38 +96,50 @@
     <var-codes-manual *ngSwitchCase="'MANUAL'"
                       class="fx-flex-row-100" [style.margin-top.px]="10"
                       [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+                      (codesChanged)="lastChangeFrom$.next('var-codes-manual codes')"
                       [processing]="varCoding.processing"
                       [fragmenting]="varCoding.fragmenting"
                       (fragmentingChanged)="setFragmenting($event)"
                       [varInfo]="varInfo"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                      (processingChanged)="lastChangeFrom$.next('var-codes-manual processing')"
                       [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
+                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-manual codeModelParameters')">
     </var-codes-manual>
+    <var-codes-value-list *ngSwitchCase="'VALUE_LIST'"
+                      class="fx-flex-row-100" [style.margin-top.px]="10"
+                      [codes]="varCoding.codes"
+                      (codesChanged)="lastChangeFrom$.next('var-codes-value-list codes')"
+                      [processing]="varCoding.processing"
+                      (processingChanged)="lastChangeFrom$.next('var-codes-value-list processing')"
+                      [fragmenting]="varCoding.fragmenting"
+                      (fragmentingChanged)="setFragmenting($event)"
+                      [varInfo]="varInfo"
+                      [codeModelParameters]="varCoding.codeModelParameters"
+                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-value-list codeModelParameters')">
+    </var-codes-value-list>
     <var-codes-choice *ngSwitchCase="'CHOICE'"
                       class="fx-flex-row-100" [style.margin-top.px]="10"
                       [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+                      (codesChanged)="lastChangeFrom$.next('var-codes-choice codes')"
                       [processing]="varCoding.processing"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                      (processingChanged)="lastChangeFrom$.next('var-codes-choice processing')"
                       [fragmenting]="varCoding.fragmenting"
                       (fragmentingChanged)="setFragmenting($event)"
                       [varInfo]="varInfo"
                       [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
+                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-choice codeModelParameters')">
     </var-codes-choice>
     <var-codes-number *ngSwitchCase="'NUMBER'"
                       class="fx-flex-row-100" [style.margin-top.px]="10"
                       [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+                      (codesChanged)="lastChangeFrom$.next('var-codes-number codes')"
                       [processing]="varCoding.processing"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                      (processingChanged)="lastChangeFrom$.next('var-codes-number processing')"
                       [fragmenting]="varCoding.fragmenting"
                       (fragmentingChanged)="setFragmenting($event)"
                       [varInfo]="varInfo"
                       [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
+                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-number codeModelParameters')">
     </var-codes-number>
     <var-codes-full *ngSwitchDefault
                     class="fx-flex-row-100" [style.margin-top.px]="10"

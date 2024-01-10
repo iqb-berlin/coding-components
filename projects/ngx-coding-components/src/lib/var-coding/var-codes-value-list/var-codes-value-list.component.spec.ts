@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CodeRulesFullComponent } from './code-rules-full.component';
+import { VarCodesValueListComponent } from './var-codes-value-list.component';
 
-describe('CodeRulesFullComponent', () => {
-  let component: CodeRulesFullComponent;
-  let fixture: ComponentFixture<CodeRulesFullComponent>;
+describe('VarCodesValueListComponent', () => {
+  let component: VarCodesValueListComponent;
+  let fixture: ComponentFixture<VarCodesValueListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CodeRulesFullComponent]
+      declarations: [VarCodesValueListComponent]
     })
       .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CodeRulesFullComponent);
+    fixture = TestBed.createComponent(VarCodesValueListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
