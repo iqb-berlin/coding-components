@@ -47,7 +47,8 @@ interface optionData {
 })
 
 export class GenerateCodingDialogComponent {
-  generationModel: 'none' | 'single-choice-some' | 'single-choice-many' | 'multi-choice' | 'integer';
+  generationModel: 'none' | 'single-choice-some' | 'single-choice-many' | 'multi-choice' |
+    'integer' | 'simple-input';
   protected readonly ToTextFactory = ToTextFactory;
   selectedOption: string = '';
   selectedOptions: string[] = [];
@@ -66,6 +67,7 @@ export class GenerateCodingDialogComponent {
       public translateService: TranslateService,
       public dialogRef: MatDialogRef<GenerateCodingDialogComponent>,
   ) {
+    this.generationModel = 'none';
     if (varInfo) {
       if (varInfo.valuesComplete && varInfo.values && varInfo.values.length > 0) {
         if (varInfo.multiple) {
@@ -80,13 +82,13 @@ export class GenerateCodingDialogComponent {
           label: v.label
         });
         this.resetOptions();
-      } else if (varInfo.type === 'integer') {
-        this.generationModel = 'integer'
-      } else {
-        this.generationModel = 'none'
+      } else if (!varInfo.multiple) {
+        if (varInfo.type === 'integer') {
+          this.generationModel = 'integer'
+        } else if (varInfo.type === 'string') {
+          this.generationModel = 'simple-input'
+        }
       }
-    } else {
-      this.generationModel = 'none'
     }
   }
 
@@ -185,6 +187,46 @@ export class GenerateCodingDialogComponent {
             ruleSets: [<RuleSet>{
               ruleOperatorAnd: true,
               rules: numericRules
+            }],
+            manualInstruction: ''
+          },
+          {
+            id: 2,
+            label: 'Falsch',
+            score: 0,
+            ruleSetOperatorAnd: false,
+            ruleSets: [<RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [{
+                method: "ELSE"
+              }]
+            }],
+            manualInstruction: ''
+          }
+        ]
+      });
+    } else if (this.generationModel === 'simple-input') {
+      this.dialogRef.close(<GeneratedCodingData>{
+        id: this.varInfo.id,
+        processing: [],
+        fragmenting: '',
+        manualInstruction: '',
+        codeModel: 'VALUE_LIST',
+        codeModelParameters: [],
+        codes: [
+          {
+            id: 1,
+            label: 'Richtig',
+            score: 1,
+            ruleSetOperatorAnd: false,
+            ruleSets: [<RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [
+                {
+                  method: "MATCH",
+                  parameters: [this.selectedOption || '']
+                }
+              ]
             }],
             manualInstruction: ''
           },

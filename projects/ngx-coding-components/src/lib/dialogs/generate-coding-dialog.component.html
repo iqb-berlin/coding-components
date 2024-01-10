@@ -81,6 +81,15 @@
       </mat-form-field>
       <div>{{numericRuleText}}</div>
     </div>
+    <div *ngIf="generationModel === 'simple-input'" class="fx-row-start-center">
+      <mat-form-field>
+        <textarea matInput
+                  [(ngModel)]="selectedOption"
+                  cdkTextareaAutosize
+                  cdkAutosizeMinRows="2"
+                  cdkAutosizeMaxRows="8"></textarea>
+      </mat-form-field>
+    </div>
     <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
   </div>
 </mat-dialog-content>
