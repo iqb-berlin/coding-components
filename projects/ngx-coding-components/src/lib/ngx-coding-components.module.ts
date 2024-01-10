@@ -51,6 +51,7 @@ import {SelectCodeRuleReferenceDialogComponent} from "./dialogs/select-code-rule
 import {RuleReferencePipe} from "./pipes/rule-reference.pipe";
 import {HasRulePipe} from "./pipes/has-rule.pipe";
 import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
+import {CdkDrag, CdkDropList} from "@angular/cdk/drag-drop";
 
 @NgModule({
   declarations: [
@@ -128,7 +129,9 @@ import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-
     CdkOverlayOrigin,
     MatRadioModule,
     MatTabsModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    CdkDrag,
+    CdkDropList
   ]
 })
 export class NgxCodingComponentsModule { }

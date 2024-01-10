@@ -58,7 +58,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   updateVarInfo() {
-    console.log('#');
     this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
   }
 

@@ -14,16 +14,38 @@
     <div *ngIf="generationModel === 'multi-choice'" class="fx-column-start-stretch">
       <div class="fx-row-end-center">
         <mat-label [style.margin-right.px]="8">{{'coding.generate.model.multi-choice-order-prompt' | translate}}</mat-label>
-        <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" disabled="true"></mat-checkbox>
-        <div>{{ 'coding.generate.model.multi-choice-' + (multiChoiceOrderMatters ? 'yes' : 'no') | translate}}</div>
+        <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" (click)="resetOptions()"></mat-checkbox>
       </div>
       <mat-selection-list *ngIf="!multiChoiceOrderMatters" [(ngModel)]="selectedOptions" multiple="true">
         <mat-list-option *ngFor="let c of options" [value]="c.value">
           '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
         </mat-list-option>
       </mat-selection-list>
-      <div *ngIf="multiChoiceOrderMatters">
-        coming soon: drag'n'drop of values
+      <div *ngIf="multiChoiceOrderMatters" class="fx-column-start-stretch">
+        <div>{{'coding.generate.model.multi-choice-drag-prompt' | translate}}</div>
+        <div  class="fx-row-start-stretch fx-gap-10">
+          <mat-chip-listbox cdkDropList [style.width.%]="50" [style.max-height.px]="800"
+                            #optionSource="cdkDropList"
+                            [cdkDropListConnectedTo]="selectedOptions"
+                            [cdkDropListData]="options">
+            <mat-chip cdkDrag *ngFor="let c of options">{{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}</mat-chip>
+          </mat-chip-listbox>
+          <div *ngIf="positionLabels.length > 0"
+               class="fx-column-start-stretch" [style.width.px]="50">
+            <p *ngFor="let pl of positionLabels">{{pl}}</p>
+          </div>
+          <mat-chip-listbox cdkDropList class="fx-flex-fill dragOptionBox"
+                            #selectedOptions="cdkDropList"
+                            [cdkDropListConnectedTo]="[optionSource]"
+                            [cdkDropListData]="selectedDragOptions"
+                            (cdkDropListDropped)="drop($event)">
+            <mat-chip cdkDrag *ngFor="let c of selectedDragOptions"
+                      removable="true" (removed)="returnOption(c)">
+              {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+          </mat-chip-listbox>
+        </div>
       </div>
     </div>
     <mat-selection-list *ngIf="generationModel === 'single-choice-some'"
