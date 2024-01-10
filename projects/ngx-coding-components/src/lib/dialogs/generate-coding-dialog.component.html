@@ -40,7 +40,7 @@
     <mat-form-field *ngIf="generationModel === 'single-choice-many'">
       <mat-select [(value)]="selectedOption">
         <mat-option *ngFor="let c of options" [value]="c.value">
-          '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+          {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
         </mat-option>
       </mat-select>
     </mat-form-field>

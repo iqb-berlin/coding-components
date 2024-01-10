@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {VarCodesDirective} from "../var-codes.directive";
 
 @Component({
@@ -6,4 +6,8 @@ import {VarCodesDirective} from "../var-codes.directive";
   templateUrl: './var-codes-full.component.html',
   styleUrls: ['./var-codes-full.component.scss']
 })
-export class VarCodesFullComponent extends VarCodesDirective {}
+export class VarCodesFullComponent extends VarCodesDirective implements OnInit {
+  ngOnInit() {
+    this.updateCodeExistences();
+  }
+}

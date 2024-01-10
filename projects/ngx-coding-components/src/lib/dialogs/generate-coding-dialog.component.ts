@@ -187,22 +187,32 @@ export class GenerateCodingDialogComponent {
     } else if (this.generationModel === 'single-choice-many' || this.generationModel === 'single-choice-some' ||
         (this.generationModel === 'multi-choice' && !this.multiChoiceOrderMatters)) {
       const fullCreditRules: CodingRule[] = [];
-      if (this.generationModel === 'multi-choice') {
-        this.selectedOptions.forEach(s => {
-          fullCreditRules.push({
-            method: "MATCH",
-            parameters: [s]
-          })
-        });
-        fullCreditRules.push({
-          method: "NO_OTHER_MATCHES",
-        });
-      } else {
+      if (this.generationModel === 'single-choice-many') {
         fullCreditRules.push({
           method: "MATCH",
-          parameters: [this.selectedOptions[0] || '']
+          parameters: [this.selectedOption || '']
         })
+      } else {
+        if (this.selectedOptions.length > 0) {
+          this.selectedOptions.forEach(s => {
+            fullCreditRules.push({
+              method: "MATCH",
+              parameters: [s]
+            })
+          });
+        } else {
+          fullCreditRules.push({
+            method: "MATCH",
+            parameters: ['']
+          })
+        }
+        if (this.generationModel === 'multi-choice') {
+          fullCreditRules.push({
+            method: "NO_OTHER_MATCHES",
+          });
+        }
       }
+
       console.log(fullCreditRules);
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
