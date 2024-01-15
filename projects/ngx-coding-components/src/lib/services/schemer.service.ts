@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import {CodingScheme, DeriveConcatDelimiter, VariableCodingData, VariableInfo, VariableValue} from "@iqb/responses";
+import {
+  CodingScheme,
+  DeriveConcatDelimiter,
+  RuleMethodParameterCount,
+  VariableCodingData,
+  VariableInfo,
+  VariableValue
+} from "@iqb/responses";
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +15,7 @@ export class SchemerService {
   public codingScheme: CodingScheme | null = null;
   public varList: VariableInfo[] = [];
   public allVariableIds: string[] = [];
+  public ruleMethodParameterCount = RuleMethodParameterCount;
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {

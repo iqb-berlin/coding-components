@@ -27,7 +27,7 @@
             <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
                  matTooltipShowDelay="500">
               {{('rule.' + rule.method) | translate}}</div>
-            <mat-form-field *ngIf="getParamCountWrapper(rule.method) < 0">
+            <mat-form-field *ngIf="schemerService.ruleMethodParameterCount[rule.method] < 0">
               <textarea matInput *ngIf="rule.parameters"
                         [(ngModel)]="rule.parameters[0]"
                         (ngModelChange)="setCodeRulesChanged()"
@@ -35,12 +35,12 @@
                         cdkAutosizeMinRows="2"
                         cdkAutosizeMaxRows="8"></textarea>
             </mat-form-field>
-            <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 0">
+            <mat-form-field *ngIf="schemerService.ruleMethodParameterCount[rule.method] > 0">
               <input matInput *ngIf="rule.parameters"
                      [(ngModel)]="rule.parameters[0]"
                      (ngModelChange)="setCodeRulesChanged()">
             </mat-form-field>
-            <mat-form-field *ngIf="getParamCountWrapper(rule.method) > 1">
+            <mat-form-field *ngIf="schemerService.ruleMethodParameterCount[rule.method] > 1">
               <input matInput *ngIf="rule.parameters"
                      [(ngModel)]="rule.parameters[1]"
                      (ngModelChange)="setCodeRulesChanged()">
