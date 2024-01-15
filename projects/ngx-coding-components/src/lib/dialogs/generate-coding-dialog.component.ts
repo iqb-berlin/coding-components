@@ -58,6 +58,7 @@ export class GenerateCodingDialogComponent {
   _options: optionData[] = [];
   options: optionData[] = [];
   selectedDragOptions: optionData[] = [];
+  textAsNumeric = false;
   numericMoreThen = '';
   numericMax = '';
   numericRuleText = '';
@@ -150,7 +151,7 @@ export class GenerateCodingDialogComponent {
   generateButtonClick() {
     if (this.generationModel === 'none') {
       this.dialogRef.close(null);
-    } else if (this.generationModel === 'integer') {
+    } else if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
       const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
       const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
       const numericRules: CodingRule[] = [];
@@ -235,13 +236,8 @@ export class GenerateCodingDialogComponent {
             label: 'Falsch',
             score: 0,
             ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: false,
-              rules: [{
-                method: "ELSE"
-              }]
-            }],
-            manualInstruction: ''
+            ruleSets: [],
+            manualInstruction: '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
           }
         ]
       });
