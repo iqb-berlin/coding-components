@@ -13,7 +13,7 @@
           <div class="has-rules-warning">
             <p *ngIf="code.manualInstruction" [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
           </div>
-          <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
+          <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'" preferredDataType="string"
                            [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
                            (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
         </div>

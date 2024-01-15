@@ -7,6 +7,7 @@ import {
 } from "../../dialogs/select-code-rule-reference-dialog.component";
 import {MatTabGroup} from "@angular/material/tabs";
 import {SchemerService} from "../../services/schemer.service";
+import {CodeModelType} from "@iqb/responses/coding-interfaces";
 
 @Component({
   selector: 'code-rules',
@@ -20,6 +21,8 @@ export class CodeRulesComponent {
   @Input() isEmptyCodeExists: boolean | undefined;
   @Input() isNullCodeExists: boolean | undefined;
   @Input() varInfo: VariableInfo | undefined;
+  @Input() preferredDataType: 'string' | 'integer' | 'number' | 'boolean' | 'attachment' | undefined;
+  @Input() codingModel: CodeModelType | undefined;
   @Input() fragmentMode: boolean | undefined;
   showCodeButtonsOf = '';
   @ViewChild(MatTabGroup) ruleSetElement: MatTabGroup | undefined;

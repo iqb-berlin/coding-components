@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {CodingRule} from "@iqb/responses";
+import {CodingRule, VariableInfo} from "@iqb/responses";
 import {RuleMethod} from "@iqb/responses/coding-interfaces";
 
 @Pipe({
@@ -9,7 +9,7 @@ export class PossibleNewRulesPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   private static getNumericRules(otherRuleMethods: string[],
                                  ruleOperatorAnd: boolean, fragmenting?: boolean): RuleMethod[] {
-    if (fragmenting) return ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MAX',
+    if (fragmenting || otherRuleMethods.length <= 0) return ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MAX',
     'NUMERIC_MORE_THEN', 'NUMERIC_MIN'];
     const returnMethods: RuleMethod[] = [];
     if (ruleOperatorAnd) {
@@ -43,22 +43,24 @@ export class PossibleNewRulesPipe implements PipeTransform {
     }
     return returnMethods;
   }
-  transform(value: CodingRule[], dataType?: string,
-            nullable?: boolean, fragmenting?: boolean | undefined,
-            ruleOperatorAnd?: boolean): RuleMethod[] {
+  transform(value: CodingRule[], varInfo?: VariableInfo,
+            preferredDataType?: string, fragmenting?: boolean,
+            ruleOperatorAnd?: boolean,
+            trigger?: number): RuleMethod[] {
     let returnMethods: RuleMethod[] = [];
+    const targetDataType = preferredDataType || varInfo?.type || '';
     const otherRuleMethods = value.map(r => r.method);
     if (otherRuleMethods.indexOf('ELSE') >= 0) return [];
     if (ruleOperatorAnd && !fragmenting && otherRuleMethods.indexOf('IS_NULL') >= 0) return [];
     if (ruleOperatorAnd && !fragmenting && otherRuleMethods.indexOf('IS_EMPTY') >= 0) return [];
 
-    if (dataType === 'boolean') {
+    if (targetDataType === 'boolean') {
       if (otherRuleMethods.indexOf('IS_FALSE') < 0 && otherRuleMethods.indexOf('IS_TRUE') < 0 && !fragmenting) {
         returnMethods = ['IS_FALSE', 'IS_TRUE'];
       }
-    } else if (dataType === 'number' || dataType === 'integer') {
+    } else if (targetDataType === 'number' || targetDataType === 'integer') {
       returnMethods = PossibleNewRulesPipe.getNumericRules(otherRuleMethods, ruleOperatorAnd || false, fragmenting);
-    } else if (dataType === 'string') {
+    } else if (targetDataType === 'string') {
       returnMethods = ['MATCH', 'MATCH_REGEX'];
     } else {
       returnMethods = ['MATCH', 'MATCH_REGEX',
@@ -68,7 +70,7 @@ export class PossibleNewRulesPipe implements PipeTransform {
         returnMethods.push('IS_TRUE');
       }
     }
-    if (nullable && (otherRuleMethods.indexOf('IS_NULL') < 0 || fragmenting)) returnMethods.push('IS_NULL');
+    if (varInfo && varInfo.nullable && (otherRuleMethods.indexOf('IS_NULL') < 0 || fragmenting)) returnMethods.push('IS_NULL');
     if (otherRuleMethods.indexOf('IS_EMPTY') < 0 || fragmenting) returnMethods.push('IS_EMPTY');
     return returnMethods;
   }
