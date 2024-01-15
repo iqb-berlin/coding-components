@@ -70,20 +70,40 @@
       <mat-label>{{'coding.generate.model.simple-input-numeric' | translate}}</mat-label>
       <mat-checkbox [(ngModel)]="textAsNumeric" [style.margin.px]="8"></mat-checkbox>
     </div>
-    <div *ngIf="generationModel === 'integer' || (textAsNumeric && generationModel === 'simple-input')" class="fx-row-start-center">
-      <mat-form-field>
-        <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
-        <input matInput
-               [(ngModel)]="numericMoreThen"
-               (ngModelChange)="updateNumericRuleText()">
-      </mat-form-field>
-      <mat-form-field [style.margin.px]="8">
-        <mat-label>{{ 'rule.NUMERIC_MAX' | translate }}</mat-label>
-        <input matInput
-               [(ngModel)]="numericMax"
-               (ngModelChange)="updateNumericRuleText()">
-      </mat-form-field>
-      <div>{{numericRuleText}}</div>
+    <div *ngIf="generationModel === 'integer' || (textAsNumeric && generationModel === 'simple-input')" class="fx-column-start-center">
+      <mat-radio-group [(ngModel)]="numericRule">
+        <div class="fx-row-start-center">
+          <div [style.width.px]="200">{{'rule.NUMERIC_MATCH' | translate}}</div>
+          <mat-radio-button class="example-radio-button" [value]="'match'"></mat-radio-button>
+          <mat-form-field>
+            <input matInput [disabled]="numericRule !== 'match'" [(ngModel)]="numericMatch">
+          </mat-form-field>
+        </div>
+        <div class="fx-row-start-center">
+          <div [style.width.px]="200">{{'rule.NUMERIC_RANGE' | translate}}</div>
+          <mat-radio-button class="example-radio-button" [value]="'range'"></mat-radio-button>
+          <mat-form-field>
+            <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
+            <input matInput [disabled]="numericRule !== 'range'"
+                   [(ngModel)]="numericMoreThen"
+                   (ngModelChange)="updateNumericRuleText()">
+          </mat-form-field>
+          <mat-form-field [style.margin.px]="8">
+            <mat-label>{{ 'rule.NUMERIC_MAX' | translate }}</mat-label>
+            <input matInput [disabled]="numericRule !== 'range'"
+                   [(ngModel)]="numericMax"
+                   (ngModelChange)="updateNumericRuleText()">
+          </mat-form-field>
+          <div class="fx-flex-fill">{{numericRuleText}}</div>
+        </div>
+        <div class="fx-row-start-center">
+          <div [style.width.px]="200">{{'rule.NUMERIC_MIN' | translate}}</div>
+          <mat-radio-button class="example-radio-button" [value]="'min'"></mat-radio-button>
+          <mat-form-field>
+            <input matInput [(ngModel)]="numericMin" [disabled]="numericRule !== 'min'">
+          </mat-form-field>
+        </div>
+      </mat-radio-group>
     </div>
     <div *ngIf="generationModel === 'simple-input' && !textAsNumeric" class="fx-row-start-start fx-gap-10">
       <mat-form-field>

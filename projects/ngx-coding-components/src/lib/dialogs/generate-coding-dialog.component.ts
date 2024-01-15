@@ -59,8 +59,11 @@ export class GenerateCodingDialogComponent {
   options: optionData[] = [];
   selectedDragOptions: optionData[] = [];
   textAsNumeric = false;
+  numericRule: 'match' | 'range' | 'min' = 'range';
   numericMoreThen = '';
   numericMax = '';
+  numericMin = '';
+  numericMatch = '';
   numericRuleText = '';
 
   constructor(
@@ -152,24 +155,38 @@ export class GenerateCodingDialogComponent {
     if (this.generationModel === 'none') {
       this.dialogRef.close(null);
     } else if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
-      const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
-      const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
       const numericRules: CodingRule[] = [];
-      if (moreThenValue && !maxValue) {
-        numericRules.push({
-          method: "NUMERIC_MORE_THEN",
-          parameters: [moreThenValue.toString(10)]
+      if (this.numericRule === 'match') {
+        const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
+        if (matchValue) numericRules.push({
+          method: "NUMERIC_MATCH",
+          parameters: [matchValue.toString(10)]
         });
-      } else if (!moreThenValue && maxValue) {
-        numericRules.push({
-          method: "NUMERIC_MAX",
-          parameters: [maxValue.toString(10)]
+      } else if (this.numericRule === 'min') {
+        const minValue = CodingFactory.getValueAsNumber(this.numericMin);
+        if (minValue) numericRules.push({
+          method: "NUMERIC_MIN",
+          parameters: [minValue.toString(10)]
         });
-      } else if (moreThenValue && maxValue && moreThenValue < maxValue) {
-        numericRules.push({
-          method: "NUMERIC_RANGE",
-          parameters: [moreThenValue.toString(10), maxValue.toString(10)]
-        });
+      } else {
+        const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+        const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
+        if (moreThenValue && !maxValue) {
+          numericRules.push({
+            method: "NUMERIC_MORE_THEN",
+            parameters: [moreThenValue.toString(10)]
+          });
+        } else if (!moreThenValue && maxValue) {
+          numericRules.push({
+            method: "NUMERIC_MAX",
+            parameters: [maxValue.toString(10)]
+          });
+        } else if (moreThenValue && maxValue && moreThenValue < maxValue) {
+          numericRules.push({
+            method: "NUMERIC_RANGE",
+            parameters: [moreThenValue.toString(10), maxValue.toString(10)]
+          });
+        }
       }
 
       this.dialogRef.close(<GeneratedCodingData>{
