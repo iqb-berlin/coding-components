@@ -74,14 +74,14 @@
       <mat-radio-group [(ngModel)]="numericRule">
         <div class="fx-row-start-center">
           <div [style.width.px]="200">{{'rule.NUMERIC_MATCH' | translate}}</div>
-          <mat-radio-button class="example-radio-button" [value]="'match'"></mat-radio-button>
+          <mat-radio-button [value]="'match'"></mat-radio-button>
           <mat-form-field>
             <input matInput [disabled]="numericRule !== 'match'" [(ngModel)]="numericMatch">
           </mat-form-field>
         </div>
         <div class="fx-row-start-center">
           <div [style.width.px]="200">{{'rule.NUMERIC_RANGE' | translate}}</div>
-          <mat-radio-button class="example-radio-button" [value]="'range'"></mat-radio-button>
+          <mat-radio-button [value]="'range'"></mat-radio-button>
           <mat-form-field>
             <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
             <input matInput [disabled]="numericRule !== 'range'"
@@ -98,7 +98,7 @@
         </div>
         <div class="fx-row-start-center">
           <div [style.width.px]="200">{{'rule.NUMERIC_MIN' | translate}}</div>
-          <mat-radio-button class="example-radio-button" [value]="'min'"></mat-radio-button>
+          <mat-radio-button [value]="'min'"></mat-radio-button>
           <mat-form-field>
             <input matInput [(ngModel)]="numericMin" [disabled]="numericRule !== 'min'">
           </mat-form-field>
@@ -114,6 +114,15 @@
                   cdkAutosizeMaxRows="8"></textarea>
       </mat-form-field>
       <div>{{'coding.generate.model.simple-input-not-numeric' | translate}}</div>
+    </div>
+    <div *ngIf="generationModel === 'simple-input' || generationModel === 'integer'" class="fx-column-start-stretch">
+      <mat-label>{{'coding.generate.else-method.prompt' | translate}}</mat-label>
+      <mat-radio-group [(ngModel)]="elseMethod" class="fx-gap-20">
+        <mat-radio-button [value]="'rule'">{{'coding.generate.else-method.rule' | translate}}</mat-radio-button>
+        <mat-radio-button [value]="'instruction'">{{'coding.generate.else-method.instruction' | translate}}</mat-radio-button>
+        <mat-radio-button [value]="'invalid'">{{'coding.generate.else-method.invalid' | translate}}</mat-radio-button>
+        <mat-radio-button [value]="'none'">{{'coding.generate.else-method.none' | translate}}</mat-radio-button>
+      </mat-radio-group>
     </div>
     <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
   </div>

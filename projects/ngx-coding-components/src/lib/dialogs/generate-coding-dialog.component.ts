@@ -65,6 +65,7 @@ export class GenerateCodingDialogComponent {
   numericMin = '';
   numericMatch = '';
   numericRuleText = '';
+  elseMethod: 'none' | 'rule' | 'instruction' | 'invalid' = 'instruction';
 
   constructor(
       @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -151,6 +152,43 @@ export class GenerateCodingDialogComponent {
     }
   }
 
+  private getElseCode(codeId: number): CodeData | null {
+    if (this.elseMethod === 'rule') return {
+      id: codeId,
+      label: 'Falsch',
+      score: 0,
+      ruleSetOperatorAnd: false,
+      ruleSets: [<RuleSet>{
+        ruleOperatorAnd: false,
+        rules: [{
+          method: "ELSE"
+        }]
+      }],
+      manualInstruction: ''
+    }
+    if (this.elseMethod === 'invalid') return {
+      id: null,
+      label: '',
+      score: 0,
+      ruleSetOperatorAnd: false,
+      ruleSets: [<RuleSet>{
+        ruleOperatorAnd: false,
+        rules: [{
+          method: "ELSE"
+        }]
+      }],
+      manualInstruction: ''
+    }
+    if (this.elseMethod === 'instruction') return {
+      id: 2,
+      label: 'Falsch',
+      score: 0,
+      ruleSetOperatorAnd: false,
+      ruleSets: [],
+      manualInstruction: '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
+    }
+    return null;
+  }
   generateButtonClick() {
     if (this.generationModel === 'none') {
       this.dialogRef.close(null);
@@ -188,7 +226,21 @@ export class GenerateCodingDialogComponent {
           });
         }
       }
-
+      const codes: CodeData[] = [
+        {
+          id: 1,
+          label: 'Richtig',
+          score: 1,
+          ruleSetOperatorAnd: false,
+          ruleSets: [<RuleSet>{
+            ruleOperatorAnd: true,
+            rules: numericRules
+          }],
+          manualInstruction: ''
+        }
+      ]
+      const elseCode = this.getElseCode(2);
+      if (elseCode) codes.push(elseCode);
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
         processing: [],
@@ -196,34 +248,27 @@ export class GenerateCodingDialogComponent {
         manualInstruction: '',
         codeModel: 'NUMBER',
         codeModelParameters: [],
-        codes: [
-          {
-            id: 1,
-            label: 'Richtig',
-            score: 1,
-            ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: true,
-              rules: numericRules
-            }],
-            manualInstruction: ''
-          },
-          {
-            id: 2,
-            label: 'Falsch',
-            score: 0,
-            ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: false,
-              rules: [{
-                method: "ELSE"
-              }]
-            }],
-            manualInstruction: ''
-          }
-        ]
+        codes: codes
       });
     } else if (this.generationModel === 'simple-input') {
+      const codes: CodeData[] = [{
+        id: 1,
+        label: 'Richtig',
+        score: 1,
+        ruleSetOperatorAnd: false,
+        ruleSets: [<RuleSet>{
+          ruleOperatorAnd: false,
+          rules: [
+            {
+              method: "MATCH",
+              parameters: [this.selectedOption || '']
+            }
+          ]
+        }],
+        manualInstruction: ''
+      }];
+      const elseCode = this.getElseCode(2);
+      if (elseCode) codes.push(elseCode);
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
         processing: [],
@@ -231,32 +276,7 @@ export class GenerateCodingDialogComponent {
         manualInstruction: '',
         codeModel: 'VALUE_LIST',
         codeModelParameters: [],
-        codes: [
-          {
-            id: 1,
-            label: 'Richtig',
-            score: 1,
-            ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: false,
-              rules: [
-                {
-                  method: "MATCH",
-                  parameters: [this.selectedOption || '']
-                }
-              ]
-            }],
-            manualInstruction: ''
-          },
-          {
-            id: 2,
-            label: 'Falsch',
-            score: 0,
-            ruleSetOperatorAnd: false,
-            ruleSets: [],
-            manualInstruction: '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
-          }
-        ]
+        codes: codes
       });
     } else if (this.generationModel === 'single-choice-some' && this.singleChoiceLongVersion) {
       const codes: CodeData[] = [];
