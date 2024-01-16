@@ -1,7 +1,7 @@
 <mat-card [style.height.%]="100">
   <mat-card-subtitle>
     <div class="fx-row-space-between-center" [style.padding]="'0 16px'">
-      <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt-auto-coding' | translate}}</div>
+      <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt.auto-coding' | translate}}</div>
       <div *ngIf="code" class="fx-row-end-center">
         <button mat-icon-button *ngIf="varInfo?.multiple" [matTooltip]="'rule-set.prompt.add' | translate"
                 (click)="addRuleSet(); setTab()">

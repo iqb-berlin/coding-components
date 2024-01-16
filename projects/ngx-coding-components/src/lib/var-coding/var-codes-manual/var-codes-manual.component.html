@@ -36,9 +36,18 @@
         <mat-icon>delete</mat-icon>
       </button>
     </div>
-    <div [style.margin-top.px]="12">
-      <button mat-raised-button (click)="addCode()">
-        <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
+    <div class="fx-row-start-center" [style.margin-top.px]="12">
+      <button mat-raised-button (click)="addCodeCredit()">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-score1' | translate}}
+      </button>
+      <button mat-raised-button (click)="addCodePartialCredit()">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-score-partial' | translate}}
+      </button>
+      <button mat-raised-button (click)="addCodeNoCredit()">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-score0' | translate}}
+      </button>
+      <button mat-raised-button (click)="addCodeElseManual()">
+        <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
       </button>
     </div>
   </ng-container>

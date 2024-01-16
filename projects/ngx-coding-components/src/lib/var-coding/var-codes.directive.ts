@@ -1,5 +1,5 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData, ProcessingParameterType, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
+import {CodeData, CodingRule, ProcessingParameterType, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
 
 export const singletonRules: RuleMethod[] = [
   'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
@@ -90,6 +90,64 @@ export abstract class VarCodesDirective {
         }];
         this.codesChanged.emit(this.codes);
       }
+    }
+  }
+
+  addCodeCredit(rule?: CodingRule) {
+    const newCode = this.addCode(false);
+    if (newCode) {
+      let maxScore = 1;
+      if (this.codeModelParameters && this.codeModelParameters[0]) {
+        const newValue = Number.parseInt(this.codeModelParameters[0], 10);
+        maxScore = Number.isNaN(newValue) ? 1 : newValue;
+      }
+      newCode.score = maxScore;
+      newCode.label = 'Richtig';
+      newCode.ruleSets = [{
+        ruleOperatorAnd: false,
+        rules: []
+      }];
+      if (rule) newCode.ruleSets[0].rules.push(rule);
+      this.codesChanged.emit(this.codes);
+    }
+  }
+
+  addCodeNoCredit(rule?: CodingRule) {
+    const newCode = this.addCode(false);
+    if (newCode) {
+      newCode.score = 0;
+      newCode.label = 'Falsch';
+      newCode.ruleSets = [{
+        ruleOperatorAnd: false,
+        rules: []
+      }];
+      if (rule) newCode.ruleSets[0].rules.push(rule);
+      this.codesChanged.emit(this.codes);
+    }
+  }
+
+  addCodeElseManual() {
+    const newCode = this.addCode(false);
+    if (newCode) {
+      newCode.score = 0;
+      newCode.label = '';
+      newCode.ruleSets = [];
+      newCode.manualInstruction = '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
+      this.codesChanged.emit(this.codes);
+    }
+  }
+
+  addCodePartialCredit(rule?: CodingRule) {
+    const newCode = this.addCode(false);
+    if (newCode) {
+      newCode.score = 0;
+      newCode.label = 'Teilweise Richtig';
+      newCode.ruleSets = [{
+        ruleOperatorAnd: false,
+        rules: []
+      }];
+      if (rule) newCode.ruleSets[0].rules.push(rule);
+      this.codesChanged.emit(this.codes);
     }
   }
 

@@ -17,35 +17,4 @@ export class VarCodesNumberComponent extends VarCodesDirective implements OnInit
   ngOnInit() {
     this.updateCodeExistences();
   }
-
-  addCodeCredit() {
-    const newCode = this.addCode(false);
-    if (newCode) {
-      let maxScore = 1;
-      if (this.codeModelParameters && this.codeModelParameters[0]) {
-        const newValue = Number.parseInt(this.codeModelParameters[0], 10);
-        maxScore = Number.isNaN(newValue) ? 1 : newValue;
-      }
-      newCode.score = maxScore;
-      newCode.label = 'Richtig';
-      newCode.ruleSets = [{
-        ruleOperatorAnd: false,
-        rules: []
-      }];
-      this.codesChanged.emit(this.codes);
-    }
-  }
-
-  addCodeNoCredit() {
-    const newCode = this.addCode(false);
-    if (newCode) {
-      newCode.score = 0;
-      newCode.label = 'Falsch';
-      newCode.ruleSets = [{
-        ruleOperatorAnd: false,
-        rules: []
-      }];
-      this.codesChanged.emit(this.codes);
-    }
-  }
 }
