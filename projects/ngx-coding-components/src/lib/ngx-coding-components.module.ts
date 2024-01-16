@@ -52,6 +52,8 @@ import {RuleReferencePipe} from "./pipes/rule-reference.pipe";
 import {HasRulePipe} from "./pipes/has-rule.pipe";
 import {VarCodesValueListComponent} from "./var-coding/var-codes-value-list/var-codes-value-list.component";
 import {CdkDrag, CdkDropList} from "@angular/cdk/drag-drop";
+import {CodesTitleComponent} from "./var-coding/codes-title.component";
+import {MatRippleModule} from "@angular/material/core";
 
 @NgModule({
   declarations: [
@@ -77,6 +79,7 @@ import {CdkDrag, CdkDropList} from "@angular/cdk/drag-drop";
     VarCodesManualComponent,
     VarCodesValueListComponent,
     CodeInstructionComponent,
+    CodesTitleComponent,
     ShowCodingProblemsDialogComponent,
     GenerateCodingDialogComponent,
     ComboButtonComponent,
@@ -131,7 +134,8 @@ import {CdkDrag, CdkDropList} from "@angular/cdk/drag-drop";
     MatTabsModule,
     MatButtonToggleModule,
     CdkDrag,
-    CdkDropList
+    CdkDropList,
+    MatRippleModule
   ]
 })
 export class NgxCodingComponentsModule { }

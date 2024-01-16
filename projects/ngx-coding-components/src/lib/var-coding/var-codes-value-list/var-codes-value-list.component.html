@@ -1,8 +1,6 @@
 <div class="fx-column-start-stretch">
-  <div class="fx-row-start-end">
-    <div class="fx-flex-fill">
-      <h3>{{'code.header' | translate}}</h3>
-    </div>
+  <div class="fx-row-space-between-end">
+    <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
     <div class="processing">
         <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
                       (change)="alterProcessing('IGNORE_CASE', $event.checked)">

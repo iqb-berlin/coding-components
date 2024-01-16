@@ -1,8 +1,6 @@
 <div class="fx-column-start-stretch">
   <div class="fx-row-start-end">
-    <div class="fx-flex-fill">
-      <h3>{{'code.header' | translate}}</h3>
-    </div>
+    <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
   </div>
   <div *ngIf="codes" class="fx-column-start-stretch">
     <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch">

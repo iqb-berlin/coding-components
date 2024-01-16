@@ -39,8 +39,8 @@ interface optionData {
       background: #cccccc;
       color: black;
       padding: 4px 10px;
-    }`,
-    `.dragOptionBox {
+    }
+    .dragOptionBox {
       border: darkgray 1px solid;
     }`
   ]
@@ -284,7 +284,7 @@ export class GenerateCodingDialogComponent {
         codes.push({
           id: codes.length + 1,
           label: '',
-          score: o.value == this.selectedOption ? 1 : 0,
+          score: this.selectedOptions[0] && o.value == this.selectedOptions[0] ? 1 : 0,
           ruleSetOperatorAnd: false,
           ruleSets: [<RuleSet>{
             ruleOperatorAnd: true,
