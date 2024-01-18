@@ -81,15 +81,15 @@ export class CodeRulesComponent {
     if (rule) {
       const dialogRef = this.editRuleReferenceDialog.open(
         SelectCodeRuleReferenceDialogComponent, {
-        width: '300px',
+        width: '400px',
         data: <SelectCodeRuleReferenceDialogData>{
           isFragmentMode: true,
-          value: typeof rule.fragment === 'undefined' ? -1 : rule.fragment
+          value: rule.fragment || 'ANY'
         },
         autoFocus: false
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult === 'number') {
+        if (dialogResult !== false) {
           rule.fragment = dialogResult;
           this.setCodeRulesChanged();
         }
@@ -101,15 +101,15 @@ export class CodeRulesComponent {
     if (ruleSet) {
       const dialogRef = this.editRuleReferenceDialog.open(
         SelectCodeRuleReferenceDialogComponent, {
-          width: '300px',
+          width: '400px',
           data: <SelectCodeRuleReferenceDialogData>{
             isFragmentMode: false,
-            value: typeof ruleSet.valueArrayPos === 'undefined' ? -1 : ruleSet.valueArrayPos
+            value: ruleSet.valueArrayPos || 'ANY'
           },
           autoFocus: false
         });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult === 'number') {
+        if (dialogResult !== false) {
           ruleSet.valueArrayPos = dialogResult;
           this.setCodeRulesChanged();
         }
