@@ -42,6 +42,16 @@ interface optionData {
     }
     .dragOptionBox {
       border: darkgray 1px solid;
+    }
+    .rule-text-error {
+      margin: 10px 0;
+      padding: 6px 12px;
+      border: #ff6c00 solid 3px;
+    }
+    .rule-text-ok {
+      margin: 10px 0;
+      padding: 6px 0;
+      border: transparent solid 3px;
     }`
   ]
 })
@@ -59,13 +69,14 @@ export class GenerateCodingDialogComponent {
   options: optionData[] = [];
   selectedDragOptions: optionData[] = [];
   textAsNumeric = false;
-  numericRule: 'match' | 'range' | 'min' = 'range';
   numericMoreThen = '';
+  numericLessThen = '';
   numericMax = '';
   numericMin = '';
   numericMatch = '';
   numericRuleText = '';
-  elseMethod: 'none' | 'rule' | 'instruction' | 'invalid' = 'instruction';
+  numericRuleError = false;
+  elseMethod: 'none' | 'rule' | 'instruction' | 'invalid' = 'rule';
 
   constructor(
       @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -95,6 +106,7 @@ export class GenerateCodingDialogComponent {
         }
       }
     }
+    this.updateNumericRuleText();
   }
 
   resetOptions() {
@@ -109,16 +121,37 @@ export class GenerateCodingDialogComponent {
   }
 
   updateNumericRuleText() {
-    const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
-    const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
-    if (moreThenValue && !maxValue) {
-      this.numericRuleText = this.translateService.instant('rule.NUMERIC_MORE_THEN')
-    } else if (!moreThenValue && maxValue) {
-      this.numericRuleText = this.translateService.instant('rule.NUMERIC_MAX')
-    } else if (moreThenValue && maxValue && moreThenValue < maxValue) {
-      this.numericRuleText = this.translateService.instant('rule.NUMERIC_RANGE')
+    this.numericRuleError = false;
+    const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
+    if (matchValue) {
+      this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_MATCH')}: ${matchValue}`;
     } else {
-      this.numericRuleText = this.translateService.instant('rule.no-rules')
+      const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+      const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
+      const minValue = CodingFactory.getValueAsNumber(this.numericMin);
+      const lessThenValue = CodingFactory.getValueAsNumber(this.numericLessThen);
+      this.numericRuleText = '';
+      if (moreThenValue && minValue) {
+        this.numericRuleText = this.translateService.instant('coding.generate.only-one-lower-limit');
+        this.numericRuleError = true;
+      }
+      if (lessThenValue && maxValue) {
+        this.numericRuleText += ' ' + this.translateService.instant('coding.generate.only-one-upper-limit');
+        this.numericRuleError = true;
+      }
+      if (!this.numericRuleText) {
+        if (moreThenValue && maxValue && moreThenValue < maxValue) {
+          this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`
+        } else {
+          const ruleTexts: string[] = [];
+          if (moreThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THEN')} ${moreThenValue}`);
+          if (minValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MIN')} ${minValue}`);
+          if (lessThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_LESS_THEN')} ${lessThenValue}`);
+          if (maxValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MAX')} ${maxValue}`);
+          this.numericRuleText = ruleTexts.length > 0 ? ruleTexts.join('; ') : this.translateService.instant('coding.generate.empty-value');
+          this.numericRuleError = ruleTexts.length === 0;
+        }
+      }
     }
   }
 
@@ -194,36 +227,41 @@ export class GenerateCodingDialogComponent {
       this.dialogRef.close(null);
     } else if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
       const numericRules: CodingRule[] = [];
-      if (this.numericRule === 'match') {
-        const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-        if (matchValue) numericRules.push({
+      const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
+      if (matchValue) {
+        numericRules.push({
           method: "NUMERIC_MATCH",
           parameters: [matchValue.toString(10)]
-        });
-      } else if (this.numericRule === 'min') {
-        const minValue = CodingFactory.getValueAsNumber(this.numericMin);
-        if (minValue) numericRules.push({
-          method: "NUMERIC_MIN",
-          parameters: [minValue.toString(10)]
         });
       } else {
         const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
         const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
-        if (moreThenValue && !maxValue) {
-          numericRules.push({
-            method: "NUMERIC_MORE_THEN",
-            parameters: [moreThenValue.toString(10)]
-          });
-        } else if (!moreThenValue && maxValue) {
-          numericRules.push({
-            method: "NUMERIC_MAX",
-            parameters: [maxValue.toString(10)]
-          });
-        } else if (moreThenValue && maxValue && moreThenValue < maxValue) {
-          numericRules.push({
-            method: "NUMERIC_RANGE",
-            parameters: [moreThenValue.toString(10), maxValue.toString(10)]
-          });
+        const minValue = CodingFactory.getValueAsNumber(this.numericMin);
+        const lessThenValue = CodingFactory.getValueAsNumber(this.numericLessThen);
+        if (!(moreThenValue && minValue) && !(lessThenValue && maxValue)) {
+          if (moreThenValue && maxValue && moreThenValue < maxValue) {
+            numericRules.push({
+              method: "NUMERIC_RANGE",
+              parameters: [moreThenValue.toString(10), maxValue.toString(10)]
+            });
+          } else {
+            if (moreThenValue) numericRules.push({
+              method: "NUMERIC_MORE_THEN",
+              parameters: [moreThenValue.toString(10)]
+            });
+            if (minValue) numericRules.push({
+              method: "NUMERIC_MIN",
+              parameters: [minValue.toString(10)]
+            });
+            if (lessThenValue) numericRules.push({
+              method: "NUMERIC_LESS_THEN",
+              parameters: [lessThenValue.toString(10)]
+            });
+            if (maxValue) numericRules.push({
+              method: "NUMERIC_MAX",
+              parameters: [maxValue.toString(10)]
+            });
+          }
         }
       }
       const codes: CodeData[] = [
