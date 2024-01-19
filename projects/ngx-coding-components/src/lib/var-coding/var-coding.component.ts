@@ -88,7 +88,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
         width: '1100px',
         data: {
-          title: this.translateService.instant('manual-instruction.prompt-general'),
+          title: this.translateService.instant('manual-instruction.coding.prompt-edit'),
           content: this.varCoding.manualInstruction || '',
           defaultFontSize: 20,
           editorHeightPx: 400
@@ -103,6 +103,13 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         }
       });
+    }
+  }
+
+  wipeInstructions() {
+    if (this.varCoding) {
+      this.varCoding.manualInstruction = '';
+      this.varCodingChanged.emit(this.varCoding);
     }
   }
 

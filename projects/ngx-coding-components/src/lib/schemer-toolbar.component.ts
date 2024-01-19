@@ -23,7 +23,7 @@ import {FileService} from "./services/file.service";
     </mat-menu>
   `,
   styles: [
-    '.mat-mdc-fab {z-index: 999; position: absolute; top: 20px; right: 20px}'
+    '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
   ]
 })
 export class SchemerToolbarComponent {

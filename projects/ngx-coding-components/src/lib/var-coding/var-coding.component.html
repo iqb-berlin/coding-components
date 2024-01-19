@@ -79,11 +79,18 @@
       </div>
     </div>
     <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">
-      <mat-card-subtitle>
-        <div class="fx-row-start-center">
-          <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.prompt-general' | translate}}</div>
-          <button mat-icon-button (click)="editTextDialog_manualInstruction()">
-            <mat-icon>edit</mat-icon>
+      <mat-card-subtitle class="hover-area">
+        <div class="fx-row-space-between-center">
+          <div class="fx-row-start-center">
+            <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.coding.title' | translate}}</div>
+            <button mat-icon-button [matTooltip]="'manual-instruction.coding.prompt-edit' | translate"
+                    (click)="editTextDialog_manualInstruction()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
+                  [matTooltip]="'manual-instruction.coding.wipe' | translate" [matTooltipShowDelay]="500">
+            <mat-icon>close</mat-icon>
           </button>
         </div>
       </mat-card-subtitle>

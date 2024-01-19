@@ -9,11 +9,18 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
   selector: 'code-instruction',
   template: `
     <mat-card *ngIf="code" [style.padding-left.px]="12" [style.height.%]="100">
-      <mat-card-subtitle>
-        <div class="fx-row-start-center">
-          <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.prompt-code' | translate}}</div>
-          <button mat-icon-button (click)="editTextDialog_manualInstruction()">
-            <mat-icon>edit</mat-icon>
+      <mat-card-subtitle class="hover-area">
+        <div class="fx-row-space-between-center">
+          <div class="fx-row-start-center">
+            <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.code.title' | translate}}</div>
+            <button mat-icon-button [matTooltip]="'manual-instruction.code.prompt-edit' | translate"
+                    (click)="editTextDialog_manualInstruction()">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
+                  [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
+            <mat-icon>close</mat-icon>
           </button>
         </div>
       </mat-card-subtitle>
@@ -21,7 +28,17 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
         <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
       </mat-card-content>
     </mat-card>
-  `
+  `,
+  styles: [
+    `
+      .hover-area .wipe-button {
+        visibility: hidden;
+      }
+      .hover-area:hover .wipe-button {
+        visibility: visible;
+      }
+    `
+  ]
 })
 export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
@@ -38,7 +55,7 @@ export class CodeInstructionComponent {
       const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
         width: '1100px',
         data: {
-          title: this.translateService.instant('manual-instruction.prompt-code'),
+          title: this.translateService.instant('manual-instruction.code.prompt-edit'),
           content: this.code.manualInstruction || '',
           defaultFontSize: 20,
           editorHeightPx: 400
@@ -53,6 +70,13 @@ export class CodeInstructionComponent {
           }
         }
       });
+    }
+  }
+
+  wipeInstructions() {
+    if (this.code) {
+      this.code.manualInstruction = '';
+      this.codeDataChanged.emit(this.code);
     }
   }
 

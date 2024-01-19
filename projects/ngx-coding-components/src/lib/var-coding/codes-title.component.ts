@@ -11,12 +11,13 @@ import {CodeData} from '@iqb/responses';
     </div>
   `,
   styles: [
-    `.hover-icon mat-icon {
-      visibility: hidden;
-    }`,
-    `.hover-icon:hover mat-icon {
-      visibility: visible;
-    }
+    `
+      .hover-icon mat-icon {
+        visibility: hidden;
+      }
+      .hover-icon:hover mat-icon {
+        visibility: visible;
+      }
     `
   ]
 })
