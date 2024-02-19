@@ -97,7 +97,8 @@ import {MatRippleModule} from "@angular/material/core";
     SelectVariableDialogComponent,
     ShowCodingDialogComponent,
     ShowCodingProblemsDialogComponent,
-    SimpleInputDialogComponent
+    SimpleInputDialogComponent,
+    ShowCodingResultsComponent
   ],
   imports: [
     CommonModule,
