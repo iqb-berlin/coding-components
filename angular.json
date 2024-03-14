@@ -209,10 +209,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "schemer:build:production"
+              "buildTarget": "schemer:build:production"
             },
             "development": {
-              "browserTarget": "schemer:build:development"
+              "buildTarget": "schemer:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -220,7 +220,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "schemer:build"
+            "buildTarget": "schemer:build"
           }
         },
         "test": {
