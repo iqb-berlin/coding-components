@@ -71,7 +71,7 @@
     "@tiptap/extension-text-style": "^2.1.10",
     "@tiptap/extension-underline": "^2.1.10",
     "ngx-tiptap": "^9.0.2",
-    "ngx-build-plus": "^16.0.0",
+    "ngx-build-plus": "^17.0.0",
     "rxjs": "~7.8.0",
     "zone.js": "~0.13.0"
   },
