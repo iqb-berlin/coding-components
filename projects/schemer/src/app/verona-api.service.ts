@@ -82,6 +82,6 @@ export interface VosSchemeChangedData {
   sessionId: string,
   timeStamp: string,
   codingScheme: string,
-  codingSchemeType: 'iqb@1.2',
+  codingSchemeType: 'iqb@1.5',
   variables: VariableInfoShort[]
 }
