@@ -1,5 +1,5 @@
 @use '../../node_modules/@angular/material/index' as mat;
-@import '../../node_modules/@angular/material/theming';
+@import '../../node_modules/@angular/material/core/typography/all-typography';
 
 $aspect-typography: mat.define-typography-config(
   $font-family: 'NunitoSans',
@@ -14,7 +14,7 @@ $aspect-theme: mat.define-light-theme((
   color: (primary: $aspect-primary, accent: $aspect-accent),
 ));
 
-@include mat.legacy-checkbox-color($aspect-theme);
+@include mat.checkbox-color($aspect-theme);
 @include mat.radio-color($aspect-theme);
 @include mat.slider-color($aspect-theme);
 
