@@ -1,10 +1,6 @@
 import { Component, Inject } from '@angular/core';
-import {
-  CdkDragDrop,
-  moveItemInArray,
-  transferArrayItem
-} from '@angular/cdk/drag-drop';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import {
   CodeData,
   CodingRule,
@@ -15,7 +11,20 @@ import {
 } from "@iqb/responses";
 import {CodeModelType} from "@iqb/responses/coding-interfaces";
 import {CodingFactory} from "@iqb/responses/coding-factory";
-import {TranslateService} from "@ngx-translate/core";
+import { TranslateService, TranslateModule } from "@ngx-translate/core";
+import { MatButton } from '@angular/material/button';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatInput } from '@angular/material/input';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
+import { MatSelectionList, MatListOption } from '@angular/material/list';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatLabel, MatFormField } from '@angular/material/form-field';
+import { NgIf, NgFor } from '@angular/common';
 
 export interface GeneratedCodingData {
   id: string,
@@ -33,9 +42,9 @@ interface optionData {
 }
 
 @Component({
-  templateUrl: 'generate-coding-dialog.component.html',
-  styles: [
-    `.coding-action {
+    templateUrl: 'generate-coding-dialog.component.html',
+    styles: [
+        `.coding-action {
       background: #cccccc;
       color: black;
       padding: 4px 10px;
@@ -53,7 +62,9 @@ interface optionData {
       padding: 6px 0;
       border: transparent solid 3px;
     }`
-  ]
+    ],
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, NgIf, NgFor, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule, MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove, MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GenerateCodingDialogComponent {

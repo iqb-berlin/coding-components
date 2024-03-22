@@ -1,11 +1,14 @@
 import {
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSelectionList } from '@angular/material/list';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { MatSelectionList, MatListOption } from '@angular/material/list';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  template: `
+    template: `
     <h1 mat-dialog-title>{{ selectData.title }}</h1>
     <div *ngIf="selectData.prompt">{{selectData.prompt}}</div>
 
@@ -22,7 +25,9 @@ import { MatSelectionList } from '@angular/material/list';
               (click)="okButtonClick()">{{ selectData.okButtonLabel }}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
-  `
+  `,
+    standalone: true,
+    imports: [MatDialogTitle, NgIf, MatDialogContent, MatSelectionList, NgFor, MatListOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SelectVariableDialogComponent implements OnInit {
   @ViewChild('variables') variablesElement?: MatSelectionList;

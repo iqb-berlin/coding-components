@@ -3,10 +3,16 @@ import {VeronaAPIService, VosStartCommand} from "./verona-api.service";
 import {Subject, takeUntil} from "rxjs";
 import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import {CodingFactory} from "@iqb/responses/coding-factory";
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { NgIf } from '@angular/common';
+import { SchemeCheckerComponent, SchemerComponent, SchemerToolbarComponent } from 'ngx-coding-components';
+import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
 
 @Component({
-  selector: 'app-root',
-  template: `
+    selector: 'app-root',
+    template: `
     <mat-drawer-container class="coder-body">
       <mat-drawer #drawer mode="side">
         <schema-checker [codingScheme]="codings"></schema-checker>
@@ -31,8 +37,8 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
                        (codingSchemeChanged)="setNewCodingScheme($event)"
                        [style.height.px]="0"></schemer-load-save>
     `,
-  styles: [
-    `
+    styles: [
+        `
         .coder-body {
           position: absolute;
           width: 100%;
@@ -46,12 +52,12 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
           align-items: stretch;
         }
       `,
-      `
+        `
         .drawer-schemer {
           flex: 1 1 auto;
         }
       `,
-      `
+        `
         .drawer-content {
           padding: 0;
           display: flex;
@@ -61,7 +67,9 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
           overflow: unset;
         }
       `
-  ]
+    ],
+    standalone: true,
+    imports: [MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, NgIf, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

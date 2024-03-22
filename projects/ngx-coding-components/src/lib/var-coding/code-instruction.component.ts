@@ -1,13 +1,18 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData} from '@iqb/responses';
-import {TranslateService} from "@ngx-translate/core";
+import { TranslateService, TranslateModule } from "@ngx-translate/core";
 import {MatDialog} from "@angular/material/dialog";
 import {RichTextEditDialogComponent} from "../rich-text-editor/rich-text-edit-dialog.component";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'code-instruction',
-  template: `
+    selector: 'code-instruction',
+    template: `
     <mat-card *ngIf="code" [style.padding-left.px]="12" [style.height.%]="100">
       <mat-card-subtitle class="hover-area">
         <div class="fx-row-space-between-center">
@@ -29,8 +34,8 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
       </mat-card-content>
     </mat-card>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .hover-area .wipe-button {
         visibility: hidden;
       }
@@ -38,7 +43,9 @@ import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
         visibility: visible;
       }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [NgIf, MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatCardContent, TranslateModule]
 })
 export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();

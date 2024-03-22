@@ -8,8 +8,8 @@ describe('CodeRulesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [CodeRulesComponent]
-    })
+    imports: [CodeRulesComponent]
+})
       .compileComponents();
   });
 

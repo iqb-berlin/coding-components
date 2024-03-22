@@ -13,21 +13,19 @@ import {NgxCodingComponentsModule} from "ngx-coding-components";
 import {createCustomElement} from "@angular/elements";
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    NgxCodingComponentsModule,
-    MatMenuModule,
-    MatDividerModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
-    MatSidenavModule,
-    MatToolbarModule
-  ],
-  providers: []
+    imports: [
+        BrowserModule,
+        NgxCodingComponentsModule,
+        MatMenuModule,
+        MatDividerModule,
+        MatIconModule,
+        MatButtonModule,
+        MatTooltipModule,
+        MatSidenavModule,
+        MatToolbarModule,
+        AppComponent
+    ],
+    providers: []
 })
 export class AppModule implements DoBootstrap {
   constructor(private injector: Injector) {}

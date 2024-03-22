@@ -1,17 +1,21 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData} from '@iqb/responses';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatRipple } from '@angular/material/core';
 
 @Component({
-  selector: 'codes-title',
-  template: `
+    selector: 'codes-title',
+    template: `
     <div class="fx-row-start-center fx-gap-5 hover-icon" (click)="sortCodes()"
          matRipple [style.cursor]="'pointer'">
       <h3 [matTooltip]="'code.prompt.sort' | translate" [matTooltipShowDelay]="500">{{'code.header' | translate}}</h3>
       <mat-icon [matTooltip]="'code.prompt.sort' | translate" [matTooltipShowDelay]="500">swap_vert</mat-icon>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .hover-icon mat-icon {
         visibility: hidden;
       }
@@ -19,7 +23,9 @@ import {CodeData} from '@iqb/responses';
         visibility: visible;
       }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [MatRipple, MatTooltip, MatIcon, TranslateModule]
 })
 export class CodesTitleComponent {
   @Output() codesChanged = new EventEmitter();

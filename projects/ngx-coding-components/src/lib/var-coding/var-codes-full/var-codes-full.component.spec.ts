@@ -8,8 +8,8 @@ describe('VarCodesFullComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [VarCodesFullComponent]
-    })
+    imports: [VarCodesFullComponent]
+})
       .compileComponents();
   });
 

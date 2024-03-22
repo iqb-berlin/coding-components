@@ -6,19 +6,27 @@ import {MessageDialogComponent, MessageDialogData, MessageType} from "../dialogs
 import {ConfirmDialogComponent, ConfirmDialogData} from "../dialogs/confirm-dialog.component";
 import {SelectVariableDialogComponent, SelectVariableDialogData} from "../dialogs/select-variable-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
-import {TranslateService} from "@ngx-translate/core";
+import { TranslateService, TranslateModule } from "@ngx-translate/core";
 import {VarCodingComponent} from "../var-coding/var-coding.component";
 import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
 import {CodingFactory} from "@iqb/responses/coding-factory";
 import {SchemerService} from "../services/schemer.service";
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatNavList, MatListItem } from '@angular/material/list';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
 
 @Component({
-  selector: 'iqb-schemer',
-  templateUrl: './schemer.component.html',
-  styleUrls: ['./schemer.component.scss'] //,
-  // encapsulation: ViewEncapsulation.ShadowDom
+    selector: 'iqb-schemer',
+    templateUrl: './schemer.component.html',
+    styleUrls: ['./schemer.component.scss'] //,
+    // encapsulation: ViewEncapsulation.ShadowDom
+    ,
+    standalone: true,
+    imports: [NgIf, NgFor, MatNavList, MatTooltip, MatListItem, MatButton, MatIcon, VarCodingComponent, AsyncPipe, TranslateModule]
 })
 
 

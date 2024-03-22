@@ -1,8 +1,14 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { NgIf } from '@angular/common';
 
 @Component({
-  template: `
+    template: `
     <h1 mat-dialog-title>{{ inputData.title }}</h1>
 
     <mat-dialog-content>
@@ -16,7 +22,9 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
       <button mat-raised-button color="primary" [mat-dialog-close]="inputData.value">{{ inputData.saveButtonLabel }}</button>
       <button mat-raised-button *ngIf="showCancel" [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
-  `
+  `,
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, NgIf, MatFormField, MatInput, ReactiveFormsModule, FormsModule, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SimpleInputDialogComponent implements OnInit {
   showCancel = true;

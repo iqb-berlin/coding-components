@@ -5,14 +5,30 @@ import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
 } from "../../dialogs/select-code-rule-reference-dialog.component";
-import {MatTabGroup} from "@angular/material/tabs";
+import { MatTabGroup, MatTab } from "@angular/material/tabs";
 import {SchemerService} from "../../services/schemer.service";
 import {CodeModelType} from "@iqb/responses/coding-interfaces";
+import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
+import { PossibleNewRulesPipe } from '../../pipes/possible-new-rules.pipe';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { NgIf, NgFor } from '@angular/common';
+import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 
 @Component({
-  selector: 'code-rules',
-  templateUrl: './code-rules.component.html',
-  styleUrls: ['./code-rules.component.scss']
+    selector: 'code-rules',
+    templateUrl: './code-rules.component.html',
+    styleUrls: ['./code-rules.component.scss'],
+    standalone: true,
+    imports: [MatCard, MatCardSubtitle, NgIf, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup, ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, NgFor, MatTab, MatFormField, MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule, PossibleNewRulesPipe, RuleReferencePipe]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();

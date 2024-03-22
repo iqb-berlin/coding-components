@@ -1,18 +1,37 @@
 import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {MatDialog} from '@angular/material/dialog';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {RichTextEditDialogComponent} from '../rich-text-editor/rich-text-edit-dialog.component';
 import {VariableCodingData, VariableInfo} from "@iqb/responses";
 import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
 import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
 import {GenerateCodingDialogComponent, GeneratedCodingData} from "../dialogs/generate-coding-dialog.component";
 import {SchemerService} from "../services/schemer.service";
+import { VarCodesFullComponent } from './var-codes-full/var-codes-full.component';
+import { VarCodesNumberComponent } from './var-codes-number/var-codes-number.component';
+import { VarCodesChoiceComponent } from './var-codes-choice/var-codes-choice.component';
+import { VarCodesValueListComponent } from './var-codes-value-list/var-codes-value-list.component';
+import { VarCodesManualComponent } from './var-codes-manual/var-codes-manual.component';
+import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 
 @Component({
-  selector: 'var-coding',
-  templateUrl: './var-coding.component.html',
-  styleUrls: ['./var-coding.component.scss']
+    selector: 'var-coding',
+    templateUrl: './var-coding.component.html',
+    styleUrls: ['./var-coding.component.scss'],
+    standalone: true,
+    imports: [NgIf, MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption, MatChipListbox, MatChip, MatMenuTrigger, NgFor, MatIcon, MatChipRemove, MatIconButton, MatMenu, MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, NgSwitch, NgSwitchCase, VarCodesManualComponent, VarCodesValueListComponent, VarCodesChoiceComponent, VarCodesNumberComponent, NgSwitchDefault, VarCodesFullComponent, TranslateModule]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();

@@ -1,12 +1,21 @@
 import {Component, OnInit} from '@angular/core';
 import {VarCodesDirective} from "../var-codes.directive";
-import {TranslateService} from "@ngx-translate/core";
+import { TranslateService, TranslateModule } from "@ngx-translate/core";
 import {CodeData, CodingRule, RuleSet} from "@iqb/responses";
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { CodeRulesComponent } from '../code-rules/code-rules.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { CodeHeaderComponent } from '../code-header.component';
+import { NgIf, NgFor } from '@angular/common';
+import { CodesTitleComponent } from '../codes-title.component';
 
 @Component({
-  selector: 'var-codes-choice',
-  templateUrl: './var-codes-choice.component.html',
-  styleUrls: ['./var-codes-choice.component.scss']
+    selector: 'var-codes-choice',
+    templateUrl: './var-codes-choice.component.html',
+    styleUrls: ['./var-codes-choice.component.scss'],
+    standalone: true,
+    imports: [CodesTitleComponent, NgIf, NgFor, CodeHeaderComponent, MatTooltip, CodeRulesComponent, MatIconButton, MatIcon, MatButton, TranslateModule]
 })
 export class VarCodesChoiceComponent extends VarCodesDirective implements OnInit {
   constructor(

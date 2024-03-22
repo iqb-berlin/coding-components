@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'ruleReference'
+    name: 'ruleReference',
+    standalone: true
 })
 export class RuleReferencePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

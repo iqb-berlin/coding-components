@@ -1,10 +1,15 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CodingScheme, VariableInfo} from "@iqb/responses";
 import {FileService} from "./services/file.service";
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFabButton } from '@angular/material/button';
 
 @Component({
-  selector: 'schemer-load-save',
-  template: `
+    selector: 'schemer-load-save',
+    template: `
     <button mat-fab [matMenuTriggerFor]="menu" matTooltip="Load/Save..." matTooltipPosition="above">
       <mat-icon>menu</mat-icon>
     </button>
@@ -22,9 +27,11 @@ import {FileService} from "./services/file.service";
       </button>
     </mat-menu>
   `,
-  styles: [
-    '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
-  ]
+    styles: [
+        '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
+    ],
+    standalone: true,
+    imports: [MatFabButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class SchemerToolbarComponent {
   @Input() codingScheme: CodingScheme | null = null;

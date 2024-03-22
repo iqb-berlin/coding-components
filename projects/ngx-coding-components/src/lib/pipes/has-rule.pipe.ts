@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import {CodeData} from "@iqb/responses";
 
 @Pipe({
-  name: 'hasRule'
+    name: 'hasRule',
+    standalone: true
 })
 export class HasRulePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

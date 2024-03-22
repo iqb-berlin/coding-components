@@ -2,11 +2,17 @@ import {Component, Input} from '@angular/core';
 import {Response, CodingScheme} from '@iqb/responses';
 import {MatDialog} from '@angular/material/dialog';
 import { ShowCodingResultsComponent } from './show-coding-results.component';
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { NgFor } from '@angular/common';
 
 @Component({
-  selector: 'schema-checker',
-  templateUrl: './scheme-checker.component.html',
-  styleUrls: ['./scheme-checker.component.scss']
+    selector: 'schema-checker',
+    templateUrl: './scheme-checker.component.html',
+    styleUrls: ['./scheme-checker.component.scss'],
+    standalone: true,
+    imports: [NgFor, MatFormField, MatLabel, MatInput, MatButton]
 })
 export class SchemeCheckerComponent {
   values: { [Key in string]: string } = {};

@@ -1,9 +1,17 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData} from '@iqb/responses';
+import { TranslateModule } from '@ngx-translate/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'code-header',
-  template: `
+    selector: 'code-header',
+    template: `
     <div  *ngIf="code" class="code-main-data fx-row-start-center">
       <ng-container *ngIf="code.id === null">
         <div class="fx-flex-fill" [style.padding-left.px]="8">
@@ -47,8 +55,8 @@ import {CodeData} from '@iqb/responses';
       </ng-container>
     </div>
   `,
-  styles: [
-    `
+    styles: [
+        `
       .code-main-data {
         background-color: whitesmoke;
       }
@@ -62,7 +70,9 @@ import {CodeData} from '@iqb/responses';
         border: transparent solid 2px;
       }
     `
-  ]
+    ],
+    standalone: true,
+    imports: [NgIf, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, TranslateModule]
 })
 export class CodeHeaderComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();

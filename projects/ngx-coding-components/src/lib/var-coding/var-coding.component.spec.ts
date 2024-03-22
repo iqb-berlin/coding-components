@@ -8,8 +8,8 @@ describe('CodingSchemeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [VarCodingComponent]
-    })
+    imports: [VarCodingComponent]
+})
       .compileComponents();
   });
 

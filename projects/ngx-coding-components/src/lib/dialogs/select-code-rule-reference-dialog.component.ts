@@ -1,11 +1,17 @@
 import {
   Component, Inject
 } from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import { TranslateService } from "@ngx-translate/core";
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { TranslateService, TranslateModule } from "@ngx-translate/core";
+import { MatButton } from '@angular/material/button';
+import { MatInput } from '@angular/material/input';
+import { MatFormField } from '@angular/material/form-field';
+import { NgIf } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatSelectionList, MatListOption } from '@angular/material/list';
 
 @Component({
-  template: `
+    template: `
     <h1 mat-dialog-title>{{ (refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.title' | translate }}</h1>
     <mat-dialog-content>
       <div>{{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.prompt' | translate}}</div>
@@ -31,7 +37,9 @@ import { TranslateService } from "@ngx-translate/core";
               (click)="okButtonClick()">{{ 'dialog-save' | translate }}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
-  `
+  `,
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, MatSelectionList, ReactiveFormsModule, FormsModule, MatListOption, NgIf, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SelectCodeRuleReferenceDialogComponent {
   newValue: number;

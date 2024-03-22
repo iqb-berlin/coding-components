@@ -1,9 +1,12 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import {CodingAsText, ToTextFactory, VariableCodingData} from "@iqb/responses";
+import { TranslateModule } from '@ngx-translate/core';
+import { MatButton } from '@angular/material/button';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  template: `
+    template: `
     <h1 mat-dialog-title>{{varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
 
     <mat-dialog-content>
@@ -50,9 +53,12 @@ import {CodingAsText, ToTextFactory, VariableCodingData} from "@iqb/responses";
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
   `,
-  styles: [
-    '.code-row:nth-child(even) {background-color: #f1f1f1;}'
-  ]})
+    styles: [
+        '.code-row:nth-child(even) {background-color: #f1f1f1;}'
+    ],
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, NgIf, NgFor, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+})
 export class ShowCodingDialogComponent {
   varCodingText: CodingAsText;
 

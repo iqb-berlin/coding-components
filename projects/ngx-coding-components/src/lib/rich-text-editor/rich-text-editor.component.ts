@@ -29,11 +29,24 @@ import { BulletListExtension } from './extensions/bullet-list';
 import { OrderedListExtension } from './extensions/ordered-list';
 import {BlockImage} from "./extensions/block-image";
 import {FileService} from "../services/file.service";
+import { NgxTiptapModule } from 'ngx-tiptap';
+import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { ComboButtonComponent } from './combo-button.component';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'aspect-rich-text-editor',
-  templateUrl: './rich-text-editor.component.html',
-  styleUrls: ['./rich-text-editor.component.scss']
+    selector: 'aspect-rich-text-editor',
+    templateUrl: './rich-text-editor.component.html',
+    styleUrls: ['./rich-text-editor.component.scss'],
+    standalone: true,
+    imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatSelect, MatOption, ComboButtonComponent, MatInput, ReactiveFormsModule, FormsModule, MatMenuTrigger, MatMenu, MatButton, NgxTiptapModule]
 })
 export class RichTextEditorComponent implements AfterViewInit {
   @Input() content!: string | Record<string, any>;

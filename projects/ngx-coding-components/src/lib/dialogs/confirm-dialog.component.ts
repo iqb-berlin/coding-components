@@ -1,8 +1,11 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { TranslateModule } from '@ngx-translate/core';
+import { NgIf } from '@angular/common';
+import { MatButton } from '@angular/material/button';
 
 @Component({
-  template: `
+    template: `
     <h1 mat-dialog-title>{{ confirmData.title }}</h1>
 
     <mat-dialog-content>
@@ -15,7 +18,9 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
       <button mat-raised-button color="primary" [mat-dialog-close]="true">{{ confirmData.confirmButtonLabel }}</button>
       <button mat-raised-button *ngIf="showCancel" [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
-  `
+  `,
+    standalone: true,
+    imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, NgIf, TranslateModule]
 })
 export class ConfirmDialogComponent implements OnInit {
   showCancel = true;

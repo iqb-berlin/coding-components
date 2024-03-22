@@ -3,7 +3,8 @@ import {CodingRule, VariableInfo} from "@iqb/responses";
 import {RuleMethod} from "@iqb/responses/coding-interfaces";
 
 @Pipe({
-  name: 'possibleNewRules'
+    name: 'possibleNewRules',
+    standalone: true
 })
 export class PossibleNewRulesPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this

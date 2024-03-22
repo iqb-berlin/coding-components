@@ -1,10 +1,17 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
+import { MatActionList, MatListItem } from '@angular/material/list';
+import { CdkOverlayOrigin, CdkConnectedOverlay } from '@angular/cdk/overlay';
+import { MatInput } from '@angular/material/input';
+import { NgIf, NgFor } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
 
 @Component({
-  selector: 'aspect-combo-button',
-  template: `
+    selector: 'aspect-combo-button',
+    template: `
     <div class="root-panel"
          [style.background-color]="inputType === 'color' ? selectedValue : isActive ? 'lightgrey' : 'unset'">
       <button class="apply-button" mat-icon-button [matTooltip]="tooltip"
@@ -41,7 +48,7 @@ import {
       </ng-container>
     </div>
   `,
-  styles: [`
+    styles: [`
     .root-panel {
       display: flex;
       flex-direction: row;
@@ -65,7 +72,9 @@ import {
       padding-top: 9px;
     }
   `
-  ]
+    ],
+    standalone: true,
+    imports: [MatIconButton, MatTooltip, MatIcon, NgIf, MatInput, CdkOverlayOrigin, CdkConnectedOverlay, MatActionList, NgFor, MatListItem]
 })
 export class ComboButtonComponent {
   @Input() inputType!: 'color' | 'list';
