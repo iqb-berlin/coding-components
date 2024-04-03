@@ -4,7 +4,7 @@
       <div class="var-list-header">{{'varlist.base' | translate}}</div>
       <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-stretch">
         <div class="fx-row-start-center">
-          <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.base-' + codingStatus[varBasic.id]) | translate"></div>
+          <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.' + codingStatus[varBasic.id]) | translate"></div>
           <a mat-list-item style="height: 22px;text-overflow: ellipsis"
              class="var-list-entry"
              [class]="varBasic.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'"
