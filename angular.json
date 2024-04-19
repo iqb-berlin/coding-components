@@ -101,10 +101,10 @@
           "builder": "ngx-build-plus:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "coding-components:build:production"
+              "buildTarget": "coding-components:build:production"
             },
             "development": {
-              "browserTarget": "coding-components:build:development"
+              "buildTarget": "coding-components:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -112,7 +112,7 @@
         "extract-i18n": {
           "builder": "ngx-build-plus:extract-i18n",
           "options": {
-            "browserTarget": "coding-components:build"
+            "buildTarget": "coding-components:build"
           }
         },
         "test": {
