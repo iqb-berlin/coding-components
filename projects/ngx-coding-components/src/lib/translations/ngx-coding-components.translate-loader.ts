@@ -1,10 +1,6 @@
-import { TranslateLoader } from '@ngx-translate/core';
-import { of, Observable} from 'rxjs';
-import deTranslations from './de.json';
+import {HttpClient} from "@angular/common/http";
+import {TranslateHttpLoader} from "@ngx-translate/http-loader";
 
-export class NgxCodingComponentsTranslateLoader implements TranslateLoader {
-  // eslint-disable-next-line class-methods-use-this
-  public getTranslation(lang: string): Observable<any> {
-    return of(deTranslations);
-  }
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/', '.json');
 }
