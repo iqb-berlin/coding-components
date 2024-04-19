@@ -1,4 +1,3 @@
-export * from './lib/ngx-coding-components.module';
 export * from './lib/scheme-checker/scheme-checker.component';
 export * from './lib/scheme-checker/show-coding-results.component';
 export * from './lib/var-coding/var-coding.component';

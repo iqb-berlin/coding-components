@@ -3,10 +3,21 @@ import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
 import {CodingFactory} from "@iqb/responses/coding-factory";
-
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
+import {TranslateModule} from "@ngx-translate/core";
+import {
+  SchemeCheckerComponent
+} from "../../projects/ngx-coding-components/src/lib/scheme-checker/scheme-checker.component";
+import {
+  SchemerComponent
+} from "../../projects/ngx-coding-components/src/lib/schemer/schemer.component";
+import {SchemerToolbarComponent} from "../../projects/ngx-coding-components/src/lib/schemer-toolbar.component";
 @Component({
-  selector: 'app-root',
-  template: `
+    selector: 'app-root',
+    template: `
       <mat-drawer-container class="coder-body">
         <mat-drawer #drawer mode="side">
             <schema-checker [codingScheme]="codings1"></schema-checker>
@@ -31,8 +42,8 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
         (codingSchemeChanged)="setNewCodingScheme($event)"
         [style.height.px]="0"></schemer-load-save>
   `,
-  styles: [
-    `
+    styles: [
+        `
         .coder-body {
           position: absolute;
           width: 100%;
@@ -46,17 +57,17 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
           align-items: stretch;
         }
       `,
-    `
+        `
         .drawer-button {
           flex: 0 0 40px;
         }
       `,
-    `
+        `
         .drawer-schemer {
           flex: 1 1 auto;
         }
       `,
-    `
+        `
         .drawer-content {
           padding: 0;
           display: flex;
@@ -66,7 +77,9 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
           overflow: unset;
         }
       `
-  ]
+    ],
+    standalone: true,
+  imports: [SchemeCheckerComponent,SchemerComponent,SchemerToolbarComponent,TranslateModule,MatDrawerContainer, MatDrawer, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemeCheckerComponent, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];

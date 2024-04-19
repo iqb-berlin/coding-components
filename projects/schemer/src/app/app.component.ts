@@ -7,8 +7,12 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { NgIf } from '@angular/common';
-import { SchemeCheckerComponent, SchemerComponent, SchemerToolbarComponent } from 'ngx-coding-components';
 import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
+import {NoopAnimationsModule} from "@angular/platform-browser/animations";
+import {TranslateModule} from "@ngx-translate/core";
+import {SchemerComponent} from "../../../ngx-coding-components/src/lib/schemer/schemer.component";
+import {SchemeCheckerComponent} from "../../../ngx-coding-components/src/lib/scheme-checker/scheme-checker.component";
+import {SchemerToolbarComponent} from "../../../ngx-coding-components/src/lib/schemer-toolbar.component";
 
 @Component({
     selector: 'app-root',
@@ -69,7 +73,7 @@ import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/materi
       `
     ],
     standalone: true,
-    imports: [MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, NgIf, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
+    imports: [SchemerComponent,SchemeCheckerComponent,SchemerToolbarComponent,TranslateModule,NoopAnimationsModule,MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, NgIf, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
