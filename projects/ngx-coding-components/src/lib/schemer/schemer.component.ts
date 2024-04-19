@@ -190,7 +190,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             if (this.schemerService.codingScheme) {
               const newVarScheme = <VariableCodingData>{
                 id: result,
-                label: result,
+                label: '',
                 sourceType: 'SUM_SCORE',
                 deriveSources: [],
                 processing: [],
