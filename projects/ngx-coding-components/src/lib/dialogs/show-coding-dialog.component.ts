@@ -3,12 +3,12 @@ import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, Ma
 import {CodingAsText, ToTextFactory, VariableCodingData} from "@iqb/responses";
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { NgIf, NgFor } from '@angular/common';
+
 
 @Component({
     template: `
     <h1 mat-dialog-title>{{varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
-
+    
     <mat-dialog-content>
       <div class="fx-row-start-center">
         <div class="fx-flex-row-20">Quelle:</div>
@@ -23,7 +23,7 @@ import { NgIf, NgFor } from '@angular/common';
         <div class="fx-flex-fill">{{varCodingText.hasManualInstruction ? 'ja' : 'keine'}}</div>
       </div>
       <h3>Codes</h3>
-      <ng-container *ngIf="varCodingText.codes.length > 0">
+      @if (varCodingText.codes.length > 0) {
         <div class="fx-row-start-center" [style.font-weight]="'bold'">
           <div class="fx-flex-row-10" [style.text-align]="'center'">Code</div>
           <div class="fx-flex-row-10" [style.text-align]="'center'">Score</div>
@@ -31,33 +31,47 @@ import { NgIf, NgFor } from '@angular/common';
           <div class="fx-flex-fill">Bedingung(en)</div>
           <div class="fx-flex-row-10" [style.text-align]="'center'">Instruktions- text ?</div>
         </div>
-        <div class="fx-row-start-center code-row" *ngFor="let codeText of varCodingText.codes">
-          <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.code}}</div>
-          <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.score}}</div>
-          <div class="fx-flex-row-20">{{codeText.label}}</div>
-          <div class="fx-flex-fill">
-            <ul *ngIf="codeText.ruleSetDescriptions.length > 1">
-              <li *ngFor="let d of codeText.ruleSetDescriptions">{{d}}</li>
-            </ul>
-            <p *ngIf="codeText.ruleSetDescriptions.length > 1">Verknüpfung der Regelsätze: {{codeText.ruleSetOperatorAnd ? 'UND' : 'ODER'}}</p>
-            <p *ngIf="codeText.ruleSetDescriptions.length === 1">{{codeText.ruleSetDescriptions[0]}}</p>
-            <p *ngIf="codeText.ruleSetDescriptions.length < 1">keine</p>
+        @for (codeText of varCodingText.codes; track codeText) {
+          <div class="fx-row-start-center code-row">
+            <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.code}}</div>
+            <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.score}}</div>
+            <div class="fx-flex-row-20">{{codeText.label}}</div>
+            <div class="fx-flex-fill">
+              @if (codeText.ruleSetDescriptions.length > 1) {
+                <ul>
+                  @for (d of codeText.ruleSetDescriptions; track d) {
+                    <li>{{d}}</li>
+                  }
+                </ul>
+              }
+              @if (codeText.ruleSetDescriptions.length > 1) {
+                <p>Verknüpfung der Regelsätze: {{codeText.ruleSetOperatorAnd ? 'UND' : 'ODER'}}</p>
+              }
+              @if (codeText.ruleSetDescriptions.length === 1) {
+                <p>{{codeText.ruleSetDescriptions[0]}}</p>
+              }
+              @if (codeText.ruleSetDescriptions.length < 1) {
+                <p>keine</p>
+              }
+            </div>
+            <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.hasManualInstruction ? 'ja' : '-'}}</div>
           </div>
-          <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.hasManualInstruction ? 'ja' : '-'}}</div>
-        </div>
-      </ng-container>
-      <div *ngIf="varCodingText.codes.length === 0">keine</div>
+        }
+      }
+      @if (varCodingText.codes.length === 0) {
+        <div>keine</div>
+      }
     </mat-dialog-content>
-
+    
     <mat-dialog-actions>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
-  `,
+    `,
     styles: [
         '.code-row:nth-child(even) {background-color: #f1f1f1;}'
     ],
     standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, NgIf, NgFor, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ShowCodingDialogComponent {
   varCodingText: CodingAsText;

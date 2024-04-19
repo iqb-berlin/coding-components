@@ -1,57 +1,65 @@
 <div class="scheme-body fx-row-space-between-stretch">
-  <div *ngIf="schemerService.allVariableIds.length > 0" class="navi-bar fx-column-space-between-stretch">
-    <div class="var-scheme-list fx-flex">
-      <div class="var-list-header">{{'varlist.base' | translate}}</div>
-      <mat-nav-list *ngFor="let varBasic of basicVariables" class="fx-column-start-stretch">
-        <div class="fx-row-start-center">
-          <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.' + codingStatus[varBasic.id]) | translate"></div>
-          <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-             class="var-list-entry"
-             [class]="varBasic.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'"
-             (click)="selectVarScheme(varBasic)">
-            {{ varBasic.id }}
-          </a>
-        </div>
-      </mat-nav-list>
-      <div class="var-list-header">{{'varlist.derived' | translate}}</div>
-      <mat-nav-list *ngFor="let varScheme of derivedVariables" class="fx-column-start-stretch">
-        <div class="fx-row-start-center">
-          <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.' + codingStatus[varScheme.id]) | translate"></div>
-          <a mat-list-item style="height: 22px;text-overflow: ellipsis"
-             class="var-list-entry"
-             (click)="selectVarScheme(varScheme)"
-             [class]="varScheme.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'">
-            {{ varScheme.id }}
-          </a>
-        </div>
-      </mat-nav-list>
+  @if (schemerService.allVariableIds.length > 0) {
+    <div class="navi-bar fx-column-space-between-stretch">
+      <div class="var-scheme-list fx-flex">
+        <div class="var-list-header">{{'varlist.base' | translate}}</div>
+        @for (varBasic of basicVariables; track varBasic) {
+          <mat-nav-list class="fx-column-start-stretch">
+            <div class="fx-row-start-center">
+              <div [class]="'var-marker-' + codingStatus[varBasic.id]" [matTooltip]="('coding-status.' + codingStatus[varBasic.id]) | translate"></div>
+              <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+                class="var-list-entry"
+                [class]="varBasic.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'"
+                (click)="selectVarScheme(varBasic)">
+                {{ varBasic.id }}
+              </a>
+            </div>
+          </mat-nav-list>
+        }
+        <div class="var-list-header">{{'varlist.derived' | translate}}</div>
+        @for (varScheme of derivedVariables; track varScheme) {
+          <mat-nav-list class="fx-column-start-stretch">
+            <div class="fx-row-start-center">
+              <div [class]="'var-marker-' + codingStatus[varScheme.id]" [matTooltip]="('coding-status.' + codingStatus[varScheme.id]) | translate"></div>
+              <a mat-list-item style="height: 22px;text-overflow: ellipsis"
+                class="var-list-entry"
+                (click)="selectVarScheme(varScheme)"
+                [class]="varScheme.id === (selectedCoding$ | async)?.id ? 'selected' : 'not-selected'">
+                {{ varScheme.id }}
+              </a>
+            </div>
+          </mat-nav-list>
+        }
+      </div>
+      <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
+      <div class="var-list-buttons">
+        <button mat-button (click)="addVarScheme()"
+          [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-button [disabled]="(selectedCoding$ | async) === null"
+          (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
+          (click)="renameVarScheme()" [matTooltip]="'varlist.rename' | translate" matTooltipPosition="above">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-button [disabled]="(selectedCoding$ | async) === null"
+          (click)="copyVarScheme()" [matTooltip]="'varlist.copy' | translate" matTooltipPosition="above">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+        <button mat-button
+          (click)="checkVarScheme()" [matTooltip]="'varlist.check' | translate" matTooltipPosition="above">
+          <mat-icon>check</mat-icon>
+        </button>
+      </div>
     </div>
-    <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-    <div class="var-list-buttons">
-      <button mat-button (click)="addVarScheme()"
-              [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
-        <mat-icon>add</mat-icon>
-      </button>
-      <button mat-button [disabled]="(selectedCoding$ | async) === null"
-              (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
-        <mat-icon>delete</mat-icon>
-      </button>
-      <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
-              (click)="renameVarScheme()" [matTooltip]="'varlist.rename' | translate" matTooltipPosition="above">
-        <mat-icon>edit</mat-icon>
-      </button>
-      <button mat-button [disabled]="(selectedCoding$ | async) === null"
-              (click)="copyVarScheme()" [matTooltip]="'varlist.copy' | translate" matTooltipPosition="above">
-        <mat-icon>content_copy</mat-icon>
-      </button>
-      <button mat-button
-              (click)="checkVarScheme()" [matTooltip]="'varlist.check' | translate" matTooltipPosition="above">
-        <mat-icon>check</mat-icon>
-      </button>
-    </div>
-  </div>
+  }
 
-  <div *ngIf="schemerService.allVariableIds.length === 0"
-       style="margin: 20px;">{{'data-error.base-variables-missing' | translate}}</div>
+  @if (schemerService.allVariableIds.length === 0) {
+    <div
+    style="margin: 20px;">{{'data-error.base-variables-missing' | translate}}</div>
+  }
   <var-coding [varCoding]="selectedCoding$ | async" class="var-coding-container fx-flex-row-100"></var-coding>
 </div>

@@ -6,7 +6,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { CodeInstructionComponent } from '../code-instruction.component';
 import { CodeRulesComponent } from '../code-rules/code-rules.component';
 import { CodeHeaderComponent } from '../code-header.component';
-import { NgIf, NgFor } from '@angular/common';
+
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -19,7 +19,7 @@ import { CodesTitleComponent } from '../codes-title.component';
     templateUrl: './var-codes-full.component.html',
     styleUrls: ['./var-codes-full.component.scss'],
     standalone: true,
-    imports: [CodesTitleComponent, MatCheckbox, MatFormField, MatTooltip, MatLabel, MatInput, ReactiveFormsModule, FormsModule, NgIf, NgFor, CodeHeaderComponent, CodeRulesComponent, CodeInstructionComponent, MatIconButton, MatIcon, MatButton, TranslateModule]
+    imports: [CodesTitleComponent, MatCheckbox, MatFormField, MatTooltip, MatLabel, MatInput, ReactiveFormsModule, FormsModule, CodeHeaderComponent, CodeRulesComponent, CodeInstructionComponent, MatIconButton, MatIcon, MatButton, TranslateModule]
 })
 export class VarCodesFullComponent extends VarCodesDirective implements OnInit {
   ngOnInit() {

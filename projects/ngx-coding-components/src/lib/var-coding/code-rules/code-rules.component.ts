@@ -20,15 +20,16 @@ import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import {JsonPipe} from "@angular/common";
 
 @Component({
     selector: 'code-rules',
     templateUrl: './code-rules.component.html',
     styleUrls: ['./code-rules.component.scss'],
     standalone: true,
-    imports: [MatCard, MatCardSubtitle, NgIf, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup, ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, NgFor, MatTab, MatFormField, MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule, PossibleNewRulesPipe, RuleReferencePipe]
+  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup, ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, MatTab, MatFormField, MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule, PossibleNewRulesPipe, RuleReferencePipe, JsonPipe]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();

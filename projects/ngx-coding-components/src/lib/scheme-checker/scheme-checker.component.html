@@ -1,10 +1,12 @@
 <div class="check-host">
-  <div class="check-element"
-       *ngFor="let baseVar of Object.keys(values)">
-    <mat-form-field>
-      <mat-label >{{baseVar}}</mat-label>
-      <input matInput (change)="updateInputValue($event.target, baseVar)">
-    </mat-form-field>
-  </div>
+  @for (baseVar of Object.keys(values); track baseVar) {
+    <div class="check-element"
+      >
+      <mat-form-field>
+        <mat-label >{{baseVar}}</mat-label>
+        <input matInput (change)="updateInputValue($event.target, baseVar)">
+      </mat-form-field>
+    </div>
+  }
   <button mat-raised-button (click)="startEvaluation()">Start</button>
 </div>

@@ -7,7 +7,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { CodeRulesComponent } from '../code-rules/code-rules.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { CodeHeaderComponent } from '../code-header.component';
-import { NgIf, NgFor } from '@angular/common';
+
 import { CodesTitleComponent } from '../codes-title.component';
 
 @Component({
@@ -15,7 +15,7 @@ import { CodesTitleComponent } from '../codes-title.component';
     templateUrl: './var-codes-choice.component.html',
     styleUrls: ['./var-codes-choice.component.scss'],
     standalone: true,
-    imports: [CodesTitleComponent, NgIf, NgFor, CodeHeaderComponent, MatTooltip, CodeRulesComponent, MatIconButton, MatIcon, MatButton, TranslateModule]
+    imports: [CodesTitleComponent, CodeHeaderComponent, MatTooltip, CodeRulesComponent, MatIconButton, MatIcon, MatButton, TranslateModule]
 })
 export class VarCodesChoiceComponent extends VarCodesDirective implements OnInit {
   constructor(

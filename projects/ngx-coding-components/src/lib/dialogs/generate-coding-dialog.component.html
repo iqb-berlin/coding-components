@@ -1,131 +1,173 @@
 <h1 mat-dialog-title>{{ 'coding.generate.dialog-title' | translate}} '{{varInfo.id}}'</h1>
 
 <mat-dialog-content>
-  <div *ngIf="varInfo">
-    <p *ngFor="let info of ToTextFactory.varInfoAsText(varInfo)">{{info}}</p>
-  </div>
-  <div *ngIf="!varInfo">
-    <p>{{ 'coding.generate.no-var-info' | translate}}</p>
-  </div>
-  <div *ngIf="generationModel === 'none'" [style.font-style]="'italic'">{{ 'coding.generate.model.none' | translate}}</div>
-  <div *ngIf="generationModel !== 'none'" class="coding-action">
-    <p [style.font-weight]="'bold'">{{ 'coding.generate.title' | translate}}</p>
-    <p>{{ 'coding.generate.model.' + generationModel | translate}}</p>
-    <div *ngIf="generationModel === 'multi-choice'" class="fx-column-start-stretch">
-      <div class="fx-row-end-center">
-        <mat-label [style.margin-right.px]="8">{{'coding.generate.model.multi-choice-order-prompt' | translate}}</mat-label>
-        <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" (click)="resetOptions()"></mat-checkbox>
-      </div>
-      <mat-selection-list *ngIf="!multiChoiceOrderMatters" [(ngModel)]="selectedOptions" multiple="true">
-        <mat-list-option *ngFor="let c of options" [value]="c.value">
-          '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
-        </mat-list-option>
-      </mat-selection-list>
-      <div *ngIf="multiChoiceOrderMatters" class="fx-column-start-stretch">
-        <div>{{'coding.generate.model.multi-choice-drag-prompt' | translate}}</div>
-        <div  class="fx-row-start-stretch fx-gap-10">
-          <mat-chip-listbox cdkDropList [style.width.%]="50" [style.max-height.px]="800"
-                            #optionSource="cdkDropList"
-                            [cdkDropListConnectedTo]="selectedOptions"
-                            [cdkDropListData]="options">
-            <mat-chip cdkDrag *ngFor="let c of options">{{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}</mat-chip>
-          </mat-chip-listbox>
-          <div *ngIf="positionLabels.length > 0"
-               class="fx-column-start-stretch" [style.width.px]="50">
-            <p *ngFor="let pl of positionLabels">{{pl}}</p>
+  @if (varInfo) {
+    <div>
+      @for (info of ToTextFactory.varInfoAsText(varInfo); track info) {
+        <p>{{info}}</p>
+      }
+    </div>
+  }
+  @if (!varInfo) {
+    <div>
+      <p>{{ 'coding.generate.no-var-info' | translate}}</p>
+    </div>
+  }
+  @if (generationModel === 'none') {
+    <div [style.font-style]="'italic'">{{ 'coding.generate.model.none' | translate}}</div>
+  }
+  @if (generationModel !== 'none') {
+    <div class="coding-action">
+      <p [style.font-weight]="'bold'">{{ 'coding.generate.title' | translate}}</p>
+      <p>{{ 'coding.generate.model.' + generationModel | translate}}</p>
+      @if (generationModel === 'multi-choice') {
+        <div class="fx-column-start-stretch">
+          <div class="fx-row-end-center">
+            <mat-label [style.margin-right.px]="8">{{'coding.generate.model.multi-choice-order-prompt' | translate}}</mat-label>
+            <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" (click)="resetOptions()"></mat-checkbox>
           </div>
-          <mat-chip-listbox cdkDropList class="fx-flex-fill dragOptionBox"
-                            #selectedOptions="cdkDropList"
-                            [cdkDropListConnectedTo]="[optionSource]"
-                            [cdkDropListData]="selectedDragOptions"
-                            (cdkDropListDropped)="drop($event)">
-            <mat-chip cdkDrag *ngFor="let c of selectedDragOptions"
+          @if (!multiChoiceOrderMatters) {
+            <mat-selection-list [(ngModel)]="selectedOptions" multiple="true">
+              @for (c of options; track c) {
+                <mat-list-option [value]="c.value">
+                  '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+                </mat-list-option>
+              }
+            </mat-selection-list>
+          }
+          @if (multiChoiceOrderMatters) {
+            <div class="fx-column-start-stretch">
+              <div>{{'coding.generate.model.multi-choice-drag-prompt' | translate}}</div>
+              <div  class="fx-row-start-stretch fx-gap-10">
+                <mat-chip-listbox cdkDropList [style.width.%]="50" [style.max-height.px]="800"
+                  #optionSource="cdkDropList"
+                  [cdkDropListConnectedTo]="selectedOptions"
+                  [cdkDropListData]="options">
+                  @for (c of options; track c) {
+                    <mat-chip cdkDrag>{{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}</mat-chip>
+                  }
+                </mat-chip-listbox>
+                @if (positionLabels.length > 0) {
+                  <div
+                    class="fx-column-start-stretch" [style.width.px]="50">
+                    @for (pl of positionLabels; track pl) {
+                      <p>{{pl}}</p>
+                    }
+                  </div>
+                }
+                <mat-chip-listbox cdkDropList class="fx-flex-fill dragOptionBox"
+                  #selectedOptions="cdkDropList"
+                  [cdkDropListConnectedTo]="[optionSource]"
+                  [cdkDropListData]="selectedDragOptions"
+                  (cdkDropListDropped)="drop($event)">
+                  @for (c of selectedDragOptions; track c) {
+                    <mat-chip cdkDrag
                       removable="true" (removed)="returnOption(c)">
-              {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
-              <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-          </mat-chip-listbox>
+                      {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
+                      <mat-icon matChipRemove>cancel</mat-icon>
+                    </mat-chip>
+                  }
+                </mat-chip-listbox>
+              </div>
+            </div>
+          }
         </div>
-      </div>
-    </div>
-    <mat-selection-list *ngIf="generationModel === 'single-choice-some'"
-                        [(ngModel)]="selectedOptions" multiple="false">
-      <mat-list-option *ngFor="let c of options" [value]="c.value">
-        '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
-      </mat-list-option>
-      <div class="fx-row-end-center">
-        <mat-label>{{'coding.generate.model.single-choice-long-version' | translate}}</mat-label>
-        <mat-checkbox [(ngModel)]="singleChoiceLongVersion" [style.margin.px]="8"></mat-checkbox>
-      </div>
-      <div>{{ 'coding.generate.model.single-choice-' + (singleChoiceLongVersion ? 'long-version-text' : 'short-version-text') | translate}}</div>
-    </mat-selection-list>
-    <mat-form-field *ngIf="generationModel === 'single-choice-many'">
-      <mat-select [(value)]="selectedOption">
-        <mat-option *ngFor="let c of options" [value]="c.value">
-          {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-    <div *ngIf="generationModel === 'simple-input'" class="fx-row-start-center">
-      <mat-label>{{'coding.generate.model.simple-input-numeric' | translate}}</mat-label>
-      <mat-checkbox [(ngModel)]="textAsNumeric" [style.margin.px]="8"></mat-checkbox>
-    </div>
-    <div *ngIf="generationModel === 'integer' || (textAsNumeric && generationModel === 'simple-input')" class="fx-column-start-start">
-      <div class="fx-row-start-center">
-        <div [style.width.px]="200">{{'rule.NUMERIC_MATCH' | translate}}</div>
+      }
+      @if (generationModel === 'single-choice-some') {
+        <mat-selection-list
+          [(ngModel)]="selectedOptions" multiple="false">
+          @for (c of options; track c) {
+            <mat-list-option [value]="c.value">
+              '{{c.value}}'{{c.label ? ' - ' : '' }}{{c.label}}
+            </mat-list-option>
+          }
+          <div class="fx-row-end-center">
+            <mat-label>{{'coding.generate.model.single-choice-long-version' | translate}}</mat-label>
+            <mat-checkbox [(ngModel)]="singleChoiceLongVersion" [style.margin.px]="8"></mat-checkbox>
+          </div>
+          <div>{{ 'coding.generate.model.single-choice-' + (singleChoiceLongVersion ? 'long-version-text' : 'short-version-text') | translate}}</div>
+        </mat-selection-list>
+      }
+      @if (generationModel === 'single-choice-many') {
         <mat-form-field>
-          <mat-label>{{ 'rule.NUMERIC_MATCH' | translate }}</mat-label>
-          <input matInput [(ngModel)]="numericMatch" (ngModelChange)="updateNumericRuleText()">
+          <mat-select [(value)]="selectedOption">
+            @for (c of options; track c) {
+              <mat-option [value]="c.value">
+                {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
+              </mat-option>
+            }
+          </mat-select>
         </mat-form-field>
-      </div>
-      <div class="fx-row-start-center">
-        <div [style.width.px]="200">{{'coding.generate.lower-limit' | translate}}</div>
-        <mat-form-field>
-          <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
-          <input matInput [(ngModel)]="numericMoreThen" (ngModelChange)="updateNumericRuleText()">
-        </mat-form-field>
-        <mat-form-field [style.margin.px]="8">
-          <mat-label>{{ 'rule.NUMERIC_MIN' | translate }}</mat-label>
-          <input matInput [(ngModel)]="numericMin" (ngModelChange)="updateNumericRuleText()">
-        </mat-form-field>
-      </div>
-      <div class="fx-row-start-center">
-        <div [style.width.px]="200">{{'coding.generate.upper-limit' | translate}}</div>
-        <mat-form-field>
-          <mat-label>{{ 'rule.NUMERIC_LESS_THEN' | translate }}</mat-label>
-          <input matInput [(ngModel)]="numericLessThen" (ngModelChange)="updateNumericRuleText()">
-        </mat-form-field>
-        <mat-form-field [style.margin.px]="8">
-          <mat-label>{{ 'rule.NUMERIC_MAX' | translate }}</mat-label>
-          <input matInput [(ngModel)]="numericMax" (ngModelChange)="updateNumericRuleText()">
-        </mat-form-field>
-      </div>
-      <div class="fx-row-start-center">
-        <div [style.width.px]="200">{{'coding.generate.true-code' | translate}}:</div>
-        <div [class]="numericRuleError ? 'rule-text-error' : 'rule-text-ok'">{{numericRuleText}}</div>
-      </div>
+      }
+      @if (generationModel === 'simple-input') {
+        <div class="fx-row-start-center">
+          <mat-label>{{'coding.generate.model.simple-input-numeric' | translate}}</mat-label>
+          <mat-checkbox [(ngModel)]="textAsNumeric" [style.margin.px]="8"></mat-checkbox>
+        </div>
+      }
+      @if (generationModel === 'integer' || (textAsNumeric && generationModel === 'simple-input')) {
+        <div class="fx-column-start-start">
+          <div class="fx-row-start-center">
+            <div [style.width.px]="200">{{'rule.NUMERIC_MATCH' | translate}}</div>
+            <mat-form-field>
+              <mat-label>{{ 'rule.NUMERIC_MATCH' | translate }}</mat-label>
+              <input matInput [(ngModel)]="numericMatch" (ngModelChange)="updateNumericRuleText()">
+            </mat-form-field>
+          </div>
+          <div class="fx-row-start-center">
+            <div [style.width.px]="200">{{'coding.generate.lower-limit' | translate}}</div>
+            <mat-form-field>
+              <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
+              <input matInput [(ngModel)]="numericMoreThen" (ngModelChange)="updateNumericRuleText()">
+            </mat-form-field>
+            <mat-form-field [style.margin.px]="8">
+              <mat-label>{{ 'rule.NUMERIC_MIN' | translate }}</mat-label>
+              <input matInput [(ngModel)]="numericMin" (ngModelChange)="updateNumericRuleText()">
+            </mat-form-field>
+          </div>
+          <div class="fx-row-start-center">
+            <div [style.width.px]="200">{{'coding.generate.upper-limit' | translate}}</div>
+            <mat-form-field>
+              <mat-label>{{ 'rule.NUMERIC_LESS_THEN' | translate }}</mat-label>
+              <input matInput [(ngModel)]="numericLessThen" (ngModelChange)="updateNumericRuleText()">
+            </mat-form-field>
+            <mat-form-field [style.margin.px]="8">
+              <mat-label>{{ 'rule.NUMERIC_MAX' | translate }}</mat-label>
+              <input matInput [(ngModel)]="numericMax" (ngModelChange)="updateNumericRuleText()">
+            </mat-form-field>
+          </div>
+          <div class="fx-row-start-center">
+            <div [style.width.px]="200">{{'coding.generate.true-code' | translate}}:</div>
+            <div [class]="numericRuleError ? 'rule-text-error' : 'rule-text-ok'">{{numericRuleText}}</div>
+          </div>
+        </div>
+      }
+      @if (generationModel === 'simple-input' && !textAsNumeric) {
+        <div class="fx-row-start-start fx-gap-10">
+          <mat-form-field>
+            <textarea matInput
+              [(ngModel)]="selectedOption"
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="2"
+            cdkAutosizeMaxRows="8"></textarea>
+          </mat-form-field>
+          <div>{{'coding.generate.model.simple-input-not-numeric' | translate}}</div>
+        </div>
+      }
+      @if (generationModel === 'simple-input' || generationModel === 'integer') {
+        <div class="fx-column-start-stretch">
+          <mat-label>{{'coding.generate.else-method.prompt' | translate}}</mat-label>
+          <mat-radio-group [(ngModel)]="elseMethod" class="fx-gap-20">
+            <mat-radio-button [value]="'rule'">{{'coding.generate.else-method.rule' | translate}}</mat-radio-button>
+            <mat-radio-button [value]="'instruction'">{{'coding.generate.else-method.instruction' | translate}}</mat-radio-button>
+            <mat-radio-button [value]="'invalid'">{{'coding.generate.else-method.invalid' | translate}}</mat-radio-button>
+            <mat-radio-button [value]="'none'">{{'coding.generate.else-method.none' | translate}}</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      }
+      <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
     </div>
-    <div *ngIf="generationModel === 'simple-input' && !textAsNumeric" class="fx-row-start-start fx-gap-10">
-      <mat-form-field>
-        <textarea matInput
-                  [(ngModel)]="selectedOption"
-                  cdkTextareaAutosize
-                  cdkAutosizeMinRows="2"
-                  cdkAutosizeMaxRows="8"></textarea>
-      </mat-form-field>
-      <div>{{'coding.generate.model.simple-input-not-numeric' | translate}}</div>
-    </div>
-    <div *ngIf="generationModel === 'simple-input' || generationModel === 'integer'" class="fx-column-start-stretch">
-      <mat-label>{{'coding.generate.else-method.prompt' | translate}}</mat-label>
-      <mat-radio-group [(ngModel)]="elseMethod" class="fx-gap-20">
-        <mat-radio-button [value]="'rule'">{{'coding.generate.else-method.rule' | translate}}</mat-radio-button>
-        <mat-radio-button [value]="'instruction'">{{'coding.generate.else-method.instruction' | translate}}</mat-radio-button>
-        <mat-radio-button [value]="'invalid'">{{'coding.generate.else-method.invalid' | translate}}</mat-radio-button>
-        <mat-radio-button [value]="'none'">{{'coding.generate.else-method.none' | translate}}</mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <p [style.font-style]="'italic'">{{ 'coding.generate.warning' | translate}}</p>
-  </div>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions>

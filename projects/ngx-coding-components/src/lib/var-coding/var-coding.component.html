@@ -1,166 +1,190 @@
-<div *ngIf="!varCoding" class="fx-flex-fill">
-  &nbsp;
-</div>
-<div *ngIf="varCoding" class="fx-column-space-between-stretch" [style.padding]="'10px'">
-  <div class="fx-row-start-stretch fx-gap-10">
-    <div class="fx-column-start-stretch" [style.width.%]="30">
-      <mat-form-field>
-        <mat-label>{{'description-position' | translate}}</mat-label>
-        <input matInput [(ngModel)]="varCoding.label"
-               (change)="lastChangeFrom$.next('label')">
-      </mat-form-field>
-      <div *ngIf="varCoding.sourceType !== 'BASE'" [style.margin]="'4px 0 4px 20px'" class="fx-column-start-stretch">
+@if (!varCoding) {
+  <div class="fx-flex-fill">
+    &nbsp;
+  </div>
+}
+@if (varCoding) {
+  <div class="fx-column-space-between-stretch" [style.padding]="'10px'">
+    <div class="fx-row-start-stretch fx-gap-10">
+      <div class="fx-column-start-stretch" [style.width.%]="30">
         <mat-form-field>
-          <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
-          <mat-select [(value)]="varCoding.sourceType" (selectionChange)="lastChangeFrom$.next('derive-method'); updateVarInfo()">
-            <mat-option [value]="'COPY_VALUE'">
-              {{'derive-method.COPY_VALUE' | translate}}
-            </mat-option>
-            <mat-option [value]="'CONCAT_CODE'">
-              {{'derive-method.CONCAT_CODE' | translate}}
-            </mat-option>
-            <mat-option [value]="'SUM_CODE'">
-              {{'derive-method.SUM_CODE' | translate}}
-            </mat-option>
-            <mat-option [value]="'SUM_SCORE'">
-              {{'derive-method.SUM_SCORE' | translate}}
-            </mat-option>
-          </mat-select>
+          <mat-label>{{'description-position' | translate}}</mat-label>
+          <input matInput [(ngModel)]="varCoding.label"
+            (change)="lastChangeFrom$.next('label')">
         </mat-form-field>
-        <div class="fx-row-start-center fx-gap-5">
-          <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
-          <mat-chip-listbox>
-            <mat-chip *ngIf="varCoding.deriveSources.length === 0" [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
-            <mat-chip *ngFor="let source of varCoding.deriveSources"
-                      [class]="schemerService.allVariableIds.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
-                      removable="true" (removed)="deleteDeriveSource(source)">
-              {{source}}
-              <mat-icon matChipRemove>cancel</mat-icon>
-            </mat-chip>
-            <button mat-icon-button [matMenuTriggerFor]="menu" *ngIf="getNewSources(varCoding.deriveSources).length > 0">
-              <mat-icon>add</mat-icon>
-            </button>
-          </mat-chip-listbox>
-          <mat-menu #menu="matMenu">
-            <button mat-menu-item *ngFor="let newSource of getNewSources(varCoding.deriveSources)" (click)="addDeriveSource(newSource)">
-              {{newSource}}
-            </button>
-          </mat-menu>
-        </div>
-      </div>
-      <div class="fx-row-start-center">
-        <mat-form-field class="fx-flex-fill">
-          <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
-          <mat-select [(value)]="varCoding.codeModel">
-            <mat-option [value]="'CHOICE'">
-              {{'code-model.CHOICE' | translate}}
-            </mat-option>
-            <mat-option [value]="'VALUE_LIST'">
-              {{'code-model.VALUE_LIST' | translate}}
-            </mat-option>
-            <mat-option [value]="'NUMBER'">
-              {{'code-model.NUMBER' | translate}}
-            </mat-option>
-            <mat-option [value]="'MANUAL'">
-              {{'code-model.MANUAL' | translate}}
-            </mat-option>
-            <mat-option [value]="'NONE'">
-              {{'code-model.NONE' | translate}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button mat-icon-button (click)="smartSchemer()"
-                [matTooltip]="'click.smart-schemer' | translate">
-          <mat-icon><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.5,5.6L5,7L6.4,4.5L5,2L7.5,3.4L10,2L8.6,4.5L10,7L7.5,5.6M19.5,15.4L22,14L20.6,16.5L22,19L19.5,17.6L17,19L18.4,16.5L17,14L19.5,15.4M22,2L20.6,4.5L22,7L19.5,5.6L17,7L18.4,4.5L17,2L19.5,3.4L22,2M13.34,12.78L15.78,10.34L13.66,8.22L11.22,10.66L13.34,12.78M14.37,7.29L16.71,9.63C17.1,10 17.1,10.65 16.71,11.04L5.04,22.71C4.65,23.1 4,23.1 3.63,22.71L1.29,20.37C0.9,20 0.9,19.35 1.29,18.96L12.96,7.29C13.35,6.9 14,6.9 14.37,7.29Z"/></svg></mat-icon>
-        </button>
-        <button mat-icon-button (click)="codingAsText()" [matTooltip]="'click.coding-as-text' | translate">
-          <mat-icon>description</mat-icon>
-        </button>
-      </div>
-    </div>
-    <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">
-      <mat-card-subtitle class="hover-area">
-        <div class="fx-row-space-between-center">
-          <div class="fx-row-start-center">
-            <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.coding.title' | translate}}</div>
-            <button mat-icon-button [matTooltip]="'manual-instruction.coding.prompt-edit' | translate"
-                    (click)="editTextDialog_manualInstruction()">
-              <mat-icon>edit</mat-icon>
-            </button>
+        @if (varCoding.sourceType !== 'BASE') {
+          <div [style.margin]="'4px 0 4px 20px'" class="fx-column-start-stretch">
+            <mat-form-field>
+              <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
+              <mat-select [(value)]="varCoding.sourceType" (selectionChange)="lastChangeFrom$.next('derive-method'); updateVarInfo()">
+                <mat-option [value]="'COPY_VALUE'">
+                  {{'derive-method.COPY_VALUE' | translate}}
+                </mat-option>
+                <mat-option [value]="'CONCAT_CODE'">
+                  {{'derive-method.CONCAT_CODE' | translate}}
+                </mat-option>
+                <mat-option [value]="'SUM_CODE'">
+                  {{'derive-method.SUM_CODE' | translate}}
+                </mat-option>
+                <mat-option [value]="'SUM_SCORE'">
+                  {{'derive-method.SUM_SCORE' | translate}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <div class="fx-row-start-center fx-gap-5">
+              <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
+              <mat-chip-listbox>
+                @if (varCoding.deriveSources.length === 0) {
+                  <mat-chip [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
+                }
+                @for (source of varCoding.deriveSources; track source) {
+                  <mat-chip
+                    [class]="schemerService.allVariableIds.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
+                    removable="true" (removed)="deleteDeriveSource(source)">
+                    {{source}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                  </mat-chip>
+                }
+                @if (getNewSources(varCoding.deriveSources).length > 0) {
+                  <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                }
+              </mat-chip-listbox>
+              <mat-menu #menu="matMenu">
+                @for (newSource of getNewSources(varCoding.deriveSources); track newSource) {
+                  <button mat-menu-item (click)="addDeriveSource(newSource)">
+                    {{newSource}}
+                  </button>
+                }
+              </mat-menu>
+            </div>
           </div>
-          <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
-                  [matTooltip]="'manual-instruction.coding.wipe' | translate" [matTooltipShowDelay]="500">
-            <mat-icon>close</mat-icon>
+        }
+        <div class="fx-row-start-center">
+          <mat-form-field class="fx-flex-fill">
+            <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
+            <mat-select [(value)]="varCoding.codeModel">
+              <mat-option [value]="'CHOICE'">
+                {{'code-model.CHOICE' | translate}}
+              </mat-option>
+              <mat-option [value]="'VALUE_LIST'">
+                {{'code-model.VALUE_LIST' | translate}}
+              </mat-option>
+              <mat-option [value]="'NUMBER'">
+                {{'code-model.NUMBER' | translate}}
+              </mat-option>
+              <mat-option [value]="'MANUAL'">
+                {{'code-model.MANUAL' | translate}}
+              </mat-option>
+              <mat-option [value]="'NONE'">
+                {{'code-model.NONE' | translate}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button (click)="smartSchemer()"
+            [matTooltip]="'click.smart-schemer' | translate">
+            <mat-icon><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.5,5.6L5,7L6.4,4.5L5,2L7.5,3.4L10,2L8.6,4.5L10,7L7.5,5.6M19.5,15.4L22,14L20.6,16.5L22,19L19.5,17.6L17,19L18.4,16.5L17,14L19.5,15.4M22,2L20.6,4.5L22,7L19.5,5.6L17,7L18.4,4.5L17,2L19.5,3.4L22,2M13.34,12.78L15.78,10.34L13.66,8.22L11.22,10.66L13.34,12.78M14.37,7.29L16.71,9.63C17.1,10 17.1,10.65 16.71,11.04L5.04,22.71C4.65,23.1 4,23.1 3.63,22.71L1.29,20.37C0.9,20 0.9,19.35 1.29,18.96L12.96,7.29C13.35,6.9 14,6.9 14.37,7.29Z"/></svg></mat-icon>
+          </button>
+          <button mat-icon-button (click)="codingAsText()" [matTooltip]="'click.coding-as-text' | translate">
+            <mat-icon>description</mat-icon>
           </button>
         </div>
-      </mat-card-subtitle>
-      <mat-card-content class="instructions">
-        <div [innerHTML]="varCoding ? getSanitizedText(varCoding.manualInstruction) : null"></div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+      <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">
+        <mat-card-subtitle class="hover-area">
+          <div class="fx-row-space-between-center">
+            <div class="fx-row-start-center">
+              <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.coding.title' | translate}}</div>
+              <button mat-icon-button [matTooltip]="'manual-instruction.coding.prompt-edit' | translate"
+                (click)="editTextDialog_manualInstruction()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+            <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
+              [matTooltip]="'manual-instruction.coding.wipe' | translate" [matTooltipShowDelay]="500">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </mat-card-subtitle>
+        <mat-card-content class="instructions">
+          <div [innerHTML]="varCoding ? getSanitizedText(varCoding.manualInstruction) : null"></div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    @switch (varCoding.codeModel) {
+      @case ('MANUAL') {
+        <var-codes-manual
+          class="fx-flex-row-100" [style.margin-top.px]="10"
+          [codes]="varCoding.codes"
+          (codesChanged)="lastChangeFrom$.next('var-codes-manual codes')"
+          [processing]="varCoding.processing"
+          [fragmenting]="varCoding.fragmenting"
+          (fragmentingChanged)="setFragmenting($event)"
+          [varInfo]="varInfo"
+          (processingChanged)="lastChangeFrom$.next('var-codes-manual processing')"
+          [codeModelParameters]="varCoding.codeModelParameters"
+          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-manual codeModelParameters')">
+        </var-codes-manual>
+      }
+      @case ('VALUE_LIST') {
+        <var-codes-value-list
+          class="fx-flex-row-100" [style.margin-top.px]="10"
+          [codes]="varCoding.codes"
+          (codesChanged)="lastChangeFrom$.next('var-codes-value-list codes')"
+          [processing]="varCoding.processing"
+          (processingChanged)="lastChangeFrom$.next('var-codes-value-list processing')"
+          [fragmenting]="varCoding.fragmenting"
+          (fragmentingChanged)="setFragmenting($event)"
+          [varInfo]="varInfo"
+          [codeModelParameters]="varCoding.codeModelParameters"
+          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-value-list codeModelParameters')">
+        </var-codes-value-list>
+      }
+      @case ('CHOICE') {
+        <var-codes-choice
+          class="fx-flex-row-100" [style.margin-top.px]="10"
+          [codes]="varCoding.codes"
+          (codesChanged)="lastChangeFrom$.next('var-codes-choice codes')"
+          [processing]="varCoding.processing"
+          (processingChanged)="lastChangeFrom$.next('var-codes-choice processing')"
+          [fragmenting]="varCoding.fragmenting"
+          (fragmentingChanged)="setFragmenting($event)"
+          [varInfo]="varInfo"
+          [codeModelParameters]="varCoding.codeModelParameters"
+          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-choice codeModelParameters')">
+        </var-codes-choice>
+      }
+      @case ('NUMBER') {
+        <var-codes-number
+          class="fx-flex-row-100" [style.margin-top.px]="10"
+          [codes]="varCoding.codes"
+          (codesChanged)="lastChangeFrom$.next('var-codes-number codes')"
+          [processing]="varCoding.processing"
+          (processingChanged)="lastChangeFrom$.next('var-codes-number processing')"
+          [fragmenting]="varCoding.fragmenting"
+          (fragmentingChanged)="setFragmenting($event)"
+          [varInfo]="varInfo"
+          [codeModelParameters]="varCoding.codeModelParameters"
+          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-number codeModelParameters')">
+        </var-codes-number>
+      }
+      @default {
+        <var-codes-full
+          class="fx-flex-row-100" [style.margin-top.px]="10"
+          [codes]="varCoding.codes"
+          (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+          [processing]="varCoding.processing"
+          (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+          [fragmenting]="varCoding.fragmenting"
+          (fragmentingChanged)="setFragmenting($event)"
+          [varInfo]="varInfo"
+          [codeModelParameters]="varCoding.codeModelParameters"
+          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
+        </var-codes-full>
+      }
+    }
   </div>
-  <ng-container [ngSwitch]="varCoding.codeModel">
-    <var-codes-manual *ngSwitchCase="'MANUAL'"
-                      class="fx-flex-row-100" [style.margin-top.px]="10"
-                      [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-manual codes')"
-                      [processing]="varCoding.processing"
-                      [fragmenting]="varCoding.fragmenting"
-                      (fragmentingChanged)="setFragmenting($event)"
-                      [varInfo]="varInfo"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-manual processing')"
-                      [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-manual codeModelParameters')">
-    </var-codes-manual>
-    <var-codes-value-list *ngSwitchCase="'VALUE_LIST'"
-                      class="fx-flex-row-100" [style.margin-top.px]="10"
-                      [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-value-list codes')"
-                      [processing]="varCoding.processing"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-value-list processing')"
-                      [fragmenting]="varCoding.fragmenting"
-                      (fragmentingChanged)="setFragmenting($event)"
-                      [varInfo]="varInfo"
-                      [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-value-list codeModelParameters')">
-    </var-codes-value-list>
-    <var-codes-choice *ngSwitchCase="'CHOICE'"
-                      class="fx-flex-row-100" [style.margin-top.px]="10"
-                      [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-choice codes')"
-                      [processing]="varCoding.processing"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-choice processing')"
-                      [fragmenting]="varCoding.fragmenting"
-                      (fragmentingChanged)="setFragmenting($event)"
-                      [varInfo]="varInfo"
-                      [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-choice codeModelParameters')">
-    </var-codes-choice>
-    <var-codes-number *ngSwitchCase="'NUMBER'"
-                      class="fx-flex-row-100" [style.margin-top.px]="10"
-                      [codes]="varCoding.codes"
-                      (codesChanged)="lastChangeFrom$.next('var-codes-number codes')"
-                      [processing]="varCoding.processing"
-                      (processingChanged)="lastChangeFrom$.next('var-codes-number processing')"
-                      [fragmenting]="varCoding.fragmenting"
-                      (fragmentingChanged)="setFragmenting($event)"
-                      [varInfo]="varInfo"
-                      [codeModelParameters]="varCoding.codeModelParameters"
-                      (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-number codeModelParameters')">
-    </var-codes-number>
-    <var-codes-full *ngSwitchDefault
-                    class="fx-flex-row-100" [style.margin-top.px]="10"
-                    [codes]="varCoding.codes"
-                    (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
-                    [processing]="varCoding.processing"
-                    (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
-                    [fragmenting]="varCoding.fragmenting"
-                    (fragmentingChanged)="setFragmenting($event)"
-                    [varInfo]="varInfo"
-                    [codeModelParameters]="varCoding.codeModelParameters"
-                    (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
-    </var-codes-full>
-  </ng-container>
-</div>
+}
 
 

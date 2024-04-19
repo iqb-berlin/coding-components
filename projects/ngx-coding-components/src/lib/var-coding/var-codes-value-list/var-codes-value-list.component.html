@@ -2,38 +2,44 @@
   <div class="fx-row-space-between-end">
     <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
     <div class="processing">
-        <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
-                      (change)="alterProcessing('IGNORE_CASE', $event.checked)">
-            {{'processing.IGNORE_CASE' | translate}}
-        </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
-                      (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
-            {{'processing.REMOVE_WHITE_SPACES' | translate}}
-        </mat-checkbox>
+      <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
+        (change)="alterProcessing('IGNORE_CASE', $event.checked)">
+        {{'processing.IGNORE_CASE' | translate}}
+      </mat-checkbox>
+      <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
+        (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
+        {{'processing.REMOVE_WHITE_SPACES' | translate}}
+      </mat-checkbox>
     </div>
   </div>
-  <ng-container *ngIf="codes">
-    <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch" [style.max-height.px]="500">
-      <ng-container *ngIf="code">
-        <div class="fx-column-start-stretch fx-flex-fill">
-          <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="false"
-                       [code]="code" [allCodes]="codes"></code-header>
-          <div class="fx-row-start-start fx-gap-10">
-            <div class="has-rules-warning">
-              <p *ngIf="code.manualInstruction && elseCodeExists" [matTooltip]="'code.has-rule-warning.manual-else' | translate">!!</p>
+  @if (codes) {
+    @for (code of codes; track code; let codeIndex = $index) {
+      <div class="fx-row-start-stretch" [style.max-height.px]="500">
+        @if (code) {
+          <div class="fx-column-start-stretch fx-flex-fill">
+            <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="false"
+            [code]="code" [allCodes]="codes"></code-header>
+            <div class="fx-row-start-start fx-gap-10">
+              <div class="has-rules-warning">
+                @if (code.manualInstruction && elseCodeExists) {
+                  <p [matTooltip]="'code.has-rule-warning.manual-else' | translate">!!</p>
+                }
+              </div>
+              <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
+                [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
+              (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
             </div>
-            <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
-                        [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
-                        (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
           </div>
-        </div>
-        <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)"
-                          *ngIf="!elseCodeExists" [style.width.%]="60"></code-instruction>
-        <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </ng-container>
-    </div>
+          @if (!elseCodeExists) {
+            <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)"
+            [style.width.%]="60"></code-instruction>
+          }
+          <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+      </div>
+    }
     <div class="fx-row-start-center" [style.margin-top.px]="12">
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
@@ -41,7 +47,9 @@
       <button mat-raised-button (click)="addCodeSingleton('ELSE'); updateCodeExistences()" [disabled]="!!elseCodeExists">
         <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
       </button>
-      <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
+      @if (codes.length === 0) {
+        <div class="no-codes">{{'code.no-codes' | translate}}</div>
+      }
     </div>
-  </ng-container>
+  }
 </div>

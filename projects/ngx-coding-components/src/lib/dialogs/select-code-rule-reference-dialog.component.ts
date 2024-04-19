@@ -6,7 +6,7 @@ import { TranslateService, TranslateModule } from "@ngx-translate/core";
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { MatFormField } from '@angular/material/form-field';
-import { NgIf } from '@angular/common';
+
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatSelectionList, MatListOption } from '@angular/material/list';
 
@@ -19,27 +19,29 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
         <mat-list-option [value]="'ANY'">
           {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.any' | translate}}
         </mat-list-option>
-        <mat-list-option [value]="'SUM'" *ngIf="!refData.isFragmentMode">
-          {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.sum' | translate}}
-        </mat-list-option>
+        @if (!refData.isFragmentMode) {
+          <mat-list-option [value]="'SUM'">
+            {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.sum' | translate}}
+          </mat-list-option>
+        }
         <mat-list-option [value]="'specific'">
           {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.specific' | translate}}:
         </mat-list-option>
       </mat-selection-list>
       <mat-form-field>
         <input matInput [disabled]="newSelection[0] !== 'specific'"
-               [(ngModel)]="newValue"
-               type="number">
+          [(ngModel)]="newValue"
+          type="number">
       </mat-form-field>
     </mat-dialog-content>
     <mat-dialog-actions>
       <button mat-raised-button color="primary" [disabled]="newSelection[0] === 'specific' && newValue <= 0"
-              (click)="okButtonClick()">{{ 'dialog-save' | translate }}</button>
+      (click)="okButtonClick()">{{ 'dialog-save' | translate }}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
-  `,
+    `,
     standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, MatSelectionList, ReactiveFormsModule, FormsModule, MatListOption, NgIf, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    imports: [MatDialogTitle, MatDialogContent, MatSelectionList, ReactiveFormsModule, FormsModule, MatListOption, MatFormField, MatInput, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SelectCodeRuleReferenceDialogComponent {
   newValue: number;

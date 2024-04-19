@@ -2,50 +2,52 @@
   <div class="fx-row-space-between-end">
     <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
     <div class="processing">
-        <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
-                      (change)="alterProcessing('IGNORE_CASE', $event.checked)">
-            {{'processing.IGNORE_CASE' | translate}}
-        </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
-                      (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
-            {{'processing.REMOVE_WHITE_SPACES' | translate}}
-        </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
-                      (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'processing.REPLAY_REQUIRED' | translate}}
-          </div>
-        </mat-checkbox>
-        <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
-                      (change)="alterProcessing('ATTACHMENT', $event.checked)">
-          <div [style.white-space]="'normal'" [style.line-height]="1.2">
-            {{'processing.ATTACHMENT' | translate}}
-          </div>
-        </mat-checkbox>
+      <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
+        (change)="alterProcessing('IGNORE_CASE', $event.checked)">
+        {{'processing.IGNORE_CASE' | translate}}
+      </mat-checkbox>
+      <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
+        (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
+        {{'processing.REMOVE_WHITE_SPACES' | translate}}
+      </mat-checkbox>
+      <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
+        (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
+        <div [style.white-space]="'normal'" [style.line-height]="1.2">
+          {{'processing.REPLAY_REQUIRED' | translate}}
+        </div>
+      </mat-checkbox>
+      <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
+        (change)="alterProcessing('ATTACHMENT', $event.checked)">
+        <div [style.white-space]="'normal'" [style.line-height]="1.2">
+          {{'processing.ATTACHMENT' | translate}}
+        </div>
+      </mat-checkbox>
     </div>
     <mat-form-field [matTooltip]="'fragmenting.tooltip' | translate">
       <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
       <input matInput
-             [(ngModel)]="fragmenting"
-             (ngModelChange)="fragmentingChanged.emit(fragmenting)">
+        [(ngModel)]="fragmenting"
+        (ngModelChange)="fragmentingChanged.emit(fragmenting)">
     </mat-form-field>
   </div>
-  <ng-container *ngIf="codes">
-    <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch" [style.max-height.px]="500">
-      <ng-container *ngIf="code">
-        <div class="fx-column-start-stretch" [style.width.%]="60">
-          <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
-                       [code]="code" [allCodes]="codes"></code-header>
-          <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
-                           [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
-                           (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
-        </div>
-        <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)" class="fx-flex-fill"></code-instruction>
-        <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </ng-container>
-    </div>
+  @if (codes) {
+    @for (code of codes; track code; let codeIndex = $index) {
+      <div class="fx-row-start-stretch" [style.max-height.px]="500">
+        @if (code) {
+          <div class="fx-column-start-stretch" [style.width.%]="60">
+            <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
+            [code]="code" [allCodes]="codes"></code-header>
+            <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
+              [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
+            (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
+          </div>
+          <code-instruction [code]="code" (codeDataChanged)="codesChanged.emit(codes)" class="fx-flex-fill"></code-instruction>
+          <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+      </div>
+    }
     <div class="fx-row-start-center" [style.margin-top.px]="12">
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
@@ -53,7 +55,9 @@
       <button mat-raised-button (click)="addCodeSingleton('ELSE'); updateCodeExistences()" [disabled]="!!elseCodeExists">
         <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
       </button>
-      <div *ngIf="codes.length === 0" class="no-codes">{{'code.no-codes' | translate}}</div>
+      @if (codes.length === 0) {
+        <div class="no-codes">{{'code.no-codes' | translate}}</div>
+      }
     </div>
-  </ng-container>
+  }
 </div>

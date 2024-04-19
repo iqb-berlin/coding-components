@@ -7,72 +7,69 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'code-header',
     template: `
-    <div  *ngIf="code" class="code-main-data fx-row-start-center">
-      <ng-container *ngIf="code.id === null">
-        <div class="fx-flex-fill" [style.padding-left.px]="8">
-          <p>{{'code.is-null' | translate}}</p>
-        </div>
-        <button mat-icon-button [style.width.px]="50" *ngIf="enableSwitchNull"
-                (click)="setCodeValid()"
-                [matTooltip]="'code.make-not-null' | translate">
-          <mat-icon>do_not_disturb_off</mat-icon></button>
-      </ng-container>
-      <ng-container *ngIf="code.id !== null">
-        <mat-form-field [class]="uniqueNumberValidator(code.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
-          <mat-label>{{'code.id' | translate}}</mat-label>
-          <input matInput
-                 required
-                 [(ngModel)]="code.id"
-                 (ngModelChange)="setCodeChanged()"
-                 type="number">
-        </mat-form-field>
-        <mat-form-field
-          [class]="code.score > 0 ? 'correct' : 'not-correct'"
-          [style.width.px]="100">
-          <mat-label>{{'code.score' | translate}}</mat-label>
-          <input matInput
-                 type="number"
-                 required
-                 [(ngModel)]="code.score"
-                 (ngModelChange)="setCodeChanged()">
-        </mat-form-field>
-        <mat-form-field class="fx-flex-fill">
-          <mat-label>{{'code.description' | translate}}</mat-label>
-          <input matInput
-                 [placeholder]="'code.description' | translate"
-                 [(ngModel)]="code.label"
-                 (ngModelChange)="setCodeChanged()">
-        </mat-form-field>
-        <button mat-icon-button [style.width.px]="50" *ngIf="enableSwitchNull"
+    @if (code) {
+      <div  class="code-main-data fx-row-start-center">
+        @if (code.id === null) {
+          <div class="fx-flex-fill" [style.padding-left.px]="8">
+            <p>{{'code.is-null' | translate}}</p>
+          </div>
+          @if (enableSwitchNull) {
+            <button mat-icon-button [style.width.px]="50"
+              (click)="setCodeValid()"
+              [matTooltip]="'code.make-not-null' | translate">
+              <mat-icon>do_not_disturb_off</mat-icon></button>
+            }
+          }
+          @if (code.id !== null) {
+            <mat-form-field [class]="uniqueNumberValidator(code.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
+              <mat-label>{{'code.id' | translate}}</mat-label>
+              <input matInput
+                required
+                [(ngModel)]="code.id"
+                (ngModelChange)="setCodeChanged()"
+                type="number">
+            </mat-form-field>
+            <mat-form-field
+              [class]="code.score > 0 ? 'correct' : 'not-correct'"
+              [style.width.px]="100">
+              <mat-label>{{'code.score' | translate}}</mat-label>
+              <input matInput
+                type="number"
+                required
+                [(ngModel)]="code.score"
+                (ngModelChange)="setCodeChanged()">
+            </mat-form-field>
+            <mat-form-field class="fx-flex-fill">
+              <mat-label>{{'code.description' | translate}}</mat-label>
+              <input matInput
+                [placeholder]="'code.description' | translate"
+                [(ngModel)]="code.label"
+                (ngModelChange)="setCodeChanged()">
+            </mat-form-field>
+            @if (enableSwitchNull) {
+              <button mat-icon-button [style.width.px]="50"
                 (click)="setCodeInvalid()"
                 [matTooltip]="'code.make-null' | translate">
-          <mat-icon>do_not_disturb_on</mat-icon></button>
-      </ng-container>
-    </div>
-  `,
+                <mat-icon>do_not_disturb_on</mat-icon></button>
+              }
+            }
+          </div>
+        }
+    `,
     styles: [
         `
       .code-main-data {
         background-color: whitesmoke;
       }
-      .not-unique-id {
-        border: orange solid 2px;
-      }
-      .correct {
-        border: limegreen solid 2px;
-      }
-      .unique-id, .not-correct {
-        border: transparent solid 2px;
-      }
     `
     ],
     standalone: true,
-    imports: [NgIf, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, TranslateModule]
+    imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, TranslateModule]
 })
 export class CodeHeaderComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();

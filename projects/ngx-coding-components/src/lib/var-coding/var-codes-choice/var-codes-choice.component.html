@@ -2,28 +2,36 @@
   <div class="fx-row-start-end">
     <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
   </div>
-  <div *ngIf="codes" class="fx-column-start-stretch">
-    <div *ngFor="let code of codes; index as codeIndex" class="fx-row-start-stretch">
-      <div class="fx-column-start-stretch fx-flex-fill">
-        <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
-                     [code]="code" [allCodes]="codes"></code-header>
-        <div class="fx-row-start-start fx-gap-10">
-          <div class="has-rules-warning">
-            <p *ngIf="code.manualInstruction" [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
+  @if (codes) {
+    <div class="fx-column-start-stretch">
+      @for (code of codes; track code; let codeIndex = $index) {
+        <div class="fx-row-start-stretch">
+          <div class="fx-column-start-stretch fx-flex-fill">
+            <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
+            [code]="code" [allCodes]="codes"></code-header>
+            <div class="fx-row-start-start fx-gap-10">
+              <div class="has-rules-warning">
+                @if (code.manualInstruction) {
+                  <p [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
+                }
+              </div>
+              <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'" preferredDataType="string"
+                [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
+              (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
+            </div>
           </div>
-          <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'" preferredDataType="string"
-                           [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
-                           (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
+          <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
+      }
+      <div class="fx-row-start-center" [style.margin-top.px]="12">
+        @if (codes.length < 2) {
+          <button mat-raised-button (click)="addCodeChoice()">
+            <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
+          </button>
+        }
       </div>
-      <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
-        <mat-icon>delete</mat-icon>
-      </button>
     </div>
-    <div class="fx-row-start-center" [style.margin-top.px]="12">
-      <button mat-raised-button (click)="addCodeChoice()" *ngIf="codes.length < 2">
-        <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
-      </button>
-    </div>
-  </div>
+  }
 </div>

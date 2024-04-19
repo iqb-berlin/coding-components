@@ -8,32 +8,34 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'code-instruction',
     template: `
-    <mat-card *ngIf="code" [style.padding-left.px]="12" [style.height.%]="100">
-      <mat-card-subtitle class="hover-area">
-        <div class="fx-row-space-between-center">
-          <div class="fx-row-start-center">
-            <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.code.title' | translate}}</div>
-            <button mat-icon-button [matTooltip]="'manual-instruction.code.prompt-edit' | translate"
-                    (click)="editTextDialog_manualInstruction()">
-              <mat-icon>edit</mat-icon>
+    @if (code) {
+      <mat-card [style.padding-left.px]="12" [style.height.%]="100">
+        <mat-card-subtitle class="hover-area">
+          <div class="fx-row-space-between-center">
+            <div class="fx-row-start-center">
+              <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.code.title' | translate}}</div>
+              <button mat-icon-button [matTooltip]="'manual-instruction.code.prompt-edit' | translate"
+                (click)="editTextDialog_manualInstruction()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+            <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
+              [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
+              <mat-icon>close</mat-icon>
             </button>
           </div>
-          <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
-                  [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </mat-card-subtitle>
-      <mat-card-content [style.overflow-x]="'auto'">
-        <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
-      </mat-card-content>
-    </mat-card>
-  `,
+        </mat-card-subtitle>
+        <mat-card-content [style.overflow-x]="'auto'">
+          <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
+        </mat-card-content>
+      </mat-card>
+    }
+    `,
     styles: [
         `
       .hover-area .wipe-button {
@@ -45,7 +47,7 @@ import { NgIf } from '@angular/common';
     `
     ],
     standalone: true,
-    imports: [NgIf, MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatCardContent, TranslateModule]
+    imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatCardContent, TranslateModule]
 })
 export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();

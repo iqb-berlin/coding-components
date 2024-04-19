@@ -6,7 +6,7 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { NgIf } from '@angular/common';
+
 import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
 import {TranslateModule} from "@ngx-translate/core";
@@ -22,24 +22,28 @@ import {SchemerToolbarComponent} from "../../../ngx-coding-components/src/lib/sc
         <schema-checker [codingScheme]="codings"></schema-checker>
       </mat-drawer>
       <mat-drawer-content class="drawer-content">
-        <div *ngIf="isStandalone">
-          <button mat-icon-button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
-            <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
-          </button>
-        </div>
+        @if (isStandalone) {
+          <div>
+            <button mat-icon-button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
+              <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
+            </button>
+          </div>
+        }
         <iqb-schemer class="drawer-schemer"
-                     [varList]="varList"
-                     [codingScheme]="codings"
-                     (codingSchemeChanged)="emitCodingSchemeChanged()"
+          [varList]="varList"
+          [codingScheme]="codings"
+          (codingSchemeChanged)="emitCodingSchemeChanged()"
         ></iqb-schemer>
       </mat-drawer-content>
     </mat-drawer-container>
-    <schemer-load-save *ngIf="isStandalone"
-                       [varList]="varList"
-                       [codingScheme]="codings"
-                       (varListChanged)="setNewVarlist($event)"
-                       (codingSchemeChanged)="setNewCodingScheme($event)"
-                       [style.height.px]="0"></schemer-load-save>
+    @if (isStandalone) {
+      <schemer-load-save
+        [varList]="varList"
+        [codingScheme]="codings"
+        (varListChanged)="setNewVarlist($event)"
+        (codingSchemeChanged)="setNewCodingScheme($event)"
+      [style.height.px]="0"></schemer-load-save>
+    }
     `,
     styles: [
         `
@@ -73,7 +77,7 @@ import {SchemerToolbarComponent} from "../../../ngx-coding-components/src/lib/sc
       `
     ],
     standalone: true,
-    imports: [SchemerComponent,SchemeCheckerComponent,SchemerToolbarComponent,TranslateModule,NoopAnimationsModule,MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, NgIf, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
+    imports: [SchemerComponent, SchemeCheckerComponent, SchemerToolbarComponent, TranslateModule, NoopAnimationsModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

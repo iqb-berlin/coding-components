@@ -24,14 +24,14 @@ import { MatSelect } from '@angular/material/select';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { NgIf, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 
 @Component({
     selector: 'var-coding',
     templateUrl: './var-coding.component.html',
     styleUrls: ['./var-coding.component.scss'],
     standalone: true,
-    imports: [NgIf, MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption, MatChipListbox, MatChip, MatMenuTrigger, NgFor, MatIcon, MatChipRemove, MatIconButton, MatMenu, MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, NgSwitch, NgSwitchCase, VarCodesManualComponent, VarCodesValueListComponent, VarCodesChoiceComponent, VarCodesNumberComponent, NgSwitchDefault, VarCodesFullComponent, TranslateModule]
+    imports: [MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption, MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu, MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, VarCodesManualComponent, VarCodesValueListComponent, VarCodesChoiceComponent, VarCodesNumberComponent, VarCodesFullComponent, TranslateModule]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();

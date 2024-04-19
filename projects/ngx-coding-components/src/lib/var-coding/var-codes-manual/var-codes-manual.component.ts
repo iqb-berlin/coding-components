@@ -7,7 +7,7 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { CodeInstructionComponent } from '../code-instruction.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { CodeHeaderComponent } from '../code-header.component';
-import { NgIf, NgFor } from '@angular/common';
+
 import { MatCheckbox } from '@angular/material/checkbox';
 import { CodesTitleComponent } from '../codes-title.component';
 
@@ -16,7 +16,7 @@ import { CodesTitleComponent } from '../codes-title.component';
     templateUrl: './var-codes-manual.component.html',
     styleUrls: ['./var-codes-manual.component.scss'],
     standalone: true,
-    imports: [CodesTitleComponent, MatCheckbox, NgIf, NgFor, CodeHeaderComponent, MatTooltip, CodeInstructionComponent, MatIconButton, MatIcon, MatButton, TranslateModule, HasRulePipe]
+    imports: [CodesTitleComponent, MatCheckbox, CodeHeaderComponent, MatTooltip, CodeInstructionComponent, MatIconButton, MatIcon, MatButton, TranslateModule, HasRulePipe]
 })
 export class VarCodesManualComponent extends VarCodesDirective implements OnInit {
   constructor(

@@ -24,7 +24,7 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
-import { NgIf, NgFor } from '@angular/common';
+
 
 export interface GeneratedCodingData {
   id: string,
@@ -51,20 +51,10 @@ interface optionData {
     }
     .dragOptionBox {
       border: darkgray 1px solid;
-    }
-    .rule-text-error {
-      margin: 10px 0;
-      padding: 6px 12px;
-      border: #ff6c00 solid 3px;
-    }
-    .rule-text-ok {
-      margin: 10px 0;
-      padding: 6px 0;
-      border: transparent solid 3px;
     }`
     ],
     standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, NgIf, NgFor, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule, MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove, MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    imports: [MatDialogTitle, MatDialogContent, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule, MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove, MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GenerateCodingDialogComponent {
