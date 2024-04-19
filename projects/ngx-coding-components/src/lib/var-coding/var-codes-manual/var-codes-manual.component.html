@@ -1,6 +1,8 @@
 <div class="fx-column-start-stretch">
-  <div class="fx-row-space-between-end">
-    <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
+  <div class="fx-column" [style.margin-bottom.px]="20">
+    <div class="fx-row-start-end">
+      <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
+    </div>
     <div class="processing">
       <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
         (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
@@ -18,17 +20,12 @@
   </div>
   @if (codes) {
     @for (code of codes; track code; let codeIndex = $index) {
-      <div class="fx-row-start-stretch"
+      <div class="fx-row-start-stretch code fx-gap-10"
         [style.margin-bottom.px]="4">
-        <div class="fx-column-start-stretch fx-flex-fill">
+        <div class="fx-column-start-stretch fx-flex-fill ">
           <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="false"
           [code]="code" [allCodes]="codes"></code-header>
           <div class="fx-row-start-stretch fx-gap-10">
-            <div class="has-rules-warning">
-              @if (code | hasRule) {
-                <p [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
-              }
-            </div>
             <code-instruction [code]="code" [style.flex]="'1 1 auto'" [style.max-height.px]="200"
             (codeDataChanged)="codesChanged.emit(codes)"></code-instruction>
           </div>
@@ -38,7 +35,10 @@
         </button>
       </div>
     }
-    <div class="fx-row-start-center" [style.margin-top.px]="12">
+    @if (codes.length === 0) {
+      <div class="no-codes">{{'code.no-codes' | translate}}</div>
+    }
+    <div class="fx-row-start-center fx-gap-20" [style.margin-top.px]="12">
       <button mat-raised-button (click)="addCodeCredit()">
         <mat-icon>add</mat-icon>{{'code.prompt.add-score1' | translate}}
       </button>

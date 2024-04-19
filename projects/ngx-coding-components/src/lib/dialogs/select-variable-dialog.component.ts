@@ -9,22 +9,21 @@ import { MatButton } from '@angular/material/button';
 
 @Component({
     template: `
-    <h1 mat-dialog-title>{{ selectData.title }}</h1>
-    @if (selectData.prompt) {
-      <div>{{selectData.prompt}}</div>
-    }
-    
-    <mat-dialog-content>
-      <mat-selection-list #variables multiple="false">
-        @for (v of selectData.variables; track v) {
-          <mat-list-option [value]="v">
-            {{v}}
-          </mat-list-option>
+      <h4 mat-dialog-title>{{ selectData.title }}</h4>
+      <mat-dialog-content>
+        @if (selectData.prompt) {
+          {{selectData.prompt}}
         }
-      </mat-selection-list>
-    </mat-dialog-content>
-    
-    <mat-dialog-actions>
+        <mat-selection-list #variables multiple="false">
+          @for (v of selectData.variables; track v) {
+            <mat-list-option [value]="v">
+              {{v}}
+            </mat-list-option>
+          }
+        </mat-selection-list>
+      </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
       <button mat-raised-button color="primary" [disabled]="variables.selectedOptions.selected.length <= 0"
       (click)="okButtonClick()">{{ selectData.okButtonLabel }}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>

@@ -7,14 +7,14 @@ import { MatButton } from '@angular/material/button';
 @Component({
     template: `
     <h1 mat-dialog-title>{{ confirmData.title }}</h1>
-    
+
     <mat-dialog-content>
       <p>
         {{ confirmData.content }}
       </p>
     </mat-dialog-content>
-    
-    <mat-dialog-actions>
+
+    <mat-dialog-actions align="end">
       <button mat-raised-button color="primary" [mat-dialog-close]="true">{{ confirmData.confirmButtonLabel }}</button>
       @if (showCancel) {
         <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>

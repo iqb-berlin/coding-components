@@ -5,16 +5,16 @@
   @if (codes) {
     <div class="fx-column-start-stretch">
       @for (code of codes; track code; let codeIndex = $index) {
-        <div class="fx-row-start-stretch">
+        <div class="fx-row-start-stretch code fx-gap-10">
           <div class="fx-column-start-stretch fx-flex-fill">
             <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
             [code]="code" [allCodes]="codes"></code-header>
             <div class="fx-row-start-start fx-gap-10">
-              <div class="has-rules-warning">
-                @if (code.manualInstruction) {
-                  <p [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
+              @if (code.manualInstruction) {
+                <div class="has-rules-warning">
+                    <mat-icon [matTooltip]="'code.has-rule-warning.autocode' | translate">warning</mat-icon>
+                </div>
                 }
-              </div>
               <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
                 [code]="code" [varInfo]="varInfo" preferredDataType="number" [fragmentMode]="!!fragmenting"
               (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
@@ -25,7 +25,10 @@
           </button>
         </div>
       }
-      <div class="fx-row-start-center" [style.margin-top.px]="12">
+      @if (codes.length === 0) {
+        <div class="no-codes">{{'code.no-codes' | translate}}</div>
+      }
+      <div class="fx-row-start-center fx-gap-20" [style.margin-top.px]="12">
         <button mat-raised-button (click)="addCodeCredit()">
           <mat-icon>add</mat-icon>{{'code.prompt.add-score1' | translate}}
         </button>

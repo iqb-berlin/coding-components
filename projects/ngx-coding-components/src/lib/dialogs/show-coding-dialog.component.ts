@@ -8,18 +8,18 @@ import { MatButton } from '@angular/material/button';
 @Component({
     template: `
     <h1 mat-dialog-title>{{varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
-    
+
     <mat-dialog-content>
       <div class="fx-row-start-center">
-        <div class="fx-flex-row-20">Quelle:</div>
+        <div class="fx-flex-row-20">{{'manual-instruction.coding.source' | translate}}:</div>
         <div class="fx-flex-fill">{{varCodingText.source}}</div>
       </div>
       <div class="fx-row-start-center">
-        <div class="fx-flex-row-20">Verarbeitung:</div>
+        <div class="fx-flex-row-20">{{'processing.prompt' | translate}}:</div>
         <div class="fx-flex-fill">{{varCodingText.processing || 'keine'}}</div>
       </div>
       <div class="fx-row-start-center">
-        <div class="fx-flex-row-20">Allgemeine Instruktion:</div>
+        <div class="fx-flex-row-20">{{'manual-instruction.coding.title' | translate}}:</div>
         <div class="fx-flex-fill">{{varCodingText.hasManualInstruction ? 'ja' : 'keine'}}</div>
       </div>
       <h3>Codes</h3>
@@ -29,7 +29,7 @@ import { MatButton } from '@angular/material/button';
           <div class="fx-flex-row-10" [style.text-align]="'center'">Score</div>
           <div class="fx-flex-row-20">Titel</div>
           <div class="fx-flex-fill">Bedingung(en)</div>
-          <div class="fx-flex-row-10" [style.text-align]="'center'">Instruktions- text ?</div>
+          <div class="fx-flex-row-15" [style.text-align]="'center'">Instruktion</div>
         </div>
         @for (codeText of varCodingText.codes; track codeText) {
           <div class="fx-row-start-center code-row">
@@ -62,9 +62,9 @@ import { MatButton } from '@angular/material/button';
         <div>keine</div>
       }
     </mat-dialog-content>
-    
-    <mat-dialog-actions>
-      <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
+
+    <mat-dialog-actions align="end">
+      <button mat-raised-button color="primary"  [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
     `,
     styles: [

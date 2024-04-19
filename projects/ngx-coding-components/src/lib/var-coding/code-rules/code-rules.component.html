@@ -29,12 +29,13 @@
           [label]="'Regelsatz ' + (ruleSetIndex + 1).toString(10)"
           [style.overflow-x]="'auto'">
           @for (rule of ruleSet.rules; track rule; let ruleIndex = $index) {
-            <div class="fx-row-start-center fx-flex-fill"
+            <div class="fx-row-start-center fx-flex-fill fx-gap-10"
               (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
               <div class="fx-column-start-stretch fx-flex-fill">
-                <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
+                <div class="rule" [matTooltip]="('rule.' + rule.method + '.description') | translate"
                   matTooltipShowDelay="500">
-                {{('rule.' + rule.method) | translate}}</div>
+                  {{('rule.' + rule.method) | translate}}
+                </div>
                 @if (schemerService.ruleMethodParameterCount[rule.method] < 0) {
                   <mat-form-field>
                     @if (rule.parameters) {
@@ -83,8 +84,6 @@
             </div>
           }
           <div class="fx-row-space-between-center">
-
-              {{ruleSet | json}}
               <button mat-icon-button [matMenuTriggerFor]="menu"
                       [matTooltip]="'rule.prompt.add' | translate">
                 <mat-icon>add</mat-icon>
