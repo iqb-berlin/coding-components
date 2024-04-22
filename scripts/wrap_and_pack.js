@@ -16,4 +16,4 @@ const fileContent = fs.readFileSync(wrapperPath, 'utf8').toString()
 fs.writeFileSync('dist/index.html', fileContent, 'utf8');
 
 const targetFileName = `iqb-schemer@${packageVersion}.html`;
-execSync(`node node_modules/iqb-dev-components/src/distpacker.js dist ${targetFileName} ${packageName}`);
+execSync(`node ./scripts/distpacker.js dist ${targetFileName} ${packageName}`);
