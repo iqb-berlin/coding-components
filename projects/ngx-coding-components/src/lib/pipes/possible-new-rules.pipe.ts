@@ -10,36 +10,36 @@ export class PossibleNewRulesPipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
   private static getNumericRules(otherRuleMethods: string[],
                                  ruleOperatorAnd: boolean, fragmenting?: boolean): RuleMethod[] {
-    if (fragmenting || otherRuleMethods.length <= 0) return ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MAX',
-    'NUMERIC_MORE_THEN', 'NUMERIC_MIN'];
+    if (fragmenting || otherRuleMethods.length <= 0) return ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THAN', 'NUMERIC_MAX',
+    'NUMERIC_MORE_THAN', 'NUMERIC_MIN'];
     const returnMethods: RuleMethod[] = [];
     if (ruleOperatorAnd) {
       if (otherRuleMethods.indexOf('NUMERIC_RANGE') < 0 &&
         otherRuleMethods.indexOf('NUMERIC_MATCH') < 0) {
-        if (otherRuleMethods.indexOf('NUMERIC_LESS_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0
-          && otherRuleMethods.indexOf('NUMERIC_MORE_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
+        if (otherRuleMethods.indexOf('NUMERIC_LESS_THAN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0
+          && otherRuleMethods.indexOf('NUMERIC_MORE_THAN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
           returnMethods.push('NUMERIC_MATCH');
           returnMethods.push('NUMERIC_RANGE');
         }
-        if (otherRuleMethods.indexOf('NUMERIC_LESS_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0) {
+        if (otherRuleMethods.indexOf('NUMERIC_LESS_THAN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0) {
           returnMethods.push('NUMERIC_MAX');
-          returnMethods.push('NUMERIC_LESS_THEN');
+          returnMethods.push('NUMERIC_LESS_THAN');
         }
-        if (otherRuleMethods.indexOf('NUMERIC_MORE_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
+        if (otherRuleMethods.indexOf('NUMERIC_MORE_THAN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
           returnMethods.push('NUMERIC_MIN');
-          returnMethods.push('NUMERIC_MORE_THEN');
+          returnMethods.push('NUMERIC_MORE_THAN');
         }
       }
     } else {
       returnMethods.push('NUMERIC_MATCH');
       returnMethods.push('NUMERIC_RANGE');
-      if (otherRuleMethods.indexOf('NUMERIC_LESS_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0) {
+      if (otherRuleMethods.indexOf('NUMERIC_LESS_THAN') < 0 && otherRuleMethods.indexOf('NUMERIC_MAX') < 0) {
         returnMethods.push('NUMERIC_MAX');
-        returnMethods.push('NUMERIC_LESS_THEN');
+        returnMethods.push('NUMERIC_LESS_THAN');
       }
-      if (otherRuleMethods.indexOf('NUMERIC_MORE_THEN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
+      if (otherRuleMethods.indexOf('NUMERIC_MORE_THAN') < 0 && otherRuleMethods.indexOf('NUMERIC_MIN') < 0) {
         returnMethods.push('NUMERIC_MIN');
-        returnMethods.push('NUMERIC_MORE_THEN');
+        returnMethods.push('NUMERIC_MORE_THAN');
       }
     }
     return returnMethods;

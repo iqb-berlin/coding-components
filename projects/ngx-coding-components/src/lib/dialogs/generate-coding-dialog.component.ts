@@ -145,9 +145,9 @@ export class GenerateCodingDialogComponent {
           this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`
         } else {
           const ruleTexts: string[] = [];
-          if (moreThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THEN')} ${moreThenValue}`);
+          if (moreThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THAN')} ${moreThenValue}`);
           if (minValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MIN')} ${minValue}`);
-          if (lessThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_LESS_THEN')} ${lessThenValue}`);
+          if (lessThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_LESS_THAN')} ${lessThenValue}`);
           if (maxValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MAX')} ${maxValue}`);
           this.numericRuleText = ruleTexts.length > 0 ? ruleTexts.join('; ') : this.translateService.instant('coding.generate.empty-value');
           this.numericRuleError = ruleTexts.length === 0;
@@ -247,7 +247,7 @@ export class GenerateCodingDialogComponent {
             });
           } else {
             if (moreThenValue) numericRules.push({
-              method: "NUMERIC_MORE_THEN",
+              method: "NUMERIC_MORE_THAN",
               parameters: [moreThenValue.toString(10)]
             });
             if (minValue) numericRules.push({
@@ -255,7 +255,7 @@ export class GenerateCodingDialogComponent {
               parameters: [minValue.toString(10)]
             });
             if (lessThenValue) numericRules.push({
-              method: "NUMERIC_LESS_THEN",
+              method: "NUMERIC_LESS_THAN",
               parameters: [lessThenValue.toString(10)]
             });
             if (maxValue) numericRules.push({

@@ -117,7 +117,7 @@
           <div class="fx-row-start-center">
             <div [style.width.px]="200">{{'coding.generate.lower-limit' | translate}}</div>
             <mat-form-field>
-              <mat-label>{{ 'rule.NUMERIC_MORE_THEN' | translate }}</mat-label>
+              <mat-label>{{ 'rule.NUMERIC_MORE_THAN' | translate }}</mat-label>
               <input matInput [(ngModel)]="numericMoreThen" (ngModelChange)="updateNumericRuleText()">
             </mat-form-field>
             <mat-form-field [style.margin.px]="8">
@@ -128,7 +128,7 @@
           <div class="fx-row-start-center">
             <div [style.width.px]="200">{{'coding.generate.upper-limit' | translate}}</div>
             <mat-form-field>
-              <mat-label>{{ 'rule.NUMERIC_LESS_THEN' | translate }}</mat-label>
+              <mat-label>{{ 'rule.NUMERIC_LESS_THAN' | translate }}</mat-label>
               <input matInput [(ngModel)]="numericLessThen" (ngModelChange)="updateNumericRuleText()">
             </mat-form-field>
             <mat-form-field [style.margin.px]="8">

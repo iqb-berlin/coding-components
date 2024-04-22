@@ -5,7 +5,7 @@ export const singletonRules: RuleMethod[] = [
   'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
 ]
 export const exclusiveNumericRules: RuleMethod[] = [
-  'NUMERIC_RANGE', 'NUMERIC_LESS_THEN', 'NUMERIC_MORE_THEN',
+  'NUMERIC_RANGE', 'NUMERIC_LESS_THAN', 'NUMERIC_MORE_THAN',
   'NUMERIC_MAX', 'NUMERIC_MIN'
 ]
 
