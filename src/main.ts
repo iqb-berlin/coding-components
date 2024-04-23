@@ -1,31 +1,25 @@
 import { importProvidersFrom } from '@angular/core';
 import { AppComponent } from './app/app.component';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatMenuModule } from '@angular/material/menu';
-import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import {NoopAnimationsModule} from "@angular/platform-browser/animations";
+import {createApplication} from '@angular/platform-browser';
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
-import {HttpClient, HttpClientModule} from "@angular/common/http";
-import {
-  createTranslateLoader
-} from "../projects/ngx-coding-components/src/lib/translations/ngx-coding-components.translate-loader";
+import {SchemerTranslateLoader} from "../projects/ngx-coding-components/src/lib/translations/schemer-translate-loader";
+import {createCustomElement} from "@angular/elements";
+import {provideAnimations} from "@angular/platform-browser/animations";
+import 'zone.js';
 
 
-bootstrapApplication(AppComponent, {
-    providers: [importProvidersFrom(
-      TranslateModule.forRoot({
-        defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient],
-      },
-    }),
-      HttpClientModule,NoopAnimationsModule,BrowserModule, MatMenuModule, MatDividerModule, MatIconModule, MatButtonModule, MatTooltipModule, MatSidenavModule, MatToolbarModule)]
-})
-  .catch(err => console.error(err));
+(async () => {
+  const app = await createApplication({providers: [
+      provideAnimations(),
+      importProvidersFrom(
+        TranslateModule.forRoot({
+          defaultLanguage: 'de',
+          loader: {
+            provide: TranslateLoader,
+            useClass: SchemerTranslateLoader
+          }
+        }),)]});
+
+  const schemer = createCustomElement(AppComponent, {injector: app.injector});
+  customElements.define('app-root', schemer);
+})();
