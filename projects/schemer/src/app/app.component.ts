@@ -6,7 +6,6 @@ import {CodingFactory} from "@iqb/responses/coding-factory";
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-
 import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
 import {TranslateModule} from "@ngx-translate/core";
@@ -77,7 +76,7 @@ import {SchemerToolbarComponent} from "../../../ngx-coding-components/src/lib/sc
       `
     ],
     standalone: true,
-    imports: [SchemerComponent, SchemeCheckerComponent, SchemerToolbarComponent, TranslateModule, NoopAnimationsModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
+    imports: [TranslateModule, NoopAnimationsModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

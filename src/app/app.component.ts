@@ -79,7 +79,7 @@ import {SchemerToolbarComponent} from "../../projects/ngx-coding-components/src/
       `
     ],
     standalone: true,
-  imports: [SchemeCheckerComponent,SchemerComponent,SchemerToolbarComponent,TranslateModule,MatDrawerContainer, MatDrawer, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemeCheckerComponent, SchemerComponent, SchemerToolbarComponent]
+  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
