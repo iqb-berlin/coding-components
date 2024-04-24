@@ -8,7 +8,7 @@ import { MatButton } from '@angular/material/button';
 @Component({
     template: `
     <h1 mat-dialog-title>Kodierschema prüfen</h1>
-    
+
     <mat-dialog-content>
       @for (v of allVariables; track v) {
         <div class="fx-column-start-stretch">
@@ -28,9 +28,9 @@ import { MatButton } from '@angular/material/button';
         <div>keine Probleme gefunden.</div>
       }
     </mat-dialog-content>
-    
-    <mat-dialog-actions>
-      <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
+
+    <mat-dialog-actions align="end">
+      <button mat-raised-button color="primary" [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
     `,
     styles: [

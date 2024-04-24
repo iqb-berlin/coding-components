@@ -6,14 +6,14 @@
 @if (varCoding) {
   <div class="fx-column-space-between-stretch" [style.padding]="'10px'">
     <div class="fx-row-start-stretch fx-gap-10">
-      <div class="fx-column-start-stretch" [style.width.%]="30">
+      <div class="fx-column-start-stretch fx-gap-10"  [style.width.%]="30">
         <mat-form-field>
           <mat-label>{{'description-position' | translate}}</mat-label>
           <input matInput [(ngModel)]="varCoding.label"
             (change)="lastChangeFrom$.next('label')">
         </mat-form-field>
         @if (varCoding.sourceType !== 'BASE') {
-          <div [style.margin]="'4px 0 4px 20px'" class="fx-column-start-stretch">
+          <div class="fx-column-start-stretch">
             <mat-form-field>
               <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
               <mat-select [(value)]="varCoding.sourceType" (selectionChange)="lastChangeFrom$.next('derive-method'); updateVarInfo()">
@@ -31,8 +31,10 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <div class="fx-row-start-center fx-gap-5">
-              <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
+            <div class="fx-row-start-center fx-gap-20">
+              <div>
+                <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
+              </div>
               <mat-chip-listbox>
                 @if (varCoding.deriveSources.length === 0) {
                   <mat-chip [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
@@ -61,7 +63,7 @@
             </div>
           </div>
         }
-        <div class="fx-row-start-center">
+        <div class="fx-row-start-center fx-gap-5" >
           <mat-form-field class="fx-flex-fill">
             <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
             <mat-select [(value)]="varCoding.codeModel">

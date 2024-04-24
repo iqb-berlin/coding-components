@@ -55,7 +55,8 @@ import { MatIconButton } from '@angular/material/button';
               <button mat-icon-button [style.width.px]="50"
                 (click)="setCodeInvalid()"
                 [matTooltip]="'code.make-null' | translate">
-                <mat-icon>do_not_disturb_on</mat-icon></button>
+                <mat-icon>do_not_disturb_on</mat-icon>
+              </button>
               }
             }
           </div>
@@ -63,9 +64,7 @@ import { MatIconButton } from '@angular/material/button';
     `,
     styles: [
         `
-      .code-main-data {
-        background-color: whitesmoke;
-      }
+
     `
     ],
     standalone: true,

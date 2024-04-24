@@ -1,6 +1,14 @@
 <div class="fx-column-start-stretch">
-  <div class="fx-row-space-between-end">
-    <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
+  <div class="fx-columns">
+    <div class="fx-row-space-between-start">
+      <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
+      <mat-form-field [matTooltip]="'fragmenting.tooltip' | translate">
+        <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
+        <input matInput
+               [(ngModel)]="fragmenting"
+               (ngModelChange)="fragmentingChanged.emit(fragmenting)">
+      </mat-form-field>
+    </div>
     <div class="processing">
       <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
         (change)="alterProcessing('IGNORE_CASE', $event.checked)">
@@ -23,18 +31,12 @@
         </div>
       </mat-checkbox>
     </div>
-    <mat-form-field [matTooltip]="'fragmenting.tooltip' | translate">
-      <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
-      <input matInput
-        [(ngModel)]="fragmenting"
-        (ngModelChange)="fragmentingChanged.emit(fragmenting)">
-    </mat-form-field>
   </div>
   @if (codes) {
     @for (code of codes; track code; let codeIndex = $index) {
-      <div class="fx-row-start-stretch" [style.max-height.px]="500">
+      <div class="fx-row-start-stretch code fx-gap-10" [style.max-height.px]="500" >
         @if (code) {
-          <div class="fx-column-start-stretch" [style.width.%]="60">
+          <div class="fx-column-start-stretch " [style.width.%]="60">
             <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
             [code]="code" [allCodes]="codes"></code-header>
             <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
@@ -48,16 +50,17 @@
         }
       </div>
     }
-    <div class="fx-row-start-center" [style.margin-top.px]="12">
+    @if (codes.length === 0) {
+      <div class="no-codes">{{'code.no-codes' | translate}}</div>
+    }
+    <div class="fx-row-start-center fx-gap-20" >
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
       </button>
       <button mat-raised-button (click)="addCodeSingleton('ELSE'); updateCodeExistences()" [disabled]="!!elseCodeExists">
         <mat-icon>add</mat-icon>{{'code.prompt.add-else' | translate}}
       </button>
-      @if (codes.length === 0) {
-        <div class="no-codes">{{'code.no-codes' | translate}}</div>
-      }
+
     </div>
   }
 </div>

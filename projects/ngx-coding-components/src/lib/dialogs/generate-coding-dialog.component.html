@@ -170,7 +170,7 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions>
-  <button mat-raised-button [disabled]="generationModel === 'none'" (click)="generateButtonClick()">{{'coding.generate.action' | translate}}</button>
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" [disabled]="generationModel === 'none'" (click)="generateButtonClick()">{{'coding.generate.action' | translate}}</button>
   <button mat-raised-button [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
 </mat-dialog-actions>

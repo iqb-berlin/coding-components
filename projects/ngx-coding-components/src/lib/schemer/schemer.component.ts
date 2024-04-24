@@ -228,17 +228,17 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     if (selectedCoding) {
       let warningMessageText;
       if (selectedCoding.sourceType !== 'BASE') {
-        warningMessageText = `Die Variable "${selectedCoding.id}" wird gelöscht. Fortsetzen?`;
+        warningMessageText = `Die Variable "${selectedCoding.id}" wird gelöscht.`;
       } else {
         const varListIds = this.schemerService.varList.map(v => v.id);
         if (varListIds.indexOf(selectedCoding.id) < 0) {
           if (SchemerComponent.isEmptyCoding(selectedCoding)) {
-            warningMessageText = 'Die verschollene Basisvariable wird gelöscht. Fortsetzen?';
+            warningMessageText = 'Die verschollene Basisvariable wird gelöscht.';
           } else {
-            warningMessageText = 'Achtung: Die verschollene Basisvariable wird einschließlich aller Kodierinformationen gelöscht. Fortsetzen?';
+            warningMessageText = 'Achtung: Die verschollene Basisvariable wird einschließlich aller Kodierinformationen gelöscht.';
           }
         } else {
-          warningMessageText = 'Alle Kodierinformationen der Basisvariable werden gelöscht. Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist. Fortsetzen?';
+          warningMessageText = 'Alle Kodierinformationen der Basisvariable werden gelöscht. Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist.';
         }
       }
       const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
@@ -279,7 +279,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         placeholder: 'Variablen-Kennung',
         value: selectedCoding.id,
         saveButtonLabel: 'Speichern',
-        showCancel: true
+        showCancel: true,
       };
       const dialogRef = this.inputDialog.open(SimpleInputDialogComponent, {
         width: '400px',

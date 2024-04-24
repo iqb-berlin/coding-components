@@ -8,22 +8,17 @@ import { MatRipple } from '@angular/material/core';
 @Component({
     selector: 'codes-title',
     template: `
-    <div class="fx-row-start-center fx-gap-5 hover-icon" (click)="sortCodes()"
-         matRipple [style.cursor]="'pointer'">
-      <h3 [matTooltip]="'code.prompt.sort' | translate" [matTooltipShowDelay]="500">{{'code.header' | translate}}</h3>
-      <mat-icon [matTooltip]="'code.prompt.sort' | translate" [matTooltipShowDelay]="500">swap_vert</mat-icon>
+    <div (click)="sortCodes()"
+         [matTooltip]="'code.prompt.sort' | translate"
+         [matTooltipShowDelay]="500"
+         class="fx-row-start-center fx-gap-5"
+         matRipple
+         [style.cursor]="'pointer'"
+         style="display: flex; align-items: center;">
+      <h2>{{'code.header' | translate}}</h2>
+      <mat-icon>swap_vert</mat-icon>
     </div>
   `,
-    styles: [
-        `
-      .hover-icon mat-icon {
-        visibility: hidden;
-      }
-      .hover-icon:hover mat-icon {
-        visibility: visible;
-      }
-    `
-    ],
     standalone: true,
     imports: [MatRipple, MatTooltip, MatIcon, TranslateModule]
 })
@@ -33,7 +28,6 @@ export class CodesTitleComponent {
 
   sortCodes() {
     if (this.codeList && this.codeList.length > 1) {
-      console.log(this.codeList.length, '1');
       let allCodeIds: number[] = [];
       this.codeList.forEach(c => {
         if (c.id !== null && allCodeIds.indexOf(c.id) < 0) allCodeIds.push(c.id);
@@ -49,11 +43,9 @@ export class CodesTitleComponent {
       newCodeList.forEach(c => {
         if (this.codeList) this.codeList.push(c)
       });
-      console.log(this.codeList.length, '2');
       nullCodes.forEach(c => {
         if (this.codeList) this.codeList.push(c)
       });
-      console.log(this.codeList.length, '3');
       this.codesChanged.emit();
     }
   }

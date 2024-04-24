@@ -1,6 +1,8 @@
 <div class="fx-column-start-stretch">
-  <div class="fx-row-space-between-end">
-    <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
+  <div class="fx-column" [style.margin-bottom.px]="20">
+    <div class="fx-row-start-end">
+      <codes-title [codeList]="codes" (codesChanged)="codesChanged.emit(codes)"></codes-title>
+    </div>
     <div class="processing">
       <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
         (change)="alterProcessing('IGNORE_CASE', $event.checked)">
@@ -14,17 +16,17 @@
   </div>
   @if (codes) {
     @for (code of codes; track code; let codeIndex = $index) {
-      <div class="fx-row-start-stretch" [style.max-height.px]="500">
+      <div class="fx-row-start-stretch code fx-gap-10" [style.max-height.px]="500">
         @if (code) {
           <div class="fx-column-start-stretch fx-flex-fill">
             <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="false"
             [code]="code" [allCodes]="codes"></code-header>
-            <div class="fx-row-start-start fx-gap-10">
-              <div class="has-rules-warning">
-                @if (code.manualInstruction && elseCodeExists) {
+            <div class="fx-row-start-start">
+              @if (code.manualInstruction && elseCodeExists) {
+                <div class="has-rules-warning">
                   <p [matTooltip]="'code.has-rule-warning.manual-else' | translate">!!</p>
-                }
-              </div>
+                </div>
+              }
               <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'"
                 [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
               (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
@@ -40,7 +42,10 @@
         }
       </div>
     }
-    <div class="fx-row-start-center" [style.margin-top.px]="12">
+    @if (codes.length === 0) {
+      <div class="no-codes">{{'code.no-codes' | translate}}</div>
+    }
+    <div class="fx-row-start-center fx-gap-20" [style.margin-top.px]="12">
       <button mat-raised-button (click)="addCode()">
         <mat-icon>add</mat-icon>{{'code.prompt.add' | translate}}
       </button>

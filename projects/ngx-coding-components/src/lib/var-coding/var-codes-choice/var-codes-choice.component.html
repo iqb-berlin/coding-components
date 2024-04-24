@@ -5,25 +5,28 @@
   @if (codes) {
     <div class="fx-column-start-stretch">
       @for (code of codes; track code; let codeIndex = $index) {
-        <div class="fx-row-start-stretch">
+        <div class="fx-row-start-stretch fx-gap-10 code">
           <div class="fx-column-start-stretch fx-flex-fill">
             <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
             [code]="code" [allCodes]="codes"></code-header>
             <div class="fx-row-start-start fx-gap-10">
-              <div class="has-rules-warning">
-                @if (code.manualInstruction) {
-                  <p [matTooltip]="'code.has-rule-warning.autocode' | translate">!!</p>
+              @if (code.manualInstruction) {
+                <div class="has-rules-warning">
+                  <mat-icon [matTooltip]="'code.has-rule-warning.autocode' | translate">warning</mat-icon>
+                </div>
                 }
-              </div>
               <code-rules [style.padding-left.px]="4" [style.flex]="'1 1 auto'" preferredDataType="string"
                 [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
               (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
             </div>
           </div>
-          <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+          <button [style.margin-top.px]="5" mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
+      }
+      @if (codes.length === 0) {
+        <div class="no-codes">{{'code.no-codes' | translate}}</div>
       }
       <div class="fx-row-start-center" [style.margin-top.px]="12">
         @if (codes.length < 2) {
@@ -34,4 +37,5 @@
       </div>
     </div>
   }
+
 </div>
