@@ -52,13 +52,13 @@ export class SchemeCheckerComponent {
           myValues.push(<Response>{
             id: cs.id,
             value: this.values[cs.id],
-            status: 'VALUE_CHANGED'
+            state: 'VALUE_CHANGED'
           });
         } else if (cs.sourceType === 'BASE') {
           myValues.push(<Response>{
             id: cs.id,
             value: '',
-            status: 'DISPLAYED'
+            state: 'DISPLAYED'
           });
         }
       });
