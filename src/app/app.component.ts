@@ -79,7 +79,7 @@ import {SchemerToolbarComponent} from "../../projects/ngx-coding-components/src/
       `
     ],
     standalone: true,
-  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerToolbarComponent]
+  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatIcon, SchemerComponent, SchemerToolbarComponent]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
@@ -95,7 +95,7 @@ export class AppComponent {
       this.varList1 = varList;
       const variableCodings: VariableCodingData[] = [];
       this.varList1.forEach(c => {
-        variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(c));
+        variableCodings.push(CodingFactory.createCodingVariable(c.id));
       });
       this.codings1 = new CodingScheme(variableCodings);
     }
