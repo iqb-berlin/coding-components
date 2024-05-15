@@ -368,7 +368,7 @@ export class GenerateCodingDialogComponent {
               parameters: [o.value || '']
             },
             {
-              method: "NO_OTHER_MATCHES"
+              method: "ELSE"
             }
           ]
         })
@@ -427,7 +427,7 @@ export class GenerateCodingDialogComponent {
         }
         if (this.generationModel === 'multi-choice') {
           fullCreditRules.push({
-            method: "NO_OTHER_MATCHES",
+            method: "ELSE",
           });
         }
       }
