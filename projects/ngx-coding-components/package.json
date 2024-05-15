@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/iqb-berlin/coding-components#readme",
   "peerDependencies": {
+    "mathjs": "^12.4.2",
     "@angular/animations": "^17.1.3",
     "@angular/common": "^17.1.3",
     "@angular/compiler": "^17.1.3",
