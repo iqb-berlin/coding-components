@@ -8,7 +8,7 @@ import { MatButton } from '@angular/material/button';
 @Component({
     template: `
       <h1 mat-dialog-title>{{'coding.result' | translate}}</h1>
-      
+
       <mat-dialog-content>
         <div class="response-list">
           <span class="column-header">{{'coding.variable' | translate}}</span>
@@ -19,13 +19,13 @@ import { MatButton } from '@angular/material/button';
           @for (rd of data; track rd) {
             <span class="column-row">{{rd.id}}</span>
             <span class="column-row">{{rd.value}}</span>
-            <span class="column-row">{{rd.status}}: {{'status-label.' + rd.status | translate}}</span>
+            <span class="column-row">{{rd.state}}: {{'status-label.' + rd.state | translate}}</span>
             <span class="column-row centered-column">{{rd.code || rd.code === 0 ? rd.code : '-'}}</span>
             <span class="column-row centered-column">{{rd.score || rd.score === 0 ? rd.score : '-'}}</span>
           }
         </div>
       </mat-dialog-content>
-      
+
       <mat-dialog-actions align="end">
         <button mat-raised-button
           color="primary"
