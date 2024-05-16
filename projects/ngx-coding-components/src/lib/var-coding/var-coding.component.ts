@@ -154,7 +154,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           this.varCoding.processing = newCoding.processing;
           this.varCoding.fragmenting = newCoding.fragmenting;
           this.varCoding.codeModel = newCoding.codeModel;
-          this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+          //this.varCoding.codeModelParameters = newCoding.codeModelParameters;
           this.varCoding.codes = newCoding.codes;
           console.log(this.varCoding.codes);
           this.varCodingChanged.emit(this.varCoding);

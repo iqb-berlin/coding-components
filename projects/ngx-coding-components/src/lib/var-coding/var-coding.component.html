@@ -125,8 +125,8 @@
           (fragmentingChanged)="setFragmenting($event)"
           [varInfo]="varInfo"
           (processingChanged)="lastChangeFrom$.next('var-codes-manual processing')"
-          [codeModelParameters]="varCoding.codeModelParameters"
           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-manual codeModelParameters')">
+        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
         </var-codes-manual>
       }
       @case ('VALUE_LIST') {
@@ -139,8 +139,8 @@
           [fragmenting]="varCoding.fragmenting"
           (fragmentingChanged)="setFragmenting($event)"
           [varInfo]="varInfo"
-          [codeModelParameters]="varCoding.codeModelParameters"
           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-value-list codeModelParameters')">
+        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
         </var-codes-value-list>
       }
       @case ('CHOICE') {
@@ -153,8 +153,8 @@
           [fragmenting]="varCoding.fragmenting"
           (fragmentingChanged)="setFragmenting($event)"
           [varInfo]="varInfo"
-          [codeModelParameters]="varCoding.codeModelParameters"
           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-choice codeModelParameters')">
+        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
         </var-codes-choice>
       }
       @case ('NUMBER') {
@@ -167,8 +167,8 @@
           [fragmenting]="varCoding.fragmenting"
           (fragmentingChanged)="setFragmenting($event)"
           [varInfo]="varInfo"
-          [codeModelParameters]="varCoding.codeModelParameters"
           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-number codeModelParameters')">
+        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
         </var-codes-number>
       }
       @default {
@@ -181,8 +181,9 @@
           [fragmenting]="varCoding.fragmenting"
           (fragmentingChanged)="setFragmenting($event)"
           [varInfo]="varInfo"
-          [codeModelParameters]="varCoding.codeModelParameters"
           (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
+<!--          [codeModelParameters]="varCoding.codeModelParameters"-->
+
         </var-codes-full>
       }
     }

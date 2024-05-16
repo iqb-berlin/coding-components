@@ -114,7 +114,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       const allBaseVariableIds = this.schemerService.codingScheme.variableCodings
         .filter(v => v.sourceType === 'BASE').map(bv => bv.id);
       this.schemerService.varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
-        const newBaseVariable = CodingFactory.createCodingVariableFromVarInfo(vi);
+        const newBaseVariable = CodingFactory.createCodingVariable(vi.id);
         if (this.schemerService.codingScheme) this.schemerService.codingScheme.variableCodings.push(newBaseVariable);
       })
     }
@@ -192,6 +192,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
                 id: result,
                 label: '',
                 sourceType: 'SUM_SCORE',
+                sourceParameters: {},
                 deriveSources: [],
                 processing: [],
                 codeModel: 'NUMBER',

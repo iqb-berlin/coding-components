@@ -8,8 +8,8 @@
         (change)="alterProcessing('IGNORE_CASE', $event.checked)">
         {{'processing.IGNORE_CASE' | translate}}
       </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('REMOVE_WHITE_SPACES') >= 0) : false"
-        (change)="alterProcessing('REMOVE_WHITE_SPACES', $event.checked)">
+      <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_ALL_SPACES') >= 0) : false"
+        (change)="alterProcessing('IGNORE_ALL_SPACES', $event.checked)">
         {{'processing.REMOVE_WHITE_SPACES' | translate}}
       </mat-checkbox>
     </div>
