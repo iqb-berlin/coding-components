@@ -1,49 +1,118 @@
-import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import { Response } from '@iqb/responses';
+import {
+  MatCell, MatCellDef,
+  MatColumnDef, MatHeaderCell,
+  MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow,
+  MatRowDef,
+  MatTable,
+  MatTableDataSource
+} from '@angular/material/table';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatInput } from '@angular/material/input';
 
-
+type Data = {
+  responses:Response[],
+  varsWithCodes:string[]
+};
 @Component({
-    template: `
-      <h1 mat-dialog-title>{{'coding.result' | translate}}</h1>
-
-      <mat-dialog-content>
-        <div class="response-list">
-          <span class="column-header">{{'coding.variable' | translate}}</span>
-          <span class="column-header">{{'coding.value' | translate }}</span>
-          <span class="column-header">{{'coding.state' | translate }}</span>
-          <span class="column-header centered-column">{{'coding.code' | translate }}</span>
-          <span class="column-header centered-column">{{'coding.score' | translate }}</span>
-          @for (rd of data; track rd) {
-            <span class="column-row">{{rd.id}}</span>
-            <span class="column-row">{{rd.value}}</span>
-            <span class="column-row">{{rd.state}}: {{'status-label.' + rd.state | translate}}</span>
-            <span class="column-row centered-column">{{rd.code || rd.code === 0 ? rd.code : '-'}}</span>
-            <span class="column-row centered-column">{{rd.score || rd.score === 0 ? rd.score : '-'}}</span>
+  template: `
+    <div mat-dialog-title class="fx-column-start-start title">
+      <span>{{'coding.result' | translate}}</span>
+      <mat-form-field class="filter">
+        <mat-label>{{'filter-by' | translate}}</mat-label>
+        <input matInput (keyup)="applyFilter($event )" #input>
+      </mat-form-field>
+      <mat-slide-toggle class="toggle" [checked]="codedVariablesOnly" (toggleChange)="toggleChange()">
+        {{'coding.vars-with-codes-only' | translate}}
+      </mat-slide-toggle>
+    </div>
+    <mat-dialog-content>
+      @if (isLoading) {
+        <mat-spinner></mat-spinner>
+      }
+      @if (!isLoading) {
+        <table mat-table matSort matSortActive="id" matSortDirection="asc"
+               (matSortChange)="matSort(sort)" [dataSource]="dataSource" >
+          @for (column of displayedColumns; track column) {
+            <ng-container [matColumnDef]="column">
+              <th mat-header-cell  *matHeaderCellDef  mat-sort-header> {{ 'coding.' + column | translate}}</th>
+              <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+            </ng-container>
           }
-        </div>
-      </mat-dialog-content>
+          <tr mat-header-row  *matHeaderRowDef="displayedColumns;sticky:true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      }
+    </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
-        <button mat-raised-button
-          color="primary"
-          [mat-dialog-close]="false">
-          {{'close' | translate}}
-        </button>
-      </mat-dialog-actions>
-      `,
-    styles: [
-        '.response-list  {display: grid; grid-template-columns: 2fr 4fr 2fr 1fr 1fr ; column-gap: 10px; row-gap: 10px;}',
-        '.centered-column {text-align: center}',
-        '.column-header {font-weight: bold; position: sticky; top: 0; background: white; padding:10px 0}'
-    ],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    <mat-dialog-actions align="end">
+      <button mat-raised-button
+              color="primary"
+              [mat-dialog-close]="false">
+        {{'close' | translate}}
+      </button>
+    </mat-dialog-actions>`,
+  styles: [
+    '.filter{width:100%;margin-top:10px}',
+    '.toggle{margin-left:15px}',
+    '.title{display:inline!important}'
+
+  ],
+  standalone: true,
+  // eslint-disable-next-line max-len
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, TranslateModule, MatProgressSpinner, MatSlideToggle, MatLabel, MatFormField, MatTable, MatColumnDef, MatHeaderCellDef, MatRowDef, MatRow, MatCell, MatHeaderCell, MatHeaderRowDef, MatSort, MatInput, MatHeaderRow, MatCellDef, MatSortHeader]
 })
-export class ShowCodingResultsComponent {
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: Response[]
-  ) { }
+
+export class ShowCodingResultsComponent implements OnInit{
+  dataSource = new MatTableDataSource();
+  displayedColumns = ['id', 'value', 'status', 'code', 'score'];
+  isLoading = false;
+  codedVariablesOnly = true;
+  constructor(@Inject(MAT_DIALOG_DATA) public data: Data) {
+
+  }
+
+  @ViewChild(MatSort) sort!: MatSort;
+  matSort(sort: MatSort) {
+    if (this.dataSource) {
+      this.dataSource.sort = sort;
+    }
+  }
+
+  ngOnInit() {
+    if (this.codedVariablesOnly) {
+      this.dataSource.data = this.data.responses
+        .filter(response => this.data.varsWithCodes.includes(response.id));
+    } else {
+      this.dataSource.data = this.data.responses;
+    }
+  }
+
+  applyFilter(event:Event) {
+    const { target } = event;
+    if (target) {
+      const filterValue = (target as HTMLInputElement).value;
+      this.dataSource.filter = filterValue.trim()
+        .toLowerCase();
+    }
+  }
+
+  toggleChange() {
+    this.codedVariablesOnly = !this.codedVariablesOnly;
+    if (this.codedVariablesOnly) {
+      this.dataSource.data = this.data.responses
+        .filter(response => this.data.varsWithCodes.includes(response.id));
+    } else {
+      this.dataSource.data = this.data.responses;
+    }
+  }
 }
