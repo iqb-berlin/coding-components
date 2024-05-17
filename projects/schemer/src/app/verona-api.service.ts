@@ -55,7 +55,7 @@ export class VeronaAPIService {
       sessionId: this.sessionID,
       timeStamp: String(Date.now()),
       codingScheme: JSON.stringify(scheme),
-      codingSchemeType: 'iqb@1.5',
+      codingSchemeType: 'iqb@2.0',
       variables: scheme ? scheme.variableCodings.map(c => <VariableInfoShort>{
         id: c.id,
         label: c.label,
@@ -82,6 +82,6 @@ export interface VosSchemeChangedData {
   sessionId: string,
   timeStamp: string,
   codingScheme: string,
-  codingSchemeType: 'iqb@1.5',
+  codingSchemeType: 'iqb@2.0',
   variables: VariableInfoShort[]
 }
