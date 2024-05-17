@@ -103,7 +103,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.varList.forEach(vi => {
           let codingForBaseVariable;
           if (this.codings && this.codings.variableCodings) codingForBaseVariable = this.codings.variableCodings.find(v => v.id === vi.id);
-          if (!codingForBaseVariable && this.codings) this.codings.variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(vi));
+          if (!codingForBaseVariable && this.codings) this.codings.variableCodings.push(CodingFactory.createCodingVariable(vi.id));
         })
       });
   }
@@ -117,7 +117,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.varList = varList;
       const variableCodings: VariableCodingData[] = [];
       this.varList.forEach(c => {
-        variableCodings.push(CodingFactory.createCodingVariableFromVarInfo(c));
+        variableCodings.push(CodingFactory.createCodingVariable(c.id));
       });
       this.codings = new CodingScheme(variableCodings);
     }
