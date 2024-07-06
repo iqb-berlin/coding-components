@@ -1,14 +1,15 @@
 import {
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 
-
 @Component({
-    template: `
+  template: `
       <h4 mat-dialog-title>{{ selectData.title }}</h4>
       <mat-dialog-content>
         @if (selectData.prompt) {
@@ -29,8 +30,8 @@ import { MatButton } from '@angular/material/button';
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
     `,
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, MatSelectionList, MatListOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, MatSelectionList, MatListOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class SelectVariableDialogComponent implements OnInit {
   @ViewChild('variables') variablesElement?: MatSelectionList;

@@ -1,6 +1,10 @@
 import { Component, Inject } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import {
+  CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag
+} from '@angular/cdk/drag-drop';
+import {
+  MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
 import {
   CodeData,
   CodingRule,
@@ -8,10 +12,10 @@ import {
   RuleSet,
   ToTextFactory,
   VariableInfo
-} from "@iqb/responses";
-import {CodeModelType} from "@iqb/responses/coding-interfaces";
-import {CodingFactory} from "@iqb/responses/coding-factory";
-import { TranslateService, TranslateModule } from "@ngx-translate/core";
+} from '@iqb/responses';
+import { CodeModelType } from '@iqb/responses/coding-interfaces';
+import { CodingFactory } from '@iqb/responses/coding-factory';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -24,7 +28,6 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
-
 
 export interface GeneratedCodingData {
   id: string,
@@ -42,9 +45,9 @@ interface optionData {
 }
 
 @Component({
-    templateUrl: 'generate-coding-dialog.component.html',
-    styles: [
-        `.coding-action {
+  templateUrl: 'generate-coding-dialog.component.html',
+  styles: [
+    `.coding-action {
       background: #cccccc;
       color: black;
       padding: 4px 10px;
@@ -52,14 +55,15 @@ interface optionData {
     .dragOptionBox {
       border: darkgray 1px solid;
     }`
-    ],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule, MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove, MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  ],
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule, MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove, MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GenerateCodingDialogComponent {
   generationModel: 'none' | 'single-choice-some' | 'single-choice-many' | 'multi-choice' |
-    'integer' | 'simple-input';
+  'integer' | 'simple-input';
+
   protected readonly ToTextFactory = ToTextFactory;
   selectedOption: string = '';
   selectedOptions: string[] = [];
@@ -80,9 +84,9 @@ export class GenerateCodingDialogComponent {
   elseMethod: 'none' | 'rule' | 'instruction' | 'invalid' = 'rule';
 
   constructor(
-      @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
-      public translateService: TranslateService,
-      public dialogRef: MatDialogRef<GenerateCodingDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
+    public translateService: TranslateService,
+    public dialogRef: MatDialogRef<GenerateCodingDialogComponent>
   ) {
     this.generationModel = 'none';
     if (varInfo) {
@@ -101,9 +105,9 @@ export class GenerateCodingDialogComponent {
         this.resetOptions();
       } else if (!varInfo.multiple) {
         if (varInfo.type === 'integer') {
-          this.generationModel = 'integer'
+          this.generationModel = 'integer';
         } else if (varInfo.type === 'string') {
-          this.generationModel = 'simple-input'
+          this.generationModel = 'simple-input';
         }
       }
     }
@@ -113,9 +117,9 @@ export class GenerateCodingDialogComponent {
   resetOptions() {
     const maxLength = 30;
     this.options = this._options.map(o => <optionData>{
-      value: o.value.length > maxLength ? o.value.slice(0, maxLength-1) + '…' : o.value,
+      value: o.value.length > maxLength ? `${o.value.slice(0, maxLength - 1)}…` : o.value,
       oldIndex: o.oldIndex,
-      label: o.label && o.label.length > maxLength ? o.label.slice(0, maxLength-1) + '…' : o.label
+      label: o.label && o.label.length > maxLength ? `${o.label.slice(0, maxLength - 1)}…` : o.label
     });
     this.selectedOptions = [];
     this.selectedDragOptions = [];
@@ -137,12 +141,12 @@ export class GenerateCodingDialogComponent {
         this.numericRuleError = true;
       }
       if (lessThenValue && maxValue) {
-        this.numericRuleText += ' ' + this.translateService.instant('coding.generate.only-one-upper-limit');
+        this.numericRuleText += ` ${this.translateService.instant('coding.generate.only-one-upper-limit')}`;
         this.numericRuleError = true;
       }
       if (!this.numericRuleText) {
         if (moreThenValue && maxValue && moreThenValue < maxValue) {
-          this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`
+          this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`;
         } else {
           const ruleTexts: string[] = [];
           if (moreThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THAN')} ${moreThenValue}`);
@@ -164,7 +168,7 @@ export class GenerateCodingDialogComponent {
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
-        event.currentIndex,
+        event.currentIndex
       );
     }
   }
@@ -187,42 +191,49 @@ export class GenerateCodingDialogComponent {
   }
 
   private getElseCode(codeId: number): CodeData | null {
-    if (this.elseMethod === 'rule') return {
-      id: codeId,
-      label: 'Falsch',
-      score: 0,
-      ruleSetOperatorAnd: false,
-      ruleSets: [<RuleSet>{
-        ruleOperatorAnd: false,
-        rules: [{
-          method: "ELSE"
-        }]
-      }],
-      manualInstruction: ''
+    if (this.elseMethod === 'rule') {
+      return {
+        id: codeId,
+        label: 'Falsch',
+        score: 0,
+        ruleSetOperatorAnd: false,
+        ruleSets: [<RuleSet>{
+          ruleOperatorAnd: false,
+          rules: [{
+            method: 'ELSE'
+          }]
+        }],
+        manualInstruction: ''
+      };
     }
-    if (this.elseMethod === 'invalid') return {
-      id: null,
-      label: '',
-      score: 0,
-      ruleSetOperatorAnd: false,
-      ruleSets: [<RuleSet>{
-        ruleOperatorAnd: false,
-        rules: [{
-          method: "ELSE"
-        }]
-      }],
-      manualInstruction: ''
+    if (this.elseMethod === 'invalid') {
+      return {
+        id: null,
+        label: '',
+        score: 0,
+        ruleSetOperatorAnd: false,
+        ruleSets: [<RuleSet>{
+          ruleOperatorAnd: false,
+          rules: [{
+            method: 'ELSE'
+          }]
+        }],
+        manualInstruction: ''
+      };
     }
-    if (this.elseMethod === 'instruction') return {
-      id: 2,
-      label: 'Falsch',
-      score: 0,
-      ruleSetOperatorAnd: false,
-      ruleSets: [],
-      manualInstruction: '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
+    if (this.elseMethod === 'instruction') {
+      return {
+        id: 2,
+        label: 'Falsch',
+        score: 0,
+        ruleSetOperatorAnd: false,
+        ruleSets: [],
+        manualInstruction: '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
+      };
     }
     return null;
   }
+
   generateButtonClick() {
     if (this.generationModel === 'none') {
       this.dialogRef.close(null);
@@ -231,7 +242,7 @@ export class GenerateCodingDialogComponent {
       const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
       if (matchValue) {
         numericRules.push({
-          method: "NUMERIC_MATCH",
+          method: 'NUMERIC_MATCH',
           parameters: [matchValue.toString(10)]
         });
       } else {
@@ -242,26 +253,34 @@ export class GenerateCodingDialogComponent {
         if (!(moreThenValue && minValue) && !(lessThenValue && maxValue)) {
           if (moreThenValue && maxValue && moreThenValue < maxValue) {
             numericRules.push({
-              method: "NUMERIC_RANGE",
+              method: 'NUMERIC_RANGE',
               parameters: [moreThenValue.toString(10), maxValue.toString(10)]
             });
           } else {
-            if (moreThenValue) numericRules.push({
-              method: "NUMERIC_MORE_THAN",
-              parameters: [moreThenValue.toString(10)]
-            });
-            if (minValue) numericRules.push({
-              method: "NUMERIC_MIN",
-              parameters: [minValue.toString(10)]
-            });
-            if (lessThenValue) numericRules.push({
-              method: "NUMERIC_LESS_THAN",
-              parameters: [lessThenValue.toString(10)]
-            });
-            if (maxValue) numericRules.push({
-              method: "NUMERIC_MAX",
-              parameters: [maxValue.toString(10)]
-            });
+            if (moreThenValue) {
+              numericRules.push({
+                method: 'NUMERIC_MORE_THAN',
+                parameters: [moreThenValue.toString(10)]
+              });
+            }
+            if (minValue) {
+              numericRules.push({
+                method: 'NUMERIC_MIN',
+                parameters: [minValue.toString(10)]
+              });
+            }
+            if (lessThenValue) {
+              numericRules.push({
+                method: 'NUMERIC_LESS_THAN',
+                parameters: [lessThenValue.toString(10)]
+              });
+            }
+            if (maxValue) {
+              numericRules.push({
+                method: 'NUMERIC_MAX',
+                parameters: [maxValue.toString(10)]
+              });
+            }
           }
         }
       }
@@ -277,7 +296,7 @@ export class GenerateCodingDialogComponent {
           }],
           manualInstruction: ''
         }
-      ]
+      ];
       const elseCode = this.getElseCode(2);
       if (elseCode) codes.push(elseCode);
       this.dialogRef.close(<GeneratedCodingData>{
@@ -299,7 +318,7 @@ export class GenerateCodingDialogComponent {
           ruleOperatorAnd: false,
           rules: [
             {
-              method: "MATCH",
+              method: 'MATCH',
               parameters: [this.selectedOption || '']
             }
           ]
@@ -328,12 +347,12 @@ export class GenerateCodingDialogComponent {
           ruleSets: [<RuleSet>{
             ruleOperatorAnd: true,
             rules: [<CodingRule>{
-              method: "MATCH",
+              method: 'MATCH',
               parameters: [o.value || '']
-            }],
+            }]
           }],
           manualInstruction: ''
-        })
+        });
       });
       codes.push({
         id: null,
@@ -343,11 +362,11 @@ export class GenerateCodingDialogComponent {
         ruleSets: [<RuleSet>{
           ruleOperatorAnd: false,
           rules: [<CodingRule>{
-            method: "ELSE"
-          }],
+            method: 'ELSE'
+          }]
         }],
         manualInstruction: ''
-      })
+      });
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
         processing: [],
@@ -364,14 +383,14 @@ export class GenerateCodingDialogComponent {
           valueArrayPos: i,
           rules: [
             {
-              method: "MATCH",
+              method: 'MATCH',
               parameters: [o.value || '']
             },
             {
-              method: "ELSE"
+              method: 'ELSE'
             }
           ]
-        })
+        });
       });
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
@@ -396,7 +415,7 @@ export class GenerateCodingDialogComponent {
             ruleSets: [<RuleSet>{
               ruleOperatorAnd: false,
               rules: [{
-                method: "ELSE"
+                method: 'ELSE'
               }]
             }],
             manualInstruction: ''
@@ -408,26 +427,26 @@ export class GenerateCodingDialogComponent {
       const fullCreditRules: CodingRule[] = [];
       if (this.generationModel === 'single-choice-many') {
         fullCreditRules.push({
-          method: "MATCH",
+          method: 'MATCH',
           parameters: [this.selectedOption || '']
-        })
+        });
       } else {
         if (this.selectedOptions.length > 0) {
           this.selectedOptions.forEach(s => {
             fullCreditRules.push({
-              method: "MATCH",
+              method: 'MATCH',
               parameters: [s]
-            })
+            });
           });
         } else {
           fullCreditRules.push({
-            method: "MATCH",
+            method: 'MATCH',
             parameters: ['']
-          })
+          });
         }
         if (this.generationModel === 'multi-choice') {
           fullCreditRules.push({
-            method: "ELSE",
+            method: 'ELSE'
           });
         }
       }
@@ -457,13 +476,13 @@ export class GenerateCodingDialogComponent {
             ruleSets: [<RuleSet>{
               ruleOperatorAnd: false,
               rules: [{
-                method: "ELSE"
+                method: 'ELSE'
               }]
             }],
             manualInstruction: ''
           }
         ]
-      })
+      });
     } else {
       this.dialogRef.close(null);
     }

@@ -1,8 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-    name: 'ruleReference',
-    standalone: true
+  name: 'ruleReference',
+  standalone: true
 })
 export class RuleReferencePipe implements PipeTransform {
   // eslint-disable-next-line class-methods-use-this
@@ -11,7 +11,7 @@ export class RuleReferencePipe implements PipeTransform {
       if (value < 0) return '-';
       return (value + 1).toString(10);
     }
-    if (value === 'SUM') return 'S'
+    if (value === 'SUM') return 'S';
     return '-';
   }
 }

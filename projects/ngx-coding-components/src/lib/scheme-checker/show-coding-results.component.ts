@@ -1,7 +1,9 @@
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import {Component, Inject, OnInit, ViewChild} from '@angular/core';
+import {
+  Component, Inject, OnInit, ViewChild
+} from '@angular/core';
 import { Response } from '@iqb/responses';
 import {
   MatCell, MatCellDef,
@@ -72,7 +74,7 @@ type Data = {
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, TranslateModule, MatProgressSpinner, MatSlideToggle, MatLabel, MatFormField, MatTable, MatColumnDef, MatHeaderCellDef, MatRowDef, MatRow, MatCell, MatHeaderCell, MatHeaderRowDef, MatSort, MatInput, MatHeaderRow, MatCellDef, MatSortHeader]
 })
 
-export class ShowCodingResultsComponent implements OnInit{
+export class ShowCodingResultsComponent implements OnInit {
   dataSource = new MatTableDataSource();
   displayedColumns = ['id', 'value', 'status', 'code', 'score'];
   isLoading = false;

@@ -19,6 +19,16 @@ import { ListItem } from '@tiptap/extension-list-item';
 import { Bold } from '@tiptap/extension-bold';
 import { Italic } from '@tiptap/extension-italic';
 import { Strike } from '@tiptap/extension-strike';
+import { NgxTiptapModule } from 'ngx-tiptap';
+import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { InlineImage } from './extensions/inline-image';
 import { AnchorId } from './extensions/anchorId';
 import { Indent } from './extensions/indent';
@@ -27,32 +37,28 @@ import { ParagraphExtension } from './extensions/paragraph-extension';
 import { FontSize } from './extensions/font-size';
 import { BulletListExtension } from './extensions/bullet-list';
 import { OrderedListExtension } from './extensions/ordered-list';
-import {BlockImage} from "./extensions/block-image";
-import {FileService} from "../services/file.service";
-import { NgxTiptapModule } from 'ngx-tiptap';
-import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatInput } from '@angular/material/input';
+import { BlockImage } from './extensions/block-image';
+import { FileService } from '../services/file.service';
 import { ComboButtonComponent } from './combo-button.component';
-import { MatOption } from '@angular/material/core';
-import { MatSelect } from '@angular/material/select';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatButton } from '@angular/material/button';
 
 @Component({
-    selector: 'aspect-rich-text-editor',
-    templateUrl: './rich-text-editor.component.html',
-    styleUrls: ['./rich-text-editor.component.scss'],
-    standalone: true,
-    imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatSelect, MatOption, ComboButtonComponent, MatInput, ReactiveFormsModule, FormsModule, MatMenuTrigger, MatMenu, MatButton, NgxTiptapModule]
+  selector: 'aspect-rich-text-editor',
+  templateUrl: './rich-text-editor.component.html',
+  styleUrls: ['./rich-text-editor.component.scss'],
+  standalone: true,
+  imports: [
+    MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatSelect, MatOption,
+    ComboButtonComponent, MatInput, ReactiveFormsModule, FormsModule,
+    MatMenuTrigger, MatMenu, MatButton, NgxTiptapModule
+  ]
 })
 export class RichTextEditorComponent implements AfterViewInit {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Input() content!: string | Record<string, any>;
   @Input() defaultFontSize!: number;
   @Input() editorHeightPx!: number;
   @Input() clozeMode: boolean = false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Output() contentChange = new EventEmitter<string | Record<string, any>>();
 
   selectedFontColor = 'lightgrey';

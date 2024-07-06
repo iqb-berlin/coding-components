@@ -10,6 +10,7 @@ export class FileService {
     anchor.href = window.URL.createObjectURL(new File([fileContent], filename));
     anchor.click();
   }
+
   static async loadFile(fileTypes: string[] = [], asBase64: boolean = false): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const fileUploadElement = document.createElement('input');

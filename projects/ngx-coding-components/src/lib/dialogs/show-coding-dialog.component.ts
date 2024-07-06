@@ -1,12 +1,13 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
-import {CodingAsText, ToTextFactory, VariableCodingData} from "@iqb/responses";
+import {
+  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+} from '@angular/material/dialog';
+import { CodingAsText, ToTextFactory, VariableCodingData } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 
-
 @Component({
-    template: `
+  template: `
     <h1 mat-dialog-title>{{varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
 
     <mat-dialog-content>
@@ -54,7 +55,9 @@ import { MatButton } from '@angular/material/button';
                 <p>keine</p>
               }
             </div>
-            <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.hasManualInstruction ? 'ja' : '-'}}</div>
+            <div class="fx-flex-row-10" [style.text-align]="'center'">
+              {{codeText.hasManualInstruction ? 'ja' : '-'}}
+            </div>
           </div>
         }
       }
@@ -67,11 +70,11 @@ import { MatButton } from '@angular/material/button';
       <button mat-raised-button color="primary"  [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
     `,
-    styles: [
-        '.code-row:nth-child(even) {background-color: #f1f1f1;}'
-    ],
-    standalone: true,
-    imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  styles: [
+    '.code-row:nth-child(even) {background-color: #f1f1f1;}'
+  ],
+  standalone: true,
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ShowCodingDialogComponent {
   varCodingText: CodingAsText;

@@ -1,56 +1,54 @@
-import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {CodingScheme, CodingSchemeProblem, VariableCodingData, VariableInfo} from "@iqb/responses";
-import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
-import {SimpleInputDialogComponent, SimpleInputDialogData} from "../dialogs/simple-input-dialog.component";
-import {MessageDialogComponent, MessageDialogData, MessageType} from "../dialogs/message-dialog.component";
-import {ConfirmDialogComponent, ConfirmDialogData} from "../dialogs/confirm-dialog.component";
-import {SelectVariableDialogComponent, SelectVariableDialogData} from "../dialogs/select-variable-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
-import { TranslateService, TranslateModule } from "@ngx-translate/core";
-import {VarCodingComponent} from "../var-coding/var-coding.component";
-import {ShowCodingProblemsDialogComponent} from "../dialogs/show-coding-problems-dialog.component";
-import {CodingFactory} from "@iqb/responses/coding-factory";
-import {SchemerService} from "../services/schemer.service";
+import {
+  AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild
+} from '@angular/core';
+import {
+  CodingScheme, CodingSchemeProblem, VariableCodingData, VariableInfo
+} from '@iqb/responses';
+import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
+import { SchemerService } from '../services/schemer.service';
+import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
+import { VarCodingComponent } from '../var-coding/var-coding.component';
+import { SelectVariableDialogComponent, SelectVariableDialogData } from '../dialogs/select-variable-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
+import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
+import { SimpleInputDialogComponent, SimpleInputDialogData } from '../dialogs/simple-input-dialog.component';
 
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
 
 @Component({
-    selector: 'iqb-schemer',
-    templateUrl: './schemer.component.html',
-    styleUrls: ['./schemer.component.scss'] //,
-    // encapsulation: ViewEncapsulation.ShadowDom
-    ,
-    standalone: true,
-    imports: [MatNavList, MatTooltip, MatListItem, MatButton, MatIcon, VarCodingComponent, AsyncPipe, TranslateModule]
-})
+  selector: 'iqb-schemer',
+  templateUrl: './schemer.component.html',
+  styleUrls: ['./schemer.component.scss'], // ,    // encapsulation: ViewEncapsulation.ShadowDom
 
+  standalone: true,
+  imports: [MatNavList, MatTooltip, MatListItem, MatButton, MatIcon, VarCodingComponent, AsyncPipe, TranslateModule]
+})
 
 export class SchemerComponent implements OnDestroy, AfterViewInit {
   @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
   @Input()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: any) {
-      this.schemerService.codingScheme = null;
-      if (value) {
-          if (typeof value === 'string') {
-              this.schemerService.codingScheme = value ? JSON.parse(value) : null;
-          } else {
-              this.schemerService.codingScheme = value;
-          }
-      }
-      this.updateVariableLists();
+    this.schemerService.codingScheme = value ? new CodingScheme(value) : null;
+    this.updateVariableLists();
   }
+
   get codingScheme(): CodingScheme | null {
     return this.schemerService.codingScheme;
   }
 
   @Input()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varList(value: any) {
     this.schemerService.varList = [];
     if (value) {
@@ -63,9 +61,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.updateVariableLists();
     }
   }
+
   get varList(): VariableInfo[] {
     return this.schemerService.varList;
   }
+
   basicVariables: VariableCodingData[] = [];
   derivedVariables: VariableCodingData[] = [];
   codingStatus: { [id: string] : string; } = {};
@@ -93,22 +93,19 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
     }
   }
+
   updateVariableLists() {
     if (this.schemerService.varList && this.schemerService.varList.length > 0 && this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
       // remove orphan and empty base variables
       const varListIds = this.schemerService.varList.map(v => v.id);
-      const varCodingsToDelete = this.schemerService.codingScheme.variableCodings.filter(bv => {
-        return bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv)
-      }).map(bv => bv.id);
+      const varCodingsToDelete = this.schemerService.codingScheme.variableCodings.filter(bv => bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv)).map(bv => bv.id);
       if (varCodingsToDelete.length > 0) {
         varCodingsToDelete.forEach(vc => {
           if (this.schemerService.codingScheme) {
-            const varCodingIndexToDelete = this.schemerService.codingScheme.variableCodings.findIndex(vcd => {
-              return vcd.id === vc;
-            });
+            const varCodingIndexToDelete = this.schemerService.codingScheme.variableCodings.findIndex(vcd => vcd.id === vc);
             if (varCodingIndexToDelete >= 0) this.schemerService.codingScheme.variableCodings.splice(varCodingIndexToDelete, 1);
           }
-        })
+        });
       }
       // add new base variables
       const allBaseVariableIds = this.schemerService.codingScheme.variableCodings
@@ -116,7 +113,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.schemerService.varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
         const newBaseVariable = CodingFactory.createCodingVariable(vi.id);
         if (this.schemerService.codingScheme) this.schemerService.codingScheme.variableCodings.push(newBaseVariable);
-      })
+      });
     }
 
     this.basicVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
@@ -186,23 +183,22 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         if (VARIABLE_NAME_CHECK_PATTERN.exec(result)) {
           if (this.schemerService.variableIdExists(result)) {
             errorMessage = 'data-error.variable-id.double';
-          } else {
-            if (this.schemerService.codingScheme) {
-              const newVarScheme = <VariableCodingData>{
-                id: result,
-                label: '',
-                sourceType: 'SUM_SCORE',
-                sourceParameters: {},
-                deriveSources: [],
-                processing: [],
-                codeModel: 'NUMBER',
-                manualInstruction: '',
-                codes: [],
-                page: ''
-              }
-              this.schemerService.codingScheme.variableCodings.push(newVarScheme);
-              this.selectVarScheme(newVarScheme);
-            }
+          } else if (this.schemerService.codingScheme) {
+            const newVarScheme = <VariableCodingData>{
+              id: result,
+              alias: result,
+              label: '',
+              sourceType: 'SUM_SCORE',
+              sourceParameters: {},
+              deriveSources: [],
+              processing: [],
+              codeModel: 'RULES_ONLY',
+              manualInstruction: '',
+              codes: [],
+              page: ''
+            };
+            this.schemerService.codingScheme.variableCodings.push(newVarScheme);
+            this.selectVarScheme(newVarScheme);
           }
         } else {
           errorMessage = 'data-error.variable-id.character';
@@ -280,7 +276,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         placeholder: 'Variablen-Kennung',
         value: selectedCoding.id,
         saveButtonLabel: 'Speichern',
-        showCancel: true,
+        showCancel: true
       };
       const dialogRef = this.inputDialog.open(SimpleInputDialogComponent, {
         width: '400px',
@@ -312,7 +308,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
                   vc.deriveSources = vc.deriveSources.filter(s => s !== oldName);
                   vc.deriveSources.push(selectedCoding.id);
                 }
-              })
+              });
             }
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);
@@ -348,7 +344,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         if (result !== false && this.schemerService.codingScheme) {
           const targetCoding = this.schemerService.codingScheme.variableCodings.find(c => c.id === result);
           if (targetCoding) {
-            const stringifiedCoding = JSON.stringify(selectedCoding)
+            const stringifiedCoding = JSON.stringify(selectedCoding);
             const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
             newCoding.id = targetCoding.id;
             this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings.filter(c => c.id !== targetCoding.id);

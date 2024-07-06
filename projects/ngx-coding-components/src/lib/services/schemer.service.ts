@@ -6,21 +6,21 @@ import {
   VariableCodingData,
   VariableInfo,
   VariableValue
-} from "@iqb/responses";
+} from '@iqb/responses';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SchemerService {
-  public codingScheme: CodingScheme | null = null;
-  public varList: VariableInfo[] = [];
-  public allVariableIds: string[] = [];
-  public ruleMethodParameterCount = RuleMethodParameterCount;
+  codingScheme: CodingScheme | null = null;
+  varList: VariableInfo[] = [];
+  allVariableIds: string[] = [];
+  ruleMethodParameterCount = RuleMethodParameterCount;
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {
       return this.varList.find(v => v.id === varCoding.id);
-    } else if (varCoding.sourceType === 'COPY_VALUE') {
+    } if (varCoding.sourceType === 'COPY_VALUE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
         return this.varList.find(v => v.id === varCoding.deriveSources[0]);
       }
@@ -32,7 +32,7 @@ export class SchemerService {
             const coding = this.codingScheme.variableCodings.find(v => v.id === s);
             codes.push(coding ? coding.codes.map(c => c.id) : []);
           }
-        })
+        });
         let resultArray: string[] = [];
         codes.forEach(c => {
           if (resultArray.length > 0) {
@@ -40,13 +40,13 @@ export class SchemerService {
             resultArray.forEach(oldEntry => {
               c.forEach(cEntry => {
                 if (cEntry) newArray.push(`${oldEntry}${DeriveConcatDelimiter}${cEntry}`);
-              })
-            })
+              });
+            });
             resultArray = newArray;
           } else {
             c.forEach(cEntry => {
-              if (cEntry) resultArray.push(cEntry.toString(10))
-            })
+              if (cEntry) resultArray.push(cEntry.toString(10));
+            });
           }
         });
         console.log(resultArray);
@@ -62,22 +62,20 @@ export class SchemerService {
           valuePositionLabels: [],
           valuesComplete: true,
           page: ''
-        }
+        };
       }
-    } else {
-      if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
-        return <VariableInfo>{
-          id: varCoding.id,
-          type: 'integer',
-          format: '',
-          multiple: false,
-          nullable: false,
-          values: [],
-          valuePositionLabels: [],
-          valuesComplete: false,
-          page: ''
-        }
-      }
+    } else if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
+      return <VariableInfo>{
+        id: varCoding.id,
+        type: 'integer',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: [],
+        valuesComplete: false,
+        page: ''
+      };
     }
     return undefined;
   }
