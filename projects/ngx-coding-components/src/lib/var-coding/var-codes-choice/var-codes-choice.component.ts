@@ -15,7 +15,10 @@ import { CodesTitleComponent } from '../codes-title.component';
     templateUrl: './var-codes-choice.component.html',
     styleUrls: ['./var-codes-choice.component.scss'],
     standalone: true,
-    imports: [CodesTitleComponent, CodeHeaderComponent, MatTooltip, CodeRulesComponent, MatIconButton, MatIcon, MatButton, TranslateModule]
+    imports: [
+      CodesTitleComponent, CodeHeaderComponent, MatTooltip, CodeRulesComponent, MatIconButton,
+      MatIcon, MatButton, TranslateModule
+    ]
 })
 export class VarCodesChoiceComponent extends VarCodesDirective implements OnInit {
   constructor(
@@ -52,15 +55,11 @@ export class VarCodesChoiceComponent extends VarCodesDirective implements OnInit
       } else if (!this.elseCodeExists) {
         newCode = <CodeData>{
           id: newCodeId,
+          type: 'RESIDUAL',
           label: '',
           score: 0,
           ruleSetOperatorAnd: false,
-          ruleSets: [<RuleSet>{
-            ruleOperatorAnd: false,
-            rules: [<CodingRule>{
-              method: 'ELSE'
-            }]
-          }],
+          ruleSets: [],
           manualInstruction: ''
         };
       }

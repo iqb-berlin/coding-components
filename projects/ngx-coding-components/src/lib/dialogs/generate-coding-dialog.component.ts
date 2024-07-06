@@ -31,10 +31,10 @@ import { MatLabel, MatFormField } from '@angular/material/form-field';
 
 export interface GeneratedCodingData {
   id: string,
+  alias: string,
   processing: ProcessingParameterType[],
   fragmenting: string,
   codeModel: CodeModelType,
-  codeModelParameters: string[],
   codes: CodeData[]
 }
 
@@ -194,36 +194,29 @@ export class GenerateCodingDialogComponent {
     if (this.elseMethod === 'rule') {
       return {
         id: codeId,
+        type: 'RESIDUAL_AUTO',
         label: 'Falsch',
         score: 0,
         ruleSetOperatorAnd: false,
-        ruleSets: [<RuleSet>{
-          ruleOperatorAnd: false,
-          rules: [{
-            method: 'ELSE'
-          }]
-        }],
+        ruleSets: [],
         manualInstruction: ''
       };
     }
     if (this.elseMethod === 'invalid') {
       return {
         id: null,
+        type: 'RESIDUAL_AUTO',
         label: '',
         score: 0,
         ruleSetOperatorAnd: false,
-        ruleSets: [<RuleSet>{
-          ruleOperatorAnd: false,
-          rules: [{
-            method: 'ELSE'
-          }]
-        }],
+        ruleSets: [],
         manualInstruction: ''
       };
     }
     if (this.elseMethod === 'instruction') {
       return {
-        id: 2,
+        id: codeId,
+        type: 'RESIDUAL',
         label: 'Falsch',
         score: 0,
         ruleSetOperatorAnd: false,
@@ -287,6 +280,7 @@ export class GenerateCodingDialogComponent {
       const codes: CodeData[] = [
         {
           id: 1,
+          type: 'FULL_CREDIT',
           label: 'Richtig',
           score: 1,
           ruleSetOperatorAnd: false,
@@ -301,16 +295,17 @@ export class GenerateCodingDialogComponent {
       if (elseCode) codes.push(elseCode);
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
+        alias: this.varInfo.alias || this.varInfo.id,
         processing: [],
         fragmenting: '',
         manualInstruction: '',
-        codeModel: 'NUMBER',
-        codeModelParameters: [],
+        codeModel: 'RULES_ONLY',
         codes: codes
       });
     } else if (this.generationModel === 'simple-input') {
       const codes: CodeData[] = [{
         id: 1,
+        type: 'FULL_CREDIT',
         label: 'Richtig',
         score: 1,
         ruleSetOperatorAnd: false,
@@ -329,11 +324,11 @@ export class GenerateCodingDialogComponent {
       if (elseCode) codes.push(elseCode);
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
+        alias: this.varInfo.alias || this.varInfo.id,
         processing: [],
         fragmenting: '',
         manualInstruction: '',
-        codeModel: 'VALUE_LIST',
-        codeModelParameters: [],
+        codeModel: 'NONE',
         codes: codes
       });
     } else if (this.generationModel === 'single-choice-some' && this.singleChoiceLongVersion) {
@@ -341,6 +336,7 @@ export class GenerateCodingDialogComponent {
       this.options.forEach(o => {
         codes.push({
           id: codes.length + 1,
+          type: this.selectedOptions[0] && o.value == this.selectedOptions[0] ? 'FULL_CREDIT' : 'NO_CREDIT',
           label: '',
           score: this.selectedOptions[0] && o.value == this.selectedOptions[0] ? 1 : 0,
           ruleSetOperatorAnd: false,
@@ -356,23 +352,19 @@ export class GenerateCodingDialogComponent {
       });
       codes.push({
         id: null,
+        type: 'RESIDUAL_AUTO',
         label: '',
         score: 0,
         ruleSetOperatorAnd: false,
-        ruleSets: [<RuleSet>{
-          ruleOperatorAnd: false,
-          rules: [<CodingRule>{
-            method: 'ELSE'
-          }]
-        }],
+        ruleSets: [],
         manualInstruction: ''
       });
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
+        alias: this.varInfo.alias || this.varInfo.id,
         processing: [],
         fragmenting: '',
-        codeModel: 'CHOICE',
-        codeModelParameters: [],
+        codeModel: 'RULES_ONLY',
         codes: codes
       });
     } else if (this.generationModel === 'multi-choice' && this.multiChoiceOrderMatters) {
@@ -385,22 +377,20 @@ export class GenerateCodingDialogComponent {
             {
               method: 'MATCH',
               parameters: [o.value || '']
-            },
-            {
-              method: 'ELSE'
             }
           ]
         });
       });
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
+        alias: this.varInfo.alias || this.varInfo.id,
         processing: [],
         fragmenting: '',
-        codeModel: 'CHOICE',
-        codeModelParameters: [],
+        codeModel: 'NONE',
         codes: [
           {
             id: 1,
+            type: 'FULL_CREDIT',
             label: 'Richtig',
             score: 1,
             ruleSetOperatorAnd: true,
@@ -409,21 +399,16 @@ export class GenerateCodingDialogComponent {
           },
           {
             id: 2,
+            type: 'RESIDUAL_AUTO',
             label: 'Falsch',
             score: 0,
             ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: false,
-              rules: [{
-                method: 'ELSE'
-              }]
-            }],
+            ruleSets: [],
             manualInstruction: ''
           }
         ]
       });
-    } else if (this.generationModel === 'single-choice-many' || this.generationModel === 'single-choice-some' ||
-        (this.generationModel === 'multi-choice')) {
+    } else if (['multi-choice', 'single-choice-many', 'single-choice-some'].includes(this.generationModel)) {
       const fullCreditRules: CodingRule[] = [];
       if (this.generationModel === 'single-choice-many') {
         fullCreditRules.push({
@@ -444,21 +429,17 @@ export class GenerateCodingDialogComponent {
             parameters: ['']
           });
         }
-        if (this.generationModel === 'multi-choice') {
-          fullCreditRules.push({
-            method: 'ELSE'
-          });
-        }
       }
       this.dialogRef.close(<GeneratedCodingData>{
         id: this.varInfo.id,
+        alias: this.varInfo.alias || this.varInfo.id,
         processing: [],
         fragmenting: '',
-        codeModel: 'CHOICE',
-        codeModelParameters: [],
+        codeModel: 'RULES_ONLY',
         codes: [
           {
             id: 1,
+            type: 'FULL_CREDIT',
             label: 'Richtig',
             score: 1,
             ruleSetOperatorAnd: false,
@@ -470,15 +451,11 @@ export class GenerateCodingDialogComponent {
           },
           {
             id: 2,
+            type: 'RESIDUAL_AUTO',
             label: 'Falsch',
             score: 0,
             ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: false,
-              rules: [{
-                method: 'ELSE'
-              }]
-            }],
+            ruleSets: [],
             manualInstruction: ''
           }
         ]

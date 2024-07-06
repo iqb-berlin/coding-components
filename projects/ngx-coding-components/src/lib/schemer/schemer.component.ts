@@ -95,7 +95,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   }
 
   updateVariableLists() {
-    if (this.schemerService.varList && this.schemerService.varList.length > 0 && this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
+    if (this.schemerService.varList && this.schemerService.varList.length > 0
+      && this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
       // remove orphan and empty base variables
       const varListIds = this.schemerService.varList.map(v => v.id);
       const varCodingsToDelete = this.schemerService.codingScheme.variableCodings.filter(bv => bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv)).map(bv => bv.id);

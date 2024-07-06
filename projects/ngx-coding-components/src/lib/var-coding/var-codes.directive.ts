@@ -2,7 +2,7 @@ import {Directive, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData, CodingRule, ProcessingParameterType, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
 
 export const singletonRules: RuleMethod[] = [
-  'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY', 'ELSE'
+  'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY'
 ]
 export const exclusiveNumericRules: RuleMethod[] = [
   'NUMERIC_RANGE', 'NUMERIC_LESS_THAN', 'NUMERIC_MORE_THAN',
@@ -37,7 +37,7 @@ export abstract class VarCodesDirective {
   }
 
   updateCodeExistences() {
-    this.elseCodeExists = this.hasRule('ELSE');
+    this.elseCodeExists = this.codes && !!this.codes.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
     this.isEmptyCodeExists = this.hasRule('IS_EMPTY');
     this.isNullCodeExists = this.hasRule('IS_NULL');
   }
@@ -48,6 +48,7 @@ export abstract class VarCodesDirective {
       const newCodeId = myCodeIds.length > 0 ? Math.max(...myCodeIds) + 1 : 1;
       const newCode: CodeData = {
         id: newCodeId,
+        type: 'UNSET',
         label: '',
         score: 0,
         ruleSetOperatorAnd: false,
