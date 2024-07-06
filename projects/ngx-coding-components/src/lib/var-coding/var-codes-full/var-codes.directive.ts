@@ -1,5 +1,6 @@
 import {Directive, EventEmitter, Input, Output} from '@angular/core';
 import {CodeData, CodingRule, ProcessingParameterType, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
+import {CodeModelType} from "@iqb/responses/coding-interfaces";
 
 export const singletonRules: RuleMethod[] = [
   'IS_FALSE', 'IS_TRUE', 'IS_NULL', 'IS_EMPTY'
@@ -14,12 +15,11 @@ export abstract class VarCodesDirective {
   @Output() codesChanged = new EventEmitter<CodeData[]>();
   @Output() processingChanged = new EventEmitter<ProcessingParameterType[]>();
   @Output() fragmentingChanged = new EventEmitter<string>();
-  @Output() codeModelParametersChanged = new EventEmitter<string[]>();
   @Input() public codes: CodeData[] | undefined;
   @Input() public processing: ProcessingParameterType[] | undefined;
   @Input() public varInfo: VariableInfo | undefined;
   @Input() public fragmenting: string | undefined;
-  @Input() public codeModelParameters: string[] | undefined;
+  @Input() public codeModel: CodeModelType | undefined;
   elseCodeExists: Boolean | undefined;
   isEmptyCodeExists: Boolean | undefined;
   isNullCodeExists: Boolean | undefined;
@@ -97,12 +97,7 @@ export abstract class VarCodesDirective {
   addCodeCredit(rule?: CodingRule) {
     const newCode = this.addCode(false);
     if (newCode) {
-      let maxScore = 1;
-      if (this.codeModelParameters && this.codeModelParameters[0]) {
-        const newValue = Number.parseInt(this.codeModelParameters[0], 10);
-        maxScore = Number.isNaN(newValue) ? 1 : newValue;
-      }
-      newCode.score = maxScore;
+      newCode.score = 1;
       newCode.label = 'Richtig';
       newCode.ruleSets = [{
         ruleOperatorAnd: false,
@@ -150,12 +145,5 @@ export abstract class VarCodesDirective {
       if (rule) newCode.ruleSets[0].rules.push(rule);
       this.codesChanged.emit(this.codes);
     }
-  }
-
-  setCodingModelParameter(parameterIndex: number, newValue: string): void {
-    if (!this.codeModelParameters) this.codeModelParameters = [];
-    while (this.codeModelParameters.length < parameterIndex + 1) this.codeModelParameters.push('');
-    this.codeModelParameters[parameterIndex] = newValue;
-    this.codeModelParametersChanged.emit(this.codeModelParameters);
   }
 }

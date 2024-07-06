@@ -18,9 +18,9 @@ export class SchemeCheckerComponent {
   _codingScheme: CodingScheme | null = null;
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set codingScheme(value: any) {
+  set codingScheme(value: CodingScheme) {
     this.values = {};
-    this._codingScheme = value ? new CodingScheme(value) : null;
+    this._codingScheme = value;
     if (this._codingScheme) {
       this._codingScheme.variableCodings.filter(v => v.sourceType === 'BASE')
         .map(v => v.id)

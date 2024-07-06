@@ -9,10 +9,6 @@ import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component
 import {GenerateCodingDialogComponent, GeneratedCodingData} from "../dialogs/generate-coding-dialog.component";
 import {SchemerService} from "../services/schemer.service";
 import { VarCodesFullComponent } from './var-codes-full/var-codes-full.component';
-import { VarCodesNumberComponent } from './var-codes-number/var-codes-number.component';
-import { VarCodesChoiceComponent } from './var-codes-choice/var-codes-choice.component';
-import { VarCodesValueListComponent } from './var-codes-value-list/var-codes-value-list.component';
-import { VarCodesManualComponent } from './var-codes-manual/var-codes-manual.component';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
@@ -31,7 +27,11 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
     templateUrl: './var-coding.component.html',
     styleUrls: ['./var-coding.component.scss'],
     standalone: true,
-    imports: [MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption, MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu, MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, VarCodesManualComponent, VarCodesValueListComponent, VarCodesChoiceComponent, VarCodesNumberComponent, VarCodesFullComponent, TranslateModule]
+    imports: [
+      MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
+      MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
+      MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, VarCodesFullComponent, TranslateModule
+    ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();

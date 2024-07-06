@@ -114,79 +114,16 @@
         </mat-card-content>
       </mat-card>
     </div>
-    @switch (varCoding.codeModel) {
-      @case ('MANUAL') {
-        <var-codes-manual
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-manual codes')"
-          [processing]="varCoding.processing"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (processingChanged)="lastChangeFrom$.next('var-codes-manual processing')"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-manual codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-manual>
-      }
-      @case ('VALUE_LIST') {
-        <var-codes-value-list
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-value-list codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-value-list processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-value-list codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-value-list>
-      }
-      @case ('CHOICE') {
-        <var-codes-choice
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-choice codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-choice processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-choice codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-choice>
-      }
-      @case ('NUMBER') {
-        <var-codes-number
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-number codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-number processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-number codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-number>
-      }
-      @default {
-        <var-codes-full
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
-<!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-
-        </var-codes-full>
-      }
-    }
+    <var-codes-full
+      class="fx-flex-row-100" [style.margin-top.px]="10"
+      [codes]="varCoding.codes"
+      (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
+      [processing]="varCoding.processing"
+      (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+      [fragmenting]="varCoding.fragmenting"
+      (fragmentingChanged)="setFragmenting($event)"
+      [varInfo]="varInfo">
+    </var-codes-full>
   </div>
 }
 

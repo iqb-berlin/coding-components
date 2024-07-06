@@ -38,8 +38,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set codingScheme(value: any) {
-    this.schemerService.codingScheme = value ? new CodingScheme(value) : null;
+  set codingScheme(value: CodingScheme) {
+    this.schemerService.codingScheme = value;
     this.updateVariableLists();
   }
 
