@@ -1,32 +1,8 @@
 <div class="fx-column-start-stretch">
-  <div class="fx-columns">
-    <codes-title [codeList]="codes"
-                 [fragmenting]="fragmenting"
-                 [processing]="processing"
-                 (codesChanged)="codesChanged.emit(codes)"></codes-title>
-    <div class="processing">
-      <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_CASE') >= 0) : false"
-        (change)="alterProcessing('IGNORE_CASE', $event.checked)">
-        {{'processing.IGNORE_CASE' | translate}}
-      </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('IGNORE_ALL_SPACES') >= 0) : false"
-        (change)="alterProcessing('IGNORE_ALL_SPACES', $event.checked)">
-        {{'processing.REMOVE_WHITE_SPACES' | translate}}
-      </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('REPLAY_REQUIRED') >= 0) : false"
-        (change)="alterProcessing('REPLAY_REQUIRED', $event.checked)">
-        <div [style.white-space]="'normal'" [style.line-height]="1.2">
-          {{'processing.REPLAY_REQUIRED' | translate}}
-        </div>
-      </mat-checkbox>
-      <mat-checkbox [checked]="processing ? (processing.indexOf('ATTACHMENT') >= 0) : false"
-        (change)="alterProcessing('ATTACHMENT', $event.checked)">
-        <div [style.white-space]="'normal'" [style.line-height]="1.2">
-          {{'processing.ATTACHMENT' | translate}}
-        </div>
-      </mat-checkbox>
-    </div>
-  </div>
+  <codes-title [codeList]="codes"
+               [fragmenting]="fragmenting"
+               [processing]="processing"
+               (codesChanged)="codesChanged.emit(codes)"></codes-title>
   @if (codes) {
     @for (code of codes; track code; let codeIndex = $index) {
       <div class="fx-row-start-stretch code fx-gap-10" [style.max-height.px]="500" >

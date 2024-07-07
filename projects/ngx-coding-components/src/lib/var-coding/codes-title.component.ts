@@ -1,13 +1,16 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import {CodeData, ProcessingParameterType} from '@iqb/responses';
+import { CodeData, ProcessingParameterType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
-import {MatLabel} from "@angular/material/form-field";
-import {MatIconButton} from "@angular/material/button";
+import { MatLabel } from '@angular/material/form-field';
+import { MatIconButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { SchemerService } from '../services/schemer.service';
+import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialogs/edit-processing-dialog.component';
 
 @Component({
   selector: 'codes-title',
@@ -35,6 +38,7 @@ import {MatIconButton} from "@angular/material/button";
           }
         </div>
         <button mat-icon-button [matTooltip]="'processing.prompt' | translate"
+                [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
                 (click)="editProcessingAndFragments()">
           <mat-icon>edit</mat-icon>
         </button>
@@ -49,6 +53,12 @@ export class CodesTitleComponent {
   @Input() codeList: CodeData[] | undefined;
   @Input() fragmenting? = '';
   @Input() processing: ProcessingParameterType[] | undefined;
+
+  constructor(
+    public schemerService: SchemerService,
+    private editProcessingDialog: MatDialog
+  ) {
+  }
 
   sortCodes() {
     if (this.codeList && this.codeList.length > 1) {
@@ -75,6 +85,26 @@ export class CodesTitleComponent {
   }
 
   editProcessingAndFragments() {
-
+    if (this.schemerService.userRole === 'RW_MAXIMAL') {
+      const dialogRef = this.editProcessingDialog.open(EditProcessingDialogComponent, {
+        data: {
+          fragmenting: this.fragmenting,
+          processing: this.processing
+        }
+      });
+      dialogRef.afterClosed().subscribe(dialogResult => {
+        if (dialogResult !== false) {
+          const dialogResultTyped: EditProcessingDialogData = dialogResult;
+          this.fragmenting = dialogResultTyped.fragmenting;
+          if (this.processing) {
+            this.processing.splice(0);
+            dialogResultTyped.processing.forEach(p => {
+              if (this.processing) this.processing.push(p);
+            });
+          }
+          this.codesChanged.emit();
+        }
+      });
+    }
   }
 }
