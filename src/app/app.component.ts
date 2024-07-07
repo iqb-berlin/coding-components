@@ -45,6 +45,10 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
   `,
   styles: [
     `
+      :host {
+        height:100%;
+        display: block;
+      }
         .coder-body {
           position: absolute;
           width: 100%;

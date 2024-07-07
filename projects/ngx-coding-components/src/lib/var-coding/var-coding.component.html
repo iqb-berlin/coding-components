@@ -90,11 +90,11 @@
               {{'code.prompt.add-UNSET' | translate}}
             </button>
             <mat-divider></mat-divider>
-            <button mat-menu-item (click)="addCode('RESIDUAL')">
+            <button mat-menu-item (click)="addCode('RESIDUAL')" [disabled]="residualExists()">
               <mat-icon>close</mat-icon>
               {{'code.prompt.add-RESIDUAL' | translate}}
             </button>
-            <button mat-menu-item (click)="addCode('RESIDUAL_AUTO')">
+            <button mat-menu-item (click)="addCode('RESIDUAL_AUTO')" [disabled]="residualExists()">
               <mat-icon style="color: orangered">close</mat-icon>
               {{'code.prompt.add-RESIDUAL_AUTO' | translate}}
             </button>

@@ -96,16 +96,17 @@
       @if (!['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type)) {
         @if (codeModel !== 'MANUAL_ONLY') {
           <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
-                      [code]="code" [fragmentMode]="fragmentMode"
+                      [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
                       (codeRulesChanged)="setCodeChanged()"></code-rules>
         } @else if (codeModel === 'MANUAL_ONLY') {
           <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
-                            [style.height]="'calc(100% - 60px)'"></code-instruction>
+                            [style.max-height.px]="250"></code-instruction>
         }
       }
     </div>
     @if (codeModel === 'NONE') {
-      <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" class="fx-flex-fill"></code-instruction>
+      <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
+                        class="fx-flex-fill" [style.max-height.px]="300"></code-instruction>
     }
     <button mat-icon-button (click)="deleteCode(codeIndex)" [matTooltip]="'code.prompt.delete' | translate">
       <mat-icon>delete</mat-icon>

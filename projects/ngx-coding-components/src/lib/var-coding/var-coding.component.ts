@@ -219,11 +219,13 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     return false;
   }
 
-  updateCodeExistences() {
-    this.elseCodeExists = !!this.varCoding && this.varCoding.codes &&
-      !!this.varCoding.codes.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
-    this.isEmptyCodeExists = this.hasRule('IS_EMPTY');
-    this.isNullCodeExists = this.hasRule('IS_NULL');
+  residualExists(): boolean {
+    if (this.varCoding && this.varCoding.codes && this.varCoding.codes.length > 0) {
+      const firstResidualCode = this.varCoding.codes
+        .find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+      return !!firstResidualCode;
+    }
+    return false;
   }
 
   ngOnDestroy(): void {

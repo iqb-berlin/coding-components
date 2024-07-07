@@ -59,9 +59,9 @@ export class SingleCodeComponent {
   }
 
   residualExists(codeType: CodeType): boolean {
-    if (!this.allCodes || ['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) return false;
+    if (!this.allCodes || this.allCodes.length === 0 || ['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) return false;
     const firstResidualCode = this.allCodes
-      .findIndex(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+      .find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
     return !!firstResidualCode;
   }
 
