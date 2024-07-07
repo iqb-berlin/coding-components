@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
+  CodeData,
+  CodeType,
   CodingScheme,
   DeriveConcatDelimiter,
   RuleMethodParameterCount,
@@ -87,5 +89,57 @@ export class SchemerService {
     const modifiedVariableIds = this.allVariableIds.filter(v => !oldId || v !== oldId);
     const normalisedId = checkId.toUpperCase();
     return !!modifiedVariableIds.find(v => v.toUpperCase() === normalisedId);
+  }
+
+  addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
+    if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
+      const maxCode = Math.max(...codeList.map(c => c.id || 0));
+      const hasNullCode = !!codeList.find(c => c.id === 0);
+      if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
+        const firstResidual = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+        if (firstResidual) return 'code.error-message.residual-exists';
+        const newCode = {
+          id: hasNullCode ? maxCode + 1 : 0,
+          type: codeType,
+          label: '',
+          score: 0,
+          ruleSetOperatorAnd: false,
+          ruleSets: [],
+          manualInstruction: ''
+        };
+        codeList.push(newCode);
+        return newCode;
+      }
+      if (codeType === 'UNSET') {
+        const newCode = {
+          id: maxCode + 1,
+          type: codeType,
+          label: '',
+          score: 0,
+          ruleSetOperatorAnd: false,
+          ruleSets: [],
+          manualInstruction: ''
+        };
+        const firstResidualCode = codeList.findIndex(c => ['RESIDUAL_AUTO', 'RESIDUAL'].includes(c.type));
+        if (firstResidualCode < 0) {
+          codeList.push(newCode);
+        } else {
+          codeList.splice(firstResidualCode, 0, newCode);
+        }
+        return newCode;
+      }
+      return 'code.error-message.type-not-supported';
+    }
+    return 'code.error-message.no-access';
+  }
+
+  deleteCode(codeList?: CodeData[], codeIndex?: number): boolean {
+    if (codeList && codeIndex && ['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
+      if (codeIndex < codeList.length) {
+        codeList.splice(codeIndex, 1);
+        return true;
+      }
+    }
+    return false;
   }
 }

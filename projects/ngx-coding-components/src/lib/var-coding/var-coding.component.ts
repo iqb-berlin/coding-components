@@ -27,9 +27,11 @@ import { GenerateCodingDialogComponent, GeneratedCodingData } from '../dialogs/g
 import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { CodesTitleComponent } from './codes-title.component';
-import { CodeHeaderComponent } from './code-header.component';
 import { CodeInstructionComponent } from './code-instruction.component';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
+import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
+import { SingleCodeComponent } from './single-code.component';
 
 @Component({
   selector: 'var-coding',
@@ -40,7 +42,8 @@ import { CodeRulesComponent } from './code-rules/code-rules.component';
     MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
     MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
     MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
-    VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider, CodesTitleComponent, CodeHeaderComponent, CodeInstructionComponent, CodeRulesComponent, MatButton
+    VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
+    CodesTitleComponent, CodeInstructionComponent, CodeRulesComponent, MatButton, SingleCodeComponent
   ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
@@ -59,7 +62,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     private translateService: TranslateService,
     private editTextDialog: MatDialog,
     private showCodingDialog: MatDialog,
-    private generateCodingDialog: MatDialog
+    private generateCodingDialog: MatDialog,
+    private messageDialog: MatDialog,
+    private confirmDialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -157,29 +162,59 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  smartSchemer() {
+  smartSchemer(event: MouseEvent) {
     if (this.varCoding) {
-      const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
-        width: '1000px',
-        data: this.varInfo
-      });
-      dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult !== 'undefined' && dialogResult !== false && dialogResult !== null && this.varCoding) {
-          const newCoding = dialogResult as GeneratedCodingData;
-          this.varCoding.processing = newCoding.processing;
-          this.varCoding.fragmenting = newCoding.fragmenting;
-          this.varCoding.codeModel = newCoding.codeModel;
-          // this.varCoding.codeModelParameters = newCoding.codeModelParameters;
-          this.varCoding.codes = newCoding.codes;
-          // console.log(this.varCoding.codes);
-          this.varCodingChanged.emit(this.varCoding);
-        }
-      });
+      if (event.ctrlKey) {
+        const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
+          width: '400px',
+          data: <ConfirmDialogData>{
+            title: 'Transformation Kodierschema',
+            content: 'Das vorhandene Kodierschema wird nach Standard "Bista2024" geändert. Fortsetzen?',
+            confirmButtonLabel: 'Weiter',
+            showCancel: true
+          }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          if (result !== false && this.schemerService.codingScheme) {
+            alert('coming soon.');
+          }
+        });
+      } else {
+        const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
+          width: '1000px',
+          data: this.varInfo
+        });
+        dialogRef.afterClosed().subscribe(dialogResult => {
+          if (typeof dialogResult !== 'undefined' &&
+            dialogResult !== false && dialogResult !== null && this.varCoding) {
+            const newCoding = dialogResult as GeneratedCodingData;
+            this.varCoding.processing = newCoding.processing;
+            this.varCoding.fragmenting = newCoding.fragmenting;
+            this.varCoding.codeModel = newCoding.codeModel;
+            // this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+            this.varCoding.codes = newCoding.codes;
+            // console.log(this.varCoding.codes);
+            this.varCodingChanged.emit(this.varCoding);
+          }
+        });
+      }
     }
   }
 
   addCode(codeType: CodeType) {
-
+    if (this.varCoding && this.varCoding.codes) {
+      const addResult = this.schemerService.addCode(this.varCoding.codes, codeType);
+      if (typeof addResult === 'string') {
+        this.messageDialog.open(MessageDialogComponent, {
+          width: '400px',
+          data: <MessageDialogData>{
+            title: this.translateService.instant('code.prompt.add'),
+            content: this.translateService.instant(addResult),
+            type: MessageType.error
+          }
+        });
+      }
+    }
   }
 
   deleteCode(codeToDeleteIndex: number) {

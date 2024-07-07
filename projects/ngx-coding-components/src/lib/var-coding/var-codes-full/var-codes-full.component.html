@@ -8,8 +8,6 @@
       <div class="fx-row-start-stretch code fx-gap-10" [style.max-height.px]="500" >
         @if (code) {
           <div class="fx-column-start-stretch " [style.width.%]="60">
-            <code-header (codeDataChanged)="codesChanged.emit(codes)" [enableSwitchNull]="true"
-            [code]="code" [allCodes]="codes"></code-header>
             <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
               [code]="code" [varInfo]="varInfo" [fragmentMode]="!!fragmenting"
             (codeRulesChanged)="codesChanged.emit(codes)"></code-rules>
