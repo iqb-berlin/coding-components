@@ -155,4 +155,30 @@ export class SchemerService {
     }
     return false;
   }
+
+  sortCodes(codeList: CodeData[], normaliseCodeIds = false) {
+    if (codeList.length > 1) {
+      if (normaliseCodeIds) {
+        this.orderOfCodeTypes.forEach(t => {
+          const allCodesOfType = codeList.filter(c => c.type === t);
+          if (allCodesOfType.length > 1) {
+            const startValue = allCodesOfType.length > 9 ?
+              (this.orderOfCodeTypes.indexOf(t) + 1) * 100 + 1: (this.orderOfCodeTypes.indexOf(t) + 1) * 10 + 1;
+            allCodesOfType.forEach((c: CodeData, index: number) => {
+              if (c.id !== null) c.id = startValue + index;
+            });
+          }
+        });
+      }
+      codeList.sort((a: CodeData, b: CodeData) => {
+        if (a.type === b.type) {
+          if (a.id === null) return b.id === null ? 0 : -1;
+          if (b.id === null) return 1;
+          if (a.id === b.id) return 0;
+          return a.id < b.id ? -1 : 1;
+        }
+        return this.orderOfCodeTypes.indexOf(a.type) < this.orderOfCodeTypes.indexOf(b.type) ? -1 : 1;
+      });
+    }
+  }
 }

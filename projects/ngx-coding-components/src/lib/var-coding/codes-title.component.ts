@@ -16,7 +16,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   selector: 'codes-title',
   template: `
     <div class="fx-row-space-between-start">
-      <div (click)="sortCodes()"
+      <div (click)="sortCodes($event)"
            [matTooltip]="'code.prompt.sort' | translate"
            [matTooltipShowDelay]="500"
            class="fx-row-start-center fx-gap-5"
@@ -60,7 +60,11 @@ export class CodesTitleComponent {
   ) {
   }
 
-  sortCodes() {
+  sortCodes(event: MouseEvent) {
+    if (this.codeList) this.schemerService.sortCodes(this.codeList, event.ctrlKey);
+  }
+
+  xsortCodes() {
     if (this.codeList && this.codeList.length > 1) {
       let allCodeIds: number[] = [];
       this.codeList.forEach(c => {

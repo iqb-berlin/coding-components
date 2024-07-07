@@ -16,6 +16,20 @@ import { CodeInstructionComponent } from './code-instruction.component';
 @Component({
   selector: 'single-code',
   templateUrl: 'single-code.component.html',
+  styles: `
+    .code-main-data {
+      background-color: whitesmoke;
+    }
+    .not-unique-id {
+      border: orange solid 2px;
+    }
+    .correct {
+      border: limegreen solid 2px;
+    }
+    .unique-id, .not-correct {
+      border: transparent solid 2px;
+    }
+  `,
   standalone: true,
   imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput,
     ReactiveFormsModule, FormsModule, TranslateModule, CodeRulesComponent, CodeInstructionComponent]

@@ -210,15 +210,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  deleteCode(codeToDeleteIndex: number) {
-    if (this.varCoding && this.varCoding.codes &&
-      codeToDeleteIndex >= 0 && this.varCoding.codes.length > codeToDeleteIndex) {
-      // const codeToDeleteIndex = this.codes.findIndex(c => c.id === codeToDeleteId);
-      this.varCoding.codes.splice(codeToDeleteIndex, 1);
-      this.lastChangeFrom$.next('delete code');
-    }
-  }
-
   hasRule(ruleCode: RuleMethod): boolean {
     if (this.varCoding && this.varCoding.codes) {
       const myRule = this.varCoding.codes.find(
