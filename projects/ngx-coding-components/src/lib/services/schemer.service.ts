@@ -95,7 +95,7 @@ export class SchemerService {
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
     if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
-      const maxCode = Math.max(...codeList.map(c => c.id || 0));
+      const maxCode = codeList.length > 0 ? Math.max(...codeList.map(c => c.id || 0)) : 0;
       const hasNullCode = !!codeList.find(c => c.id === 0);
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
         const firstResidual = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
@@ -163,7 +163,7 @@ export class SchemerService {
           const allCodesOfType = codeList.filter(c => c.type === t);
           if (allCodesOfType.length > 1) {
             const startValue = allCodesOfType.length > 9 ?
-              (this.orderOfCodeTypes.indexOf(t) + 1) * 100 + 1: (this.orderOfCodeTypes.indexOf(t) + 1) * 10 + 1;
+              (this.orderOfCodeTypes.indexOf(t) + 1) * 100 + 1 : (this.orderOfCodeTypes.indexOf(t) + 1) * 10 + 1;
             allCodesOfType.forEach((c: CodeData, index: number) => {
               if (c.id !== null) c.id = startValue + index;
             });

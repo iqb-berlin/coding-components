@@ -47,21 +47,11 @@ export class SingleCodeComponent {
     public schemerService: SchemerService
   ) { }
 
-  uniqueNumberValidator(codeToValidate: number | null): boolean {
-    if (codeToValidate === null) return false;
-    const allCodeIds = this.allCodes ? this.allCodes.map(c => c.id) : [];
-    const newArray: number[] = [];
-    const notUnique: number[] = [];
-    allCodeIds.forEach(u => {
-      if (u !== null) {
-        if (newArray.indexOf(u) >= 0) {
-          notUnique.push(u);
-        } else {
-          newArray.push(u);
-        }
-      }
-    });
-    return notUnique.indexOf(codeToValidate) < 0;
+  codeIdIsUnique(codeToValidate: number | null, codeIndex?: number): boolean {
+    if (!this.allCodes || codeToValidate === null) return true;
+    const firstEqualCode = this.allCodes
+      .find((c: CodeData, index: number) => index !== codeIndex && c.id === codeToValidate);
+    return !firstEqualCode;
   }
 
   deleteCode(codeIndex?: number) {

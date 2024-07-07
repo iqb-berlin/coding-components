@@ -14,7 +14,7 @@
             }
           }
           @if (code.id !== null) {
-            <mat-form-field [class]="uniqueNumberValidator(code.id) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
+            <mat-form-field [class]="codeIdIsUnique(code.id, codeIndex) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
               <mat-label>{{'code.id' | translate}}</mat-label>
               <input matInput
                      required
