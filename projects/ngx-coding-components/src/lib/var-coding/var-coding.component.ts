@@ -89,13 +89,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     return returnSources;
   }
 
-  setFragmenting(newFragmenting: string) {
-    if (this.varCoding) {
-      this.varCoding.fragmenting = newFragmenting;
-      this.lastChangeFrom$.next('var-codes-full fragmenting');
-    }
-  }
-
   updateVarInfo() {
     this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
   }

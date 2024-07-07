@@ -57,7 +57,6 @@ export class SchemerService {
             });
           }
         });
-        console.log(resultArray);
         return <VariableInfo>{
           id: varCoding.id,
           type: 'string',
@@ -147,8 +146,8 @@ export class SchemerService {
     return 'code.error-message.no-access';
   }
 
-  deleteCode(codeList?: CodeData[], codeIndex?: number): boolean {
-    if (codeList && codeIndex && ['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
+  deleteCode(codeList: CodeData[], codeIndex: number): boolean {
+    if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
       if (codeIndex < codeList.length) {
         codeList.splice(codeIndex, 1);
         return true;

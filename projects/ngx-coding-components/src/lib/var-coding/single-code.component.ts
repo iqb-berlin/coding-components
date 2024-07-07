@@ -51,8 +51,10 @@ export class SingleCodeComponent {
   }
 
   deleteCode(codeIndex?: number) {
-    this.schemerService.deleteCode(this.allCodes, codeIndex);
-    this.codeDataChanged.emit(this.code);
+    if (this.allCodes && typeof codeIndex !== 'undefined') {
+      this.schemerService.deleteCode(this.allCodes, codeIndex);
+      this.codeDataChanged.emit();
+    }
   }
 
   setCodeChanged() {
