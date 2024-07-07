@@ -4,11 +4,13 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { CodeType, VariableCodingData, VariableInfo } from '@iqb/responses';
+import {
+  CodeType, RuleMethod, VariableCodingData, VariableInfo
+} from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
@@ -24,6 +26,10 @@ import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from '../dialogs/generate-coding-dialog.component';
 import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import { CodesTitleComponent } from './codes-title.component';
+import { CodeHeaderComponent } from './code-header.component';
+import { CodeInstructionComponent } from './code-instruction.component';
+import { CodeRulesComponent } from './code-rules/code-rules.component';
 
 @Component({
   selector: 'var-coding',
@@ -34,7 +40,7 @@ import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-
     MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
     MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
     MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
-    VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider
+    VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider, CodesTitleComponent, CodeHeaderComponent, CodeInstructionComponent, CodeRulesComponent, MatButton
   ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
@@ -43,6 +49,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
   varInfo: VariableInfo | undefined;
+  elseCodeExists = false;
+  isEmptyCodeExists = false;
+  isNullCodeExists = false;
 
   constructor(
     public schemerService: SchemerService,
@@ -171,6 +180,31 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   addCode(codeType: CodeType) {
 
+  }
+
+  deleteCode(codeToDeleteIndex: number) {
+    if (this.varCoding && this.varCoding.codes &&
+      codeToDeleteIndex >= 0 && this.varCoding.codes.length > codeToDeleteIndex) {
+      // const codeToDeleteIndex = this.codes.findIndex(c => c.id === codeToDeleteId);
+      this.varCoding.codes.splice(codeToDeleteIndex, 1);
+      this.lastChangeFrom$.next('delete code');
+    }
+  }
+
+  hasRule(ruleCode: RuleMethod): boolean {
+    if (this.varCoding && this.varCoding.codes) {
+      const myRule = this.varCoding.codes.find(
+        c => !!c.ruleSets.find(rs => !!rs.rules.find(r => r.method === ruleCode)));
+      return !!myRule;
+    }
+    return false;
+  }
+
+  updateCodeExistences() {
+    this.elseCodeExists = !!this.varCoding && this.varCoding.codes &&
+      !!this.varCoding.codes.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+    this.isEmptyCodeExists = this.hasRule('IS_EMPTY');
+    this.isNullCodeExists = this.hasRule('IS_NULL');
   }
 
   ngOnDestroy(): void {

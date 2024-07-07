@@ -140,16 +140,32 @@
         </mat-card-content>
       </mat-card>
     </div>
-    <var-codes-full
-      class="fx-flex-row-100" [style.margin-top.px]="10"
-      [codes]="varCoding.codes"
-      (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
-      [processing]="varCoding.processing"
-      (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
-      [fragmenting]="varCoding.fragmenting"
-      (fragmentingChanged)="setFragmenting($event)"
-      [varInfo]="varInfo">
-    </var-codes-full>
+    <codes-title [codeList]="varCoding.codes"
+                 [fragmenting]="varCoding.fragmenting"
+                 [processing]="varCoding.processing"
+                 (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"></codes-title>
+    @if (varCoding.codes) {
+      @for (code of varCoding.codes; track code; let codeIndex = $index) {
+        <div class="fx-row-start-stretch code fx-gap-10" [style.max-height.px]="500" >
+          @if (code) {
+            <div class="fx-column-start-stretch " [style.width.%]="60">
+              <code-header (codeDataChanged)="lastChangeFrom$.next('code-header codes')" [enableSwitchNull]="true"
+                           [code]="code" [allCodes]="varCoding.codes"></code-header>
+              <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
+                          [code]="code" [varInfo]="varInfo" [fragmentMode]="!!varCoding.fragmenting"
+                          (codeRulesChanged)="lastChangeFrom$.next('code-rules codes')"></code-rules>
+            </div>
+            <code-instruction [code]="code" (codeDataChanged)="lastChangeFrom$.next('code-instruction codes')" class="fx-flex-fill"></code-instruction>
+            <button mat-icon-button (click)="deleteCode(codeIndex); updateCodeExistences()" [matTooltip]="'code.prompt.delete' | translate">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </div>
+      }
+      @if (varCoding.codes.length === 0) {
+        <div class="no-codes">{{'code.no-codes' | translate}}</div>
+      }
+    }
   </div>
 }
 
