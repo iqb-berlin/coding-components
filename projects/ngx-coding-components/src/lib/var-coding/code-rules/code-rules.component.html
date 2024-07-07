@@ -90,7 +90,7 @@
               </button>
 
             <mat-menu #menu="matMenu">
-              @for (newSource of (ruleSet.rules | possibleNewRules:varInfo:preferredDataType:fragmentMode:ruleSet.ruleOperatorAnd:ruleSet.rules.length); track newSource) {
+              @for (newSource of allRules; track newSource) {
                   <button mat-menu-item
                           (click)="addRule(ruleSet, newSource)">
                     {{('rule.' + newSource) | translate}}

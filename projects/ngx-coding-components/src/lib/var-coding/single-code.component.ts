@@ -1,17 +1,20 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { CodeData, VariableInfo } from '@iqb/responses';
+import { CodeData, CodeType, VariableInfo } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatDivider } from '@angular/material/divider';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { SchemerService } from '../services/schemer.service';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
 import { CodeInstructionComponent } from './code-instruction.component';
+import {CodeModelType} from "@iqb/responses/coding-interfaces";
 
 @Component({
   selector: 'single-code',
@@ -32,16 +35,17 @@ import { CodeInstructionComponent } from './code-instruction.component';
   `,
   standalone: true,
   imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput,
-    ReactiveFormsModule, FormsModule, TranslateModule, CodeRulesComponent, CodeInstructionComponent]
+    ReactiveFormsModule, FormsModule, TranslateModule, CodeRulesComponent, CodeInstructionComponent,
+    MatDivider, MatMenu, MatMenuItem, MatMenuTrigger, MatButton]
 })
 export class SingleCodeComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
   @Input() allCodes: CodeData[] | undefined;
-  @Input() enableSwitchNull: boolean = true;
   @Input() varInfo: VariableInfo | undefined;
   @Input() fragmentMode: boolean | undefined;
   @Input() codeIndex: number | undefined;
+  @Input() codeModel: CodeModelType | undefined;
 
   constructor(
     public schemerService: SchemerService
@@ -52,6 +56,13 @@ export class SingleCodeComponent {
     const firstEqualCode = this.allCodes
       .find((c: CodeData, index: number) => index !== codeIndex && c.id === codeToValidate);
     return !firstEqualCode;
+  }
+
+  residualExists(codeType: CodeType): boolean {
+    if (!this.allCodes || ['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) return false;
+    const firstResidualCode = this.allCodes
+      .findIndex(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+    return !!firstResidualCode;
   }
 
   deleteCode(codeIndex?: number) {
@@ -73,8 +84,13 @@ export class SingleCodeComponent {
   }
 
   setCodeValid() {
-    if (this.code) {
-      this.code.id = 1;
+    if (this.code && this.allCodes) {
+      const hasNullCode = this.allCodes.length > 0 ? !!this.allCodes.find(c => c.id === 0) : false;
+      if (hasNullCode) {
+        this.code.id = this.allCodes.length > 0 ? Math.max(...this.allCodes.map(c => c.id || 0)) + 1 : 0;
+      } else {
+        this.code.id = 0;
+      }
       this.codeDataChanged.emit(this.code);
     }
   }

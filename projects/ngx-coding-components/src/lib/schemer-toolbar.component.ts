@@ -1,15 +1,17 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CodingScheme, VariableInfo} from "@iqb/responses";
-import {FileService} from "./services/file.service";
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
+import { CodingScheme, VariableInfo } from '@iqb/responses';
 import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
+import { FileService } from './services/file.service';
 
 @Component({
-    selector: 'schemer-load-save',
-    template: `
+  selector: 'schemer-load-save',
+  template: `
     <button mat-fab [matMenuTriggerFor]="menu" matTooltip="Load/Save..." matTooltipPosition="above">
       <mat-icon>menu</mat-icon>
     </button>
@@ -27,11 +29,11 @@ import { MatFabButton } from '@angular/material/button';
       </button>
     </mat-menu>
   `,
-    styles: [
-        '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
-    ],
-    standalone: true,
-    imports: [MatFabButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
+  styles: [
+    '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
+  ],
+  standalone: true,
+  imports: [MatFabButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
 })
 export class SchemerToolbarComponent {
   @Input() codingScheme: CodingScheme | null = null;
@@ -47,8 +49,9 @@ export class SchemerToolbarComponent {
     this.varList = JSON.parse(await FileService.loadFile(['.json']));
     this.varListChanged.emit(this.varList);
   }
+
   async loadCodingScheme(): Promise<void> {
-    const codingsParsed = JSON.parse(await FileService.loadFile(['.json']))
+    const codingsParsed = JSON.parse(await FileService.loadFile(['.json']));
     this.codingScheme = new CodingScheme(codingsParsed.variableCodings);
     this.codingSchemeChanged.emit(this.codingScheme);
   }

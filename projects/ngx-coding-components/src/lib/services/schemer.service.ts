@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import {
   CodeData,
-  CodeType,
+  CodeType, CodingRule,
   CodingScheme,
   DeriveConcatDelimiter,
-  RuleMethodParameterCount,
+  RuleMethodParameterCount, RuleSet,
   VariableCodingData,
   VariableInfo,
   VariableValue
@@ -96,7 +96,7 @@ export class SchemerService {
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
     if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
       const maxCode = codeList.length > 0 ? Math.max(...codeList.map(c => c.id || 0)) : 0;
-      const hasNullCode = !!codeList.find(c => c.id === 0);
+      const hasNullCode = codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
         const firstResidual = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
         if (firstResidual) return 'code.error-message.residual-exists';
@@ -129,7 +129,10 @@ export class SchemerService {
           label: '',
           score: codeType === 'FULL_CREDIT' ? 1 : 0,
           ruleSetOperatorAnd: false,
-          ruleSets: [],
+          ruleSets: [<RuleSet>{
+            ruleOperatorAnd: true,
+            rules: []
+          }],
           manualInstruction: ''
         };
         const firstFollowerCode = codeList.length > 0 ? codeList.findIndex(

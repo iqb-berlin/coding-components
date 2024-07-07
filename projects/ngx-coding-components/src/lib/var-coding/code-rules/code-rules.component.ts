@@ -1,15 +1,11 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {MatDialog} from "@angular/material/dialog";
-import {CodeData, CodingRule, RuleMethod, RuleSet, VariableInfo} from "@iqb/responses";
 import {
-  SelectCodeRuleReferenceDialogComponent,
-  SelectCodeRuleReferenceDialogData
-} from "../../dialogs/select-code-rule-reference-dialog.component";
-import { MatTabGroup, MatTab } from "@angular/material/tabs";
-import {SchemerService} from "../../services/schemer.service";
-import {CodeModelType} from "@iqb/responses/coding-interfaces";
-import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
-import { PossibleNewRulesPipe } from '../../pipes/possible-new-rules.pipe';
+  Component, EventEmitter, Input, Output, ViewChild
+} from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  CodeData, CodingRule, RuleMethod, RuleSet, VariableInfo
+} from '@iqb/responses';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -22,27 +18,34 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
-import {JsonPipe} from "@angular/common";
+import { JsonPipe } from '@angular/common';
+import { PossibleNewRulesPipe } from '../../pipes/possible-new-rules.pipe';
+import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
+import { SchemerService } from '../../services/schemer.service';
+import {
+  SelectCodeRuleReferenceDialogComponent,
+  SelectCodeRuleReferenceDialogData
+} from '../../dialogs/select-code-rule-reference-dialog.component';
 
 @Component({
-    selector: 'code-rules',
-    templateUrl: './code-rules.component.html',
-    styleUrls: ['./code-rules.component.scss'],
-    standalone: true,
-  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup, ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, MatTab, MatFormField, MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule, PossibleNewRulesPipe, RuleReferencePipe, JsonPipe]
+  selector: 'code-rules',
+  templateUrl: './code-rules.component.html',
+  styleUrls: ['./code-rules.component.scss'],
+  standalone: true,
+  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup,
+    ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, MatTab, MatFormField,
+    MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule,
+    PossibleNewRulesPipe, RuleReferencePipe, JsonPipe]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
-  @Input() public code: CodeData | undefined;
-  @Input() elseCodeExists: boolean | undefined;
-  @Input() isEmptyCodeExists: boolean | undefined;
-  @Input() isNullCodeExists: boolean | undefined;
+  @Input() code: CodeData | undefined;
   @Input() varInfo: VariableInfo | undefined;
-  @Input() preferredDataType: 'string' | 'integer' | 'number' | 'boolean' | 'attachment' | undefined;
-  @Input() codingModel: CodeModelType | undefined;
   @Input() fragmentMode: boolean | undefined;
   showCodeButtonsOf = '';
   @ViewChild(MatTabGroup) ruleSetElement: MatTabGroup | undefined;
+  allRules: RuleMethod[] = ['MATCH', 'MATCH_REGEX', 'NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THAN',
+    'NUMERIC_MORE_THAN', 'NUMERIC_MAX', 'NUMERIC_MIN', 'IS_EMPTY', 'IS_NULL', 'IS_TRUE', 'IS_FALSE'];
 
   constructor(
     public editRuleReferenceDialog: MatDialog,
@@ -74,7 +77,7 @@ export class CodeRulesComponent {
         valueArrayPos: -1,
         ruleOperatorAnd: false,
         rules: []
-      })
+      });
       this.setCodeRulesChanged();
     }
   }
@@ -98,13 +101,13 @@ export class CodeRulesComponent {
     if (rule) {
       const dialogRef = this.editRuleReferenceDialog.open(
         SelectCodeRuleReferenceDialogComponent, {
-        width: '400px',
-        data: <SelectCodeRuleReferenceDialogData>{
-          isFragmentMode: true,
-          value: rule.fragment || 'ANY'
-        },
-        autoFocus: false
-      });
+          width: '400px',
+          data: <SelectCodeRuleReferenceDialogData>{
+            isFragmentMode: true,
+            value: rule.fragment || 'ANY'
+          },
+          autoFocus: false
+        });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false) {
           rule.fragment = dialogResult;
@@ -135,6 +138,6 @@ export class CodeRulesComponent {
   }
 
   setTab() {
-    if (this.ruleSetElement && this.code) this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1
+    if (this.ruleSetElement && this.code) this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
   }
 }
