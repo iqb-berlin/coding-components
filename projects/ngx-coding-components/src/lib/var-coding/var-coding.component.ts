@@ -20,6 +20,7 @@ import { MatSelect } from '@angular/material/select';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
 
 
 @Component({
@@ -27,11 +28,11 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
     templateUrl: './var-coding.component.html',
     styleUrls: ['./var-coding.component.scss'],
     standalone: true,
-    imports: [
-      MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
-      MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
-      MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, VarCodesFullComponent, TranslateModule
-    ]
+  imports: [
+    MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
+    MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
+    MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle
+  ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
