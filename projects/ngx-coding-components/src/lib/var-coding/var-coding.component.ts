@@ -4,7 +4,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import {CodeType, VariableCodingData, VariableInfo} from '@iqb/responses';
+import { CodeType, VariableCodingData, VariableInfo } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -18,12 +18,12 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { MatDivider } from '@angular/material/divider';
 import { VarCodesFullComponent } from './var-codes-full/var-codes-full.component';
 import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from '../dialogs/generate-coding-dialog.component';
 import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
-import {MatDivider} from "@angular/material/divider";
 
 @Component({
   selector: 'var-coding',

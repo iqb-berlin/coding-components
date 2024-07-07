@@ -1,30 +1,54 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData} from '@iqb/responses';
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
+import {CodeData, ProcessingParameterType} from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
+import {MatLabel} from "@angular/material/form-field";
+import {MatIconButton} from "@angular/material/button";
 
 @Component({
-    selector: 'codes-title',
-    template: `
-    <div (click)="sortCodes()"
-         [matTooltip]="'code.prompt.sort' | translate"
-         [matTooltipShowDelay]="500"
-         class="fx-row-start-center fx-gap-5"
-         matRipple
-         [style.cursor]="'pointer'"
-         style="display: flex; align-items: center;">
-      <h2>{{'code.header' | translate}}</h2>
-      <mat-icon>swap_vert</mat-icon>
+  selector: 'codes-title',
+  template: `
+    <div class="fx-row-space-between-start">
+      <div (click)="sortCodes()"
+           [matTooltip]="'code.prompt.sort' | translate"
+           [matTooltipShowDelay]="500"
+           class="fx-row-start-center fx-gap-5"
+           matRipple
+           [style.cursor]="'pointer'">
+        <h2>{{ 'code.header' | translate }}</h2>
+        <mat-icon>swap_vert</mat-icon>
+      </div>
+      <div class="fx-row-start-start">
+        <div class="fx-column-start-start">
+          @for (p of processing; track p) {
+            <div class="fx-row-center-center" style="font-size: small">
+              <mat-icon style="font-size: small; align-content: center;">check</mat-icon>
+              <div>{{('processing.' + p) | translate}}</div>
+            </div>
+          }
+          @if (fragmenting) {
+            <div style="font-size: small">{{ 'fragmenting.prompt' | translate }}: "{{fragmenting}}"</div>
+          }
+        </div>
+        <button mat-icon-button [matTooltip]="'processing.prompt' | translate"
+                (click)="editProcessingAndFragments()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
     </div>
   `,
-    standalone: true,
-    imports: [MatRipple, MatTooltip, MatIcon, TranslateModule]
+  standalone: true,
+  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton]
 })
 export class CodesTitleComponent {
   @Output() codesChanged = new EventEmitter();
-  @Input() public codeList: CodeData[] | undefined;
+  @Input() codeList: CodeData[] | undefined;
+  @Input() fragmenting? = '';
+  @Input() processing: ProcessingParameterType[] | undefined;
 
   sortCodes() {
     if (this.codeList && this.codeList.length > 1) {
@@ -41,12 +65,16 @@ export class CodesTitleComponent {
       });
       this.codeList.splice(0, this.codeList.length);
       newCodeList.forEach(c => {
-        if (this.codeList) this.codeList.push(c)
+        if (this.codeList) this.codeList.push(c);
       });
       nullCodes.forEach(c => {
-        if (this.codeList) this.codeList.push(c)
+        if (this.codeList) this.codeList.push(c);
       });
       this.codesChanged.emit();
     }
+  }
+
+  editProcessingAndFragments() {
+
   }
 }
