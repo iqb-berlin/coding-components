@@ -21,6 +21,9 @@ export class SchemerService {
   allVariableIds: string[] = [];
   ruleMethodParameterCount = RuleMethodParameterCount;
   userRole: UserRoleType = 'RW_MAXIMAL';
+  orderOfCodeTypes: CodeType[] = [
+    'FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET', 'RESIDUAL', 'RESIDUAL_AUTO'
+  ];
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {
@@ -110,21 +113,32 @@ export class SchemerService {
         codeList.push(newCode);
         return newCode;
       }
-      if (codeType === 'UNSET') {
+      if (['FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET'].includes(codeType)) {
+        let newCodeId = -1;
+        codeList.forEach(c => {
+          if (c.type === codeType && c.id && c.id > newCodeId) newCodeId = c.id;
+        });
+        if (newCodeId < 0) {
+          newCodeId = maxCode + 1;
+        } else {
+          const newCodeFound = codeList.find(c => c.id === newCodeId + 1);
+          newCodeId = newCodeFound ? maxCode + 1 : newCodeId + 1;
+        }
         const newCode = {
-          id: maxCode + 1,
+          id: newCodeId,
           type: codeType,
           label: '',
-          score: 0,
+          score: codeType === 'FULL_CREDIT' ? 1 : 0,
           ruleSetOperatorAnd: false,
           ruleSets: [],
           manualInstruction: ''
         };
-        const firstResidualCode = codeList.findIndex(c => ['RESIDUAL_AUTO', 'RESIDUAL'].includes(c.type));
-        if (firstResidualCode < 0) {
+        const firstFollowerCode = codeList.length > 0 ? codeList.findIndex(
+          c => this.orderOfCodeTypes.indexOf(c.type) > this.orderOfCodeTypes.indexOf(codeType)) : -1;
+        if (firstFollowerCode < 0) {
           codeList.push(newCode);
         } else {
-          codeList.splice(firstResidualCode, 0, newCode);
+          codeList.splice(firstFollowerCode, 0, newCode);
         }
         return newCode;
       }
