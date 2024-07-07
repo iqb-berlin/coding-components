@@ -8,6 +8,8 @@ import {
   VariableValue
 } from '@iqb/responses';
 
+export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -16,6 +18,7 @@ export class SchemerService {
   varList: VariableInfo[] = [];
   allVariableIds: string[] = [];
   ruleMethodParameterCount = RuleMethodParameterCount;
+  userRole: UserRoleType = 'RW_MAXIMAL';
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {

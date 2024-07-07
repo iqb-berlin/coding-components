@@ -1,14 +1,11 @@
-import {Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges} from '@angular/core';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {MatDialog} from '@angular/material/dialog';
+import {
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
+} from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import {RichTextEditDialogComponent} from '../rich-text-editor/rich-text-edit-dialog.component';
-import {VariableCodingData, VariableInfo} from "@iqb/responses";
-import {BehaviorSubject, debounceTime, Subscription} from "rxjs";
-import {ShowCodingDialogComponent} from "../dialogs/show-coding-dialog.component";
-import {GenerateCodingDialogComponent, GeneratedCodingData} from "../dialogs/generate-coding-dialog.component";
-import {SchemerService} from "../services/schemer.service";
-import { VarCodesFullComponent } from './var-codes-full/var-codes-full.component';
+import {CodeType, VariableCodingData, VariableInfo} from '@iqb/responses';
+import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
@@ -20,18 +17,24 @@ import { MatSelect } from '@angular/material/select';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
-
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { VarCodesFullComponent } from './var-codes-full/var-codes-full.component';
+import { SchemerService } from '../services/schemer.service';
+import { GenerateCodingDialogComponent, GeneratedCodingData } from '../dialogs/generate-coding-dialog.component';
+import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
+import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import {MatDivider} from "@angular/material/divider";
 
 @Component({
-    selector: 'var-coding',
-    templateUrl: './var-coding.component.html',
-    styleUrls: ['./var-coding.component.scss'],
-    standalone: true,
+  selector: 'var-coding',
+  templateUrl: './var-coding.component.html',
+  styleUrls: ['./var-coding.component.scss'],
+  standalone: true,
   imports: [
     MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
     MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
-    MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent, VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle
+    MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
+    VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider
   ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
@@ -52,15 +55,17 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit() {
     this.lastChangeFromSubscription = this.lastChangeFrom$.pipe(
-        debounceTime(500)
-      ).subscribe(source => {
-        if (source !== 'init') this.varCodingChanged.emit(this.varCoding);
-      });
+      debounceTime(500)
+    ).subscribe(source => {
+      if (source !== 'init') this.varCodingChanged.emit(this.varCoding);
+    });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ngOnChanges(changes: SimpleChanges) {
     this.updateVarInfo();
   }
+
   getNewSources(usedVars: string[]) {
     const returnSources: string[] = [];
     this.schemerService.allVariableIds.forEach(v => {
@@ -73,7 +78,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   setFragmenting(newFragmenting: string) {
     if (this.varCoding) {
       this.varCoding.fragmenting = newFragmenting;
-      this.lastChangeFrom$.next('var-codes-full fragmenting')
+      this.lastChangeFrom$.next('var-codes-full fragmenting');
     }
   }
 
@@ -155,13 +160,17 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           this.varCoding.processing = newCoding.processing;
           this.varCoding.fragmenting = newCoding.fragmenting;
           this.varCoding.codeModel = newCoding.codeModel;
-          //this.varCoding.codeModelParameters = newCoding.codeModelParameters;
+          // this.varCoding.codeModelParameters = newCoding.codeModelParameters;
           this.varCoding.codes = newCoding.codes;
-          console.log(this.varCoding.codes);
+          // console.log(this.varCoding.codes);
           this.varCodingChanged.emit(this.varCoding);
         }
       });
     }
+  }
+
+  addCode(codeType: CodeType) {
+
   }
 
   ngOnDestroy(): void {
