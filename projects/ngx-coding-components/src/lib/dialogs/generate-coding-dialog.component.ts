@@ -10,7 +10,7 @@ import {
   CodingRule,
   ProcessingParameterType,
   RuleSet,
-  ToTextFactory,
+  ToTextFactory, VariableCodingData,
   VariableInfo
 } from '@iqb/responses';
 import { CodeModelType } from '@iqb/responses/coding-interfaces';
@@ -28,6 +28,7 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
+import { SchemerService } from '../services/schemer.service';
 
 export interface GeneratedCodingData {
   id: string,
@@ -86,11 +87,13 @@ export class GenerateCodingDialogComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
     public translateService: TranslateService,
+    public schemerService: SchemerService,
     public dialogRef: MatDialogRef<GenerateCodingDialogComponent>
   ) {
     this.generationModel = 'none';
     if (varInfo) {
       if (varInfo.valuesComplete && varInfo.values && varInfo.values.length > 0) {
+        this.elseMethod = 'invalid';
         if (varInfo.multiple) {
           this.generationModel = 'multi-choice';
           this.positionLabels = varInfo.valuePositionLabels;
@@ -104,6 +107,7 @@ export class GenerateCodingDialogComponent {
         });
         this.resetOptions();
       } else if (!varInfo.multiple) {
+        this.elseMethod = 'rule';
         if (varInfo.type === 'integer') {
           this.generationModel = 'integer';
         } else if (varInfo.type === 'string') {
@@ -190,278 +194,195 @@ export class GenerateCodingDialogComponent {
     }
   }
 
-  private getElseCode(codeId: number): CodeData | null {
-    if (this.elseMethod === 'rule') {
-      return {
-        id: codeId,
-        type: 'RESIDUAL_AUTO',
-        label: 'Falsch',
-        score: 0,
-        ruleSetOperatorAnd: false,
-        ruleSets: [],
-        manualInstruction: ''
-      };
-    }
-    if (this.elseMethod === 'invalid') {
-      return {
-        id: null,
-        type: 'RESIDUAL_AUTO',
-        label: '',
-        score: 0,
-        ruleSetOperatorAnd: false,
-        ruleSets: [],
-        manualInstruction: ''
-      };
-    }
-    if (this.elseMethod === 'instruction') {
-      return {
-        id: codeId,
-        type: 'RESIDUAL',
-        label: 'Falsch',
-        score: 0,
-        ruleSetOperatorAnd: false,
-        ruleSets: [],
-        manualInstruction: '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
-      };
-    }
-    return null;
-  }
-
   generateButtonClick() {
     if (this.generationModel === 'none') {
       this.dialogRef.close(null);
-    } else if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
-      const numericRules: CodingRule[] = [];
-      const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-      if (matchValue) {
-        numericRules.push({
-          method: 'NUMERIC_MATCH',
-          parameters: [matchValue.toString(10)]
-        });
-      } else {
-        const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
-        const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
-        const minValue = CodingFactory.getValueAsNumber(this.numericMin);
-        const lessThenValue = CodingFactory.getValueAsNumber(this.numericLessThen);
-        if (!(moreThenValue && minValue) && !(lessThenValue && maxValue)) {
-          if (moreThenValue && maxValue && moreThenValue < maxValue) {
-            numericRules.push({
-              method: 'NUMERIC_RANGE',
-              parameters: [moreThenValue.toString(10), maxValue.toString(10)]
-            });
-          } else {
-            if (moreThenValue) {
-              numericRules.push({
-                method: 'NUMERIC_MORE_THAN',
-                parameters: [moreThenValue.toString(10)]
-              });
-            }
-            if (minValue) {
-              numericRules.push({
-                method: 'NUMERIC_MIN',
-                parameters: [minValue.toString(10)]
-              });
-            }
-            if (lessThenValue) {
-              numericRules.push({
-                method: 'NUMERIC_LESS_THAN',
-                parameters: [lessThenValue.toString(10)]
-              });
-            }
-            if (maxValue) {
-              numericRules.push({
-                method: 'NUMERIC_MAX',
-                parameters: [maxValue.toString(10)]
-              });
-            }
-          }
-        }
-      }
-      const codes: CodeData[] = [
-        {
-          id: 1,
-          type: 'FULL_CREDIT',
-          label: 'Richtig',
-          score: 1,
-          ruleSetOperatorAnd: false,
-          ruleSets: [<RuleSet>{
-            ruleOperatorAnd: true,
-            rules: numericRules
-          }],
-          manualInstruction: ''
-        }
-      ];
-      const elseCode = this.getElseCode(2);
-      if (elseCode) codes.push(elseCode);
-      this.dialogRef.close(<GeneratedCodingData>{
+    } else {
+      const newVardata: VariableCodingData = {
         id: this.varInfo.id,
         alias: this.varInfo.alias || this.varInfo.id,
-        processing: [],
-        fragmenting: '',
-        manualInstruction: '',
-        codeModel: 'RULES_ONLY',
-        codes: codes
-      });
-    } else if (this.generationModel === 'simple-input') {
-      const codes: CodeData[] = [{
-        id: 1,
-        type: 'FULL_CREDIT',
-        label: 'Richtig',
-        score: 1,
-        ruleSetOperatorAnd: false,
-        ruleSets: [<RuleSet>{
-          ruleOperatorAnd: false,
-          rules: [
-            {
-              method: 'MATCH',
-              parameters: [this.selectedOption || '']
-            }
-          ]
-        }],
-        manualInstruction: ''
-      }];
-      const elseCode = this.getElseCode(2);
-      if (elseCode) codes.push(elseCode);
-      this.dialogRef.close(<GeneratedCodingData>{
-        id: this.varInfo.id,
-        alias: this.varInfo.alias || this.varInfo.id,
-        processing: [],
-        fragmenting: '',
-        manualInstruction: '',
-        codeModel: 'NONE',
-        codes: codes
-      });
-    } else if (this.generationModel === 'single-choice-some' && this.singleChoiceLongVersion) {
-      const codes: CodeData[] = [];
-      this.options.forEach(o => {
-        codes.push({
-          id: codes.length + 1,
-          type: this.selectedOptions[0] && o.value == this.selectedOptions[0] ? 'FULL_CREDIT' : 'NO_CREDIT',
-          label: '',
-          score: this.selectedOptions[0] && o.value == this.selectedOptions[0] ? 1 : 0,
-          ruleSetOperatorAnd: false,
-          ruleSets: [<RuleSet>{
-            ruleOperatorAnd: true,
-            rules: [<CodingRule>{
-              method: 'MATCH',
-              parameters: [o.value || '']
-            }]
-          }],
-          manualInstruction: ''
-        });
-      });
-      codes.push({
-        id: null,
-        type: 'RESIDUAL_AUTO',
         label: '',
-        score: 0,
-        ruleSetOperatorAnd: false,
-        ruleSets: [],
-        manualInstruction: ''
-      });
-      this.dialogRef.close(<GeneratedCodingData>{
-        id: this.varInfo.id,
-        alias: this.varInfo.alias || this.varInfo.id,
+        sourceType: 'BASE',
+        sourceParameters: {
+          solverExpression: '',
+          processing: []
+        },
+        deriveSources: [],
         processing: [],
         fragmenting: '',
-        codeModel: 'RULES_ONLY',
-        codes: codes
-      });
-    } else if (this.generationModel === 'multi-choice' && this.multiChoiceOrderMatters) {
-      const fullCreditRuleSets: RuleSet[] = [];
-      this.selectedDragOptions.forEach((o, i) => {
-        fullCreditRuleSets.push({
-          ruleOperatorAnd: true,
-          valueArrayPos: i,
-          rules: [
-            {
-              method: 'MATCH',
-              parameters: [o.value || '']
-            }
-          ]
-        });
-      });
-      this.dialogRef.close(<GeneratedCodingData>{
-        id: this.varInfo.id,
-        alias: this.varInfo.alias || this.varInfo.id,
-        processing: [],
-        fragmenting: '',
+        manualInstruction: '',
         codeModel: 'NONE',
-        codes: [
-          {
-            id: 1,
-            type: 'FULL_CREDIT',
-            label: 'Richtig',
-            score: 1,
-            ruleSetOperatorAnd: true,
-            ruleSets: fullCreditRuleSets,
-            manualInstruction: ''
-          },
-          {
-            id: 2,
-            type: 'RESIDUAL_AUTO',
-            label: 'Falsch',
-            score: 0,
-            ruleSetOperatorAnd: false,
-            ruleSets: [],
-            manualInstruction: ''
-          }
-        ]
-      });
-    } else if (['multi-choice', 'single-choice-many', 'single-choice-some'].includes(this.generationModel)) {
-      const fullCreditRules: CodingRule[] = [];
-      if (this.generationModel === 'single-choice-many') {
-        fullCreditRules.push({
-          method: 'MATCH',
-          parameters: [this.selectedOption || '']
-        });
-      } else {
-        if (this.selectedOptions.length > 0) {
-          this.selectedOptions.forEach(s => {
-            fullCreditRules.push({
-              method: 'MATCH',
-              parameters: [s]
-            });
+        codes: []
+      }
+      if (['rule', 'instruction', 'invalid'].includes(this.elseMethod)) {
+        const newResidualCode = this.schemerService.addCode(
+          newVardata.codes, this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO');
+        if (typeof newResidualCode !== 'string' && this.elseMethod === 'invalid') newResidualCode.id = null;
+      }
+      if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
+        const numericRules: CodingRule[] = [];
+        const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
+        if (matchValue) {
+          numericRules.push({
+            method: 'NUMERIC_MATCH',
+            parameters: [matchValue.toString(10)]
           });
         } else {
+          const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+          const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
+          const minValue = CodingFactory.getValueAsNumber(this.numericMin);
+          const lessThenValue = CodingFactory.getValueAsNumber(this.numericLessThen);
+          if (!(moreThenValue && minValue) && !(lessThenValue && maxValue)) {
+            if (moreThenValue && maxValue && moreThenValue < maxValue) {
+              numericRules.push({
+                method: 'NUMERIC_RANGE',
+                parameters: [moreThenValue.toString(10), maxValue.toString(10)]
+              });
+            } else {
+              if (moreThenValue) {
+                numericRules.push({
+                  method: 'NUMERIC_MORE_THAN',
+                  parameters: [moreThenValue.toString(10)]
+                });
+              }
+              if (minValue) {
+                numericRules.push({
+                  method: 'NUMERIC_MIN',
+                  parameters: [minValue.toString(10)]
+                });
+              }
+              if (lessThenValue) {
+                numericRules.push({
+                  method: 'NUMERIC_LESS_THAN',
+                  parameters: [lessThenValue.toString(10)]
+                });
+              }
+              if (maxValue) {
+                numericRules.push({
+                  method: 'NUMERIC_MAX',
+                  parameters: [maxValue.toString(10)]
+                });
+              }
+            }
+          }
+        }
+        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        if (typeof newCode !== 'string') {
+          newCode.ruleSetOperatorAnd = false;
+          newCode.ruleSets = [<RuleSet>{
+            ruleOperatorAnd: true,
+            rules: numericRules
+          }];
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else if (this.generationModel === 'simple-input') {
+        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        if (typeof newCode !== 'string') {
+          newCode.ruleSetOperatorAnd = false;
+          newCode.ruleSets = [<RuleSet>{
+            ruleOperatorAnd: false,
+            rules: [
+              {
+                method: 'MATCH',
+                parameters: [this.selectedOption || '']
+              }
+            ]
+          }];
+          this.dialogRef.close(newVardata);
+        }
+      } else if (this.generationModel === 'single-choice-some' && this.singleChoiceLongVersion) {
+        this.options.filter(o => this.selectedOptions[0] && o.value == this.selectedOptions[0])
+          .forEach(o => {
+            const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+            if (typeof newCode !== 'string') {
+              newCode.ruleSetOperatorAnd = false;
+              newCode.ruleSets = [<RuleSet>{
+                ruleOperatorAnd: true,
+                rules: [<CodingRule>{
+                  method: 'MATCH',
+                  parameters: [o.value || '']
+                }]
+              }]
+            }
+          });
+        this.options.filter(o => !(this.selectedOptions[0] && o.value == this.selectedOptions[0]))
+          .forEach(o => {
+            const newCode = this.schemerService.addCode(newVardata.codes, 'NO_CREDIT');
+            if (typeof newCode !== 'string') {
+              newCode.ruleSetOperatorAnd = false;
+              newCode.ruleSets = [<RuleSet>{
+                ruleOperatorAnd: true,
+                rules: [<CodingRule>{
+                  method: 'MATCH',
+                  parameters: [o.value || '']
+                }]
+              }]
+            }
+          });
+        newVardata.codeModel = 'RULES_ONLY';
+        this.schemerService.sortCodes(newVardata.codes, true);
+        this.dialogRef.close(newVardata);
+      } else if (this.generationModel === 'multi-choice' && this.multiChoiceOrderMatters) {
+        const fullCreditRuleSets: RuleSet[] = [];
+        this.selectedDragOptions.forEach((o, i) => {
+          fullCreditRuleSets.push({
+            ruleOperatorAnd: true,
+            valueArrayPos: i,
+            rules: [
+              {
+                method: 'MATCH',
+                parameters: [o.value || '']
+              }
+            ]
+          });
+        });
+        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        if (typeof newCode !== 'string') {
+          newCode.ruleSetOperatorAnd = true;
+          newCode.ruleSets = fullCreditRuleSets;
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else if (['multi-choice', 'single-choice-many', 'single-choice-some'].includes(this.generationModel)) {
+        const fullCreditRules: CodingRule[] = [];
+        if (this.generationModel === 'single-choice-many') {
           fullCreditRules.push({
             method: 'MATCH',
-            parameters: ['']
+            parameters: [this.selectedOption || '']
           });
-        }
-      }
-      this.dialogRef.close(<GeneratedCodingData>{
-        id: this.varInfo.id,
-        alias: this.varInfo.alias || this.varInfo.id,
-        processing: [],
-        fragmenting: '',
-        codeModel: 'RULES_ONLY',
-        codes: [
-          {
-            id: 1,
-            type: 'FULL_CREDIT',
-            label: 'Richtig',
-            score: 1,
-            ruleSetOperatorAnd: false,
-            ruleSets: [<RuleSet>{
-              ruleOperatorAnd: true,
-              rules: fullCreditRules
-            }],
-            manualInstruction: ''
-          },
-          {
-            id: 2,
-            type: 'RESIDUAL_AUTO',
-            label: 'Falsch',
-            score: 0,
-            ruleSetOperatorAnd: false,
-            ruleSets: [],
-            manualInstruction: ''
+        } else {
+          if (this.selectedOptions.length > 0) {
+            this.selectedOptions.forEach(s => {
+              fullCreditRules.push({
+                method: 'MATCH',
+                parameters: [s]
+              });
+            });
+          } else {
+            fullCreditRules.push({
+              method: 'MATCH',
+              parameters: ['']
+            });
           }
-        ]
-      });
-    } else {
-      this.dialogRef.close(null);
+        }
+        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        if (typeof newCode !== 'string') {
+          newVardata.codeModel = 'RULES_ONLY';
+          newCode.ruleSetOperatorAnd = false;
+          newCode.ruleSets = [<RuleSet>{
+            ruleOperatorAnd: true,
+            rules: fullCreditRules
+          }];
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else {
+        this.dialogRef.close(null);
+      }
     }
   }
 }
