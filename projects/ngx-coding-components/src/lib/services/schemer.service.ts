@@ -22,7 +22,7 @@ export class SchemerService {
   ruleMethodParameterCount = RuleMethodParameterCount;
   userRole: UserRoleType = 'RW_MAXIMAL';
   orderOfCodeTypes: CodeType[] = [
-    'FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET', 'RESIDUAL', 'RESIDUAL_AUTO'
+    'FULL_CREDIT', 'PARTIAL_CREDIT', 'TO_CHECK', 'NO_CREDIT', 'UNSET', 'RESIDUAL', 'RESIDUAL_AUTO'
   ];
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
@@ -112,13 +112,15 @@ export class SchemerService {
         codeList.push(newCode);
         return newCode;
       }
-      if (['FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET'].includes(codeType)) {
+      if (['FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET', 'TO_CHECK'].includes(codeType)) {
         let newCodeId = -1;
         codeList.forEach(c => {
           if (c.type === codeType && c.id && c.id > newCodeId) newCodeId = c.id;
         });
         if (newCodeId < 0) {
-          newCodeId = maxCode + 1;
+          newCodeId = this.orderOfCodeTypes.indexOf(codeType) + 1;
+          const alreadyUsed = codeList.find(c => c.id === newCodeId);
+          if (alreadyUsed) newCodeId = maxCode + 1;
         } else {
           const newCodeFound = codeList.find(c => c.id === newCodeId + 1);
           newCodeId = newCodeFound ? maxCode + 1 : newCodeId + 1;
@@ -170,6 +172,12 @@ export class SchemerService {
             allCodesOfType.forEach((c: CodeData, index: number) => {
               if (c.id !== null) c.id = startValue + index;
             });
+          }
+        });
+        this.orderOfCodeTypes.forEach(t => {
+          if (!['RESIDUAL', 'RESIDUAL_AUTO'].includes(t)) {
+            const allCodesOfType = codeList.filter(c => c.type === t);
+            if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
           }
         });
       }

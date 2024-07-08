@@ -34,7 +34,7 @@ import { MatButton } from '@angular/material/button';
         </div>
         @for (codeText of varCodingText.codes; track codeText) {
           <div class="fx-row-start-center code-row">
-            <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.code}}</div>
+            <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.id}}</div>
             <div class="fx-flex-row-10" [style.text-align]="'center'">{{codeText.score}}</div>
             <div class="fx-flex-row-20">{{codeText.label}}</div>
             <div class="fx-flex-fill">
