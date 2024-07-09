@@ -74,7 +74,7 @@
             </mat-form-field>
           } @else {
             <div class="fx-flex-fill" style="align-content: center">
-              {{'code.prompt.add-' + code.type | translate}}
+              {{'code.type-label.' + code.type | translate}}
             </div>
           }
           @if (!['RESIDUAL', 'RESIDUAL_AUTO', 'NO_CREDIT'].includes(code.type)) {
