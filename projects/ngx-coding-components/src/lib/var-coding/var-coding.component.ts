@@ -32,6 +32,11 @@ import { CodeRulesComponent } from './code-rules/code-rules.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
 import { SingleCodeComponent } from './single-code.component';
+import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
+import {
+  EditSourceParametersDialog,
+  EditSourceParametersDialogData
+} from './dialogs/edit-source-parameters-dialog.component';
 
 @Component({
   selector: 'var-coding',
@@ -43,7 +48,7 @@ import { SingleCodeComponent } from './single-code.component';
     MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
     MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
     VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
-    CodesTitleComponent, CodeInstructionComponent, CodeRulesComponent, MatButton, SingleCodeComponent
+    CodesTitleComponent, CodeInstructionComponent, CodeRulesComponent, MatButton, SingleCodeComponent, VariableAliasPipe
   ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
@@ -52,9 +57,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
   varInfo: VariableInfo | undefined;
-  elseCodeExists = false;
-  isEmptyCodeExists = false;
-  isNullCodeExists = false;
 
   constructor(
     public schemerService: SchemerService,
@@ -64,7 +66,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     private showCodingDialog: MatDialog,
     private generateCodingDialog: MatDialog,
     private messageDialog: MatDialog,
-    private confirmDialog: MatDialog
+    private confirmDialog: MatDialog,
+    private editSourceParametersDialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -226,6 +229,29 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       return !!firstResidualCode;
     }
     return false;
+  }
+
+  editSourceParameters() {
+    if (this.schemerService.userRole === 'RW_MAXIMAL' && this.varCoding) {
+      const dialogRef = this.editSourceParametersDialog.open(EditSourceParametersDialog, {
+        width: '600px',
+        height: '400px',
+        data: <EditSourceParametersDialogData>{
+          sourceType: this.varCoding.sourceType,
+          sourceParameters: this.varCoding.sourceParameters,
+          deriveSources: this.varCoding.deriveSources
+        }
+      });
+      dialogRef.afterClosed().subscribe(dialogResult => {
+        if (dialogResult !== false && this.varCoding) {
+          const dialogResultTyped: EditSourceParametersDialogData = dialogResult;
+          this.varCoding.sourceType = dialogResultTyped.sourceType;
+          this.varCoding.sourceParameters = dialogResultTyped.sourceParameters;
+          this.varCoding.deriveSources = dialogResultTyped.deriveSources;
+          // todo: refresh lists?
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {

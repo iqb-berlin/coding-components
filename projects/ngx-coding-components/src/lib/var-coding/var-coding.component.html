@@ -12,57 +12,30 @@
           <input matInput [(ngModel)]="varCoding.label"
             (change)="lastChangeFrom$.next('label')">
         </mat-form-field>
-        @if (varCoding.sourceType !== 'BASE') {
-          <div class="fx-column-start-stretch">
-            <mat-form-field>
-              <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
-              <mat-select [(value)]="varCoding.sourceType" (selectionChange)="lastChangeFrom$.next('derive-method'); updateVarInfo()">
-                <mat-option [value]="'COPY_VALUE'">
-                  {{'derive-method.COPY_VALUE' | translate}}
-                </mat-option>
-                <mat-option [value]="'CONCAT_CODE'">
-                  {{'derive-method.CONCAT_CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SUM_CODE'">
-                  {{'derive-method.SUM_CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SUM_SCORE'">
-                  {{'derive-method.SUM_SCORE' | translate}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div class="fx-row-start-center fx-gap-20">
-              <div>
-                <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
+        <div class="fx-row-start-stretch fx-gap-10">
+          <div class="fx-flex-fill fx-column-start-start">
+            @if (varCoding.sourceType === 'BASE') {
+              <div>Basisvariable</div>
+            } @else {
+              <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias}}</div>
+              <div>Methode der Ableitung: {{'derive-method.' + varCoding.sourceType | translate}}</div>
+            }
+            @if (varCoding.sourceParameters.solverExpression) {
+              <div>{{('derive-processing.SOLVER_EXPRESSION') | translate}}: {{varCoding.sourceParameters.solverExpression}}</div>
+            }
+            @for (p of varCoding.sourceParameters.processing; track p) {
+              <div class="fx-row-center-center" style="font-size: small">
+                <mat-icon style="font-size: small; align-content: center;">check</mat-icon>
+                <div>{{('derive-processing.' + p) | translate}}</div>
               </div>
-              <mat-chip-listbox>
-                @if (varCoding.deriveSources.length === 0) {
-                  <mat-chip [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
-                }
-                @for (source of varCoding.deriveSources; track source) {
-                  <mat-chip
-                    [class]="schemerService.allVariableIds.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
-                    removable="true" (removed)="deleteDeriveSource(source)">
-                    {{source}}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                  </mat-chip>
-                }
-                @if (getNewSources(varCoding.deriveSources).length > 0) {
-                  <button mat-icon-button [matMenuTriggerFor]="menu">
-                    <mat-icon>add</mat-icon>
-                  </button>
-                }
-              </mat-chip-listbox>
-              <mat-menu #menu="matMenu">
-                @for (newSource of getNewSources(varCoding.deriveSources); track newSource) {
-                  <button mat-menu-item (click)="addDeriveSource(newSource)">
-                    {{newSource}}
-                  </button>
-                }
-              </mat-menu>
-            </div>
+            }
           </div>
-        }
+          <button mat-icon-button [matTooltip]="'processing.prompt' | translate"
+                  [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+                  (click)="editSourceParameters()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
         <div class="fx-row-start-start fx-gap-5" >
           @if (schemerService.userRole === 'RW_MAXIMAL') {
             <button mat-icon-button

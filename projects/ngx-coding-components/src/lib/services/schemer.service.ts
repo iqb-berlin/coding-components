@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   CodeData,
-  CodeType, CodingRule,
+  CodeType,
   CodingScheme,
   DeriveConcatDelimiter,
   RuleMethodParameterCount, RuleSet,
@@ -191,5 +191,20 @@ export class SchemerService {
         return this.orderOfCodeTypes.indexOf(a.type) < this.orderOfCodeTypes.indexOf(b.type) ? -1 : 1;
       });
     }
+  }
+
+  getVariableAliasForId (varId?: string | string[]): string {
+    if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '';
+    if (typeof varId === 'string') {
+      const findVar = this.codingScheme.variableCodings
+        .find(v => v.id === varId);
+      return !!findVar ? findVar.alias || findVar.id : '';
+    }
+    if (Array.isArray(varId)) {
+      const returnValues: string[] = this.codingScheme.variableCodings
+        .filter(v => varId.includes(v.id)).map(v => v.alias || v.id);
+      return returnValues.join(', ');
+    }
+    return '?';
   }
 }
