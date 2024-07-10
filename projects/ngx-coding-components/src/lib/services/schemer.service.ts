@@ -107,7 +107,9 @@ export class SchemerService {
           score: 0,
           ruleSetOperatorAnd: false,
           ruleSets: [],
-          manualInstruction: ''
+          manualInstruction: `<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">
+                                Alle anderen Antworten ${codeType === 'RESIDUAL_AUTO' ? ' (automatisch)' : ''}
+                              </p>`
         };
         codeList.push(newCode);
         return newCode;
@@ -193,12 +195,13 @@ export class SchemerService {
     }
   }
 
-  getVariableAliasForId (varId?: string | string[]): string {
+  getVariableAliasForId(varId?: string | string[]): string {
     if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '';
     if (typeof varId === 'string') {
       const findVar = this.codingScheme.variableCodings
         .find(v => v.id === varId);
-      return !!findVar ? findVar.alias || findVar.id : '';
+      if (findVar) return findVar.alias || findVar.id;
+      return '';
     }
     if (Array.isArray(varId)) {
       const returnValues: string[] = this.codingScheme.variableCodings

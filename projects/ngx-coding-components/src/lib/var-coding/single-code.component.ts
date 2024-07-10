@@ -11,10 +11,10 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { CodeModelType } from '@iqb/responses/coding-interfaces';
 import { SchemerService } from '../services/schemer.service';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
 import { CodeInstructionComponent } from './code-instruction.component';
-import {CodeModelType} from "@iqb/responses/coding-interfaces";
 
 @Component({
   selector: 'single-code',
@@ -56,13 +56,6 @@ export class SingleCodeComponent {
     const firstEqualCode = this.allCodes
       .find((c: CodeData, index: number) => index !== codeIndex && c.id === codeToValidate);
     return !firstEqualCode;
-  }
-
-  residualExists(codeType: CodeType): boolean {
-    if (!this.allCodes || this.allCodes.length === 0 || ['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) return false;
-    const firstResidualCode = this.allCodes
-      .find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
-    return !!firstResidualCode;
   }
 
   deleteCode(codeIndex?: number) {

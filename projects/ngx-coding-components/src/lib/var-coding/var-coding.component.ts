@@ -21,7 +21,6 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatDivider } from '@angular/material/divider';
-import { VarCodesFullComponent } from './var-codes-full/var-codes-full.component';
 import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from '../dialogs/generate-coding-dialog.component';
 import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
@@ -47,7 +46,7 @@ import {
     MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
     MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
     MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
-    VarCodesFullComponent, TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
+    TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
     CodesTitleComponent, CodeInstructionComponent, CodeRulesComponent, MatButton, SingleCodeComponent, VariableAliasPipe
   ]
 })

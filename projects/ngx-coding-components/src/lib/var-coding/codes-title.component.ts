@@ -64,30 +64,6 @@ export class CodesTitleComponent {
     if (this.codeList) this.schemerService.sortCodes(this.codeList, event.ctrlKey);
   }
 
-  xsortCodes() {
-    if (this.codeList && this.codeList.length > 1) {
-      let allCodeIds: number[] = [];
-      this.codeList.forEach(c => {
-        if (c.id !== null && allCodeIds.indexOf(c.id) < 0) allCodeIds.push(c.id);
-      });
-      const nullCodes = this.codeList.filter(c => c.id === null);
-      const newCodeList: CodeData[] = [];
-      allCodeIds = allCodeIds.sort();
-      allCodeIds.forEach(cId => {
-        const codes = this.codeList ? this.codeList.filter(c => c.id === cId) : [];
-        codes.forEach(c => newCodeList.push(c));
-      });
-      this.codeList.splice(0, this.codeList.length);
-      newCodeList.forEach(c => {
-        if (this.codeList) this.codeList.push(c);
-      });
-      nullCodes.forEach(c => {
-        if (this.codeList) this.codeList.push(c);
-      });
-      this.codesChanged.emit();
-    }
-  }
-
   editProcessingAndFragments() {
     if (this.schemerService.userRole === 'RW_MAXIMAL') {
       const dialogRef = this.editProcessingDialog.open(EditProcessingDialogComponent, {
