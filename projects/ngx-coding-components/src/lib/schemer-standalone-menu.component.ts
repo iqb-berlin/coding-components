@@ -81,10 +81,4 @@ export class SchemerStandaloneMenuComponent {
     this.codingScheme = new CodingScheme(codingsParsed.variableCodings);
     this.codingSchemeChanged.emit(this.codingScheme);
   }
-
-  setUserRole(newRole: UserRoleType) {
-    this.userRole = newRole;
-    console.log(newRole);
-    this.userRoleChanged.emit(newRole);
-  }
 }

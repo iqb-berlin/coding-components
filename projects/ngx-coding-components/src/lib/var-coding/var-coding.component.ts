@@ -82,15 +82,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     this.updateVarInfo();
   }
 
-  getNewSources(usedVars: string[]) {
-    const returnSources: string[] = [];
-    this.schemerService.allVariableIds.forEach(v => {
-      if (this.varCoding && usedVars.indexOf(v) < 0 && v !== this.varCoding.id) returnSources.push(v);
-    });
-    returnSources.sort();
-    return returnSources;
-  }
-
   updateVarInfo() {
     this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
   }
@@ -213,7 +204,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         width: '600px',
         minHeight: '400px',
         data: <EditSourceParametersDialogData>{
-          selfId: this.varCoding.alias || this.varCoding.id,
+          selfId: this.varCoding.id,
+          selfAlias: this.varCoding.alias || this.varCoding.id,
           sourceType: this.varCoding.sourceType,
           sourceParameters: this.varCoding.sourceParameters,
           deriveSources: this.varCoding.deriveSources
@@ -222,6 +214,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false && this.varCoding) {
           const dialogResultTyped: EditSourceParametersDialogData = dialogResult;
+          this.varCoding.alias = dialogResultTyped.selfAlias;
           this.varCoding.sourceType = dialogResultTyped.sourceType;
           this.varCoding.sourceParameters = dialogResultTyped.sourceParameters;
           this.varCoding.deriveSources = dialogResultTyped.deriveSources;

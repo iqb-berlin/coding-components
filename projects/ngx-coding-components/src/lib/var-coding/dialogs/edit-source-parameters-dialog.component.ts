@@ -21,6 +21,7 @@ import { VariableAliasPipe } from '../../pipes/variable-alias.pipe';
 
 export interface EditSourceParametersDialogData {
   selfId: string,
+  selfAlias: string,
   sourceType: SourceType,
   sourceParameters: VariableSourceParameters;
   deriveSources: string[]
@@ -49,6 +50,7 @@ export class EditSourceParametersDialog {
     this.newVariableMode = !this.data.selfId;
     const shadowProcessing: EditSourceParametersDialogData = {
       selfId: this.data.selfId,
+      selfAlias: this.data.selfAlias,
       sourceType: 'BASE',
       sourceParameters: {
         solverExpression: '',
@@ -73,15 +75,10 @@ export class EditSourceParametersDialog {
 
   updatePossibleNewSources() {
     if (this.schemerService.codingScheme) {
-      if (this.data.deriveSources.length === 0) {
-        this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
-          .filter(v => this.data.selfId !== v.id)
-          .map(v => [v.alias || v.id, v.id]));
-      } else {
-        this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
-          .filter(v => ![...this.data.deriveSources, this.data.selfId].includes(v.id))
-          .map(v => [v.id, v.alias || v.id]));
-      }
+      this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
+        .filter(v => !([...this.data.deriveSources, this.data.selfId].includes(v.id)))
+        .sort()
+        .map(v => [v.id, v.alias || v.id]));
     }
   }
 

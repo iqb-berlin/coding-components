@@ -88,10 +88,24 @@ export class SchemerService {
     return undefined;
   }
 
-  variableIdExists(checkId: string, oldId?: string): boolean {
-    const modifiedVariableIds = this.allVariableIds.filter(v => !oldId || v !== oldId);
-    const normalisedId = checkId.toUpperCase();
-    return !!modifiedVariableIds.find(v => v.toUpperCase() === normalisedId);
+  changeNewVarIdIfExists(checkId: string): string {
+    let idToCheck = checkId;
+    let modifier = 0;
+    while (!!this.allVariableIds.find(v => v.toUpperCase() === idToCheck.toUpperCase())) {
+      modifier += 1;
+      idToCheck = `${checkId}_${modifier}`;
+    }
+    return idToCheck;
+  }
+
+  checkRenamedVarAliasOk(checkAlias: string, checkId?: string): boolean {
+    if (this.codingScheme && this.codingScheme.variableCodings) {
+      const normalisedAlias = checkAlias.toUpperCase();
+      const doubleFound = this.codingScheme.variableCodings
+        .find(v => v.alias.toUpperCase() === normalisedAlias && v.id !== checkId);
+      return !doubleFound;
+    }
+    return false;
   }
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
@@ -178,7 +192,7 @@ export class SchemerService {
           }
         });
         this.orderOfCodeTypes.forEach(t => {
-          if (!['RESIDUAL', 'RESIDUAL_AUTO'].includes(t)) {
+          if (!(['RESIDUAL', 'RESIDUAL_AUTO'].includes(t))) {
             const allCodesOfType = codeList.filter(c => c.type === t);
             if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
           } else {

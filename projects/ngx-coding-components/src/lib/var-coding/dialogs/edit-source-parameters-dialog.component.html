@@ -6,7 +6,7 @@
       <mat-label>{{ 'id' | translate }}</mat-label>
       <input matInput id="variableId" name="variableId" required
              [pattern]="VARIABLE_NAME_CHECK_PATTERN"
-             [(ngModel)]="data.selfId">
+             [(ngModel)]="data.selfAlias">
     </mat-form-field>
 
     @if (data.sourceType !== 'BASE') {
@@ -68,7 +68,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="primary"
-          [disabled]="!data.selfId || !VARIABLE_NAME_CHECK_PATTERN.exec(data.selfId) || !data.sourceType || (data.sourceType !== 'BASE' && data.deriveSources.length < 1)"
+          [disabled]="!data.selfAlias || !VARIABLE_NAME_CHECK_PATTERN.exec(data.selfAlias) || !data.sourceType || (data.sourceType !== 'BASE' && data.deriveSources.length < 1)"
           [mat-dialog-close]="data">{{ 'dialog-save' | translate }}</button>
   <button mat-raised-button [mat-dialog-close]="false">{{ 'dialog-cancel' | translate }}</button>
 </mat-dialog-actions>

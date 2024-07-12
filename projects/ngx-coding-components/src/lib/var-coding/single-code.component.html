@@ -79,7 +79,7 @@
               {{'code.type-label.' + code.type | translate}}
             </div>
           }
-          @if (!['RESIDUAL', 'RESIDUAL_AUTO', 'NO_CREDIT'].includes(code.type)) {
+          @if (!(['RESIDUAL', 'RESIDUAL_AUTO', 'NO_CREDIT'].includes(code.type))) {
             <mat-form-field
               [class]="code.score > 0 ? 'correct' : 'not-correct'"
               [style.width.px]="100">
@@ -100,7 +100,7 @@
           }
         }
       </div>
-      @if (codeModel !== 'MANUAL_ONLY' && !['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type)) {
+      @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type))) {
         <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
                     [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
                     (codeRulesChanged)="setCodeChanged()"></code-rules>
