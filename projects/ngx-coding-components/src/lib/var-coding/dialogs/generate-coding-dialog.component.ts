@@ -28,7 +28,7 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
-import { SchemerService } from '../services/schemer.service';
+import { SchemerService } from '../../services/schemer.service';
 
 export interface GeneratedCodingData {
   id: string,
@@ -39,7 +39,7 @@ export interface GeneratedCodingData {
   codes: CodeData[]
 }
 
-interface optionData {
+interface OptionData {
   value: string,
   oldIndex: number,
   label?: string
@@ -74,9 +74,9 @@ export class GenerateCodingDialogComponent {
   positionLabels: string[] = [];
   multiChoiceOrderMatters = false;
   singleChoiceLongVersion = false;
-  _options: optionData[] = [];
-  options: optionData[] = [];
-  selectedDragOptions: optionData[] = [];
+  _options: OptionData[] = [];
+  options: OptionData[] = [];
+  selectedDragOptions: OptionData[] = [];
   textAsNumeric = false;
   numericMoreThen = '';
   numericLessThen = '';
@@ -103,7 +103,7 @@ export class GenerateCodingDialogComponent {
         } else {
           this.generationModel = varInfo.values.length > 20 ? 'single-choice-many' : 'single-choice-some';
         }
-        this._options = varInfo.values.map((v, i) => <optionData>{
+        this._options = varInfo.values.map((v, i) => <OptionData>{
           value: (typeof v.value === 'string') ? v.value : v.value.toString(),
           oldIndex: i,
           label: v.label
@@ -123,7 +123,7 @@ export class GenerateCodingDialogComponent {
 
   resetOptions() {
     const maxLength = 30;
-    this.options = this._options.map(o => <optionData>{
+    this.options = this._options.map(o => <OptionData>{
       value: o.value.length > maxLength ? `${o.value.slice(0, maxLength - 1)}…` : o.value,
       oldIndex: o.oldIndex,
       label: o.label && o.label.length > maxLength ? `${o.label.slice(0, maxLength - 1)}…` : o.label
@@ -153,21 +153,28 @@ export class GenerateCodingDialogComponent {
       }
       if (!this.numericRuleText) {
         if (moreThenValue && maxValue && moreThenValue < maxValue) {
-          this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`;
+          this.numericRuleText =
+            `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`;
         } else {
           const ruleTexts: string[] = [];
-          if (moreThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THAN')} ${moreThenValue}`);
+          if (moreThenValue) {
+            ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THAN')} ${moreThenValue}`);
+          }
           if (minValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MIN')} ${minValue}`);
-          if (lessThenValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_LESS_THAN')} ${lessThenValue}`);
+          if (lessThenValue) {
+            ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_LESS_THAN')} ${lessThenValue}`);
+          }
           if (maxValue) ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MAX')} ${maxValue}`);
-          this.numericRuleText = ruleTexts.length > 0 ? ruleTexts.join('; ') : this.translateService.instant('coding.generate.empty-value');
+          this.numericRuleText = ruleTexts.length > 0 ?
+            ruleTexts.join('; ') : this.translateService.instant('coding.generate.empty-value');
           this.numericRuleError = ruleTexts.length === 0;
         }
       }
     }
   }
 
-  drop(event: CdkDragDrop<optionData[]>) {
+  // eslint-disable-next-line class-methods-use-this
+  drop(event: CdkDragDrop<OptionData[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -180,7 +187,7 @@ export class GenerateCodingDialogComponent {
     }
   }
 
-  returnOption(optionToReturn: optionData) {
+  returnOption(optionToReturn: OptionData) {
     const removeFromIndex = this.selectedDragOptions.findIndex(o => o.value === optionToReturn.value);
     if (removeFromIndex >= 0) {
       this.selectedDragOptions.splice(removeFromIndex, 1);
@@ -216,7 +223,7 @@ export class GenerateCodingDialogComponent {
         manualInstruction: '',
         codeModel: 'NONE',
         codes: []
-      }
+      };
       if (['rule', 'instruction', 'invalid'].includes(this.elseMethod)) {
         const newResidualCode = this.schemerService.addCode(
           newVardata.codes, this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO');
@@ -296,6 +303,7 @@ export class GenerateCodingDialogComponent {
           this.dialogRef.close(newVardata);
         }
       } else if (this.generationModel === 'single-choice-some' && this.singleChoiceLongVersion) {
+        // eslint-disable-next-line eqeqeq
         this.options.filter(o => this.selectedOptions[0] && o.value == this.selectedOptions[0])
           .forEach(o => {
             const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
@@ -307,9 +315,10 @@ export class GenerateCodingDialogComponent {
                   method: 'MATCH',
                   parameters: [o.value || '']
                 }]
-              }]
+              }];
             }
           });
+        // eslint-disable-next-line eqeqeq
         this.options.filter(o => !(this.selectedOptions[0] && o.value == this.selectedOptions[0]))
           .forEach(o => {
             const newCode = this.schemerService.addCode(newVardata.codes, 'NO_CREDIT');
@@ -321,7 +330,7 @@ export class GenerateCodingDialogComponent {
                   method: 'MATCH',
                   parameters: [o.value || '']
                 }]
-              }]
+              }];
             }
           });
         newVardata.codeModel = 'RULES_ONLY';
@@ -356,20 +365,18 @@ export class GenerateCodingDialogComponent {
             method: 'MATCH',
             parameters: [this.selectedOption || '']
           });
-        } else {
-          if (this.selectedOptions.length > 0) {
-            this.selectedOptions.forEach(s => {
-              fullCreditRules.push({
-                method: 'MATCH',
-                parameters: [s]
-              });
-            });
-          } else {
+        } else if (this.selectedOptions.length > 0) {
+          this.selectedOptions.forEach(s => {
             fullCreditRules.push({
               method: 'MATCH',
-              parameters: ['']
+              parameters: [s]
             });
-          }
+          });
+        } else {
+          fullCreditRules.push({
+            method: 'MATCH',
+            parameters: ['']
+          });
         }
         const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
         if (typeof newCode !== 'string') {

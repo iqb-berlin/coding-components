@@ -20,12 +20,13 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
   selector: 'app-root',
   template: `
       <mat-drawer-container class="coder-body">
-        <mat-drawer #drawer mode="side">
+        <mat-drawer #drawer mode="over">
             <schema-checker [codingScheme]="codings1"></schema-checker>
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
           <div>
-            <button mat-icon-button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
+            <button mat-icon-button (click)="drawer.toggle()"
+                    [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
               <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
             </button>
           </div>

@@ -14,10 +14,14 @@
         </mat-form-field>
         <div class="fx-row-start-stretch fx-gap-10">
           <div class="fx-flex-fill fx-column-start-start">
-            @if (varCoding.sourceType === 'BASE') {
-              <div>Basisvariable</div>
-            } @else {
-              <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias}}</div>
+            @if (varCoding.sourceType !== 'BASE') {
+              @if (varCoding.deriveSources.length === 0) {
+                <div class="no-sources">
+                  {{ 'derive-sources.error' | translate }}
+                </div>
+              } @else {
+                <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias}}</div>
+              }
               <div>Methode der Ableitung: {{'derive-method.' + varCoding.sourceType | translate}}</div>
             }
             @if (varCoding.sourceParameters.solverExpression) {
@@ -30,7 +34,7 @@
               </div>
             }
           </div>
-          <button mat-icon-button [matTooltip]="'processing.prompt' | translate"
+          <button mat-icon-button [matTooltip]="'derive-processing.prompt' | translate"
                   [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
                   (click)="editSourceParameters()">
             <mat-icon>edit</mat-icon>
@@ -39,13 +43,13 @@
         <div class="fx-row-start-start fx-gap-5" >
           @if (schemerService.userRole === 'RW_MAXIMAL') {
             <button mat-icon-button
-                    [matMenuTriggerFor]="menuNew"
+                    [matMenuTriggerFor]="menuAddCode"
                     [matTooltip]="'code.prompt.add' | translate"
                     matTooltipPosition="above">
               <mat-icon>add</mat-icon>
             </button>
           }
-          <mat-menu #menuNew>
+          <mat-menu #menuAddCode>
             @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
               <button mat-menu-item (click)="addCode(codeType)">
                 @if (codeType === 'FULL_CREDIT') {

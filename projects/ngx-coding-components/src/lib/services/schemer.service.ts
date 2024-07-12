@@ -11,6 +11,7 @@ import {
 } from '@iqb/responses';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
+export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
 
 @Injectable({
   providedIn: 'root'
@@ -195,7 +196,7 @@ export class SchemerService {
     }
   }
 
-  getVariableAliasForId(varId?: string | string[]): string {
+  getVariableAliasById(varId?: string | string[]): string {
     if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '';
     if (typeof varId === 'string') {
       const findVar = this.codingScheme.variableCodings

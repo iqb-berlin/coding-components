@@ -4,77 +4,51 @@ import {
 } from '@angular/material/dialog';
 import { SourceProcessingType, SourceType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatButton } from '@angular/material/button';
-import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { VariableSourceParameters } from '@iqb/responses/coding-interfaces';
 import { MatOption, MatSelect } from '@angular/material/select';
+import { MatChip, MatChipListbox, MatChipRemove } from '@angular/material/chips';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { KeyValuePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SchemerService, VARIABLE_NAME_CHECK_PATTERN } from '../../services/schemer.service';
+import { VariableAliasPipe } from '../../pipes/variable-alias.pipe';
 
 export interface EditSourceParametersDialogData {
+  selfId: string,
   sourceType: SourceType,
   sourceParameters: VariableSourceParameters;
   deriveSources: string[]
 }
 
 @Component({
-  template: `
-    <h1 mat-dialog-title>{{ 'derive-header' | translate }}</h1>
-
-    <mat-dialog-content>
-      <div class="fx-column-start-stretch">
-        @if (data.sourceType !== 'BASE') {
-          <mat-form-field>
-            <mat-label>{{ 'derive-method.prompt' | translate }}</mat-label>
-            <mat-select [(value)]="data.sourceType" (selectionChange)="sourceTypeChanged()">
-              @for (st of sourceTypeList; track st) {
-                <mat-option [value]="st">
-                  {{ 'derive-method.' + st | translate }}
-                </mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        }
-
-        @if (possibleDeriveProcessing.length > 0) {
-          <div>{{ 'derive-processing.prompt' | translate }}</div>
-          @for (p of possibleDeriveProcessing; track p) {
-            <mat-checkbox [checked]="data.sourceParameters.processing?.includes(p)"
-                          (change)="alterProcessing(p, $event.checked)">
-              {{ 'derive-processing.' + p | translate }}
-            </mat-checkbox>
-          }
-        }
-        @if (data.sourceType === 'SOLVER') {
-          <mat-form-field>
-            <mat-label>{{ 'derive-processing.SOLVER_EXPRESSION' | translate }}</mat-label>
-            <input matInput [(ngModel)]="data.sourceParameters.solverExpression">
-          </mat-form-field>
-        }
-      </div>
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-raised-button color="primary" [mat-dialog-close]="data">{{ 'dialog-save' | translate }}</button>
-      <button mat-raised-button [mat-dialog-close]="false">{{ 'dialog-cancel' | translate }}</button>
-    </mat-dialog-actions>
-  `,
+  templateUrl: 'edit-source-parameters-dialog.component.html',
   standalone: true,
   imports: [
     MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule,
-    FormsModule, MatTooltip, MatFormField, MatInput, MatCheckbox, MatLabel, MatSelect, MatOption
+    FormsModule, MatTooltip, MatFormField, MatInput, MatCheckbox, MatLabel, MatSelect, MatOption, MatChipRemove,
+    MatMenu, MatChip, MatMenuTrigger, MatIcon, MatIconButton, MatMenuItem, VariableAliasPipe,
+    KeyValuePipe, MatChipListbox
   ]
 })
 export class EditSourceParametersDialog {
   sourceTypeList: SourceType[] = ['COPY_VALUE', 'CONCAT_CODE', 'SUM_CODE', 'SUM_SCORE', 'UNIQUE_VALUES', 'SOLVER'];
-  possibleDeriveProcessing: SourceProcessingType[] = []
+  possibleDeriveProcessing: SourceProcessingType[] = [];
+  possibleNewSources: ReadonlyMap<string, string> = new Map([]);
+  newVariableMode = false;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: EditSourceParametersDialogData
+    @Inject(MAT_DIALOG_DATA) public data: EditSourceParametersDialogData,
+    public schemerService: SchemerService
   ) {
+    this.newVariableMode = !this.data.selfId;
     const shadowProcessing: EditSourceParametersDialogData = {
+      selfId: this.data.selfId,
       sourceType: 'BASE',
       sourceParameters: {
         solverExpression: '',
@@ -86,27 +60,42 @@ export class EditSourceParametersDialog {
     shadowProcessing.sourceParameters.solverExpression = this.data.sourceParameters.solverExpression;
     if (this.data.sourceParameters.processing && shadowProcessing.sourceParameters.processing) {
       this.data.sourceParameters.processing.forEach(p => {
-        if (shadowProcessing.sourceParameters.processing) shadowProcessing.sourceParameters.processing.push(p)
+        if (shadowProcessing.sourceParameters.processing) shadowProcessing.sourceParameters.processing.push(p);
       });
     }
     this.data.deriveSources.forEach(p => {
-      shadowProcessing.deriveSources.push(p)
+      shadowProcessing.deriveSources.push(p);
     });
     this.data = shadowProcessing;
-    this.sourceTypeChanged();
+    this.updatePossibleDeriveProcessing();
+    this.updatePossibleNewSources();
   }
 
-  sourceTypeChanged() {
+  updatePossibleNewSources() {
+    if (this.schemerService.codingScheme) {
+      if (this.data.deriveSources.length === 0) {
+        this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
+          .filter(v => this.data.selfId !== v.id)
+          .map(v => [v.alias || v.id, v.id]));
+      } else {
+        this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
+          .filter(v => ![...this.data.deriveSources, this.data.selfId].includes(v.id))
+          .map(v => [v.id, v.alias || v.id]));
+      }
+    }
+  }
+
+  updatePossibleDeriveProcessing() {
     this.data.sourceParameters.processing = [];
     if (this.data.sourceType === 'BASE') {
-      this.possibleDeriveProcessing = ['TAKE_DISPLAYED_AS_VALUE_CHANGED', 'TAKE_EMPTY_AS_VALID']
+      this.possibleDeriveProcessing = ['TAKE_DISPLAYED_AS_VALUE_CHANGED', 'TAKE_EMPTY_AS_VALID'];
     } else if (this.data.sourceType === 'UNIQUE_VALUES') {
       this.possibleDeriveProcessing = ['REMOVE_ALL_SPACES', 'REMOVE_DISPENSABLE_SPACES',
         'TO_NUMBER', 'TO_LOWER_CASE'];
     } else if (this.data.sourceType === 'CONCAT_CODE') {
-      this.possibleDeriveProcessing = ['SORT']
+      this.possibleDeriveProcessing = ['SORT'];
     } else {
-      this.possibleDeriveProcessing = []
+      this.possibleDeriveProcessing = [];
     }
   }
 
@@ -120,4 +109,18 @@ export class EditSourceParametersDialog {
       }
     }
   }
+
+  deleteDeriveSource(varId: string) {
+    const sourcePos = this.data.deriveSources.indexOf(varId);
+    if (sourcePos >= 0) this.data.deriveSources.splice(sourcePos, 1);
+    this.updatePossibleNewSources();
+  }
+
+  addDeriveSource(varId: string) {
+    this.data.deriveSources.push(varId);
+    this.data.deriveSources.sort();
+    this.updatePossibleNewSources();
+  }
+
+  protected readonly VARIABLE_NAME_CHECK_PATTERN = VARIABLE_NAME_CHECK_PATTERN;
 }

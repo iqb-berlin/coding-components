@@ -1,6 +1,8 @@
 <div class="fx-row-start-stretch code fx-gap-10">
   @if (code) {
-    <button mat-icon-button [matMenuTriggerFor]="selectCodeType" [disabled]="schemerService.userRole !== 'RW_MAXIMAL'">
+    <button mat-icon-button [matMenuTriggerFor]="selectCodeType"
+            [matTooltip]="'code.prompt.add-' + code.type | translate" [matTooltipShowDelay]="500"
+            [disabled]="schemerService.userRole !== 'RW_MAXIMAL'">
       @if (code.type === 'FULL_CREDIT') {
         <mat-icon style="color: limegreen">done_all</mat-icon>
       } @else if (code.type === 'PARTIAL_CREDIT') {
@@ -98,7 +100,7 @@
           }
         }
       </div>
-      @if (codeModel !== 'MANUAL_ONLY') {
+      @if (codeModel !== 'MANUAL_ONLY' && !['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type)) {
         <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
                     [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
                     (codeRulesChanged)="setCodeChanged()"></code-rules>

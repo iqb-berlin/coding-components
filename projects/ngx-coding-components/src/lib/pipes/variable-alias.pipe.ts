@@ -12,6 +12,6 @@ export class VariableAliasPipe implements PipeTransform {
   ) { }
 
   transform(value?: string | string[]): string {
-    return this.schemerService.getVariableAliasForId(value);
+    return this.schemerService.getVariableAliasById(value);
   }
 }

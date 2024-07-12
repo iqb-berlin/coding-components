@@ -22,7 +22,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatDivider } from '@angular/material/divider';
 import { SchemerService } from '../services/schemer.service';
-import { GenerateCodingDialogComponent, GeneratedCodingData } from '../dialogs/generate-coding-dialog.component';
+import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/generate-coding-dialog.component';
 import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { CodesTitleComponent } from './codes-title.component';
@@ -93,24 +93,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   updateVarInfo() {
     this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
-  }
-
-  deleteDeriveSource(source: string) {
-    if (this.varCoding) {
-      const sourcePos = this.varCoding.deriveSources.indexOf(source);
-      if (sourcePos >= 0) this.varCoding.deriveSources.splice(sourcePos, 1);
-      this.varCodingChanged.emit(this.varCoding);
-      this.updateVarInfo();
-    }
-  }
-
-  addDeriveSource(v: string) {
-    if (this.varCoding) {
-      this.varCoding.deriveSources.push(v);
-      this.varCoding.deriveSources.sort();
-      this.varCodingChanged.emit(this.varCoding);
-      this.updateVarInfo();
-    }
   }
 
   getSanitizedText(text: string): SafeHtml {
@@ -212,30 +194,13 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  hasRule(ruleCode: RuleMethod): boolean {
-    if (this.varCoding && this.varCoding.codes) {
-      const myRule = this.varCoding.codes.find(
-        c => !!c.ruleSets.find(rs => !!rs.rules.find(r => r.method === ruleCode)));
-      return !!myRule;
-    }
-    return false;
-  }
-
-  residualExists(): boolean {
-    if (this.varCoding && this.varCoding.codes && this.varCoding.codes.length > 0) {
-      const firstResidualCode = this.varCoding.codes
-        .find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
-      return !!firstResidualCode;
-    }
-    return false;
-  }
-
   editSourceParameters() {
     if (this.schemerService.userRole === 'RW_MAXIMAL' && this.varCoding) {
       const dialogRef = this.editSourceParametersDialog.open(EditSourceParametersDialog, {
         width: '600px',
-        height: '400px',
+        minHeight: '400px',
         data: <EditSourceParametersDialogData>{
+          selfId: this.varCoding.alias || this.varCoding.id,
           sourceType: this.varCoding.sourceType,
           sourceParameters: this.varCoding.sourceParameters,
           deriveSources: this.varCoding.deriveSources

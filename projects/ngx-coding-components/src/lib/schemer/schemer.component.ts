@@ -13,15 +13,13 @@ import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
-import { SchemerService } from '../services/schemer.service';
+import { SchemerService, VARIABLE_NAME_CHECK_PATTERN } from '../services/schemer.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SelectVariableDialogComponent, SelectVariableDialogData } from '../dialogs/select-variable-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
 import { SimpleInputDialogComponent, SimpleInputDialogData } from '../dialogs/simple-input-dialog.component';
-
-export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
 
 @Component({
   selector: 'iqb-schemer',
