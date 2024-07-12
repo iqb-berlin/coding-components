@@ -32,7 +32,7 @@
         }
       </div>
       <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
-      <div class="var-list-buttons">
+      <div class="var-list-buttons fx-row-space-between-center">
         <button mat-button (click)="addVarScheme()"
           [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
           <mat-icon>add</mat-icon>
@@ -41,18 +41,25 @@
           (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>
-        <button mat-button [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
-          (click)="renameVarScheme()" [matTooltip]="'varlist.rename' | translate" matTooltipPosition="above">
-          <mat-icon>edit</mat-icon>
+        <button mat-button [matMenuTriggerFor]="otherFunctions" matTooltip="Load/Save..." matTooltipPosition="above">
+          <mat-icon>menu</mat-icon>
         </button>
-        <button mat-button [disabled]="(selectedCoding$ | async) === null"
-          (click)="copyVarScheme()" [matTooltip]="'varlist.copy' | translate" matTooltipPosition="above">
-          <mat-icon>content_copy</mat-icon>
-        </button>
-        <button mat-button
-          (click)="checkVarScheme()" [matTooltip]="'varlist.check' | translate" matTooltipPosition="above">
-          <mat-icon>check</mat-icon>
-        </button>
+        <mat-menu #otherFunctions="matMenu">
+          <button mat-menu-item [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE'"
+                  (click)="renameVarScheme()">
+            <mat-icon>edit</mat-icon>{{'varlist.rename' | translate}}
+          </button>
+          <button mat-menu-item [disabled]="(selectedCoding$ | async) === null" (click)="copyVarScheme()">
+            <mat-icon>content_copy</mat-icon>{{'varlist.copy' | translate}}
+          </button>
+          <button mat-menu-item (click)="checkVarScheme()">
+            <mat-icon>check</mat-icon>{{'varlist.check' | translate}}
+          </button>
+          <button mat-menu-item (click)="variableDependencyTree()" [disabled]="derivedVariables.length === 0">
+            <mat-icon>account_tree</mat-icon>{{'varlist.derived-tree.title' | translate}}
+          </button>
+        </mat-menu>
+
       </div>
     </div>
   }

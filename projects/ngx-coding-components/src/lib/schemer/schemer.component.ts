@@ -9,17 +9,19 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
-import {SchemerService, UserRoleType, VARIABLE_NAME_CHECK_PATTERN} from '../services/schemer.service';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { SchemerService, UserRoleType, VARIABLE_NAME_CHECK_PATTERN } from '../services/schemer.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SelectVariableDialogComponent, SelectVariableDialogData } from '../dialogs/select-variable-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
 import { SimpleInputDialogComponent, SimpleInputDialogData } from '../dialogs/simple-input-dialog.component';
+import { ShowDependencyTreeDialogComponent } from '../dialogs/show-dependency-tree-dialog.component';
 
 @Component({
   selector: 'iqb-schemer',
@@ -27,7 +29,7 @@ import { SimpleInputDialogComponent, SimpleInputDialogData } from '../dialogs/si
   styleUrls: ['./schemer.component.scss'], // ,    // encapsulation: ViewEncapsulation.ShadowDom
 
   standalone: true,
-  imports: [MatNavList, MatTooltip, MatListItem, MatButton, MatIcon, VarCodingComponent, AsyncPipe, TranslateModule]
+  imports: [MatNavList, MatTooltip, MatListItem, MatButton, MatIcon, VarCodingComponent, AsyncPipe, TranslateModule, MatFabButton, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 
 export class SchemerComponent implements OnDestroy, AfterViewInit {
@@ -382,6 +384,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
       dialogRef.afterClosed().subscribe();
     }
+  }
+
+  variableDependencyTree() {
+    this.showCodingProblemsDialog.open(ShowDependencyTreeDialogComponent, {
+      width: '1000px',
+      data: this.codingScheme
+    }).afterClosed().subscribe();
   }
 
   ngOnDestroy(): void {
