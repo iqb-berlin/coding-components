@@ -105,15 +105,16 @@
                     [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
                     (codeRulesChanged)="setCodeChanged()"></code-rules>
       } @else if (codeModel === 'MANUAL_ONLY') {
-        <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
+        <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
                           [style.max-height.px]="250"></code-instruction>
       }
     </div>
     @if (codeModel === 'NONE') {
-      <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()"
+      <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
                         class="fx-flex-fill" [style.max-height.px]="300"></code-instruction>
     }
-    <button mat-icon-button (click)="deleteCode(codeIndex)" [matTooltip]="'code.prompt.delete' | translate">
+    <button mat-icon-button (click)="deleteCode(codeIndex)" [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+            [matTooltip]="'code.prompt.delete' | translate">
       <mat-icon>delete</mat-icon>
     </button>
   }

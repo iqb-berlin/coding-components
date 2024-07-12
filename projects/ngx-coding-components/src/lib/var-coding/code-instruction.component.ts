@@ -1,31 +1,36 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {CodeData} from '@iqb/responses';
-import { TranslateService, TranslateModule } from "@ngx-translate/core";
-import {MatDialog} from "@angular/material/dialog";
-import {RichTextEditDialogComponent} from "../rich-text-editor/rich-text-edit-dialog.component";
-import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
+import {
+  Component, EventEmitter, Input, Output
+} from '@angular/core';
+import { CodeData } from '@iqb/responses';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
-
+import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import { UserRoleType } from '../services/schemer.service';
 
 @Component({
-    selector: 'code-instruction',
-    template: `
+  selector: 'code-instruction',
+  template: `
     @if (code) {
       <mat-card [style.padding-left.px]="12" [style.height.%]="100">
         <mat-card-subtitle class="hover-area">
           <div class="fx-row-space-between-center">
             <div class="fx-row-start-center">
-              <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.code.title' | translate}}</div>
+              <div [style.color]="'grey'" [style.font-size]="'smaller'">
+                {{'manual-instruction.code.title' | translate}}</div>
               <button mat-icon-button [matTooltip]="'manual-instruction.code.prompt-edit' | translate"
-                (click)="editTextDialog_manualInstruction()">
+                      [disabled]="userRole === 'RO'"
+                      (click)="editTextDialog_manualInstruction()">
                 <mat-icon>edit</mat-icon>
               </button>
             </div>
             <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
-              [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
+                    [disabled]="userRole === 'RO'"
+                    [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
               <mat-icon>close</mat-icon>
             </button>
           </div>
@@ -36,8 +41,8 @@ import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card
       </mat-card>
     }
     `,
-    styles: [
-        `
+  styles: [
+    `
       .hover-area .wipe-button {
         visibility: hidden;
       }
@@ -45,13 +50,14 @@ import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card
         visibility: visible;
       }
     `
-    ],
-    standalone: true,
-    imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatCardContent, TranslateModule]
+  ],
+  standalone: true,
+  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatCardContent, TranslateModule]
 })
 export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
-  @Input() public code: CodeData | undefined;
+  @Input() code: CodeData | undefined;
+  @Input() userRole: UserRoleType = 'RO';
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -92,6 +98,4 @@ export class CodeInstructionComponent {
   getSanitizedText(text: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(text);
   }
-
-  protected readonly scroll = scroll;
 }

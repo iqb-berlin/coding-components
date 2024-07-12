@@ -13,7 +13,7 @@ import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
-import { SchemerService, VARIABLE_NAME_CHECK_PATTERN } from '../services/schemer.service';
+import {SchemerService, UserRoleType, VARIABLE_NAME_CHECK_PATTERN} from '../services/schemer.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SelectVariableDialogComponent, SelectVariableDialogData } from '../dialogs/select-variable-dialog.component';
@@ -36,13 +36,18 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set codingScheme(value: CodingScheme) {
+  set codingScheme(value: CodingScheme | null) {
     this.schemerService.codingScheme = value;
     this.updateVariableLists();
   }
 
   get codingScheme(): CodingScheme | null {
     return this.schemerService.codingScheme;
+  }
+
+  @Input()
+  set userRole(value: UserRoleType) {
+    this.schemerService.userRole = value;
   }
 
   @Input()
@@ -236,10 +241,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           if (SchemerComponent.isEmptyCoding(selectedCoding)) {
             warningMessageText = 'Die verschollene Basisvariable wird gelöscht.';
           } else {
-            warningMessageText = 'Achtung: Die verschollene Basisvariable wird einschließlich aller Kodierinformationen gelöscht.';
+            warningMessageText = `Achtung: Die verschollene Basisvariable wird einschließlich
+              aller Kodierinformationen gelöscht.`;
           }
         } else {
-          warningMessageText = 'Alle Kodierinformationen der Basisvariable werden gelöscht. Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist.';
+          warningMessageText = `Alle Kodierinformationen der Basisvariable werden gelöscht.
+            Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist.`;
         }
       }
       const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
@@ -254,7 +261,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false && this.schemerService.codingScheme) {
           this.selectedCoding$.next(null);
-          this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id);
+          this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
+            .filter(c => c.id !== selectedCoding.id);
           this.updateVariableLists();
           this.codingSchemeChanged.emit(this.schemerService.codingScheme);
         }
@@ -290,7 +298,9 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         if (result !== false) {
           let errorMessage = '';
           if (VARIABLE_NAME_CHECK_PATTERN.exec(result)) {
-            if (this.schemerService.variableIdExists(result, selectedCoding.id)) errorMessage = 'data-error.variable-id.double';
+            if (this.schemerService.variableIdExists(result, selectedCoding.id)) {
+              errorMessage = 'data-error.variable-id.double';
+            }
           } else {
             errorMessage = 'data-error.variable-id.character';
           }
@@ -336,8 +346,10 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     if (selectedCoding && this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
         title: 'Kodierung kopieren',
-        prompt: 'Bitte Zielvariable wählen! Achtung: Die Kodierungsdaten der Zielvariable werden komplett überschrieben.',
-        variables: this.schemerService.codingScheme.variableCodings.filter(c => c.id !== selectedCoding.id).map(c => c.id),
+        prompt: `Bitte Zielvariable wählen! Achtung:
+          Die Kodierungsdaten der Zielvariable werden komplett überschrieben.`,
+        variables: this.schemerService.codingScheme.variableCodings
+          .filter(c => c.id !== selectedCoding.id).map(c => c.id),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
@@ -351,7 +363,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             const stringifiedCoding = JSON.stringify(selectedCoding);
             const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
             newCoding.id = targetCoding.id;
-            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings.filter(c => c.id !== targetCoding.id);
+            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
+              .filter(c => c.id !== targetCoding.id);
             this.schemerService.codingScheme.variableCodings.push(newCoding);
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);

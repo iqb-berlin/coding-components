@@ -23,7 +23,9 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
            matRipple
            [style.cursor]="'pointer'">
         <h2>{{ 'code.header' | translate }}</h2>
-        <mat-icon>swap_vert</mat-icon>
+        @if (schemerService.userRole === 'RW_MAXIMAL') {
+          <mat-icon>swap_vert</mat-icon>
+        }
       </div>
       <div class="fx-row-start-start">
         <div class="fx-column-start-start">
@@ -61,7 +63,9 @@ export class CodesTitleComponent {
   }
 
   sortCodes(event: MouseEvent) {
-    if (this.codeList) this.schemerService.sortCodes(this.codeList, event.ctrlKey);
+    if (this.codeList && this.schemerService.userRole === 'RW_MAXIMAL') {
+      this.schemerService.sortCodes(this.codeList, event.ctrlKey);
+    }
   }
 
   editProcessingAndFragments() {

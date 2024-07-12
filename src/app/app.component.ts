@@ -12,16 +12,17 @@ import {
 import {
   SchemerComponent
 } from '../../projects/ngx-coding-components/src/lib/schemer/schemer.component';
-import { SchemerToolbarComponent } from '../../projects/ngx-coding-components/src/lib/schemer-toolbar.component';
+import { SchemerStandaloneMenuComponent } from '../../projects/ngx-coding-components/src/lib/schemer-standalone-menu.component';
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
+import {UserRoleType} from "../../projects/ngx-coding-components/src/lib/services/schemer.service";
 
 @Component({
   selector: 'app-root',
   template: `
       <mat-drawer-container class="coder-body">
         <mat-drawer #drawer mode="over">
-            <schema-checker [codingScheme]="codings1"></schema-checker>
+            <scheme-checker [codingScheme]="codings1"></scheme-checker>
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
           <div>
@@ -32,17 +33,20 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
           </div>
           <iqb-schemer class="drawer-schemer"
                        [varList]="varList1"
+                       [userRole]="userRole"
                        [codingScheme]="codings1"
                        (codingSchemeChanged)="updateCodingScheme()"
           ></iqb-schemer>
         </mat-drawer-content>
       </mat-drawer-container>
-      <schemer-load-save
+      <schemer-standalone-menu
         [varList]="varList1"
+        [userRole]="userRole"
         [codingScheme]="codings1"
         (varListChanged)="setNewVarlist($event)"
+        (userRoleChanged)="userRole = $event"
         (codingSchemeChanged)="setNewCodingScheme($event)"
-        [style.height.px]="0"></schemer-load-save>
+        [style.height.px]="0"></schemer-standalone-menu>
   `,
   styles: [
     `
@@ -86,11 +90,12 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
   ],
   standalone: true,
   imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton,
-    MatIcon, SchemerComponent, SchemerToolbarComponent, MatTooltip]
+    MatIcon, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltip]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
   codings1 = new CodingScheme(sampleCodings1);
+  userRole: UserRoleType = 'RO';
   title = 'coding-components';
 
   updateCodingScheme() {

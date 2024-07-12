@@ -7,7 +7,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { ShowCodingResultsComponent } from './show-coding-results.component';
 
 @Component({
-  selector: 'schema-checker',
+  selector: 'scheme-checker',
   templateUrl: './scheme-checker.component.html',
   styleUrls: ['./scheme-checker.component.scss'],
   standalone: true,
@@ -18,7 +18,7 @@ export class SchemeCheckerComponent {
   _codingScheme: CodingScheme | null = null;
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  set codingScheme(value: CodingScheme) {
+  set codingScheme(value: CodingScheme | null) {
     this.values = {};
     this._codingScheme = value;
     if (this._codingScheme) {
