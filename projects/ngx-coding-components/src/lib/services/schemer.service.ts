@@ -91,9 +91,12 @@ export class SchemerService {
   changeNewVarIdIfExists(checkId: string): string {
     let idToCheck = checkId;
     let modifier = 0;
-    while (!!this.allVariableIds.find(v => v.toUpperCase() === idToCheck.toUpperCase())) {
+    let idFound = true;
+    while (idFound) {
+      if (modifier > 0) idToCheck = `${checkId}_${modifier}`;
+      // eslint-disable-next-line @typescript-eslint/no-loop-func
+      idFound = !!this.allVariableIds.find(v => v.toUpperCase() === idToCheck.toUpperCase());
       modifier += 1;
-      idToCheck = `${checkId}_${modifier}`;
     }
     return idToCheck;
   }

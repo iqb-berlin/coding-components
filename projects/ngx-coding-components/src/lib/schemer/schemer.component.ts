@@ -109,7 +109,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   updateVariableLists() {
     if (this.schemerService.varList && this.schemerService.varList.length > 0 &&
       this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
-      // remove orphan and empty base variables
+      // remove orphan+empty base variables
       const varListIds = this.schemerService.varList.map(v => v.id);
       const varCodingsToDelete = this.schemerService.codingScheme.variableCodings
         .filter(bv => bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv))
@@ -130,9 +130,17 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         .filter(v => v.sourceType === 'BASE').map(bv => bv.id);
       this.schemerService.varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
         const newBaseVariable = CodingFactory.createCodingVariable(vi.id);
+        newBaseVariable.alias = vi.alias || vi.id;
         if (this.schemerService.codingScheme) this.schemerService.codingScheme.variableCodings.push(newBaseVariable);
       });
     }
+    // update aliases
+    this.schemerService.varList.forEach(vi => {
+      if (this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
+        const coding = this.schemerService.codingScheme.variableCodings.find(vc => vc.id === vi.id);
+        if (coding) coding.alias = vi.alias || vi.id;
+      }
+    });
 
     this.basicVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
       this.schemerService.codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
