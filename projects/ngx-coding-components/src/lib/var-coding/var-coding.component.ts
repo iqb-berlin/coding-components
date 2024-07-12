@@ -5,7 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
-  CodeType, RuleMethod, VariableCodingData, VariableInfo
+  CodeType, VariableCodingData, VariableInfo
 } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
@@ -146,14 +146,27 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           width: '400px',
           data: <ConfirmDialogData>{
             title: 'Transformation Kodierschema',
-            content: 'Das vorhandene Kodierschema wird nach Standard "Bista2024" geändert. Fortsetzen?',
+            content: `Für die vorhandenen Codes werden - soweit erkennbar - Code-Typen und
+                      IDs nach Standard "Bista2024" geändert. Fortsetzen?`,
             confirmButtonLabel: 'Weiter',
             showCancel: true
           }
         });
         dialogRef.afterClosed().subscribe(result => {
-          if (result !== false && this.schemerService.codingScheme) {
-            alert('coming soon.');
+          if (result !== false && this.schemerService.codingScheme && this.varCoding) {
+            this.varCoding?.codes.forEach(c => {
+              if (/teilw/i.exec(c.label)) {
+                c.label = '';
+                c.type = 'PARTIAL_CREDIT';
+              } else if (/richtig/i.exec(c.label)) {
+                c.label = '';
+                c.type = 'FULL_CREDIT';
+              } else if (/falsch/i.exec(c.label)) {
+                c.label = '';
+                c.type = 'NO_CREDIT';
+              }
+            });
+            this.schemerService.sortCodes(this.varCoding.codes, true);
           }
         });
       } else {

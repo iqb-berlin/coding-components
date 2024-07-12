@@ -85,7 +85,8 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
       `
   ],
   standalone: true,
-  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatIcon, SchemerComponent, SchemerToolbarComponent, MatTooltip]
+  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton,
+    MatIcon, SchemerComponent, SchemerToolbarComponent, MatTooltip]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];

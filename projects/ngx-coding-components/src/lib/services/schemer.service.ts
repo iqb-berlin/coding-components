@@ -181,6 +181,9 @@ export class SchemerService {
           if (!['RESIDUAL', 'RESIDUAL_AUTO'].includes(t)) {
             const allCodesOfType = codeList.filter(c => c.type === t);
             if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
+          } else {
+            const allResidualCodes = codeList.filter(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+            if (allResidualCodes.length === 1) allResidualCodes[0].id = 0;
           }
         });
       }

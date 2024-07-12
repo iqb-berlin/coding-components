@@ -38,7 +38,7 @@
     "codes": [
       {
         "id": 1,
-        "label": "",
+        "label": "teilweise richtig",
         "score": 0,
         "rules": [
           {
@@ -47,6 +47,20 @@
               "22222"
             ]
           }
+        ],
+        "manualInstruction": ""
+      },
+      {
+        "id": 11,
+        "label": "",
+        "score": 0,
+        "ruleSets": [{
+          "rules": [
+          {
+            "method": "ELSE",
+            "parameters": []
+          }
+            ]}
         ],
         "manualInstruction": ""
       }
