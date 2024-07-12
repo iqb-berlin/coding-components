@@ -1,7 +1,7 @@
 {
   "name": "coding-components",
   "config": {
-    "schemer_version": "1.5.1"
+    "schemer_version": "1.6.0-beta"
   },
   "scripts": {
     "ng": "ng",

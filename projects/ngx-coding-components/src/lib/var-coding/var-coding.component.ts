@@ -146,15 +146,17 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         dialogRef.afterClosed().subscribe(result => {
           if (result !== false && this.schemerService.codingScheme && this.varCoding) {
             this.varCoding?.codes.forEach(c => {
-              if (/teilw/i.exec(c.label)) {
-                c.label = '';
-                c.type = 'PARTIAL_CREDIT';
-              } else if (/richtig/i.exec(c.label)) {
-                c.label = '';
-                c.type = 'FULL_CREDIT';
-              } else if (/falsch/i.exec(c.label)) {
-                c.label = '';
-                c.type = 'NO_CREDIT';
+              if (!c.type || c.type === 'UNSET') {
+                if (/teilw/i.exec(c.label)) {
+                  c.label = '';
+                  c.type = 'PARTIAL_CREDIT';
+                } else if (/richtig/i.exec(c.label)) {
+                  c.label = '';
+                  c.type = 'FULL_CREDIT';
+                } else if (/falsch/i.exec(c.label)) {
+                  c.label = '';
+                  c.type = 'NO_CREDIT';
+                }
               }
             });
             this.schemerService.sortCodes(this.varCoding.codes, true);

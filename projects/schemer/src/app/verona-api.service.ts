@@ -1,6 +1,6 @@
 import {Inject, Injectable} from '@angular/core';
 import { fromEvent, Observable, Subject } from 'rxjs';
-import {CodingScheme, VariableInfo, VariableInfoShort} from "@iqb/responses";
+import {CodingScheme, VariableInfo, VariableInfoShort, CodingSchemeVersionMajor, CodingSchemeVersionMinor } from "@iqb/responses";
 import {DOCUMENT} from "@angular/common";
 
 @Injectable({
@@ -55,9 +55,10 @@ export class VeronaAPIService {
       sessionId: this.sessionID,
       timeStamp: String(Date.now()),
       codingScheme: JSON.stringify(scheme),
-      codingSchemeType: 'iqb@2.0',
+      codingSchemeType: `iqb@${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`,
       variables: scheme ? scheme.variableCodings.map(c => <VariableInfoShort>{
         id: c.id,
+        // todo: add alias
         label: c.label,
         page: c.page || ''
       }) : []
@@ -69,12 +70,18 @@ export class VeronaAPIService {
   }
 }
 
+export interface VosStartCommandConfig {
+  directDownloadUrl: string,
+  role: 'guest' | 'commentator' | 'developer' | 'maintainer' | 'super';
+}
+
 export interface VosStartCommand {
   type: 'vosStartCommand'
   sessionId: string,
   codingScheme?: string,
   codingSchemeType?: string,
-  variables: VariableInfo[]
+  variables: VariableInfo[],
+  schemerConfig: VosStartCommandConfig
 }
 
 export interface VosSchemeChangedData {
@@ -82,6 +89,6 @@ export interface VosSchemeChangedData {
   sessionId: string,
   timeStamp: string,
   codingScheme: string,
-  codingSchemeType: 'iqb@2.0',
+  codingSchemeType: string,
   variables: VariableInfoShort[]
 }

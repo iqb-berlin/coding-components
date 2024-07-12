@@ -1,18 +1,31 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { CodingScheme, VariableCodingData, VariableInfo } from '@iqb/responses';
+import {
+  CodingScheme,
+  CodingSchemeVersionMajor,
+  CodingSchemeVersionMinor,
+  VariableCodingData,
+  VariableInfo
+} from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
 import { SchemerComponent } from '../../../ngx-coding-components/src/lib/schemer/schemer.component';
 import { SchemeCheckerComponent } from '../../../ngx-coding-components/src/lib/scheme-checker/scheme-checker.component';
-import { SchemerStandaloneMenuComponent } from '../../../ngx-coding-components/src/lib/schemer-standalone-menu.component';
+import {
+  SchemerStandaloneMenuComponent
+} from '../../../ngx-coding-components/src/lib/schemer-standalone-menu.component';
 import { UserRoleType } from '../../../ngx-coding-components/src/lib/services/schemer.service';
 import { VeronaAPIService, VosStartCommand } from './verona-api.service';
+import {
+  MessageDialogComponent,
+  MessageDialogData, MessageType
+} from "../../../ngx-coding-components/src/lib/dialogs/message-dialog.component";
 
 @Component({
   selector: 'app-root',
@@ -81,7 +94,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
       `
   ],
   standalone: true,
-  imports: [TranslateModule, NoopAnimationsModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent,
+  imports: [NoopAnimationsModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent,
     MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerStandaloneMenuComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
@@ -92,7 +105,8 @@ export class AppComponent implements OnInit, OnDestroy {
   userRole: UserRoleType = 'RW_MAXIMAL';
   title = 'schemer';
   constructor(
-    private veronaAPIService: VeronaAPIService
+    private veronaAPIService: VeronaAPIService,
+    private messageDialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -102,6 +116,27 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe((message: VosStartCommand) => {
         this.varList = message.variables;
         if (message.codingScheme) {
+          const compareVersionResult = CodingScheme.checkVersion(message.codingScheme);
+          if (compareVersionResult !== 'OK') {
+            let messageText;
+            if (compareVersionResult === 'MINOR_GREATER') {
+              messageText = 'Größere Nebenversion';
+            } else if (compareVersionResult === 'MAJOR_GREATER') {
+              messageText = 'Größere Hauptversion';
+            } else {
+              messageText = 'Geringere Hauptversion';
+            }
+            this.messageDialog.open(MessageDialogComponent, {
+              width: '400px',
+              data: <MessageDialogData>{
+                title: 'Achtung: Abweichende Daten-Version',
+                content: `Sie haben eine abweichende Daten-Version des Kodierschemas geladen: ${messageText}.
+                Nach dem Speichern ist das Schema auf die Version
+                ${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor} geändert.`,
+                type: MessageType.warning
+              }
+            });
+          }
           const codingScheme = JSON.parse(message.codingScheme);
           this.codings = new CodingScheme(codingScheme.variableCodings || []);
         } else {
@@ -116,6 +151,9 @@ export class AppComponent implements OnInit, OnDestroy {
             this.codings.variableCodings.push(CodingFactory.createCodingVariable(vi.id));
           }
         });
+        if (message.schemerConfig && message.schemerConfig.role && message.schemerConfig.role !== 'super') {
+          this.userRole = ['guest', 'commentator'].includes(message.schemerConfig.role) ? 'RO' : 'RW_MINIMAL';
+        }
       });
   }
 
@@ -140,7 +178,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
   setUserRole(newRole: UserRoleType) {
     this.userRole = newRole;
-    console.log(newRole);
   }
 
   ngOnDestroy(): void {
