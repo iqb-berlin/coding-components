@@ -50,15 +50,19 @@ export class VeronaAPIService {
   }
 
   sendVosSchemeChangedNotification(scheme: CodingScheme | null): void {
+    const newScheme = {
+      variableCodings: scheme ? scheme.variableCodings : [],
+      version: `${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`
+    }
     this.send(<VosSchemeChangedData>{
       type: 'vosSchemeChangedNotification',
       sessionId: this.sessionID,
       timeStamp: String(Date.now()),
-      codingScheme: JSON.stringify(scheme),
+      codingScheme: JSON.stringify(newScheme),
       codingSchemeType: `iqb@${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`,
       variables: scheme ? scheme.variableCodings.map(c => <VariableInfoShort>{
         id: c.id,
-        // todo: add alias
+        alias: c.alias,
         label: c.label,
         page: c.page || ''
       }) : []

@@ -5,7 +5,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import {
-  CodeType, VariableCodingData, VariableInfo
+  CodeType, CodingToTextMode, VariableCodingData, VariableInfo
 } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
@@ -23,7 +23,7 @@ import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-
 import { MatDivider } from '@angular/material/divider';
 import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/generate-coding-dialog.component';
-import { ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
+import {ShowCodingData, ShowCodingDialogComponent} from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { CodesTitleComponent } from './codes-title.component';
 import { CodeInstructionComponent } from './code-instruction.component';
@@ -124,9 +124,16 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     if (this.varCoding) {
       const dialogRef = this.showCodingDialog.open(ShowCodingDialogComponent, {
         width: '1000px',
-        data: this.varCoding
+        data: <ShowCodingData>{
+          varCoding: this.varCoding,
+          mode: this.schemerService.codingToTextMode
+        }
       });
-      dialogRef.afterClosed().subscribe();
+      dialogRef.afterClosed().subscribe(dialogResult => {
+        if (typeof dialogResult === 'string') {
+          this.schemerService.codingToTextMode = dialogResult as CodingToTextMode;
+        }
+      });
     }
   }
 
@@ -160,6 +167,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
               }
             });
             this.schemerService.sortCodes(this.varCoding.codes, true);
+            this.varCodingChanged.emit(this.varCoding);
           }
         });
       } else {
@@ -196,6 +204,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             type: MessageType.error
           }
         });
+      } else {
+        this.varCodingChanged.emit(this.varCoding);
       }
     }
   }
@@ -220,7 +230,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           this.varCoding.sourceType = dialogResultTyped.sourceType;
           this.varCoding.sourceParameters = dialogResultTyped.sourceParameters;
           this.varCoding.deriveSources = dialogResultTyped.deriveSources;
-          // todo: refresh lists?
+          this.varCodingChanged.emit(this.varCoding);
         }
       });
     }

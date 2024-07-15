@@ -2,29 +2,46 @@ import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { CodingAsText, ToTextFactory, VariableCodingData } from '@iqb/responses';
+import {
+  CodingAsText,
+  CodingToTextMode,
+  ToTextFactory,
+  VariableCodingData
+} from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import {MatSlideToggle, MatSlideToggleChange} from "@angular/material/slide-toggle";
+import {FormsModule} from "@angular/forms";
+import {boolean} from "mathjs";
+
+export interface ShowCodingData {
+  varCoding: VariableCodingData,
+  mode: CodingToTextMode
+}
 
 @Component({
   template: `
     <h1 mat-dialog-title>{{varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
 
     <mat-dialog-content>
+      <div class="fx-row-end-center">
+        <mat-slide-toggle [(ngModel)]="isSimpleMode" (change)="updateText($event)">
+          {{'show-coding.simple-mode-label' | translate}}</mat-slide-toggle>
+      </div>
       <div class="fx-row-start-center">
         <div class="fx-flex-row-20">{{'manual-instruction.coding.source' | translate}}:</div>
-        <div class="fx-flex-fill">{{varCodingText.source}}</div>
+        <div class="fx-flex-fill">{{varCodingText?.source}}</div>
       </div>
       <div class="fx-row-start-center">
         <div class="fx-flex-row-20">{{'processing.prompt' | translate}}:</div>
-        <div class="fx-flex-fill">{{varCodingText.processing || 'keine'}}</div>
+        <div class="fx-flex-fill">{{varCodingText?.processing || 'keine'}}</div>
       </div>
       <div class="fx-row-start-center">
         <div class="fx-flex-row-20">{{'manual-instruction.coding.title' | translate}}:</div>
-        <div class="fx-flex-fill">{{varCodingText.hasManualInstruction ? 'ja' : 'keine'}}</div>
+        <div class="fx-flex-fill">{{varCodingText?.hasManualInstruction ? 'ja' : 'keine'}}</div>
       </div>
       <h3>Codes</h3>
-      @if (varCodingText.codes.length > 0) {
+      @if (varCodingText && varCodingText.codes && varCodingText.codes.length > 0) {
         <div class="fx-row-start-center" [style.font-weight]="'bold'">
           <div class="fx-flex-row-10" [style.text-align]="'center'">Code</div>
           <div class="fx-flex-row-10" [style.text-align]="'center'">Score</div>
@@ -61,32 +78,43 @@ import { MatButton } from '@angular/material/button';
           </div>
         }
       }
-      @if (varCodingText.codes.length === 0) {
+      @if (varCodingText && varCodingText.codes && varCodingText.codes.length === 0) {
         <div>keine</div>
       }
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-raised-button color="primary"  [mat-dialog-close]="false">{{'dialog-close' | translate}}</button>
+      <button mat-raised-button color="primary"  [mat-dialog-close]="mode">{{'dialog-close' | translate}}</button>
     </mat-dialog-actions>
     `,
   styles: [
     '.code-row:nth-child(even) {background-color: #f1f1f1;}'
   ],
   standalone: true,
-  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatSlideToggle, FormsModule]
 })
 export class ShowCodingDialogComponent {
-  varCodingText: CodingAsText;
+  varCoding: VariableCodingData;
+  varCodingText: CodingAsText | undefined;
+  mode: CodingToTextMode | undefined;
+  isSimpleMode: boolean;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public varCoding: VariableCodingData) {
+  constructor(@Inject(MAT_DIALOG_DATA) public showCodingData: ShowCodingData) {
+    this.varCoding = showCodingData.varCoding;
+    this.isSimpleMode = showCodingData.mode === 'SIMPLE';
+    this.updateText(this.isSimpleMode);
+  }
+
+  updateText(newValue: MatSlideToggleChange | boolean) {
+    const booleanValue = typeof newValue === 'boolean'? newValue : newValue.checked;
+    this.mode = booleanValue ? 'SIMPLE' : 'EXTENDED';
     this.varCodingText = {
       id: this.varCoding.id,
       label: this.varCoding.label,
       source: ToTextFactory.sourceAsText(this.varCoding.id, this.varCoding.sourceType, this.varCoding.deriveSources),
       processing: ToTextFactory.processingAsText(this.varCoding.processing, this.varCoding.fragmenting),
       hasManualInstruction: !!this.varCoding.manualInstruction,
-      codes: this.varCoding.codes.map(code => ToTextFactory.codeAsText(code))
+      codes: this.varCoding.codes.map(code => ToTextFactory.codeAsText(code, this.mode))
     };
   }
 }

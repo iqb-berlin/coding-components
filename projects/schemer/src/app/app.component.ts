@@ -137,8 +137,7 @@ export class AppComponent implements OnInit, OnDestroy {
               }
             });
           }
-          const codingScheme = JSON.parse(message.codingScheme);
-          this.codings = new CodingScheme(codingScheme.variableCodings || []);
+          this.codings = new CodingScheme(message.codingScheme);
         } else {
           this.codings = new CodingScheme([]);
         }
@@ -147,8 +146,12 @@ export class AppComponent implements OnInit, OnDestroy {
           if (this.codings && this.codings.variableCodings) {
             codingForBaseVariable = this.codings.variableCodings.find(v => v.id === vi.id);
           }
-          if (!codingForBaseVariable && this.codings) {
-            this.codings.variableCodings.push(CodingFactory.createCodingVariable(vi.id));
+          if (codingForBaseVariable) {
+            codingForBaseVariable.alias = vi.alias || vi.id;
+          } else if (this.codings) {
+            const newBaseVar = CodingFactory.createCodingVariable(vi.id);
+            if (vi.alias) newBaseVar.alias = vi.alias;
+            this.codings.variableCodings.push(newBaseVar);
           }
         });
         if (message.schemerConfig && message.schemerConfig.role && message.schemerConfig.role !== 'super') {

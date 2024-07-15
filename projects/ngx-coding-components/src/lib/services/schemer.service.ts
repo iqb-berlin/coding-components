@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   CodeData,
   CodeType,
-  CodingScheme,
+  CodingScheme, CodingToTextMode,
   DeriveConcatDelimiter,
   RuleMethodParameterCount, RuleSet,
   VariableCodingData,
@@ -25,6 +25,7 @@ export class SchemerService {
   orderOfCodeTypes: CodeType[] = [
     'FULL_CREDIT', 'PARTIAL_CREDIT', 'TO_CHECK', 'NO_CREDIT', 'UNSET', 'RESIDUAL', 'RESIDUAL_AUTO'
   ];
+  codingToTextMode : CodingToTextMode = 'EXTENDED';
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {

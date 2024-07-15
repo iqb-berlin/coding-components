@@ -61,7 +61,7 @@ export class SingleCodeComponent {
   deleteCode(codeIndex?: number) {
     if (this.allCodes && typeof codeIndex !== 'undefined') {
       this.schemerService.deleteCode(this.allCodes, codeIndex);
-      this.codeDataChanged.emit();
+      this.setCodeChanged();
     }
   }
 
@@ -72,7 +72,7 @@ export class SingleCodeComponent {
   setCodeInvalid() {
     if (this.code) {
       this.code.id = null;
-      this.codeDataChanged.emit(this.code);
+      this.setCodeChanged();
     }
   }
 
@@ -84,7 +84,7 @@ export class SingleCodeComponent {
       } else {
         this.code.id = 0;
       }
-      this.codeDataChanged.emit(this.code);
+      this.setCodeChanged();
     }
   }
 }

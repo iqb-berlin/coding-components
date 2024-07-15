@@ -21,7 +21,7 @@
     </button>
     <mat-menu #selectCodeType>
       @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
-        <button mat-menu-item (click)="code.type = codeType">
+        <button mat-menu-item (click)="code.type = codeType; setCodeChanged()">
           @if (codeType === 'FULL_CREDIT') {
             <mat-icon style="color: limegreen">done_all</mat-icon>
           } @else if (codeType === 'PARTIAL_CREDIT') {
