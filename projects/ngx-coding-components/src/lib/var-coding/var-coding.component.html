@@ -9,85 +9,87 @@
       <div class="fx-column-start-stretch fx-gap-10"  [style.width.%]="30">
         <mat-form-field>
           <mat-label>{{'description-position' | translate}}</mat-label>
-          <input matInput [(ngModel)]="varCoding.label"
+          <input matInput [(ngModel)]="varCoding.label" [disabled]="schemerService.userRole === 'RO'"
             (change)="lastChangeFrom$.next('label')">
         </mat-form-field>
-        @if (varCoding.sourceType !== 'BASE') {
-          <div class="fx-column-start-stretch">
-            <mat-form-field>
-              <mat-label>{{'derive-method.prompt' | translate}}</mat-label>
-              <mat-select [(value)]="varCoding.sourceType" (selectionChange)="lastChangeFrom$.next('derive-method'); updateVarInfo()">
-                <mat-option [value]="'COPY_VALUE'">
-                  {{'derive-method.COPY_VALUE' | translate}}
-                </mat-option>
-                <mat-option [value]="'CONCAT_CODE'">
-                  {{'derive-method.CONCAT_CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SUM_CODE'">
-                  {{'derive-method.SUM_CODE' | translate}}
-                </mat-option>
-                <mat-option [value]="'SUM_SCORE'">
-                  {{'derive-method.SUM_SCORE' | translate}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <div class="fx-row-start-center fx-gap-20">
-              <div>
-                <mat-label [class]="varCoding.deriveSources.length === 0 ? 'no-sources' : ''">{{ 'derive-sources.prompt' | translate }}</mat-label>
+        <div class="fx-row-start-stretch fx-gap-10">
+          <div class="fx-flex-fill fx-column-start-start">
+            @if (varCoding.sourceType !== 'BASE') {
+              @if (varCoding.deriveSources.length === 0) {
+                <div class="no-sources">
+                  {{ 'derive-sources.error' | translate }}
+                </div>
+              } @else {
+                <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias}}</div>
+              }
+              <div>Methode der Ableitung: {{'derive-method.' + varCoding.sourceType | translate}}</div>
+            }
+            @if (varCoding.sourceParameters.solverExpression) {
+              <div>{{('derive-processing.SOLVER_EXPRESSION') | translate}}: {{varCoding.sourceParameters.solverExpression}}</div>
+            }
+            @for (p of varCoding.sourceParameters.processing; track p) {
+              <div class="fx-row-center-center" style="font-size: small">
+                <mat-icon style="font-size: small; align-content: center;">check</mat-icon>
+                <div>{{('derive-processing.' + p) | translate}}</div>
               </div>
-              <mat-chip-listbox>
-                @if (varCoding.deriveSources.length === 0) {
-                  <mat-chip [matMenuTriggerFor]="menu">{{ 'derive-sources.error' | translate }}</mat-chip>
-                }
-                @for (source of varCoding.deriveSources; track source) {
-                  <mat-chip
-                    [class]="schemerService.allVariableIds.indexOf(source) < 0 ? 'source-missing' : 'source-ok'"
-                    removable="true" (removed)="deleteDeriveSource(source)">
-                    {{source}}
-                    <mat-icon matChipRemove>cancel</mat-icon>
-                  </mat-chip>
-                }
-                @if (getNewSources(varCoding.deriveSources).length > 0) {
-                  <button mat-icon-button [matMenuTriggerFor]="menu">
-                    <mat-icon>add</mat-icon>
-                  </button>
-                }
-              </mat-chip-listbox>
-              <mat-menu #menu="matMenu">
-                @for (newSource of getNewSources(varCoding.deriveSources); track newSource) {
-                  <button mat-menu-item (click)="addDeriveSource(newSource)">
-                    {{newSource}}
-                  </button>
-                }
-              </mat-menu>
-            </div>
+            }
           </div>
-        }
-        <div class="fx-row-start-center fx-gap-5" >
-          <mat-form-field class="fx-flex-fill">
-            <mat-label>{{ 'code-model.prompt' | translate }}</mat-label>
-            <mat-select [(value)]="varCoding.codeModel">
-              <mat-option [value]="'CHOICE'">
-                {{'code-model.CHOICE' | translate}}
-              </mat-option>
-              <mat-option [value]="'VALUE_LIST'">
-                {{'code-model.VALUE_LIST' | translate}}
-              </mat-option>
-              <mat-option [value]="'NUMBER'">
-                {{'code-model.NUMBER' | translate}}
-              </mat-option>
-              <mat-option [value]="'MANUAL'">
-                {{'code-model.MANUAL' | translate}}
-              </mat-option>
-              <mat-option [value]="'NONE'">
-                {{'code-model.NONE' | translate}}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-          <button mat-icon-button (click)="smartSchemer()"
-            [matTooltip]="'click.smart-schemer' | translate">
+          <button mat-icon-button [matTooltip]="'derive-processing.prompt' | translate"
+                  [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+                  (click)="editSourceParameters()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+        <div class="fx-row-start-start fx-gap-5" >
+          <button mat-icon-button
+                  [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+                  [matMenuTriggerFor]="menuAddCode"
+                  [matTooltip]="'code.prompt.add' | translate"
+                  matTooltipPosition="above">
+            <mat-icon>add</mat-icon>
+          </button>
+          <mat-menu #menuAddCode>
+            @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
+              <button mat-menu-item (click)="addCode(codeType)">
+                @if (codeType === 'FULL_CREDIT') {
+                  <mat-icon style="color: limegreen">done_all</mat-icon>
+                } @else if (codeType === 'PARTIAL_CREDIT') {
+                  <mat-icon style="color: green">check</mat-icon>
+                } @else if (codeType === 'NO_CREDIT') {
+                  <mat-icon style="color: gold">remove_done</mat-icon>
+                } @else if (codeType === 'UNSET') {
+                  <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
+                } @else if (codeType === 'TO_CHECK') {
+                  <mat-icon style="color: blue"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/></svg></mat-icon>
+                } @else if (codeType === 'RESIDUAL') {
+                  <mat-icon>close</mat-icon>
+                } @else if (codeType === 'RESIDUAL_AUTO') {
+                  <mat-icon style="color: orangered">close</mat-icon>
+                } @else {
+                  <div>{{'code type ' + codeType + ' unknown'}}</div>
+                }
+                {{'code.prompt.add-' + codeType | translate}}
+              </button>
+              @if (codeType === 'UNSET') {
+                <mat-divider></mat-divider>
+              }
+            }
+          </mat-menu>
+          <button mat-icon-button (click)="smartSchemer($event)" [disabled]="schemerService.userRole === 'RO'"
+                  [matTooltip]="'click.smart-schemer' | translate">
             <mat-icon><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.5,5.6L5,7L6.4,4.5L5,2L7.5,3.4L10,2L8.6,4.5L10,7L7.5,5.6M19.5,15.4L22,14L20.6,16.5L22,19L19.5,17.6L17,19L18.4,16.5L17,14L19.5,15.4M22,2L20.6,4.5L22,7L19.5,5.6L17,7L18.4,4.5L17,2L19.5,3.4L22,2M13.34,12.78L15.78,10.34L13.66,8.22L11.22,10.66L13.34,12.78M14.37,7.29L16.71,9.63C17.1,10 17.1,10.65 16.71,11.04L5.04,22.71C4.65,23.1 4,23.1 3.63,22.71L1.29,20.37C0.9,20 0.9,19.35 1.29,18.96L12.96,7.29C13.35,6.9 14,6.9 14.37,7.29Z"/></svg></mat-icon>
           </button>
+          <mat-button-toggle-group
+            [(value)]="varCoding.codeModel"
+            [disabled]="schemerService.userRole === 'RO'"
+            hideSingleSelectionIndicator="true"
+          >
+            <mat-button-toggle [value]="'NONE'" [matTooltip]="'code-model.NONE' | translate"><mat-icon>vertical_split</mat-icon></mat-button-toggle>
+            <mat-button-toggle [value]="'RULES_ONLY'" [matTooltip]="'code-model.RULES_ONLY' | translate"><mat-icon>reorder</mat-icon></mat-button-toggle>
+            <mat-button-toggle [value]="'MANUAL_ONLY'" [matTooltip]="'code-model.MANUAL_ONLY' | translate">
+              <mat-icon><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#5f6368"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Z"/></svg></mat-icon>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
           <button mat-icon-button (click)="codingAsText()" [matTooltip]="'click.coding-as-text' | translate">
             <mat-icon>description</mat-icon>
           </button>
@@ -99,6 +101,7 @@
             <div class="fx-row-start-center">
               <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'manual-instruction.coding.title' | translate}}</div>
               <button mat-icon-button [matTooltip]="'manual-instruction.coding.prompt-edit' | translate"
+                      [disabled]="schemerService.userRole === 'RO'"
                 (click)="editTextDialog_manualInstruction()">
                 <mat-icon>edit</mat-icon>
               </button>
@@ -114,77 +117,18 @@
         </mat-card-content>
       </mat-card>
     </div>
-    @switch (varCoding.codeModel) {
-      @case ('MANUAL') {
-        <var-codes-manual
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-manual codes')"
-          [processing]="varCoding.processing"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (processingChanged)="lastChangeFrom$.next('var-codes-manual processing')"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-manual codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-manual>
+    <codes-title [codeList]="varCoding.codes"
+                 [fragmenting]="varCoding.fragmenting"
+                 [processing]="varCoding.processing"
+                 (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"></codes-title>
+    @if (varCoding.codes) {
+      @for (code of varCoding.codes; track code; let codeIndex = $index) {
+        <single-code (codeDataChanged)="lastChangeFrom$.next('single-code codes')" [varInfo]="varInfo"
+                     [fragmentMode]="!!varCoding.fragmenting" [codeModel]="varCoding.codeModel"
+                     [code]="code" [codeIndex]="codeIndex" [allCodes]="varCoding.codes"></single-code>
       }
-      @case ('VALUE_LIST') {
-        <var-codes-value-list
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-value-list codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-value-list processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-value-list codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-value-list>
-      }
-      @case ('CHOICE') {
-        <var-codes-choice
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-choice codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-choice processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-choice codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-choice>
-      }
-      @case ('NUMBER') {
-        <var-codes-number
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-number codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-number processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-number codeModelParameters')">
-        <!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-        </var-codes-number>
-      }
-      @default {
-        <var-codes-full
-          class="fx-flex-row-100" [style.margin-top.px]="10"
-          [codes]="varCoding.codes"
-          (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"
-          [processing]="varCoding.processing"
-          (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
-          [fragmenting]="varCoding.fragmenting"
-          (fragmentingChanged)="setFragmenting($event)"
-          [varInfo]="varInfo"
-          (codeModelParametersChanged)="lastChangeFrom$.next('var-codes-full codeModelParameters')">
-<!--          [codeModelParameters]="varCoding.codeModelParameters"-->
-
-        </var-codes-full>
+      @if (varCoding.codes.length === 0) {
+        <div class="no-codes">{{'code.no-codes' | translate}}</div>
       }
     }
   </div>

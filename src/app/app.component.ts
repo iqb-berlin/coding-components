@@ -1,49 +1,59 @@
 import { Component } from '@angular/core';
-import {CodingScheme, VariableCodingData, VariableInfo} from "@iqb/responses";
-import sampleVarList1 from '../../sample-data/var-list-1.json';
-import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
-import {CodingFactory} from "@iqb/responses/coding-factory";
+import { CodingScheme, VariableCodingData, VariableInfo } from '@iqb/responses';
+import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
-import {TranslateModule} from "@ngx-translate/core";
+import { TranslateModule } from '@ngx-translate/core';
 import {
   SchemeCheckerComponent
-} from "../../projects/ngx-coding-components/src/lib/scheme-checker/scheme-checker.component";
+} from '../../projects/ngx-coding-components/src/lib/scheme-checker/scheme-checker.component';
 import {
   SchemerComponent
-} from "../../projects/ngx-coding-components/src/lib/schemer/schemer.component";
-import {SchemerToolbarComponent} from "../../projects/ngx-coding-components/src/lib/schemer-toolbar.component";
+} from '../../projects/ngx-coding-components/src/lib/schemer/schemer.component';
+import { SchemerStandaloneMenuComponent } from '../../projects/ngx-coding-components/src/lib/schemer-standalone-menu.component';
+import sampleVarList1 from '../../sample-data/var-list-1.json';
+import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
+import {UserRoleType} from "../../projects/ngx-coding-components/src/lib/services/schemer.service";
+
 @Component({
-    selector: 'app-root',
-    template: `
+  selector: 'app-root',
+  template: `
       <mat-drawer-container class="coder-body">
-        <mat-drawer #drawer mode="side">
-            <schema-checker [codingScheme]="codings1"></schema-checker>
+        <mat-drawer #drawer mode="over">
+            <scheme-checker [codingScheme]="codings1"></scheme-checker>
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
           <div>
-            <button mat-icon-button (click)="drawer.toggle()" [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
+            <button mat-icon-button (click)="drawer.toggle()"
+                    [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
               <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
             </button>
           </div>
           <iqb-schemer class="drawer-schemer"
                        [varList]="varList1"
+                       [userRole]="userRole"
                        [codingScheme]="codings1"
                        (codingSchemeChanged)="updateCodingScheme()"
           ></iqb-schemer>
         </mat-drawer-content>
       </mat-drawer-container>
-      <schemer-load-save
+      <schemer-standalone-menu
         [varList]="varList1"
+        [userRole]="userRole"
         [codingScheme]="codings1"
         (varListChanged)="setNewVarlist($event)"
+        (userRoleChanged)="userRole = $event"
         (codingSchemeChanged)="setNewCodingScheme($event)"
-        [style.height.px]="0"></schemer-load-save>
+        [style.height.px]="0"></schemer-standalone-menu>
   `,
-    styles: [
-        `
+  styles: [
+    `
+      :host {
+        height:100%;
+        display: block;
+      }
         .coder-body {
           position: absolute;
           width: 100%;
@@ -57,17 +67,17 @@ import {SchemerToolbarComponent} from "../../projects/ngx-coding-components/src/
           align-items: stretch;
         }
       `,
-        `
+    `
         .drawer-button {
           flex: 0 0 40px;
         }
       `,
-        `
+    `
         .drawer-schemer {
           flex: 1 1 auto;
         }
       `,
-        `
+    `
         .drawer-content {
           padding: 0;
           display: flex;
@@ -77,17 +87,19 @@ import {SchemerToolbarComponent} from "../../projects/ngx-coding-components/src/
           overflow: unset;
         }
       `
-    ],
-    standalone: true,
-  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton, MatIcon, SchemerComponent, SchemerToolbarComponent, MatTooltip]
+  ],
+  standalone: true,
+  imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton,
+    MatIcon, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltip]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
   codings1 = new CodingScheme(sampleCodings1);
+  userRole: UserRoleType = 'RO';
   title = 'coding-components';
 
   updateCodingScheme() {
-    console.log(this.codings1)
+    console.log(this.codings1);
   }
 
   setNewVarlist(varList: VariableInfo[] | null) {

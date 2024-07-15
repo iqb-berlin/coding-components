@@ -4,13 +4,13 @@
       <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt.auto-coding' | translate}}</div>
       @if (code) {
         <div class="fx-row-end-center">
-          @if (varInfo?.multiple) {
+          @if (varInfo?.multiple && schemerService.userRole === 'RW_MAXIMAL') {
             <button mat-icon-button [matTooltip]="'rule-set.prompt.add' | translate"
               (click)="addRuleSet(); setTab()">
               <mat-icon>add</mat-icon>
             </button>
           }
-          @if (code.ruleSets.length > 1) {
+          @if (code.ruleSets.length > 1 && schemerService.userRole === 'RW_MAXIMAL') {
             <mat-button-toggle-group appearance="legacy"
               [(ngModel)]="code.ruleSetOperatorAnd"
               [matTooltip]="'rule-set.prompt.operator' | translate">
@@ -39,7 +39,7 @@
                 @if (schemerService.ruleMethodParameterCount[rule.method] < 0) {
                   <mat-form-field>
                     @if (rule.parameters) {
-                      <textarea matInput
+                      <textarea matInput [disabled]="schemerService.userRole === 'RO'"
                         [(ngModel)]="rule.parameters[0]"
                         (ngModelChange)="setCodeRulesChanged()"
                         cdkTextareaAutosize
@@ -51,7 +51,7 @@
                 @if (schemerService.ruleMethodParameterCount[rule.method] > 0) {
                   <mat-form-field>
                     @if (rule.parameters) {
-                      <input matInput
+                      <input matInput [disabled]="schemerService.userRole === 'RO'"
                         [(ngModel)]="rule.parameters[0]"
                         (ngModelChange)="setCodeRulesChanged()">
                     }
@@ -60,7 +60,7 @@
                 @if (schemerService.ruleMethodParameterCount[rule.method] > 1) {
                   <mat-form-field>
                     @if (rule.parameters) {
-                      <input matInput
+                      <input matInput [disabled]="schemerService.userRole === 'RO'"
                         [(ngModel)]="rule.parameters[1]"
                         (ngModelChange)="setCodeRulesChanged()">
                     }
@@ -68,11 +68,13 @@
                 }
               </div>
               <div class="fx-column-start-center">
-                <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate" (click)="deleteRule(ruleSet, ruleIndex)"
-                  [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
+                <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate"
+                        [disabled]="schemerService.userRole === 'RO'"
+                        (click)="deleteRule(ruleSet, ruleIndex)"
+                        [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
                   <mat-icon>delete</mat-icon>
                 </button>
-                @if (fragmentMode) {
+                @if (fragmentMode && schemerService.userRole === 'RW_MAXIMAL') {
                   <div>
                     <button mat-flat-button (click)="editFragmentReference(rule)"
                       [matTooltip]="'rule.reference.title' | translate">
@@ -84,13 +86,13 @@
             </div>
           }
           <div class="fx-row-space-between-center">
-              <button mat-icon-button [matMenuTriggerFor]="menu"
+              <button mat-icon-button [matMenuTriggerFor]="addRuleMenu" [disabled]="schemerService.userRole === 'RO'"
                       [matTooltip]="'rule.prompt.add' | translate">
                 <mat-icon>add</mat-icon>
               </button>
 
-            <mat-menu #menu="matMenu">
-              @for (newSource of (ruleSet.rules | possibleNewRules:varInfo:preferredDataType:fragmentMode:ruleSet.ruleOperatorAnd:ruleSet.rules.length); track newSource) {
+            <mat-menu #addRuleMenu="matMenu">
+              @for (newSource of allRules; track newSource) {
                   <button mat-menu-item
                           (click)="addRule(ruleSet, newSource)">
                     {{('rule.' + newSource) | translate}}
@@ -98,10 +100,9 @@
               }
             </mat-menu>
             @if (ruleSet.rules.length === 0) {
-              <div [matMenuTriggerFor]="menu"
-              class="no-rules">{{'rule.no-rules' | translate}}</div>
+              <div class="no-rules">{{'rule.no-rules' | translate}}</div>
             }
-            @if (varInfo && varInfo.multiple && ruleSet.rules.length > 0) {
+            @if (varInfo && varInfo.multiple && ruleSet.rules.length > 0 && schemerService.userRole === 'RW_MAXIMAL') {
               <div>
                 <button mat-flat-button (click)="editArrayReference(ruleSet)"
                   [matTooltip]="'rule-set.reference.title' | translate">
@@ -109,13 +110,13 @@
                 </button>
               </div>
             }
-            @if (code && code.ruleSets.length > 1) {
+            @if (code && code.ruleSets.length > 1 && schemerService.userRole === 'RW_MAXIMAL') {
               <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate"
                 (click)="deleteRuleSet(ruleSetIndex)">
                 <mat-icon>delete</mat-icon>
               </button>
             }
-            @if (ruleSet.rules.length > 1) {
+            @if (ruleSet.rules.length > 1 && schemerService.userRole === 'RW_MAXIMAL') {
               <mat-button-toggle-group appearance="legacy"
                 [(ngModel)]="ruleSet.ruleOperatorAnd"
                 [matTooltip]="'rule.prompt.operator' | translate">
