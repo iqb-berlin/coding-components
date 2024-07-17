@@ -158,9 +158,8 @@
         <div class="fx-column-start-stretch">
           <mat-label>{{'coding.generate.else-method.prompt' | translate}}</mat-label>
           <mat-radio-group [(ngModel)]="elseMethod" class="fx-gap-20">
-            <mat-radio-button [value]="'rule'">{{'coding.generate.else-method.rule' | translate}}</mat-radio-button>
+            <mat-radio-button [value]="'auto'">{{'coding.generate.else-method.auto' | translate}}</mat-radio-button>
             <mat-radio-button [value]="'instruction'">{{'coding.generate.else-method.instruction' | translate}}</mat-radio-button>
-            <mat-radio-button [value]="'invalid'">{{'coding.generate.else-method.invalid' | translate}}</mat-radio-button>
             <mat-radio-button [value]="'none'">{{'coding.generate.else-method.none' | translate}}</mat-radio-button>
           </mat-radio-group>
         </div>

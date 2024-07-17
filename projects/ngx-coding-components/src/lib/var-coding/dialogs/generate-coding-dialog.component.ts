@@ -85,7 +85,7 @@ export class GenerateCodingDialogComponent {
   numericMatch = '';
   numericRuleText = '';
   numericRuleError = false;
-  elseMethod: 'none' | 'rule' | 'instruction' | 'invalid' = 'rule';
+  elseMethod: 'none' | 'auto' | 'instruction' = 'none';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -96,7 +96,7 @@ export class GenerateCodingDialogComponent {
     this.generationModel = 'none';
     if (varInfo) {
       if (varInfo.valuesComplete && varInfo.values && varInfo.values.length > 0) {
-        this.elseMethod = 'invalid';
+        this.elseMethod = 'auto';
         if (varInfo.multiple) {
           this.generationModel = 'multi-choice';
           this.positionLabels = varInfo.valuePositionLabels;
@@ -110,7 +110,7 @@ export class GenerateCodingDialogComponent {
         });
         this.resetOptions();
       } else if (!varInfo.multiple) {
-        this.elseMethod = 'rule';
+        this.elseMethod = 'instruction';
         if (varInfo.type === 'integer') {
           this.generationModel = 'integer';
         } else if (varInfo.type === 'string') {
@@ -224,10 +224,13 @@ export class GenerateCodingDialogComponent {
         codeModel: 'NONE',
         codes: []
       };
-      if (['rule', 'instruction', 'invalid'].includes(this.elseMethod)) {
+      if (['auto', 'instruction'].includes(this.elseMethod)) {
         const newResidualCode = this.schemerService.addCode(
           newVardata.codes, this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO');
-        if (typeof newResidualCode !== 'string' && this.elseMethod === 'invalid') newResidualCode.id = null;
+        if (typeof newResidualCode !== 'string' && this.singleChoiceLongVersion === true) {
+          // todo: seems to fail - why?
+          newResidualCode.id = null;
+        }
       }
       if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
         const numericRules: CodingRule[] = [];

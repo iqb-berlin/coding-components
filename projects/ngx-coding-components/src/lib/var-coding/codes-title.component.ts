@@ -16,17 +16,19 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   selector: 'codes-title',
   template: `
     <div class="fx-row-space-between-start">
-      <div (click)="sortCodes($event)"
-           [matTooltip]="'code.prompt.sort' | translate"
-           [matTooltipShowDelay]="500"
-           class="fx-row-start-center fx-gap-5"
-           matRipple
-           [style.cursor]="'pointer'">
-        <h2>{{ 'code.header' | translate }}</h2>
-        @if (schemerService.userRole === 'RW_MAXIMAL') {
+      @if (schemerService.userRole === 'RW_MAXIMAL') {
+        <div (click)="sortCodes($event)"
+             [matTooltip]="'code.prompt.sort' | translate"
+             [matTooltipShowDelay]="500"
+             class="fx-row-start-center fx-gap-5"
+             matRipple
+             [style.cursor]="'pointer'">
+          <h2>{{ 'code.header' | translate }}</h2>
           <mat-icon>swap_vert</mat-icon>
-        }
-      </div>
+        </div>
+      } @else {
+        <h2>{{ 'code.header' | translate }}</h2>
+      }
       <div class="fx-row-start-start">
         <div class="fx-column-start-start">
           @for (p of processing; track p) {
