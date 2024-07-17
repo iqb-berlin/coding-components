@@ -23,11 +23,11 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
              class="fx-row-start-center fx-gap-5"
              matRipple
              [style.cursor]="'pointer'">
-          <h2>{{ 'code.header' | translate }}</h2>
+          <h1>{{ 'code.header' | translate }}</h1>
           <mat-icon>swap_vert</mat-icon>
         </div>
       } @else {
-        <h2>{{ 'code.header' | translate }}</h2>
+        <h1>{{ 'code.header' | translate }}</h1>
       }
       <div class="fx-row-start-start">
         <div class="fx-column-start-start">
