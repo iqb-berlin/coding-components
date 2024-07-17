@@ -80,7 +80,7 @@
               {{'code.type-label.' + code.type | translate}}
             </div>
           }
-          @if (!(['RESIDUAL', 'RESIDUAL_AUTO', 'NO_CREDIT'].includes(code.type))) {
+          @if (!(['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type))) {
             <mat-form-field
               [class]="code.score > 0 ? 'correct' : 'not-correct'"
               [style.width.px]="100">
@@ -88,6 +88,7 @@
               <input matInput
                      type="number"
                      required
+                     [disabled]="code.type === 'NO_CREDIT'"
                      [(ngModel)]="code.score"
                      (ngModelChange)="setCodeChanged()">
             </mat-form-field>

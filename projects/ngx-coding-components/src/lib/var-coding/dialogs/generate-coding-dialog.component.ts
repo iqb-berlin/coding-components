@@ -336,7 +336,7 @@ export class GenerateCodingDialogComponent {
               }];
             }
           });
-        newVardata.codeModel = 'RULES_ONLY';
+        // newVardata.codeModel = 'RULES_ONLY';
         this.schemerService.sortCodes(newVardata.codes, true);
         this.dialogRef.close(newVardata);
       } else if (this.generationModel === 'multi-choice' && this.multiChoiceOrderMatters) {
@@ -383,7 +383,7 @@ export class GenerateCodingDialogComponent {
         }
         const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
         if (typeof newCode !== 'string') {
-          newVardata.codeModel = 'RULES_ONLY';
+          // newVardata.codeModel = 'RULES_ONLY';
           newCode.ruleSetOperatorAnd = false;
           newCode.ruleSets = [<RuleSet>{
             ruleOperatorAnd: true,
