@@ -104,7 +104,7 @@ export class CodeRulesComponent {
           width: '400px',
           data: <SelectCodeRuleReferenceDialogData>{
             isFragmentMode: true,
-            value: rule.fragment || 'ANY'
+            value: typeof rule.fragment === 'undefined' ? 'ANY' : rule.fragment
           },
           autoFocus: false
         });

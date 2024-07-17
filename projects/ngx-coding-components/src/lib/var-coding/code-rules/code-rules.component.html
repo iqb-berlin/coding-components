@@ -74,13 +74,17 @@
                         [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
                   <mat-icon>delete</mat-icon>
                 </button>
-                @if (fragmentMode && schemerService.userRole === 'RW_MAXIMAL') {
-                  <div>
-                    <button mat-flat-button (click)="editFragmentReference(rule)"
-                      [matTooltip]="'rule.reference.title' | translate">
-                      F {{ rule.fragment | ruleReference }}
-                    </button>
-                  </div>
+                @if (fragmentMode) {
+                  @if (schemerService.userRole === 'RW_MAXIMAL') {
+                    <div>
+                      <button mat-flat-button (click)="editFragmentReference(rule)"
+                        [matTooltip]="'rule.reference.title' | translate">
+                        F {{ rule.fragment | ruleReference }}
+                      </button>
+                    </div>
+                  } @else {
+                    <div>F {{ rule.fragment | ruleReference }}</div>
+                  }
                 }
               </div>
             </div>
