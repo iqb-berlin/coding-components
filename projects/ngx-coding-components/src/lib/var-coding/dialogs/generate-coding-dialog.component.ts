@@ -227,7 +227,7 @@ export class GenerateCodingDialogComponent {
       if (['auto', 'instruction'].includes(this.elseMethod)) {
         const newResidualCode = this.schemerService.addCode(
           newVardata.codes, this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO');
-        if (typeof newResidualCode !== 'string' && this.singleChoiceLongVersion === true) {
+        if (typeof newResidualCode !== 'string' && this.singleChoiceLongVersion) {
           // todo: seems to fail - why?
           newResidualCode.id = null;
         }

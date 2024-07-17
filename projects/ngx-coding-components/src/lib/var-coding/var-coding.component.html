@@ -120,7 +120,8 @@
     <codes-title [codeList]="varCoding.codes"
                  [fragmenting]="varCoding.fragmenting"
                  [processing]="varCoding.processing"
-                 (codesChanged)="lastChangeFrom$.next('var-codes-full codes')"></codes-title>
+                 (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
+                 (fragmentingChanged)="varCoding.fragmenting = $event;lastChangeFrom$.next('var-codes-full fragmenting')"></codes-title>
     @if (varCoding.codes) {
       @for (code of varCoding.codes; track code; let codeIndex = $index) {
         <single-code (codeDataChanged)="lastChangeFrom$.next('single-code codes')" [varInfo]="varInfo"

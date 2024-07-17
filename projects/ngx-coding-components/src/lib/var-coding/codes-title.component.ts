@@ -53,7 +53,8 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton]
 })
 export class CodesTitleComponent {
-  @Output() codesChanged = new EventEmitter();
+  @Output() processingChanged = new EventEmitter<string[]>();
+  @Output() fragmentingChanged = new EventEmitter<string>();
   @Input() codeList: CodeData[] | undefined;
   @Input() fragmenting? = '';
   @Input() processing: ProcessingParameterType[] | undefined;
@@ -81,14 +82,17 @@ export class CodesTitleComponent {
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false) {
           const dialogResultTyped: EditProcessingDialogData = dialogResult;
-          this.fragmenting = dialogResultTyped.fragmenting;
+          if (this.fragmenting !== dialogResultTyped.fragmenting) {
+            this.fragmenting = dialogResultTyped.fragmenting;
+            this.fragmentingChanged.emit(this.fragmenting);
+          }
           if (this.processing) {
             this.processing.splice(0);
             dialogResultTyped.processing.forEach(p => {
               if (this.processing) this.processing.push(p);
             });
           }
-          this.codesChanged.emit();
+          this.processingChanged.emit(this.processing);
         }
       });
     }
