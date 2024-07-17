@@ -32,6 +32,13 @@ import { CodeInstructionComponent } from './code-instruction.component';
     .unique-id, .not-correct {
       border: transparent solid 2px;
     }
+    .type-residual-auto {
+      background: bisque;
+      padding: 10px 4px;
+    }
+    .type-no-residual-auto {
+      padding-left: 8px;
+    }
   `,
   standalone: true,
   imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput,

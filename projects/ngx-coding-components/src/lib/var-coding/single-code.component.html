@@ -49,8 +49,8 @@
     <div class="fx-column-start-stretch " [style.width.%]="codeModel === 'NONE' ? 60 : 100">
       <div class="code-main-data fx-row-start-center fx-gap-5">
         @if (code.id === null) {
-          <div class="fx-flex-fill" [style.padding-left.px]="8">
-            <p>{{'code.type-label.' + code.type | translate}}; {{'code.is-null' | translate}}</p>
+          <div [class]="code.type === 'RESIDUAL_AUTO' ? 'type-residual-auto fx-flex-fill' : 'fx-flex-fill type-no-residual-auto'">
+            {{'code.type-label.' + code.type | translate}}; {{'code.is-null' | translate}}
           </div>
           <button mat-icon-button [style.width.px]="50"
                   (click)="setCodeValid()"
@@ -75,7 +75,8 @@
                      (ngModelChange)="setCodeChanged()">
             </mat-form-field>
           } @else {
-            <div class="fx-flex-fill" style="align-content: center">
+            <div [class]="code.type === 'RESIDUAL_AUTO' ? 'type-residual-auto fx-flex-fill' : 'fx-flex-fill'"
+                 style="align-content: center">
               {{'code.type-label.' + code.type | translate}}
             </div>
           }
@@ -104,14 +105,18 @@
         <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
                     [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
                     (codeRulesChanged)="setCodeChanged()"></code-rules>
-      } @else if (codeModel === 'MANUAL_ONLY') {
+      } @else if (codeModel === 'MANUAL_ONLY' && code.type !== 'RESIDUAL_AUTO') {
         <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
                           [style.max-height.px]="250"></code-instruction>
       }
     </div>
     @if (codeModel === 'NONE') {
-      <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
-                        class="fx-flex-fill" [style.max-height.px]="300"></code-instruction>
+      @if (code.type === 'RESIDUAL_AUTO') {
+        <div class="fx-flex-fill"></div>
+      }  @else {
+        <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
+                          class="fx-flex-fill" [style.max-height.px]="300"></code-instruction>
+      }
     }
     <button mat-icon-button (click)="deleteCode(codeIndex)" [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
             [matTooltip]="'code.prompt.delete' | translate">
