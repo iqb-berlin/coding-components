@@ -140,36 +140,24 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   smartSchemer(event: MouseEvent) {
     if (this.varCoding) {
       if (event.ctrlKey) {
-        const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
-          width: '400px',
-          data: <ConfirmDialogData>{
-            title: 'Transformation Kodierschema',
-            content: `Für die vorhandenen Codes werden - soweit erkennbar - Code-Typen und
-                      IDs nach Standard "Bista2024" geändert. Fortsetzen?`,
-            confirmButtonLabel: 'Weiter',
-            showCancel: true
-          }
-        });
-        dialogRef.afterClosed().subscribe(result => {
-          if (result !== false && this.schemerService.codingScheme && this.varCoding) {
-            this.varCoding?.codes.forEach(c => {
-              if (!c.type || c.type === 'UNSET') {
-                if (/teilw/i.exec(c.label)) {
-                  c.label = '';
-                  c.type = 'PARTIAL_CREDIT';
-                } else if (/richtig/i.exec(c.label)) {
-                  c.label = '';
-                  c.type = 'FULL_CREDIT';
-                } else if (/falsch/i.exec(c.label)) {
-                  c.label = '';
-                  c.type = 'NO_CREDIT';
-                }
+        if (this.schemerService.codingScheme && this.varCoding) {
+          this.varCoding?.codes.forEach(c => {
+            if (!c.type || c.type === 'UNSET') {
+              if (/teilw/i.exec(c.label)) {
+                c.label = '';
+                c.type = 'PARTIAL_CREDIT';
+              } else if (/richtig/i.exec(c.label)) {
+                c.label = '';
+                c.type = 'FULL_CREDIT';
+              } else if (/falsch/i.exec(c.label)) {
+                c.label = '';
+                c.type = 'NO_CREDIT';
               }
-            });
-            this.schemerService.sortCodes(this.varCoding.codes, true);
-            this.varCodingChanged.emit(this.varCoding);
-          }
-        });
+            }
+          });
+          this.schemerService.sortCodes(this.varCoding.codes, true);
+          this.varCodingChanged.emit(this.varCoding);
+        }
       } else {
         const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
           width: '1000px',

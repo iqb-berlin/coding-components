@@ -29,7 +29,7 @@ The steps to publish a new release of the library:
 
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/iqb-berlin/coding-components)
 
-The component `schemer` of this repo is published as a [Verona](https://verona-interfaces.github.io) module. This way, you can load it in any application supporting the specification. See the [release section](https://github.com/iqb-berlin/coding-components/releases/latest) of this repo to get it.
+The component `schemer` of this repo is published as a [Verona](https://verona-interfaces.github.io) module. This way, you can load it in any application supporting the specification. See the [release section](https://github.com/iqb-berlin/coding-components/releases/latest) of this repo to get it. See 
 
 The project `schemer` of this repo is a simple wrapper around the component. 
 
@@ -40,7 +40,7 @@ The steps to publish a new release of the schemer:
 * update the version in `package.json` in the repo root: Path `config.schemer_version`
 * Build: Use the script `build_sc` in `package.json`
 * Pack: Use the script `pack_sc` in `package.json`; you find the new schemer in the folder `dist`, filename `iqb-schemer@<version>.html`
-* Commit, push and create a new release; add the schemer file to the release 
+* Commit, push and create a new release; add the schemer file to the release as asset 
 
  
  
