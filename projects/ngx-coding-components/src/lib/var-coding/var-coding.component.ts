@@ -28,7 +28,6 @@ import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-
 import { CodesTitleComponent } from './codes-title.component';
 import { CodeInstructionComponent } from './code-instruction.component';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
 import { SingleCodeComponent } from './single-code.component';
 import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
@@ -65,7 +64,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     private showCodingDialog: MatDialog,
     private generateCodingDialog: MatDialog,
     private messageDialog: MatDialog,
-    private confirmDialog: MatDialog,
     private editSourceParametersDialog: MatDialog
   ) { }
 

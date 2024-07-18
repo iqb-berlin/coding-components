@@ -2,11 +2,9 @@ import {
   Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  CodeData, CodingRule, RuleMethod, RuleSet, VariableInfo
-} from '@iqb/responses';
+import { CodeData, VariableInfo } from '@iqb/responses';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import { TranslateModule } from '@ngx-translate/core';
+import {TranslateModule, TranslateService} from '@ngx-translate/core';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatInput } from '@angular/material/input';
@@ -26,6 +24,8 @@ import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
 } from '../../dialogs/select-code-rule-reference-dialog.component';
+import {CodeRuleListComponent} from "./code-rule-list.component";
+import {MessageDialogComponent, MessageDialogData, MessageType} from "../../dialogs/message-dialog.component";
 
 @Component({
   selector: 'code-rules',
@@ -35,40 +35,23 @@ import {
   imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup,
     ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, MatTab, MatFormField,
     MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule,
-    PossibleNewRulesPipe, RuleReferencePipe, JsonPipe]
+    PossibleNewRulesPipe, RuleReferencePipe, JsonPipe, CodeRuleListComponent]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
   @Input() varInfo: VariableInfo | undefined;
   @Input() fragmentMode: boolean | undefined;
-  showCodeButtonsOf = '';
   @ViewChild(MatTabGroup) ruleSetElement: MatTabGroup | undefined;
-  allRules: RuleMethod[] = ['MATCH', 'MATCH_REGEX', 'NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_LESS_THAN',
-    'NUMERIC_MORE_THAN', 'NUMERIC_MAX', 'NUMERIC_MIN', 'IS_EMPTY', 'IS_NULL', 'IS_TRUE', 'IS_FALSE'];
 
   constructor(
-    public editRuleReferenceDialog: MatDialog,
+    private messageDialog: MatDialog,
+    private translateService: TranslateService,
     public schemerService: SchemerService
   ) {}
 
   setCodeRulesChanged() {
     this.codeRulesChanged.emit(this.code);
-  }
-
-  addRule(ruleSet: RuleSet, newRuleMethod: RuleMethod) {
-    if (ruleSet) {
-      const newRule: CodingRule = {
-        method: newRuleMethod
-      };
-      const paramCount = this.schemerService.ruleMethodParameterCount[newRuleMethod];
-      if (paramCount !== 0) {
-        newRule.parameters = [''];
-        if (paramCount > 1) newRule.parameters.push('');
-      }
-      ruleSet.rules.push(newRule);
-      this.setCodeRulesChanged();
-    }
   }
 
   addRuleSet() {
@@ -82,56 +65,17 @@ export class CodeRulesComponent {
     }
   }
 
-  deleteRule(ruleSet: RuleSet, ruleToDeleteIndex: number) {
-    console.log(ruleSet, ruleToDeleteIndex);
-    if (ruleSet && ruleToDeleteIndex >= 0) {
-      ruleSet.rules.splice(ruleToDeleteIndex, 1);
-      this.setCodeRulesChanged();
-    }
-  }
-
   deleteRuleSet(ruleSetToDeleteIndex: number) {
     if (this.code && ruleSetToDeleteIndex >= 0) {
       this.code.ruleSets.splice(ruleSetToDeleteIndex, 1);
       this.setCodeRulesChanged();
-    }
-  }
-
-  editFragmentReference(rule: CodingRule) {
-    if (rule) {
-      const dialogRef = this.editRuleReferenceDialog.open(
-        SelectCodeRuleReferenceDialogComponent, {
-          width: '400px',
-          data: <SelectCodeRuleReferenceDialogData>{
-            isFragmentMode: true,
-            value: typeof rule.fragment === 'undefined' ? 'ANY' : rule.fragment
-          },
-          autoFocus: false
-        });
-      dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
-          rule.fragment = dialogResult;
-          this.setCodeRulesChanged();
-        }
-      });
-    }
-  }
-
-  editArrayReference(ruleSet: RuleSet) {
-    if (ruleSet) {
-      const dialogRef = this.editRuleReferenceDialog.open(
-        SelectCodeRuleReferenceDialogComponent, {
-          width: '400px',
-          data: <SelectCodeRuleReferenceDialogData>{
-            isFragmentMode: false,
-            value: ruleSet.valueArrayPos || 'ANY'
-          },
-          autoFocus: false
-        });
-      dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
-          ruleSet.valueArrayPos = dialogResult;
-          this.setCodeRulesChanged();
+    } else {
+      this.messageDialog.open(MessageDialogComponent, {
+        width: '400px',
+        data: <MessageDialogData>{
+          title: this.translateService.instant('rule-set.prompt.delete'),
+          content: this.translateService.instant('rule-set.delete-error'),
+          type: MessageType.error
         }
       });
     }

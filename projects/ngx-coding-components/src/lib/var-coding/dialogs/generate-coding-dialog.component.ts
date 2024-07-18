@@ -110,7 +110,7 @@ export class GenerateCodingDialogComponent {
         });
         this.resetOptions();
       } else if (!varInfo.multiple) {
-        this.elseMethod = 'instruction';
+        this.elseMethod = 'auto';
         if (varInfo.type === 'integer') {
           this.generationModel = 'integer';
         } else if (varInfo.type === 'string') {
