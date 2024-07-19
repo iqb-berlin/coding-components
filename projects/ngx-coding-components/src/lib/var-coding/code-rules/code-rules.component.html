@@ -6,7 +6,7 @@
         <div class="fx-row-end-center">
           @if (varInfo?.multiple && schemerService.userRole === 'RW_MAXIMAL') {
             <button mat-icon-button [matTooltip]="'rule-set.prompt.add' | translate"
-              (click)="addRuleSet(); setTab()">
+              (click)="addRuleSet()">
               <mat-icon>add</mat-icon>
             </button>
           }
@@ -24,11 +24,10 @@
   </mat-card-subtitle>
   <mat-card-content class="fx-column-start-stretch" [style.overflow-x]="'auto'">
     @if (code && code.ruleSets.length > 1) {
-      <mat-tab-group dynamicHeight class="fx-row-start-stretch">
+      <mat-tab-group [dynamicHeight]="false">
         @for (ruleSet of code.ruleSets; track ruleSet; let ruleSetIndex = $index) {
-          <mat-tab class="fx-column-start-stretch"
-            [label]="'Regelsatz ' + (ruleSetIndex + 1).toString(10)"
-            [style.overflow-x]="'auto'">
+          <mat-tab [label]="'Regelsatz ' + (ruleSetIndex + 1).toString(10)"
+                   [style.overflow-x]="'auto'">
             <code-rule-list [fragmentMode]="fragmentMode || false" [ruleSet]="ruleSet" class="fx-flex-fill"
                             [arrayMode]="varInfo && varInfo.multiple || false"
                             (deleteRuleSetRequested)="deleteRuleSet(ruleSetIndex)"

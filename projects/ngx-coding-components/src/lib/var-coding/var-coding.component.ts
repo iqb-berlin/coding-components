@@ -23,7 +23,7 @@ import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-
 import { MatDivider } from '@angular/material/divider';
 import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/generate-coding-dialog.component';
-import {ShowCodingData, ShowCodingDialogComponent} from '../dialogs/show-coding-dialog.component';
+import { ShowCodingData, ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { CodesTitleComponent } from './codes-title.component';
 import { CodeInstructionComponent } from './code-instruction.component';

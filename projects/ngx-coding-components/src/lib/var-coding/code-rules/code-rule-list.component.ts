@@ -1,25 +1,25 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import {CodingRule, RuleMethod, RuleSet} from '@iqb/responses';
+import { CodingRule, RuleMethod, RuleSet } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {MatButton, MatIconButton} from '@angular/material/button';
-import {CdkTextareaAutosize} from "@angular/cdk/text-field";
-import {FormsModule} from "@angular/forms";
-import {MatInput} from "@angular/material/input";
-import {RuleReferencePipe} from "../../pipes/rule-reference.pipe";
-import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
-import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
-import {SchemerService} from "../../services/schemer.service";
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
+import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
+import { SchemerService } from '../../services/schemer.service';
 import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
-} from "../../dialogs/select-code-rule-reference-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
+} from '../../dialogs/select-code-rule-reference-dialog.component';
 
 @Component({
   selector: 'code-rule-list',
@@ -149,7 +149,9 @@ import {MatDialog} from "@angular/material/dialog";
     `
   ],
   standalone: true,
-  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton, CdkTextareaAutosize, FormsModule, MatButton, MatFormField, MatInput, RuleReferencePipe, MatButtonToggle, MatButtonToggleGroup, MatMenu, MatMenuItem, MatMenuTrigger]
+  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton, CdkTextareaAutosize,
+    FormsModule, MatButton, MatFormField, MatInput, RuleReferencePipe, MatButtonToggle, MatButtonToggleGroup,
+    MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class CodeRuleListComponent {
   @Output() codeRulesChanged = new EventEmitter();

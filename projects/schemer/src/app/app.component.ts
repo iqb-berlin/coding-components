@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Subject, takeUntil } from 'rxjs';
 import {
   CodingScheme,
@@ -11,7 +12,6 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
 import {
   SchemerStandaloneMenuComponent
@@ -61,7 +61,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
       `
   ],
   standalone: true,
-  imports: [NoopAnimationsModule,
+  imports: [BrowserAnimationsModule,
     MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerStandaloneMenuComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {

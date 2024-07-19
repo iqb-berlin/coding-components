@@ -8,14 +8,14 @@ import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/materi
 import { TranslateModule } from '@ngx-translate/core';
 import {
   SchemeCheckerComponent
-} from '../../projects/ngx-coding-components/src/lib/scheme-checker/scheme-checker.component';
+} from '@ngx-coding-components/scheme-checker/scheme-checker.component';
 import {
   SchemerComponent
-} from '../../projects/ngx-coding-components/src/lib/schemer/schemer.component';
-import { SchemerStandaloneMenuComponent } from '../../projects/ngx-coding-components/src/lib/schemer-standalone-menu.component';
+} from '@ngx-coding-components/schemer/schemer.component';
+import { SchemerStandaloneMenuComponent } from '@ngx-coding-components/schemer-standalone-menu.component';
+import { UserRoleType } from '@ngx-coding-components/services/schemer.service';
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
-import {UserRoleType} from "../../projects/ngx-coding-components/src/lib/services/schemer.service";
 
 @Component({
   selector: 'app-root',
@@ -94,8 +94,8 @@ import {UserRoleType} from "../../projects/ngx-coding-components/src/lib/service
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
-  codings1 = new CodingScheme(sampleCodings1);
-  userRole: UserRoleType = 'RO';
+  codings1 = new CodingScheme(sampleCodings1.variableCodings);
+  userRole: UserRoleType = 'RW_MAXIMAL';
   title = 'coding-components';
 
   updateCodingScheme() {

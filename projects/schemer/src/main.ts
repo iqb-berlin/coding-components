@@ -1,23 +1,23 @@
-import {enableProdMode, importProvidersFrom} from '@angular/core';
+import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { createApplication } from '@angular/platform-browser';
+import { createCustomElement } from '@angular/elements';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { SchemerTranslateLoader } from '@ngx-coding-components/translations/schemer-translate-loader';
+import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
-import {createApplication} from "@angular/platform-browser";
-import {createCustomElement} from "@angular/elements";
-import {AppComponent} from "./app/app.component";
-import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
-import {SchemerTranslateLoader} from "../../ngx-coding-components/src/lib/translations/schemer-translate-loader";
 import 'zone.js';
-
-
 
 if (environment.production) {
   enableProdMode();
 }
- // bootstrapApplication(AppComponent, appConfig)
- //   .catch((err) => console.error(err));
-
+// bootstrapApplication(AppComponent, appConfig)
+//   .catch((err) => console.error(err));
 
 (async () => {
-  const app = await createApplication({providers: [
+  const app = await createApplication({
+    providers: [
+      provideAnimations(),
       importProvidersFrom(
         TranslateModule.forRoot({
           defaultLanguage: 'de',
@@ -25,8 +25,9 @@ if (environment.production) {
             provide: TranslateLoader,
             useClass: SchemerTranslateLoader
           }
-        }),)]});
+        }))]
+  });
 
-  const schemer = createCustomElement(AppComponent, {injector: app.injector});
+  const schemer = createCustomElement(AppComponent, { injector: app.injector });
   customElements.define('app-root', schemer);
 })();

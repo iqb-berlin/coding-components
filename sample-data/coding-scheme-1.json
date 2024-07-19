@@ -41,15 +41,18 @@
           "id": 1,
           "label": "teilweise richtig",
           "score": 0,
-          "rules": [
+          "ruleSets": [
             {
-              "method": "MATCH",
-              "parameters": [
-                "22222"
-              ]
-            }
-          ],
-          "manualInstruction": ""
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": [
+                    "22222"
+                  ]
+                }
+              ],
+              "manualInstruction": ""
+            }]
         },
         {
           "id": 11,

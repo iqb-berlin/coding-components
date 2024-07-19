@@ -14,7 +14,6 @@ import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
-
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { JsonPipe } from '@angular/common';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
@@ -51,11 +50,14 @@ export class CodeRulesComponent {
 
   addRuleSet() {
     if (this.code) {
-      this.code.ruleSets.push({
+      const rs = this.code.ruleSets;
+      this.code.ruleSets = [];
+      rs.push({
         valueArrayPos: -1,
         ruleOperatorAnd: false,
         rules: []
       });
+      this.code.ruleSets = rs;
       this.setCodeRulesChanged();
     }
   }
