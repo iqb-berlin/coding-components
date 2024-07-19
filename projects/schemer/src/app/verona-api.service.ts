@@ -1,7 +1,9 @@
-import {Inject, Injectable} from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { fromEvent, Observable, Subject } from 'rxjs';
-import {CodingScheme, VariableInfo, VariableInfoShort, CodingSchemeVersionMajor, CodingSchemeVersionMinor } from "@iqb/responses";
-import {DOCUMENT} from "@angular/common";
+import {
+  CodingScheme, VariableInfo, VariableInfoShort, CodingSchemeVersionMajor, CodingSchemeVersionMinor
+} from '@iqb/responses';
+import { DOCUMENT } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +13,7 @@ export class VeronaAPIService {
   metadata: Record<string, string> = {};
   private _vosStartCommand = new Subject<VosStartCommand>();
 
+  // eslint-disable-next-line class-methods-use-this
   private isStandalone = (): boolean => window === window.parent;
 
   constructor(@Inject(DOCUMENT) private document: Document) {
@@ -53,7 +56,7 @@ export class VeronaAPIService {
     const newScheme = {
       variableCodings: scheme ? scheme.variableCodings : [],
       version: `${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`
-    }
+    };
     this.send(<VosSchemeChangedData>{
       type: 'vosSchemeChangedNotification',
       sessionId: this.sessionID,

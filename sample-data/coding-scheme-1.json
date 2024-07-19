@@ -1,81 +1,86 @@
-[
-  {
-    "id": "Otto",
-    "label": "",
-    "sourceType": "BASE",
-    "deriveSources": [],
-    "processing": [
-      "REMOVE_WHITE_SPACES"
-    ],
-    "manualInstruction": "",
-    "codes": []
-  },
-  {
-    "id": "Paul",
-    "label": "",
-    "sourceType": "BASE",
-    "deriveSources": [],
-    "processing": [],
-    "manualInstruction": "",
-    "codes": []
-  },
-  {
-    "id": "Schnecke",
-    "label": "Schnecke",
-    "sourceType": "BASE",
-    "deriveSources": [],
-    "processing": [],
-    "manualInstruction": "ss",
-    "codes": []
-  },
-  {
-    "id": "Susi",
-    "label": "",
-    "sourceType": "BASE",
-    "deriveSources": [],
-    "processing": [],
-    "manualInstruction": "",
-    "codes": [
-      {
-        "id": 1,
-        "label": "teilweise richtig",
-        "score": 0,
-        "rules": [
-          {
-            "method": "MATCH",
-            "parameters": [
-              "22222"
-            ]
-          }
-        ],
-        "manualInstruction": ""
-      },
-      {
-        "id": 11,
-        "label": "",
-        "score": 0,
-        "ruleSets": [{
+{
+  "variableCodings": [
+    {
+      "id": "Otto",
+      "label": "",
+      "sourceType": "BASE",
+      "deriveSources": [],
+      "processing": [
+        "REMOVE_WHITE_SPACES"
+      ],
+      "manualInstruction": "",
+      "codes": []
+    },
+    {
+      "id": "Paul",
+      "label": "",
+      "sourceType": "BASE",
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codes": []
+    },
+    {
+      "id": "Schnecke",
+      "label": "Schnecke",
+      "sourceType": "BASE",
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "ss",
+      "codes": []
+    },
+    {
+      "id": "Susi",
+      "label": "",
+      "sourceType": "BASE",
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codes": [
+        {
+          "id": 1,
+          "label": "teilweise richtig",
+          "score": 0,
           "rules": [
-          {
-            "method": "ELSE",
-            "parameters": []
-          }
-            ]}
-        ],
-        "manualInstruction": ""
-      }
-    ]
-  },
-  {
-    "id": "ss",
-    "label": "",
-    "sourceType": "CONCAT_CODE",
-    "deriveSources": [
-      "Otto",
-      "Paul"
-    ],
-    "processing": [],
-    "manualInstruction": "",
-    "codes": []
-  }
-]
+            {
+              "method": "MATCH",
+              "parameters": [
+                "22222"
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 11,
+          "label": "",
+          "score": 0,
+          "ruleSets": [
+            {
+              "rules": [
+                {
+                  "method": "ELSE",
+                  "parameters": []
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "ss",
+      "label": "",
+      "sourceType": "CONCAT_CODE",
+      "deriveSources": [
+        "Otto",
+        "Paul"
+      ],
+      "processing": [],
+      "manualInstruction": "",
+      "codes": []
+    }
+  ],
+  "version": "3.0"
+}

@@ -4,7 +4,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { CodeData, VariableInfo } from '@iqb/responses';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import {TranslateModule, TranslateService} from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatInput } from '@angular/material/input';
@@ -17,15 +17,10 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { JsonPipe } from '@angular/common';
-import { PossibleNewRulesPipe } from '../../pipes/possible-new-rules.pipe';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService } from '../../services/schemer.service';
-import {
-  SelectCodeRuleReferenceDialogComponent,
-  SelectCodeRuleReferenceDialogData
-} from '../../dialogs/select-code-rule-reference-dialog.component';
-import {CodeRuleListComponent} from "./code-rule-list.component";
-import {MessageDialogComponent, MessageDialogData, MessageType} from "../../dialogs/message-dialog.component";
+import { CodeRuleListComponent } from './code-rule-list.component';
+import { MessageDialogComponent, MessageDialogData, MessageType } from '../../dialogs/message-dialog.component';
 
 @Component({
   selector: 'code-rules',
@@ -35,7 +30,7 @@ import {MessageDialogComponent, MessageDialogData, MessageType} from "../../dial
   imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup,
     ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, MatTab, MatFormField,
     MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule,
-    PossibleNewRulesPipe, RuleReferencePipe, JsonPipe, CodeRuleListComponent]
+    RuleReferencePipe, JsonPipe, CodeRuleListComponent]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();

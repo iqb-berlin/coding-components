@@ -364,6 +364,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             const stringifiedCoding = JSON.stringify(selectedCoding);
             const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
             newCoding.id = targetCoding.id;
+            newCoding.alias = targetCoding.alias;
             this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
               .filter(c => c.id !== targetCoding.id);
             this.schemerService.codingScheme.variableCodings.push(newCoding);

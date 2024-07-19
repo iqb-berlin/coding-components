@@ -13,8 +13,8 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "paths": {
-      "ngx-coding-components": [
-        "dist/ngx-coding-components"
+      "@ngx-coding-components/*": [
+        "projects/ngx-coding-components/src/lib/*"
       ]
     },
     "sourceMap": true,

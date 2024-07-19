@@ -11,46 +11,28 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
-import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
-import { SchemerComponent } from '../../../ngx-coding-components/src/lib/schemer/schemer.component';
-import { SchemeCheckerComponent } from '../../../ngx-coding-components/src/lib/scheme-checker/scheme-checker.component';
 import {
   SchemerStandaloneMenuComponent
-} from '../../../ngx-coding-components/src/lib/schemer-standalone-menu.component';
-import { UserRoleType } from '../../../ngx-coding-components/src/lib/services/schemer.service';
-import { VeronaAPIService, VosStartCommand } from './verona-api.service';
+} from '@ngx-coding-components/schemer-standalone-menu.component';
+import { UserRoleType } from '@ngx-coding-components/services/schemer.service';
 import {
   MessageDialogComponent,
   MessageDialogData, MessageType
-} from "../../../ngx-coding-components/src/lib/dialogs/message-dialog.component";
+} from '@ngx-coding-components/dialogs/message-dialog.component';
+import { SchemerComponent } from '@ngx-coding-components/schemer/schemer.component';
+import { VeronaAPIService, VosStartCommand } from './verona-api.service';
 
 @Component({
   selector: 'app-root',
   template: `
-    <mat-drawer-container class="coder-body">
-      <mat-drawer #drawer mode="side">
-        <scheme-checker [codingScheme]="codings"></scheme-checker>
-      </mat-drawer>
-      <mat-drawer-content class="drawer-content">
-        @if (isStandalone) {
-          <div>
-            <button mat-icon-button (click)="drawer.toggle()"
-                    [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
-              <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
-            </button>
-          </div>
-        }
-        <iqb-schemer class="drawer-schemer"
-          [varList]="varList"
-          [codingScheme]="codings"
-          [userRole]="userRole"
-          (codingSchemeChanged)="emitCodingSchemeChanged()"
-        ></iqb-schemer>
-      </mat-drawer-content>
-    </mat-drawer-container>
+    <iqb-schemer class="coder-body"
+      [varList]="varList"
+      [codingScheme]="codings"
+      [userRole]="userRole"
+      (codingSchemeChanged)="emitCodingSchemeChanged()"
+    ></iqb-schemer>
     @if (isStandalone) {
       <schemer-standalone-menu
         [varList]="varList"
@@ -76,26 +58,11 @@ import {
           justify-content: space-between;
           align-items: stretch;
         }
-      `,
-    `
-        .drawer-schemer {
-          flex: 1 1 auto;
-        }
-      `,
-    `
-        .drawer-content {
-          padding: 0;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: stretch;
-          overflow: unset;
-        }
       `
   ],
   standalone: true,
-  imports: [NoopAnimationsModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent,
-    MatDrawerContent, MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerStandaloneMenuComponent]
+  imports: [NoopAnimationsModule,
+    MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerStandaloneMenuComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

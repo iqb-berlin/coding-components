@@ -41,6 +41,10 @@
           (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>
+        <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
+                [matTooltip]="'varlist.copy' | translate" (click)="copyVarScheme()" matTooltipPosition="above">
+          <mat-icon>content_copy</mat-icon>
+        </button>
         <button mat-button [matMenuTriggerFor]="otherFunctions" matTooltip="Load/Save..." matTooltipPosition="above">
           <mat-icon>menu</mat-icon>
         </button>
@@ -48,9 +52,6 @@
           <button mat-menu-item (click)="renameVarScheme()"
                   [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'">
             <mat-icon>edit</mat-icon>{{'varlist.rename' | translate}}
-          </button>
-          <button mat-menu-item [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'" (click)="copyVarScheme()">
-            <mat-icon>content_copy</mat-icon>{{'varlist.copy' | translate}}
           </button>
           <button mat-menu-item (click)="checkVarScheme()">
             <mat-icon>check</mat-icon>{{'varlist.check' | translate}}

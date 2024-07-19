@@ -25,7 +25,7 @@
   <mat-card-content class="fx-column-start-stretch" [style.overflow-x]="'auto'">
     @if (code && code.ruleSets.length > 1) {
       <mat-tab-group dynamicHeight class="fx-row-start-stretch">
-        @for (ruleSet of code?.ruleSets; track ruleSet; let ruleSetIndex = $index) {
+        @for (ruleSet of code.ruleSets; track ruleSet; let ruleSetIndex = $index) {
           <mat-tab class="fx-column-start-stretch"
             [label]="'Regelsatz ' + (ruleSetIndex + 1).toString(10)"
             [style.overflow-x]="'auto'">

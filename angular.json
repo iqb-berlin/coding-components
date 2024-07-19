@@ -161,7 +161,6 @@
               "zone.js"
             ],
             "assets": [
-              "projects/schemer/src/favicon.ico",
               "projects/schemer/src/assets"
             ],
             "styles": [
