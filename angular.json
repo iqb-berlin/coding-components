@@ -166,7 +166,6 @@
             "styles": [
               "projects/schemer/src/styles.scss",
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-              "projects/schemer/src/assets/material-icons.css",
               "projects/schemer/src/assets/customTheme.scss"
             ],
             "scripts": []
@@ -244,6 +243,6 @@
     }
   },
   "cli": {
-    "analytics": "f1bd264f-0698-47a3-adf2-a8b5e1e507d8"
+    "analytics": false
   }
 }
