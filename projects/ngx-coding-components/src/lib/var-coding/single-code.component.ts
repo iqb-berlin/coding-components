@@ -53,6 +53,7 @@ export class SingleCodeComponent {
   @Input() fragmentMode: boolean | undefined;
   @Input() codeIndex: number | undefined;
   @Input() codeModel: CodeModelType | undefined;
+  @Input() hasResidualAutoCode = false;
 
   constructor(
     public schemerService: SchemerService

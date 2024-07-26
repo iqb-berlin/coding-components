@@ -108,14 +108,15 @@
                     (codeRulesChanged)="setCodeChanged()"></code-rules>
       } @else if (codeModel === 'MANUAL_ONLY' && code.type !== 'RESIDUAL_AUTO') {
         <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
-                          [style.max-height.px]="250"></code-instruction>
+                          [hasResidualAutoCode]="hasResidualAutoCode" [style.max-height.px]="250"></code-instruction>
       }
     </div>
     @if (codeModel === 'NONE') {
-      @if (code.type === 'RESIDUAL_AUTO') {
+      @if (code.type === 'RESIDUAL_AUTO' && !code.manualInstruction) {
         <div class="fx-flex-fill"></div>
       }  @else {
         <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
+                          [hasResidualAutoCode]="hasResidualAutoCode"
                           class="fx-flex-fill" [style.max-height.px]="300"></code-instruction>
       }
     }

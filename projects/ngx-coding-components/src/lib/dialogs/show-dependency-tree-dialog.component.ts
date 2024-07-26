@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { KeyValuePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
-import {VariableAliasPipe} from "@ngx-coding-components/pipes/variable-alias.pipe";
+import { VariableAliasPipe } from '@ngx-coding-components/pipes/variable-alias.pipe';
 
 @Component({
   template: `

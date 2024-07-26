@@ -27,6 +27,10 @@ import { UserRoleType } from '../services/schemer.service';
                       (click)="editTextDialog_manualInstruction()">
                 <mat-icon>edit</mat-icon>
               </button>
+              @if (hasResidualAutoCode && code.manualInstruction) {
+                <mat-icon [style.color]="'red'"
+                          [matTooltip]="'manual-instruction.code.error-residual-auto' | translate">error</mat-icon>
+              }
             </div>
             <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
                     [disabled]="userRole === 'RO'"
@@ -58,6 +62,7 @@ export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
   @Input() userRole: UserRoleType = 'RO';
+  @Input() hasResidualAutoCode = false;
 
   constructor(
     private sanitizer: DomSanitizer,

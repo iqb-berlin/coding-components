@@ -51,10 +51,21 @@ import {
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
-  @Input() varCoding: VariableCodingData | null = null;
+  _varCoding: VariableCodingData | null = null;
+  @Input()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set varCoding(value: VariableCodingData | null) {
+    this._varCoding = value;
+    this.updateHasResidualAutoCode();
+  }
+  get varCoding(): VariableCodingData | null {
+    return this._varCoding;
+  }
+
   lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
   varInfo: VariableInfo | undefined;
+  hasResidualAutoCode = false;
 
   constructor(
     public schemerService: SchemerService,
@@ -71,7 +82,10 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     this.lastChangeFromSubscription = this.lastChangeFrom$.pipe(
       debounceTime(500)
     ).subscribe(source => {
-      if (source !== 'init') this.varCodingChanged.emit(this.varCoding);
+      if (source !== 'init') {
+        this.updateHasResidualAutoCode();
+        this.varCodingChanged.emit(this.varCoding);
+      }
     });
   }
 
@@ -82,6 +96,10 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   updateVarInfo() {
     this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
+  }
+
+  updateHasResidualAutoCode() {
+    this.hasResidualAutoCode = this.varCoding ? !!this.varCoding.codes.find(c => c.type === 'RESIDUAL_AUTO') : false;
   }
 
   getSanitizedText(text: string): SafeHtml {
@@ -170,7 +188,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             this.varCoding.codeModel = newCoding.codeModel;
             // this.varCoding.codeModelParameters = newCoding.codeModelParameters;
             this.varCoding.codes = newCoding.codes;
-            console.log(this.varCoding.codes);
+            this.updateHasResidualAutoCode();
             this.varCodingChanged.emit(this.varCoding);
           }
         });
@@ -191,6 +209,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         });
       } else {
+        this.updateHasResidualAutoCode();
         this.varCodingChanged.emit(this.varCoding);
       }
     }
