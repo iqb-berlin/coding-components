@@ -32,11 +32,13 @@ import { UserRoleType } from '../services/schemer.service';
                           [matTooltip]="'manual-instruction.code.error-residual-auto' | translate">error</mat-icon>
               }
             </div>
-            <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
-                    [disabled]="userRole === 'RO'"
-                    [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
-              <mat-icon>close</mat-icon>
-            </button>
+            @if (code.manualInstruction) {
+              <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
+                      [disabled]="userRole === 'RO'"
+                      [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
           </div>
         </mat-card-subtitle>
         <mat-card-content [style.overflow-x]="'auto'">

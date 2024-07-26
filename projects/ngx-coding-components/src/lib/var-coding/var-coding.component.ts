@@ -58,6 +58,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     this._varCoding = value;
     this.updateHasResidualAutoCode();
   }
+
   get varCoding(): VariableCodingData | null {
     return this._varCoding;
   }
@@ -229,7 +230,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         }
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false && this.varCoding) {
+        if (typeof dialogResult !== 'undefined' && dialogResult !== false && this.varCoding) {
           const dialogResultTyped: EditSourceParametersDialogData = dialogResult;
           this.varCoding.alias = dialogResultTyped.selfAlias;
           this.varCoding.sourceType = dialogResultTyped.sourceType;

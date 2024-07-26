@@ -235,7 +235,7 @@ export class GenerateCodingDialogComponent {
       if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
         const numericRules: CodingRule[] = [];
         const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-        if (matchValue) {
+        if (matchValue !== null) {
           numericRules.push({
             method: 'NUMERIC_MATCH',
             parameters: [matchValue.toString(10)]

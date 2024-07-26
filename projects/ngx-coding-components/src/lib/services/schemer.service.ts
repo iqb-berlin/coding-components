@@ -127,9 +127,8 @@ export class SchemerService {
           score: 0,
           ruleSetOperatorAnd: false,
           ruleSets: [],
-          manualInstruction: `<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">
-                                Alle anderen Antworten ${codeType === 'RESIDUAL_AUTO' ? ' (automatisch)' : ''}
-                              </p>`
+          manualInstruction: codeType === 'RESIDUAL_AUTO' ? '' :
+            '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
         };
         codeList.push(newCode);
         return newCode;
