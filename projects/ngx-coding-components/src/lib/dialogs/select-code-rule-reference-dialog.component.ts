@@ -4,13 +4,18 @@ import {
 import {
   MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { MatFormField } from '@angular/material/form-field';
 
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatSelectionList, MatListOption } from '@angular/material/list';
+
+export interface SelectCodeRuleReferenceDialogData {
+  isFragmentMode: boolean;
+  value: number | 'ANY' | 'ANY_OPEN' | 'SUM';
+}
 
 @Component({
   template: `
@@ -22,8 +27,11 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
           {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.any' | translate}}
         </mat-list-option>
         @if (!refData.isFragmentMode) {
+          <mat-list-option [value]="'ANY_OPEN'">
+            {{'rule-set.reference.any-open' | translate}}
+          </mat-list-option>
           <mat-list-option [value]="'SUM'">
-            {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.sum' | translate}}
+            {{'rule-set.reference.sum' | translate}}
           </mat-list-option>
         }
         <mat-list-option [value]="'specific'">
@@ -53,11 +61,15 @@ export class SelectCodeRuleReferenceDialogComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public refData: SelectCodeRuleReferenceDialogData,
-    public dialogRef: MatDialogRef<SelectCodeRuleReferenceDialogComponent>,
-    public translateService: TranslateService
+    public dialogRef: MatDialogRef<SelectCodeRuleReferenceDialogComponent>
   ) {
-    this.newValue = typeof this.refData.value === 'number' ? this.refData.value + 1 : 0;
-    this.newSelection = typeof this.refData.value === 'number' ? ['specific'] : [this.refData.value];
+    if (typeof this.refData.value === 'number') {
+      this.newValue = this.refData.value + 1;
+      this.newSelection = ['specific'];
+    } else {
+      this.newValue = 0;
+      this.newSelection = [this.refData.value || 'ANY'];
+    }
   }
 
   okButtonClick() {
@@ -67,9 +79,4 @@ export class SelectCodeRuleReferenceDialogComponent {
       this.dialogRef.close(this.newSelection[0]);
     }
   }
-}
-
-export interface SelectCodeRuleReferenceDialogData {
-  isFragmentMode: boolean;
-  value: number | 'ANY' | 'SUM';
 }

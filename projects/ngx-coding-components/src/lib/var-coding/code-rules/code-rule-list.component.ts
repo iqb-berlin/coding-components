@@ -223,7 +223,7 @@ export class CodeRuleListComponent {
           width: '400px',
           data: <SelectCodeRuleReferenceDialogData>{
             isFragmentMode: false,
-            value: ruleSet.valueArrayPos || 'ANY'
+            value: ruleSet.valueArrayPos
           },
           autoFocus: false
         });

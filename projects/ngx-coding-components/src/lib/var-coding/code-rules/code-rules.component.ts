@@ -58,6 +58,7 @@ export class CodeRulesComponent {
         rules: []
       });
       this.code.ruleSets = rs;
+      if (this.ruleSetElement) this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
       this.setCodeRulesChanged();
     }
   }
@@ -76,9 +77,5 @@ export class CodeRulesComponent {
         }
       });
     }
-  }
-
-  setTab() {
-    if (this.ruleSetElement && this.code) this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
   }
 }
