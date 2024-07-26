@@ -217,19 +217,19 @@ export class SchemerService {
     }
   }
 
-  getVariableAliasById(varId?: string | string[]): string {
-    if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '';
-    if (typeof varId === 'string') {
-      const findVar = this.codingScheme.variableCodings
-        .find(v => v.id === varId);
-      if (findVar) return findVar.alias || findVar.id;
-      return '';
-    }
-    if (Array.isArray(varId)) {
-      const returnValues: string[] = this.codingScheme.variableCodings
-        .filter(v => varId.includes(v.id)).map(v => v.alias || v.id);
-      return returnValues.join(', ');
-    }
+  getVariableAliasById(varId: string): string {
+    if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '?';
+    const findVar = this.codingScheme.variableCodings
+      .find(v => v.id === varId);
+    if (findVar) return findVar.alias || findVar.id;
     return '?';
+  }
+
+  getVariableAliasByIdListString(varIds: string[], maxEntries: number): string {
+    if (!this.codingScheme || !this.codingScheme.variableCodings) return '';
+    const varIdsToTake = maxEntries > 0 && maxEntries <= varIds.length ? varIds.slice(0, maxEntries) : varIds;
+    const returnValues: string[] = varIdsToTake.map(vId => this.getVariableAliasById(vId));
+    if (maxEntries > 0 && maxEntries < varIds.length) returnValues.push('...');
+    return returnValues.join(', ');
   }
 }

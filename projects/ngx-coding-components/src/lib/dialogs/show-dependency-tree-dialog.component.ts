@@ -7,6 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { KeyValuePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
+import {VariableAliasPipe} from "@ngx-coding-components/pipes/variable-alias.pipe";
 
 @Component({
   template: `
@@ -21,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
           <div class="fx-column-start-start">
             @if (vn.value.length > 0) {
               @for (vSource of vn.value; track vSource) {
-                <div>{{vSource}}</div>
+                <div>{{vSource | varAlias}}</div>
               }
             } @else {
               <div>{{'varlist.derived-tree.no-sources' | translate}}</div>
@@ -30,7 +31,7 @@ import { MatIcon } from '@angular/material/icon';
           @if (vn.value.length > 0) {
             <div><mat-icon>chevron_right</mat-icon></div>
           }
-          <div>{{vn.key}}</div>
+          <div>{{vn.key | varAlias}}</div>
         </div>
       }
     </mat-dialog-content>
@@ -44,7 +45,7 @@ import { MatIcon } from '@angular/material/icon';
   ],
   standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton,
-    MatDialogClose, TranslateModule, KeyValuePipe, MatIcon]
+    MatDialogClose, TranslateModule, KeyValuePipe, MatIcon, VariableAliasPipe]
 })
 export class ShowDependencyTreeDialogComponent {
   varNodeRows: ReadonlyMap<string, string[]> = new Map([]);

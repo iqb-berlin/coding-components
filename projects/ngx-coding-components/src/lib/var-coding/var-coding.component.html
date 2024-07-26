@@ -20,7 +20,7 @@
                   {{ 'derive-sources.error' | translate }}
                 </div>
               } @else {
-                <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias}}</div>
+                <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias:4}}</div>
               }
               <div>Methode der Ableitung: {{'derive-method.' + varCoding.sourceType | translate}}</div>
             }

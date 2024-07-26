@@ -10,7 +10,8 @@ export class VariableAliasPipe implements PipeTransform {
     public schemerService: SchemerService
   ) { }
 
-  transform(value?: string | string[]): string {
+  transform(value: string | string[], maxEntries?: number): string {
+    if (Array.isArray(value)) return this.schemerService.getVariableAliasByIdListString(value, maxEntries || 0);
     return this.schemerService.getVariableAliasById(value);
   }
 }
