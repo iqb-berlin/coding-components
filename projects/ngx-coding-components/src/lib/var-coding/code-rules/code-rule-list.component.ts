@@ -189,7 +189,6 @@ export class CodeRuleListComponent {
   }
 
   deleteRule(ruleSet: RuleSet, ruleToDeleteIndex: number) {
-    console.log(ruleSet, ruleToDeleteIndex);
     if (ruleSet && ruleToDeleteIndex >= 0) {
       ruleSet.rules.splice(ruleToDeleteIndex, 1);
       this.setCodeRulesChanged();

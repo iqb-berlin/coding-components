@@ -38,28 +38,32 @@ export class SchemerService {
     } else if (varCoding.sourceType === 'CONCAT_CODE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
         const codes: (number | null)[][] = [];
+        let totalCodesCount = 0;
         varCoding.deriveSources.forEach(s => {
           if (this.codingScheme) {
             const coding = this.codingScheme.variableCodings.find(v => v.id === s);
             codes.push(coding ? coding.codes.map(c => c.id) : []);
+            totalCodesCount += coding ? coding.codes.length : 0;
           }
         });
         let resultArray: string[] = [];
-        codes.forEach(c => {
-          if (resultArray.length > 0) {
-            const newArray: string[] = [];
-            resultArray.forEach(oldEntry => {
-              c.forEach(cEntry => {
-                if (cEntry) newArray.push(`${oldEntry}${DeriveConcatDelimiter}${cEntry}`);
+        if (totalCodesCount < 10) {
+          codes.forEach(c => {
+            if (resultArray.length > 0) {
+              const newArray: string[] = [];
+              resultArray.forEach(oldEntry => {
+                c.forEach(cEntry => {
+                  if (cEntry !== null) newArray.push(`${oldEntry}${DeriveConcatDelimiter}${cEntry}`);
+                });
               });
-            });
-            resultArray = newArray;
-          } else {
-            c.forEach(cEntry => {
-              if (cEntry) resultArray.push(cEntry.toString(10));
-            });
-          }
-        });
+              resultArray = newArray;
+            } else {
+              c.forEach(cEntry => {
+                if (cEntry !== null) resultArray.push(cEntry.toString(10));
+              });
+            }
+          });
+        }
         return <VariableInfo>{
           id: varCoding.id,
           type: 'string',
