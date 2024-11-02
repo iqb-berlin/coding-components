@@ -16,7 +16,7 @@ import {
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatInput } from '@angular/material/input';
@@ -33,8 +33,15 @@ type Data = {
         <mat-label>{{'filter-by' | translate}}</mat-label>
         <input matInput (keyup)="applyFilter($event )" #input>
       </mat-form-field>
-      <mat-slide-toggle class="toggle" [checked]="codedVariablesOnly" (toggleChange)="toggleChange()">
+      <mat-slide-toggle class="toggle" name='codedVariablesOnly'
+                        [checked]="codedVariablesOnly"
+                        (change)="toggleChange($event)">
         {{'coding.vars-with-codes-only' | translate}}
+      </mat-slide-toggle>
+      <mat-slide-toggle class="toggle" name='rawResponsesView'
+                        [checked]="rawResponsesView"
+                        (change)="toggleChange($event)">
+        {{'coding.raw-responses' | translate}}
       </mat-slide-toggle>
     </div>
     <mat-dialog-content>
@@ -42,17 +49,21 @@ type Data = {
         <mat-spinner></mat-spinner>
       }
       @if (!isLoading) {
-        <table mat-table matSort matSortActive="id" matSortDirection="asc"
-               (matSortChange)="matSort(sort)" [dataSource]="dataSource" >
-          @for (column of displayedColumns; track column) {
-            <ng-container [matColumnDef]="column">
-              <th mat-header-cell  *matHeaderCellDef  mat-sort-header> {{ 'coding.' + column | translate}}</th>
-              <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
-            </ng-container>
-          }
-          <tr mat-header-row  *matHeaderRowDef="displayedColumns;sticky:true"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+        @if(rawResponsesView){
+          {{JSON.stringify(this.dataSource.data)}}
+        } @else {
+          <table mat-table matSort matSortActive="id" matSortDirection="asc"
+                 (matSortChange)="matSort(sort)" [dataSource]="dataSource" >
+            @for (column of displayedColumns; track column) {
+              <ng-container [matColumnDef]="column">
+                <th mat-header-cell  *matHeaderCellDef  mat-sort-header> {{ ('coding.' + column) | translate}}</th>
+                <td mat-cell [innerHTML]="element[column]" *matCellDef="let element"></td>
+              </ng-container>
+            }
+            <tr mat-header-row  *matHeaderRowDef="displayedColumns;sticky:true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        }
       }
     </mat-dialog-content>
 
@@ -70,8 +81,30 @@ type Data = {
 
   ],
   standalone: true,
-  // eslint-disable-next-line max-len
-  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, TranslateModule, MatProgressSpinner, MatSlideToggle, MatLabel, MatFormField, MatTable, MatColumnDef, MatHeaderCellDef, MatRowDef, MatRow, MatCell, MatHeaderCell, MatHeaderRowDef, MatSort, MatInput, MatHeaderRow, MatCellDef, MatSortHeader]
+  imports: [MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslateModule,
+    TranslateModule,
+    MatProgressSpinner,
+    MatSlideToggle,
+    MatLabel,
+    MatFormField,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatRowDef,
+    MatRow,
+    MatCell,
+    MatHeaderCell,
+    MatHeaderRowDef,
+    MatSort,
+    MatInput,
+    MatHeaderRow,
+    MatCellDef,
+    MatSortHeader]
 })
 
 export class ShowCodingResultsComponent implements OnInit {
@@ -79,6 +112,7 @@ export class ShowCodingResultsComponent implements OnInit {
   displayedColumns = ['id', 'value', 'status', 'code', 'score'];
   isLoading = false;
   codedVariablesOnly = true;
+  rawResponsesView = false;
   constructor(@Inject(MAT_DIALOG_DATA) public data: Data) {
 
   }
@@ -91,7 +125,7 @@ export class ShowCodingResultsComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.codedVariablesOnly) {
+    if (this.codedVariablesOnly && this.data.responses) {
       this.dataSource.data = this.data.responses
         .filter(response => this.data.varsWithCodes.includes(response.id));
     } else {
@@ -108,13 +142,19 @@ export class ShowCodingResultsComponent implements OnInit {
     }
   }
 
-  toggleChange() {
-    this.codedVariablesOnly = !this.codedVariablesOnly;
-    if (this.codedVariablesOnly) {
-      this.dataSource.data = this.data.responses
-        .filter(response => this.data.varsWithCodes.includes(response.id));
-    } else {
-      this.dataSource.data = this.data.responses;
+  toggleChange(event: MatSlideToggleChange) {
+    if (event.source.name === 'rawResponsesView') {
+      this.rawResponsesView = !this.rawResponsesView;
+    } else if (event.source.name === 'codedVariablesOnly') {
+      this.codedVariablesOnly = !this.codedVariablesOnly;
+      if (this.codedVariablesOnly) {
+        this.dataSource.data = this.data.responses
+          .filter(response => this.data.varsWithCodes.includes(response.id));
+      } else {
+        this.dataSource.data = this.data.responses;
+      }
     }
   }
+
+  protected readonly JSON = JSON;
 }

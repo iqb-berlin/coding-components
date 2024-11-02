@@ -17,7 +17,6 @@ export class SchemeCheckerComponent {
   values: { [Key in string]: string } = {};
   _codingScheme: CodingScheme | null = null;
   @Input()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: CodingScheme | null) {
     this.values = {};
     this._codingScheme = value;
@@ -56,9 +55,11 @@ export class SchemeCheckerComponent {
           });
         }
       });
+      const varsWithCodes: string[] = this._codingScheme.variableCodings.filter(v => v.codes.length > 0).map(v => v.id);
       this.showCodingResultsDialog.open(ShowCodingResultsComponent, {
         width: '800px',
-        data: this._codingScheme.code(myValues)
+        height: '600px',
+        data: { responses: this._codingScheme.code(myValues), varsWithCodes: varsWithCodes }
       });
     }
   }
