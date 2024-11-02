@@ -14,7 +14,7 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 
 export interface SelectCodeRuleReferenceDialogData {
   isFragmentMode: boolean;
-  value: number | 'ANY' | 'ANY_OPEN' | 'SUM';
+  value: number | 'ANY' | 'ANY_OPEN' | 'SUM' | 'LENGTH' ;
 }
 
 @Component({
@@ -32,6 +32,9 @@ export interface SelectCodeRuleReferenceDialogData {
           </mat-list-option>
           <mat-list-option [value]="'SUM'">
             {{'rule-set.reference.sum' | translate}}
+          </mat-list-option>
+          <mat-list-option [value]="'LENGTH'">
+            {{'rule-set.reference.length' | translate}}
           </mat-list-option>
         }
         <mat-list-option [value]="'specific'">
