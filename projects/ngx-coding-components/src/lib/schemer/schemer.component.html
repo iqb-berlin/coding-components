@@ -45,7 +45,7 @@
                 [matTooltip]="'varlist.copy' | translate" (click)="copyVarScheme()" matTooltipPosition="above">
           <mat-icon>content_copy</mat-icon>
         </button>
-        <button mat-button [matMenuTriggerFor]="otherFunctions" matTooltip="Load/Save..." matTooltipPosition="above">
+        <button mat-button [matMenuTriggerFor]="otherFunctions" [matTooltip]="'varlist.load-and-save' | translate" matTooltipPosition="above">
           <mat-icon>menu</mat-icon>
         </button>
         <mat-menu #otherFunctions="matMenu">
