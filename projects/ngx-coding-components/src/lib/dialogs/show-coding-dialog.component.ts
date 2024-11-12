@@ -10,9 +10,8 @@ import {
 } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import {MatSlideToggle, MatSlideToggleChange} from "@angular/material/slide-toggle";
-import {FormsModule} from "@angular/forms";
-import {boolean} from "mathjs";
+import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
 
 export interface ShowCodingData {
   varCoding: VariableCodingData,
@@ -21,7 +20,7 @@ export interface ShowCodingData {
 
 @Component({
   template: `
-    <h1 mat-dialog-title>{{varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
+    <h1 mat-dialog-title>{{varCoding.alias || varCoding.id}}{{varCoding.label ? ' - ' + varCoding.label : ''}}</h1>
 
     <mat-dialog-content>
       <div class="fx-row-end-center">
@@ -91,7 +90,15 @@ export interface ShowCodingData {
     '.code-row:nth-child(even) {background-color: #f1f1f1;}'
   ],
   standalone: true,
-  imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule, MatSlideToggle, FormsModule]
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslateModule,
+    MatSlideToggle,
+    FormsModule]
 })
 export class ShowCodingDialogComponent {
   varCoding: VariableCodingData;
@@ -106,12 +113,13 @@ export class ShowCodingDialogComponent {
   }
 
   updateText(newValue: MatSlideToggleChange | boolean) {
-    const booleanValue = typeof newValue === 'boolean'? newValue : newValue.checked;
+    const booleanValue = typeof newValue === 'boolean' ? newValue : newValue.checked;
     this.mode = booleanValue ? 'SIMPLE' : 'EXTENDED';
     this.varCodingText = {
-      id: this.varCoding.id,
+      id: this.varCoding.alias || this.varCoding.id,
       label: this.varCoding.label,
-      source: ToTextFactory.sourceAsText(this.varCoding.id, this.varCoding.sourceType, this.varCoding.deriveSources),
+      source: ToTextFactory.sourceAsText(
+        this.varCoding.alias || this.varCoding.id, this.varCoding.sourceType, this.varCoding.deriveSources),
       processing: ToTextFactory.processingAsText(this.varCoding.processing, this.varCoding.fragmenting),
       hasManualInstruction: !!this.varCoding.manualInstruction,
       codes: this.varCoding.codes.map(code => ToTextFactory.codeAsText(code, this.mode))

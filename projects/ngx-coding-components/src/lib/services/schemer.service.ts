@@ -33,7 +33,7 @@ export class SchemerService {
       return this.varList.find(v => v.id === varCoding.id);
     } if (varCoding.sourceType === 'COPY_VALUE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
-        return this.varList.find(v => v.id === varCoding.deriveSources[0]);
+        return this.varList.find(v => (v.alias || v.id) === varCoding.deriveSources[0]);
       }
     } else if (varCoding.sourceType === 'CONCAT_CODE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
@@ -41,7 +41,7 @@ export class SchemerService {
         let totalCodesCount = 0;
         varCoding.deriveSources.forEach(s => {
           if (this.codingScheme) {
-            const coding = this.codingScheme.variableCodings.find(v => v.id === s);
+            const coding = this.codingScheme.variableCodings.find(v => (v.alias || v.id) === s);
             codes.push(coding ? coding.codes.map(c => c.id) : []);
             totalCodesCount += coding ? coding.codes.length : 0;
           }

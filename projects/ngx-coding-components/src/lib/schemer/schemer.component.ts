@@ -42,7 +42,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
   @Input()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: CodingScheme | null) {
     this.schemerService.codingScheme = value;
     this.updateVariableLists();
@@ -350,7 +349,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         prompt: `Bitte Zielvariable wählen! Achtung:
           Die Kodierungsdaten der Zielvariable werden komplett überschrieben.`,
         variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.id !== selectedCoding.id).map(c => c.id),
+          .filter(c => c.id !== selectedCoding.id).map(c => c.alias || c.id),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
