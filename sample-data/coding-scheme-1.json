@@ -2,6 +2,7 @@
   "variableCodings": [
     {
       "id": "Otto",
+      "alias": "OttoAlias",
       "label": "",
       "sourceType": "BASE",
       "deriveSources": [],

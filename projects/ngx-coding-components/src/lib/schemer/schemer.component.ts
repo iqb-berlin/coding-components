@@ -168,12 +168,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.schemerService.codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = 'OK';
         const breakingProblem = this.problems
-          .find(p => p.variableId === v.id && p.breaking);
+          .find(p => p.variableId === (v.alias || v.id) && p.breaking);
         if (breakingProblem) {
           this.codingStatus[v.id] = 'ERROR';
         } else {
           const minorProblem = this.problems
-            .find(p => p.variableId === v.id && !p.breaking);
+            .find(p => p.variableId === (v.alias || v.id) && !p.breaking);
           if (minorProblem) this.codingStatus[v.id] = 'WARNING';
         }
       });
@@ -252,7 +252,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     if (selectedCoding) {
       let warningMessageText;
       if (selectedCoding.sourceType !== 'BASE') {
-        warningMessageText = `Die Variable "${selectedCoding.id}" wird gelöscht.`;
+        warningMessageText = `Die Variable "${selectedCoding.alias || selectedCoding.id}" wird gelöscht.`;
       } else {
         const varListIds = this.schemerService.varList.map(v => v.id);
         if (varListIds.indexOf(selectedCoding.id) < 0) {
@@ -270,7 +270,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
         width: '400px',
         data: <ConfirmDialogData>{
-          title: `Löschen Variable '${selectedCoding.id}'`,
+          title: `Löschen Variable '${selectedCoding.alias || selectedCoding.id}'`,
           content: warningMessageText,
           confirmButtonLabel: 'Löschen',
           showCancel: true
@@ -350,7 +350,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         prompt: `Bitte Zielvariable wählen! Achtung:
           Die Kodierungsdaten der Zielvariable werden komplett überschrieben.`,
         variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.id !== selectedCoding.id).map(c => c.id),
+          .filter(c => c.id !== selectedCoding.id).map(c => this.schemerService.getVariableAliasById(c.id)),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
@@ -359,7 +359,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false && this.schemerService.codingScheme) {
-          const targetCoding = this.schemerService.codingScheme.variableCodings.find(c => c.id === result);
+          const targetCoding = this.schemerService.codingScheme.variableCodings.find(c => (c.alias || c.id) === result);
           if (targetCoding) {
             const stringifiedCoding = JSON.stringify(selectedCoding);
             const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;

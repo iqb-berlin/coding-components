@@ -66,6 +66,7 @@ export class SchemerService {
         }
         return <VariableInfo>{
           id: varCoding.id,
+          alias: varCoding.alias,
           type: 'string',
           format: '',
           multiple: false,
@@ -81,6 +82,7 @@ export class SchemerService {
     } else if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
       return <VariableInfo>{
         id: varCoding.id,
+        alias: varCoding.alias,
         type: 'integer',
         format: '',
         multiple: false,

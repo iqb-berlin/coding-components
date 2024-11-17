@@ -1,6 +1,7 @@
 [
   {
     "id": "Otto",
+    "alias": "OttoAlias",
     "type": "string",
     "format": "",
     "multiple": true,

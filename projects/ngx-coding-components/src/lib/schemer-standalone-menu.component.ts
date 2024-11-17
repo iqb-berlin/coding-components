@@ -13,7 +13,7 @@ import { UserRoleType } from './services/schemer.service';
 @Component({
   selector: 'schemer-standalone-menu',
   template: `
-    <button mat-fab [matMenuTriggerFor]="menu" matTooltip="Load/Save..." matTooltipPosition="above">
+    <button mat-fab [matMenuTriggerFor]="menu" matTooltip="Weitere Funktionen" matTooltipPosition="above">
       <mat-icon>menu</mat-icon>
     </button>
 

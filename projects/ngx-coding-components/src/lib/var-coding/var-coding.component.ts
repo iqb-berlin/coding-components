@@ -139,10 +139,12 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   codingAsText() {
     if (this.varCoding) {
+      const deriveSourcesAliases = this.varCoding.deriveSources
+        .map(ds => this.schemerService.getVariableAliasById(ds));
       const dialogRef = this.showCodingDialog.open(ShowCodingDialogComponent, {
         width: '1000px',
         data: <ShowCodingData>{
-          varCoding: this.varCoding,
+          varCoding: { ...this.varCoding, deriveSources: deriveSourcesAliases },
           mode: this.schemerService.codingToTextMode
         }
       });
