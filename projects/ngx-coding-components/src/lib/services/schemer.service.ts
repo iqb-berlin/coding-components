@@ -110,13 +110,13 @@ export class SchemerService {
   }
 
   checkRenamedVarAliasOk(checkAlias: string, checkId?: string): boolean {
-    if (this.codingScheme && this.codingScheme.variableCodings) {
-      const normalisedAlias = checkAlias.toUpperCase();
+    if (this.codingScheme && this.codingScheme.variableCodings && checkAlias) {
+      const normalisedAlias = checkAlias?.toUpperCase();
       const doubleFound = this.codingScheme.variableCodings
-        .find(v => v.alias.toUpperCase() === normalisedAlias && v.id !== checkId);
+        .find(v => v.alias?.toUpperCase() === normalisedAlias && v.id !== checkId);
       return !doubleFound;
     }
-    return false;
+    return !checkAlias;
   }
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
