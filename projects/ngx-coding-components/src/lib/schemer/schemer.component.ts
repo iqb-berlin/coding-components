@@ -9,7 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
@@ -33,8 +33,17 @@ import {
   styleUrls: ['./schemer.component.scss'], // ,    // encapsulation: ViewEncapsulation.ShadowDom
 
   standalone: true,
-  imports: [MatNavList, MatTooltip, MatListItem, MatButton, MatIcon, VarCodingComponent, AsyncPipe, TranslateModule,
-    MatFabButton, MatMenu, MatMenuItem, MatMenuTrigger]
+  imports: [MatNavList,
+    MatTooltip,
+    MatListItem,
+    MatButton,
+    MatIcon,
+    VarCodingComponent,
+    AsyncPipe,
+    TranslateModule,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger]
 })
 
 export class SchemerComponent implements OnDestroy, AfterViewInit {
