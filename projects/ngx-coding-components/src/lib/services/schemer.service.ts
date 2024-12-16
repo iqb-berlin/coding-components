@@ -21,7 +21,7 @@ export class SchemerService {
   varList: VariableInfo[] = [];
   allVariableIds: string[] = [];
   ruleMethodParameterCount = RuleMethodParameterCount;
-  userRole: UserRoleType = 'RO';
+  userRole: UserRoleType = 'RW_MAXIMAL';
   orderOfCodeTypes: CodeType[] = [
     'FULL_CREDIT', 'PARTIAL_CREDIT', 'TO_CHECK', 'NO_CREDIT', 'UNSET', 'RESIDUAL', 'RESIDUAL_AUTO'
   ];
