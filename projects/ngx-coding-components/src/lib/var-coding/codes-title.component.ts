@@ -16,7 +16,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   selector: 'codes-title',
   template: `
     <div class="fx-row-space-between-start">
-      @if (schemerService.userRole === 'RW_MAXIMAL') {
+      @if (schemerService.userRole !== 'RO') {
         <div (click)="sortCodes($event)"
              [matTooltip]="'code.prompt.sort' | translate"
              [matTooltipShowDelay]="500"
@@ -42,7 +42,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
           }
         </div>
         <button mat-icon-button [matTooltip]="'processing.prompt' | translate"
-                [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+                [disabled]="schemerService.userRole === 'RO'"
                 (click)="editProcessingAndFragments()">
           <mat-icon>edit</mat-icon>
         </button>
@@ -66,13 +66,13 @@ export class CodesTitleComponent {
   }
 
   sortCodes(event: MouseEvent) {
-    if (this.codeList && this.schemerService.userRole === 'RW_MAXIMAL') {
+    if (this.codeList && this.schemerService.userRole !== 'RO') {
       this.schemerService.sortCodes(this.codeList, event.ctrlKey);
     }
   }
 
   editProcessingAndFragments() {
-    if (this.schemerService.userRole === 'RW_MAXIMAL') {
+    if (this.schemerService.userRole !== 'RO') {
       const dialogRef = this.editProcessingDialog.open(EditProcessingDialogComponent, {
         data: {
           fragmenting: this.fragmenting,

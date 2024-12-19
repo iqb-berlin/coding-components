@@ -79,7 +79,7 @@ export class VeronaAPIService {
 
 export interface VosStartCommandConfig {
   directDownloadUrl: string,
-  role: 'guest' | 'commentator' | 'developer' | 'maintainer' | 'super';
+  role: 'guest' | 'commenter' | 'developer' | 'maintainer' | 'super';
 }
 
 export interface VosStartCommand {

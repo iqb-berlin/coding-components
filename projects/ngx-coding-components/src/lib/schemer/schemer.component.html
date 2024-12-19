@@ -37,7 +37,7 @@
           [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
           <mat-icon>add</mat-icon>
         </button>
-        <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole !== 'RW_MAXIMAL'"
+        <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
           (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>

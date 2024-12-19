@@ -219,7 +219,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   editSourceParameters() {
-    if (this.schemerService.userRole === 'RW_MAXIMAL' && this.varCoding) {
+    if (this.schemerService.userRole !== 'RO' && this.varCoding) {
       const dialogRef = this.editSourceParametersDialog.open(EditSourceParametersDialog, {
         width: '600px',
         minHeight: '400px',

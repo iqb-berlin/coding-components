@@ -35,7 +35,7 @@
             }
           </div>
           <button mat-icon-button [matTooltip]="'derive-processing.prompt' | translate"
-                  [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+                  [disabled]="schemerService.userRole === 'RO'"
                   (click)="editSourceParameters()">
             <mat-icon>edit</mat-icon>
           </button>
@@ -67,7 +67,7 @@
       <div class="fx-row-start-start fx-gap-5">
         @if (!schemerService.codingScheme) {
           <button mat-icon-button
-                  [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
+                  [disabled]="schemerService.userRole === 'RO'"
                   [matMenuTriggerFor]="menuAddCode"
                   [matTooltip]="'code.prompt.add' | translate"
                   matTooltipPosition="above">
@@ -121,12 +121,11 @@
         </button>
       </div>
       <div class="fx-row-start-center fx-gap-10">
-        @if (schemerService.userRole === 'RW_MAXIMAL') {
+        @if (schemerService.userRole !== 'RO') {
           <div>{{'code.prompt.add' | translate}}</div>
           <div>
             @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
               <button mat-icon-button (click)="addCode(codeType)"
-                      [disabled]="schemerService.userRole !== 'RW_MAXIMAL'"
                       [matTooltip]="'code.prompt.add-' + codeType | translate">
                 @if (codeType === 'FULL_CREDIT') {
                   <mat-icon style="color: limegreen">done_all</mat-icon>

@@ -122,7 +122,7 @@ export class AppComponent implements OnInit, OnDestroy {
           }
         });
         if (message.schemerConfig && message.schemerConfig.role && message.schemerConfig.role !== 'super') {
-          this.userRole = ['guest', 'commentator'].includes(message.schemerConfig.role) ? 'RO' : 'RW_MINIMAL';
+          this.userRole = ['guest', 'commenter'].includes(message.schemerConfig.role) ? 'RO' : 'RW_MINIMAL';
         }
       });
   }

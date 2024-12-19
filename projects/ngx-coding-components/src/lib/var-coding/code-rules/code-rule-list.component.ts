@@ -74,7 +74,7 @@ import {
                   <mat-icon>delete</mat-icon>
                 </button>
                 @if (fragmentMode) {
-                  @if (schemerService.userRole === 'RW_MAXIMAL') {
+                  @if (schemerService.userRole !== 'RO') {
                     <div>
                       <button mat-flat-button (click)="editFragmentReference(rule)"
                               [matTooltip]="'rule.reference.title' | translate">
@@ -105,7 +105,7 @@ import {
             @if (ruleSet.rules.length === 0) {
               <div class="no-rules">{{'rule.no-rules' | translate}}</div>
             }
-            @if (ruleSet.rules.length > 1 && schemerService.userRole === 'RW_MAXIMAL') {
+            @if (ruleSet.rules.length > 1 && schemerService.userRole !== 'RO') {
               <mat-button-toggle-group appearance="legacy"
                                        [(ngModel)]="ruleSet.ruleOperatorAnd"
                                        [matTooltip]="'rule.prompt.operator' | translate">
@@ -117,13 +117,13 @@ import {
         </div>
         @if (arrayMode || canDeleteRuleSet) {
           <div class="fx-column-start-center" [style.border-left]="'4px solid lightgrey'">
-            @if (schemerService.userRole === 'RW_MAXIMAL' && canDeleteRuleSet) {
+            @if (schemerService.userRole !== 'RO' && canDeleteRuleSet) {
               <button mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate"
                       (click)="deleteRuleSetRequested.emit()">
                 <mat-icon>delete</mat-icon>
               </button>
             }
-            @if (arrayMode && ruleSet.rules.length > 0 && schemerService.userRole === 'RW_MAXIMAL') {
+            @if (arrayMode && ruleSet.rules.length > 0 && schemerService.userRole !== 'RO') {
               <button mat-flat-button (click)="editArrayReference(ruleSet)"
                       [matTooltip]="'rule-set.reference.title' | translate">
                 A {{ ruleSet.valueArrayPos | ruleReference }}

@@ -4,13 +4,13 @@
       <div [style.color]="'grey'" [style.font-size]="'smaller'">{{'code.prompt.auto-coding' | translate}}</div>
       @if (code) {
         <div class="fx-row-end-center">
-          @if (varInfo?.multiple && schemerService.userRole === 'RW_MAXIMAL') {
+          @if (varInfo?.multiple && schemerService.userRole !== 'RO') {
             <button mat-icon-button [matTooltip]="'rule-set.prompt.add' | translate"
               (click)="addRuleSet()">
               <mat-icon>add</mat-icon>
             </button>
           }
-          @if (code.ruleSets.length > 1 && schemerService.userRole === 'RW_MAXIMAL') {
+          @if (code.ruleSets.length > 1 && schemerService.userRole !== 'RO') {
             <mat-button-toggle-group appearance="legacy"
               [(ngModel)]="code.ruleSetOperatorAnd"
               [matTooltip]="'rule-set.prompt.operator' | translate">

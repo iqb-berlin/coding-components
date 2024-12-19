@@ -200,7 +200,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   }
 
   addVarScheme() {
-    if (this.schemerService.userRole === 'RW_MAXIMAL' && this.schemerService.codingScheme) {
+    if (this.schemerService.userRole !== 'RO' && this.schemerService.codingScheme) {
       const dialogRef = this.editSourceParametersDialog.open(EditSourceParametersDialog, {
         width: '600px',
         minHeight: '400px',
