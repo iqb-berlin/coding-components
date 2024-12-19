@@ -83,7 +83,6 @@ export class EditSourceParametersDialog {
   }
 
   updatePossibleDeriveProcessing() {
-    this.data.sourceParameters.processing = [];
     if (this.data.sourceType === 'BASE') {
       this.possibleDeriveProcessing = ['TAKE_DISPLAYED_AS_VALUE_CHANGED', 'TAKE_EMPTY_AS_VALID'];
     } else if (this.data.sourceType === 'UNIQUE_VALUES') {
