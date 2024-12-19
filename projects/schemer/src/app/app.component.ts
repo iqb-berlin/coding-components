@@ -81,7 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.veronaAPIService.vosStartCommand
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((message: VosStartCommand) => {
-        this.varList = message.variables.filter(v => v.type === 'no-value');
+        this.varList = message.variables.filter(v => v.type !== 'no-value');
         if (message.codingScheme) {
           const compareVersionResult = CodingScheme.checkVersion(message.codingScheme);
           if (compareVersionResult !== 'OK') {
