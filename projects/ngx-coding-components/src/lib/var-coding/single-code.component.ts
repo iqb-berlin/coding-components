@@ -39,6 +39,10 @@ import { CodeInstructionComponent } from './code-instruction.component';
     .type-no-residual-auto {
       padding-left: 8px;
     }
+    .type-intended-incomplete {
+      background: bisque;
+      padding: 15px 4px;
+    }
   `,
   standalone: true,
   imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput,
@@ -59,8 +63,8 @@ export class SingleCodeComponent {
     public schemerService: SchemerService
   ) { }
 
-  codeIdIsUnique(codeToValidate: number | null, codeIndex?: number): boolean {
-    if (!this.allCodes || codeToValidate === null) return true;
+  codeIdIsUnique(codeToValidate: number | 'INTENDED_INCOMPLETE' | 'INVALID', codeIndex?: number): boolean {
+    if (!this.allCodes || codeToValidate === 'INVALID' || codeToValidate === 'INTENDED_INCOMPLETE') return true;
     const firstEqualCode = this.allCodes
       .find((c: CodeData, index: number) => index !== codeIndex && c.id === codeToValidate);
     return !firstEqualCode;
@@ -79,7 +83,7 @@ export class SingleCodeComponent {
 
   setCodeInvalid() {
     if (this.code) {
-      this.code.id = null;
+      this.code.id = 'INVALID';
       this.setCodeChanged();
     }
   }
@@ -88,7 +92,8 @@ export class SingleCodeComponent {
     if (this.code && this.allCodes) {
       const hasNullCode = this.allCodes.length > 0 ? !!this.allCodes.find(c => c.id === 0) : false;
       if (hasNullCode) {
-        this.code.id = this.allCodes.length > 0 ? Math.max(...this.allCodes.map(c => c.id || 0)) + 1 : 0;
+        this.code.id = this.allCodes.length > 0 ? Math.max(...this.allCodes
+          .filter(c => typeof c.id === 'number').map(c => Number(c.id) || 0)) + 1 : 0;
       } else {
         this.code.id = 0;
       }

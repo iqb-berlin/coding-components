@@ -13,6 +13,8 @@
         <mat-icon style="color: gold">remove_done</mat-icon>
       } @else if (code.type === 'UNSET') {
         <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
+      } @else if (code.type === 'INTENDED_INCOMPLETE') {
+          <mat-icon style="color: darkgrey">disabled_by_default</mat-icon>
       } @else if (code.type === 'RESIDUAL') {
         <mat-icon>close</mat-icon>
       } @else if (code.type === 'RESIDUAL_AUTO') {
@@ -32,6 +34,8 @@
             <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
           } @else if (codeType === 'TO_CHECK') {
             <mat-icon style="color: blue"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/></svg></mat-icon>
+          } @else if (codeType === 'INTENDED_INCOMPLETE') {
+              <mat-icon style="color: lightgrey">disabled_by_default</mat-icon>
           } @else if (codeType === 'RESIDUAL') {
             <mat-icon>close</mat-icon>
           } @else if (codeType === 'RESIDUAL_AUTO') {
@@ -48,16 +52,21 @@
     </mat-menu>
     <div class="fx-column-start-stretch " [style.width.%]="codeModel === 'NONE' ? 60 : 100">
       <div class="code-main-data fx-row-start-center fx-gap-5">
-        @if (code.id === null) {
+        @if (code.id === 'INVALID') {
           <div [class]="code.type === 'RESIDUAL_AUTO' ? 'type-residual-auto fx-flex-fill' : 'fx-flex-fill type-no-residual-auto'">
-            {{'code.type-label.' + code.type | translate}}; {{'code.is-null' | translate}}
+            {{'code.type-label.' + code?.type | translate}}; {{'code.is-invalid' | translate}}
           </div>
           <button mat-icon-button [style.width.px]="50"
                   (click)="setCodeValid()"
-                  [matTooltip]="'code.make-not-null' | translate">
+                  [matTooltip]="'code.make-not-invalid' | translate">
             <mat-icon>do_not_disturb_off</mat-icon></button>
         }
-        @if (code.id !== null) {
+        @if (code.id === 'INTENDED_INCOMPLETE') {
+          <div [class]="'type-intended-incomplete fx-flex-fill'">
+            {{'code.type-label.' + code?.type | translate}}
+          </div>
+        }
+        @if (code.id !== 'INVALID' && code.id !== 'INTENDED_INCOMPLETE') {
           <mat-form-field [class]="codeIdIsUnique(code.id, codeIndex) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
             <mat-label>{{'code.id' | translate}}</mat-label>
             <input matInput
@@ -80,7 +89,7 @@
               {{'code.type-label.' + code.type | translate}}
             </div>
           }
-          @if (!(['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type))) {
+          @if (!(['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
             <mat-form-field
               [class]="code.score > 0 ? 'correct' : 'not-correct'"
               [style.width.px]="100">
@@ -96,13 +105,13 @@
           @if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type) && (code.id !== null)) {
             <button mat-icon-button [style.width.px]="50"
                     (click)="setCodeInvalid()"
-                    [matTooltip]="'code.make-null' | translate">
+                    [matTooltip]="'code.make-invalid' | translate">
               <mat-icon>do_not_disturb_on</mat-icon>
             </button>
           }
         }
       </div>
-      @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type))) {
+      @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
         <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
                     [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
                     (codeRulesChanged)="setCodeChanged()"></code-rules>
@@ -112,7 +121,7 @@
       }
     </div>
     @if (codeModel === 'NONE') {
-      @if (code.type === 'RESIDUAL_AUTO' && !code.manualInstruction) {
+      @if ((code.type === 'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE') && !code.manualInstruction) {
         <div class="fx-flex-fill"></div>
       }  @else {
         <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
