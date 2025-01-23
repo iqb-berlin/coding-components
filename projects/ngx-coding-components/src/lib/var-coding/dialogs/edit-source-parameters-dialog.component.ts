@@ -37,7 +37,15 @@ export interface EditSourceParametersDialogData {
   ]
 })
 export class EditSourceParametersDialog {
-  sourceTypeList: SourceType[] = ['COPY_VALUE', 'CONCAT_CODE', 'SUM_CODE', 'SUM_SCORE', 'UNIQUE_VALUES', 'SOLVER'];
+  sourceTypeList: SourceType[] =
+    ['COPY_VALUE',
+      'CONCAT_CODE',
+      'SUM_CODE',
+      'SUM_SCORE',
+      'UNIQUE_VALUES',
+      'SOLVER',
+      'MANUAL'];
+
   possibleDeriveProcessing: SourceProcessingType[] = [];
   possibleNewSources: ReadonlyMap<string, string> = new Map([]);
   newVariableMode = false;
