@@ -120,9 +120,9 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
       // remove orphan+empty base variables
       const varListIds = this.schemerService.varList.map(v => v.id);
-      const varCodingsToDelete = this.schemerService.codingScheme.variableCodings
+      const varCodingsToDelete = [...this.schemerService.codingScheme.variableCodings
         .filter(bv => bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv))
-        .map(bv => bv.id);
+        .map(bv => bv.id)];
       if (varCodingsToDelete.length > 0) {
         varCodingsToDelete.forEach(vc => {
           if (this.schemerService.codingScheme) {
@@ -137,11 +137,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       // add new base variables
       const allBaseVariableIds = this.schemerService.codingScheme.variableCodings
         .filter(v => v.sourceType === 'BASE').map(bv => bv.id);
-      this.schemerService.varList.filter(vi => allBaseVariableIds.indexOf(vi.id) < 0).forEach(vi => {
-        const newBaseVariable = CodingFactory.createCodingVariable(vi.id);
-        newBaseVariable.alias = vi.alias || vi.id;
-        if (this.schemerService.codingScheme) this.schemerService.codingScheme.variableCodings.push(newBaseVariable);
-      });
+      this.schemerService.varList
+        .filter(vi => allBaseVariableIds.indexOf(vi.id) < 0 && vi.type !== 'no-value').forEach(vi => {
+          const newBaseVariable = CodingFactory.createCodingVariable(vi.id);
+          newBaseVariable.alias = vi.alias || vi.id;
+          if (this.schemerService.codingScheme) this.schemerService.codingScheme.variableCodings.push(newBaseVariable);
+        });
     }
     // update aliases
     this.schemerService.varList.forEach(vi => {
@@ -150,7 +151,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         if (coding) coding.alias = vi.alias || vi.id;
       }
     });
-
     this.basicVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
       this.schemerService.codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
         .sort((a, b) => {
@@ -161,7 +161,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           return 0;
         }) : [];
     this.derivedVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
-      this.schemerService.codingScheme?.variableCodings.filter(c => (c.sourceType !== 'BASE'))
+      this.schemerService.codingScheme?.variableCodings
+        .filter(c => (c.sourceType !== 'BASE' && c.sourceType !== 'BASE_NO_VALUE'))
         .sort((a, b) => {
           const idA = (a.alias || a.id).toUpperCase();
           const idB = (b.alias || b.id).toUpperCase();
@@ -173,7 +174,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.schemerService.codingScheme.variableCodings.map(c => c.id) : [];
     this.codingStatus = {};
     if (this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
-      this.problems = this.schemerService.codingScheme?.validate(this.schemerService.varList);
+      this.problems = this.schemerService.codingScheme
+        ?.validate(this.schemerService.varList);
       this.schemerService.codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = 'OK';
         const breakingProblem = this.problems
@@ -359,7 +361,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         prompt: `Bitte Zielvariable wählen! Achtung:
           Die Kodierungsdaten der Zielvariable werden komplett überschrieben.`,
         variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.id !== selectedCoding.id).map(c => this.schemerService.getVariableAliasById(c.id)),
+          .filter(c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE')
+          .map(c => this.schemerService.getVariableAliasById(c.id)),
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {

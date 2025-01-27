@@ -5,7 +5,6 @@ import {
 import { SourceProcessingType, SourceType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -32,7 +31,7 @@ export interface EditSourceParametersDialogData {
   standalone: true,
   imports: [
     MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule,
-    FormsModule, MatTooltip, MatFormField, MatInput, MatCheckbox, MatLabel, MatSelect, MatOption, MatChipRemove,
+    FormsModule, MatFormField, MatInput, MatCheckbox, MatLabel, MatSelect, MatOption, MatChipRemove,
     MatMenu, MatChip, MatMenuTrigger, MatIcon, MatIconButton, MatMenuItem, VariableAliasPipe,
     KeyValuePipe, MatChipListbox
   ]
@@ -76,7 +75,7 @@ export class EditSourceParametersDialog {
   updatePossibleNewSources() {
     if (this.schemerService.codingScheme) {
       this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
-        .filter(v => !([...this.data.deriveSources, this.data.selfId].includes(v.id)))
+        .filter(v => !([...this.data.deriveSources, this.data.selfId].includes(v.id)) && v.sourceType === 'BASE')
         .sort()
         .map(v => [v.id, v.alias || v.id]));
     }
