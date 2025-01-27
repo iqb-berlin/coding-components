@@ -7,8 +7,8 @@ import {
   CodingSchemeVersionMinor,
   VariableCodingData,
   VariableInfo
-} from '@jurei733/responses';
-import { CodingFactory } from '@jurei733/responses/coding-factory';
+} from '@iqb/responses';
+import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatDialog } from '@angular/material/dialog';
 import {
   SchemerStandaloneMenuComponent
