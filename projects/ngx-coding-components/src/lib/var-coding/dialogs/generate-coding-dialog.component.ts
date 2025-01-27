@@ -229,7 +229,7 @@ export class GenerateCodingDialogComponent {
           newVardata.codes, this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO');
         if (typeof newResidualCode !== 'string' && this.singleChoiceLongVersion) {
           // todo: seems to fail - why?
-          newResidualCode.id = null;
+          newResidualCode.id = 'INVALID';
         }
       }
       if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {

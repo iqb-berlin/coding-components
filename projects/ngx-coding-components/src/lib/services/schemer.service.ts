@@ -23,7 +23,14 @@ export class SchemerService {
   ruleMethodParameterCount = RuleMethodParameterCount;
   userRole: UserRoleType = 'RW_MAXIMAL';
   orderOfCodeTypes: CodeType[] = [
-    'FULL_CREDIT', 'PARTIAL_CREDIT', 'TO_CHECK', 'NO_CREDIT', 'UNSET', 'RESIDUAL', 'RESIDUAL_AUTO'
+    'FULL_CREDIT',
+    'PARTIAL_CREDIT',
+    'TO_CHECK',
+    'NO_CREDIT',
+    'UNSET',
+    'INTENDED_INCOMPLETE',
+    'RESIDUAL',
+    'RESIDUAL_AUTO'
   ];
 
   codingToTextMode : CodingToTextMode = 'EXTENDED';
@@ -37,7 +44,7 @@ export class SchemerService {
       }
     } else if (varCoding.sourceType === 'CONCAT_CODE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
-        const codes: (number | null)[][] = [];
+        const codes: (number | 'INVALID' | 'INTENDED_INCOMPLETE')[][] = [];
         let totalCodesCount = 0;
         varCoding.deriveSources.forEach(s => {
           if (this.codingScheme) {
@@ -121,11 +128,13 @@ export class SchemerService {
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
     if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
-      const maxCode = codeList.length > 0 ? Math.max(...codeList.map(c => c.id || 0)) : 0;
+      const maxCode = codeList.length > 0 ? Math.max(...codeList
+        .filter(c => typeof c.id === 'number').map(c => Number(c.id) || 0)) : 0;
       const hasNullCode = codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
-        const firstResidual = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
-        if (firstResidual) return 'code.error-message.residual-exists';
+        const firstResidualOrIntendedIncomplete = codeList
+          .find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type));
+        if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
           id: hasNullCode ? maxCode + 1 : 0,
           type: codeType,
@@ -139,10 +148,27 @@ export class SchemerService {
         codeList.push(newCode);
         return newCode;
       }
+      if (codeType === 'INTENDED_INCOMPLETE') {
+        const firstResidualOrIntendedIncomplete = codeList
+          .find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type));
+        if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
+        const newCode = {
+          id: 'INTENDED_INCOMPLETE' as const,
+          type: codeType,
+          label: '',
+          score: 0,
+          ruleSetOperatorAnd: false,
+          ruleSets: [],
+          manualInstruction: ''
+        };
+        codeList.push(newCode);
+        return newCode;
+      }
+
       if (['FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET', 'TO_CHECK'].includes(codeType)) {
         let newCodeId = -1;
-        codeList.forEach(c => {
-          if (c.type === codeType && c.id && c.id > newCodeId) newCodeId = c.id;
+        codeList.filter(c => typeof c.id === 'number').forEach(c => {
+          if (c.type === codeType && c.id && Number(c.id) > newCodeId) newCodeId = Number(c.id);
         });
         if (newCodeId < 0) {
           newCodeId = this.orderOfCodeTypes.indexOf(codeType) + 1;
