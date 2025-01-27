@@ -7,11 +7,8 @@ import {
   CodingSchemeVersionMinor,
   VariableCodingData,
   VariableInfo
-} from '@iqb/responses';
-import { CodingFactory } from '@iqb/responses/coding-factory';
-import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton } from '@angular/material/button';
+} from '@jurei733/responses';
+import { CodingFactory } from '@jurei733/responses/coding-factory';
 import { MatDialog } from '@angular/material/dialog';
 import {
   SchemerStandaloneMenuComponent
@@ -61,8 +58,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
       `
   ],
   standalone: true,
-  imports: [BrowserAnimationsModule,
-    MatIconButton, MatTooltip, MatIcon, SchemerComponent, SchemerStandaloneMenuComponent]
+  imports: [BrowserAnimationsModule, SchemerComponent, SchemerStandaloneMenuComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
@@ -81,7 +77,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.veronaAPIService.vosStartCommand
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((message: VosStartCommand) => {
-        this.varList = message.variables.filter(v => v.type !== 'no-value');
+        this.varList = message.variables;
         if (message.codingScheme) {
           const compareVersionResult = CodingScheme.checkVersion(message.codingScheme);
           if (compareVersionResult !== 'OK') {
@@ -116,9 +112,15 @@ export class AppComponent implements OnInit, OnDestroy {
           if (codingForBaseVariable) {
             codingForBaseVariable.alias = vi.alias || vi.id;
           } else if (this.codings) {
-            const newBaseVar = CodingFactory.createCodingVariable(vi.id);
-            if (vi.alias) newBaseVar.alias = vi.alias;
-            this.codings.variableCodings.push(newBaseVar);
+            if (vi.type === 'no-value') {
+              const newNoValueBaseVar = CodingFactory.createNoValueCodingVariable(vi.id);
+              if (vi.alias) newNoValueBaseVar.alias = vi.alias;
+              this.codings.variableCodings.push(newNoValueBaseVar);
+            } else {
+              const newBaseVar = CodingFactory.createCodingVariable(vi.id);
+              if (vi.alias) newBaseVar.alias = vi.alias;
+              this.codings.variableCodings.push(newBaseVar);
+            }
           }
         });
         if (message.schemerConfig && message.schemerConfig.role && message.schemerConfig.role !== 'super') {

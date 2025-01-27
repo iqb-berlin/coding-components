@@ -10,12 +10,10 @@ import {
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
-import { MatOption } from '@angular/material/core';
-import { MatSelect } from '@angular/material/select';
+
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -26,8 +24,7 @@ import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/ge
 import { ShowCodingData, ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { CodesTitleComponent } from './codes-title.component';
-import { CodeInstructionComponent } from './code-instruction.component';
-import { CodeRulesComponent } from './code-rules/code-rules.component';
+
 import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
 import { SingleCodeComponent } from './single-code.component';
 import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
@@ -42,11 +39,10 @@ import {
   styleUrls: ['./var-coding.component.scss'],
   standalone: true,
   imports: [
-    MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatSelect, MatOption,
-    MatChipListbox, MatChip, MatMenuTrigger, MatIcon, MatChipRemove, MatIconButton, MatMenu,
+    MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatMenuTrigger, MatIcon, MatIconButton, MatMenu,
     MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
     TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
-    CodesTitleComponent, CodeInstructionComponent, CodeRulesComponent, MatButton, SingleCodeComponent, VariableAliasPipe
+    CodesTitleComponent, SingleCodeComponent, VariableAliasPipe
   ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
