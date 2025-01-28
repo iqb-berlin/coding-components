@@ -10,15 +10,15 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 
 @Component({
-    selector: 'aspect-combo-button',
-    template: `
+  selector: 'aspect-combo-button',
+  template: `
     <div class="root-panel"
       [style.background-color]="inputType === 'color' ? selectedValue : isActive ? 'lightgrey' : 'unset'">
       <button class="apply-button" mat-icon-button [matTooltip]="tooltip"
         (click)="applySelection.emit()">
         <mat-icon>{{icon}}</mat-icon>
       </button>
-    
+
       @if (inputType == 'color') {
         <button class="select-trigger-button" type="button" (click)="input.click()">
           <svg viewBox="0 0 24 24" width="24px" height="24px" focusable="false" aria-hidden="true">
@@ -28,7 +28,7 @@ import { MatIconButton } from '@angular/material/button';
         <input matInput type="color" #input hidden
           (input)="selectionChanged.emit($any($event.target).value); applySelection.emit()">
       }
-    
+
       @if (inputType == 'list') {
         <button class="select-trigger-button" type="button" cdkOverlayOrigin #trigger="cdkOverlayOrigin"
           (click)="isOpen = !isOpen">
@@ -50,7 +50,7 @@ import { MatIconButton } from '@angular/material/button';
       }
     </div>
     `,
-    styles: [`
+  styles: [`
     .root-panel {
       display: flex;
       flex-direction: row;
@@ -74,9 +74,10 @@ import { MatIconButton } from '@angular/material/button';
       padding-top: 9px;
     }
   `
-    ],
-    standalone: true,
-    imports: [MatIconButton, MatTooltip, MatIcon, MatInput, CdkOverlayOrigin, CdkConnectedOverlay, MatActionList, MatListItem]
+  ],
+  standalone: true,
+  imports: [
+    MatIconButton, MatTooltip, MatIcon, MatInput, CdkOverlayOrigin, CdkConnectedOverlay, MatActionList, MatListItem]
 })
 export class ComboButtonComponent {
   @Input() inputType!: 'color' | 'list';

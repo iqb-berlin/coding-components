@@ -12,7 +12,9 @@ import { MatButton } from '@angular/material/button';
   template: `
       <h4 mat-dialog-title>{{ selectData.title }}</h4>
       <mat-dialog-content>
-        @if (selectData.prompt) {
+        @if (selectData.variables.length === 0) {
+          {{'dialog-no-variables' | translate}}
+        } @else if (selectData.prompt) {
           {{selectData.prompt}}
         }
         <mat-selection-list #variables multiple="false">
@@ -22,16 +24,24 @@ import { MatButton } from '@angular/material/button';
             </mat-list-option>
           }
         </mat-selection-list>
+
       </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-raised-button color="primary" [disabled]="variables.selectedOptions.selected.length <= 0"
+      <button mat-raised-button color="primary" [disabled]="!variables"
       (click)="okButtonClick()">{{ selectData.okButtonLabel }}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
     `,
   standalone: true,
-  imports: [MatDialogTitle, MatDialogContent, MatSelectionList, MatListOption, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [MatDialogTitle,
+    MatDialogContent,
+    MatSelectionList,
+    MatListOption,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslateModule]
 })
 export class SelectVariableDialogComponent implements OnInit {
   @ViewChild('variables') variablesElement?: MatSelectionList;
