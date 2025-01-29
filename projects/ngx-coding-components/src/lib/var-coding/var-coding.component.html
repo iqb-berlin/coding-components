@@ -15,14 +15,14 @@
         <div class="fx-row-start-stretch fx-gap-10">
           <div class="fx-flex-fill fx-column-start-start">
             @if (varCoding.sourceType !== 'BASE' && varCoding.sourceType !== 'BASE_NO_VALUE') {
+              <div>Ableitungsmethode: {{'derive-method.' + varCoding.sourceType | translate}}</div>
               @if (varCoding.deriveSources.length === 0) {
                 <div class="no-sources">
                   {{ 'derive-sources.error' | translate }}
                 </div>
               } @else {
-                <div>Abgeleitet von folgenden Variablen: {{varCoding.deriveSources | varAlias : 4 }}</div>
+                <div>Quell-Variablen: {{varCoding.deriveSources | varAlias : 4 }}</div>
               }
-              <div>Methode der Ableitung: {{'derive-method.' + varCoding.sourceType | translate}}</div>
             }
             @if (varCoding.sourceParameters.solverExpression) {
               <div>{{('derive-processing.SOLVER_EXPRESSION') | translate}}: {{varCoding.sourceParameters.solverExpression}}</div>
@@ -34,11 +34,16 @@
               </div>
             }
           </div>
-          <button mat-icon-button [matTooltip]="'derive-processing.prompt' | translate"
+
+
+
+          <button mat-button [matTooltip]="'derive-processing.prompt' | translate"
                   [disabled]="schemerService.userRole === 'RO'"
                   (click)="editSourceParameters()">
             <mat-icon>edit</mat-icon>
+            {{'derive-processing.prompt' | translate}}
           </button>
+
         </div>
       </div>
       <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">

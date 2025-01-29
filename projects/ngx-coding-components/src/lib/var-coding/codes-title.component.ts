@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { SchemerService } from '../services/schemer.service';
 import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialogs/edit-processing-dialog.component';
@@ -30,7 +30,13 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
       } @else {
         <h2>{{ 'code.header' | translate }}</h2>
       }
-      <div class="fx-row-start-start">
+      <div class="fx-column-start-center">
+        <button mat-button [matTooltip]="'processing.prompt' | translate"
+                [disabled]="schemerService.userRole === 'RO'"
+                (click)="editProcessingAndFragments()">
+          <mat-icon>edit</mat-icon>
+          {{'processing.prompt' | translate}}
+        </button>
         <div class="fx-column-start-start">
           @for (p of processing; track p) {
             <div class="fx-row-center-center" style="font-size: small">
@@ -42,11 +48,6 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
             <div style="font-size: small">{{ 'fragmenting.prompt' | translate }}: "{{fragmenting}}"</div>
           }
         </div>
-        <button mat-icon-button [matTooltip]="'processing.prompt' | translate"
-                [disabled]="schemerService.userRole === 'RO'"
-                (click)="editProcessingAndFragments()">
-          <mat-icon>edit</mat-icon>
-        </button>
       </div>
     </div>
   `,
@@ -60,7 +61,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
     `
   ],
   standalone: true,
-  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatIconButton]
+  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatButton]
 })
 export class CodesTitleComponent {
   @Output() processingChanged = new EventEmitter<string[]>();
