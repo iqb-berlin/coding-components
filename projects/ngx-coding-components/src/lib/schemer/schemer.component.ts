@@ -432,6 +432,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             newCoding.alias = targetCoding.alias;
             this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
               .filter(c => c.id !== targetCoding.id);
+            if (newCoding.sourceType !== 'BASE' || targetCoding.sourceType !== 'BASE') {
+              newCoding.sourceType = targetCoding.sourceType;
+              newCoding.sourceParameters = targetCoding.sourceParameters;
+              newCoding.deriveSources = targetCoding.deriveSources;
+            }
             this.schemerService.codingScheme.variableCodings.push(newCoding);
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);
