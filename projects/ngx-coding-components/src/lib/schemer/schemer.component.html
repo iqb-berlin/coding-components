@@ -38,7 +38,9 @@
           <mat-icon>add</mat-icon>
         </button>
         <button mat-button (click)="renameVarScheme()"
-                [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'">
+                [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'"
+                [matTooltip]="'varList.rename' | translate" matTooltipPosition="above"
+        >
           <mat-icon>edit</mat-icon>
         </button>
         <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
