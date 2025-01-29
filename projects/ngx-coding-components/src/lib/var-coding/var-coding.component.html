@@ -23,7 +23,7 @@
             <div style="margin-left:35px;margin-bottom: 10px">
             @if (varCoding.sourceType !== 'BASE' && varCoding.sourceType !== 'BASE_NO_VALUE') {
               <div >Ableitungsmethode: {{'derive-method.' + varCoding.sourceType | translate}}</div>
-              @if (varCoding.sourceParameters.solverExpression) {
+              @if (varCoding.sourceParameters.solverExpression && varCoding.sourceType === 'SOLVER') {
                 <div>{{('derive-processing.SOLVER_EXPRESSION') | translate}}: {{varCoding.sourceParameters.solverExpression}}</div>
               }
               @if (varCoding.deriveSources.length === 0) {
