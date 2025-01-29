@@ -55,6 +55,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   set varCoding(value: VariableCodingData | null) {
     this._varCoding = value;
     this.updateHasResidualAutoCode();
+    this.updateHasIntendedIncompleteAutoCode();
   }
 
   get varCoding(): VariableCodingData | null {
@@ -65,6 +66,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   lastChangeFromSubscription: Subscription | null = null;
   varInfo: VariableInfo | undefined;
   hasResidualAutoCode = false;
+  hasIntendedIncompleteAutoCode = false;
 
   constructor(
     public schemerService: SchemerService,
@@ -84,6 +86,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     ).subscribe(source => {
       if (source !== 'init') {
         this.updateHasResidualAutoCode();
+        this.updateHasIntendedIncompleteAutoCode();
         this.varCodingChanged.emit(this.varCoding);
       }
     });
@@ -100,6 +103,11 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   updateHasResidualAutoCode() {
     this.hasResidualAutoCode = this.varCoding ? !!this.varCoding.codes.find(c => c.type === 'RESIDUAL_AUTO') : false;
+  }
+
+  updateHasIntendedIncompleteAutoCode() {
+    this.hasIntendedIncompleteAutoCode = this.varCoding ? !!this.varCoding.codes
+      .find(c => c.type === 'INTENDED_INCOMPLETE') : false;
   }
 
   getSanitizedText(text: string): SafeHtml {
@@ -219,6 +227,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             this.varCoding.codeModel = newCoding.codeModel;
             this.varCoding.codes = newCoding.codes;
             this.updateHasResidualAutoCode();
+            this.updateHasIntendedIncompleteAutoCode();
             this.varCodingChanged.emit(this.varCoding);
           }
         });
@@ -240,6 +249,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         });
       } else {
         this.updateHasResidualAutoCode();
+        this.updateHasIntendedIncompleteAutoCode();
         this.varCodingChanged.emit(this.varCoding);
       }
     }

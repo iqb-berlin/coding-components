@@ -168,6 +168,7 @@
         <single-code (codeDataChanged)="lastChangeFrom$.next('single-code codes')" [varInfo]="varInfo"
                      [fragmentMode]="!!varCoding.fragmenting" [codeModel]="varCoding.codeModel"
                      [hasResidualAutoCode]="hasResidualAutoCode"
+                     [hasIntendedIncompleteAutoCode]="hasIntendedIncompleteAutoCode"
                      [code]="code" [codeIndex]="codeIndex" [allCodes]="varCoding.codes"></single-code>
       }
       @if (varCoding.codes.length === 0) {

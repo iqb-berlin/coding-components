@@ -6,7 +6,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
-import { MatLabel } from '@angular/material/form-field';
 import { MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { SchemerService } from '../services/schemer.service';
@@ -61,7 +60,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
     `
   ],
   standalone: true,
-  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton]
+  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatIconButton]
 })
 export class CodesTitleComponent {
   @Output() processingChanged = new EventEmitter<string[]>();
