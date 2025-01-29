@@ -17,17 +17,19 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   template: `
     <div class="fx-row-space-between-start">
       @if (schemerService.userRole !== 'RO') {
-        <div (click)="sortCodes($event)"
-             [matTooltip]="'code.prompt.sort' | translate"
-             [matTooltipShowDelay]="500"
-             class="fx-row-start-center fx-gap-5"
-             matRipple
-             [style.cursor]="'pointer'">
-          <h1>{{ 'code.header' | translate }}</h1>
-          <mat-icon>swap_vert</mat-icon>
+        <div class="fx-row-start-start">
+          <h2>{{ 'code.header' | translate }}</h2>
+          <div (click)="sortCodes($event)"
+               [matTooltip]="'code.prompt.sort' | translate"
+               [matTooltipShowDelay]="500"
+               class="sort"
+               matRipple
+               [style.cursor]="'pointer'">
+            <mat-icon>swap_vert</mat-icon>
+          </div>
         </div>
       } @else {
-        <h1>{{ 'code.header' | translate }}</h1>
+        <h2>{{ 'code.header' | translate }}</h2>
       }
       <div class="fx-row-start-start">
         <div class="fx-column-start-start">
@@ -49,6 +51,15 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
       </div>
     </div>
   `,
+  styles: [
+    `
+     .sort {
+       align-items: center;
+       margin-left: 10px;
+       margin-top:25px;
+     }
+    `
+  ],
   standalone: true,
   imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton]
 })

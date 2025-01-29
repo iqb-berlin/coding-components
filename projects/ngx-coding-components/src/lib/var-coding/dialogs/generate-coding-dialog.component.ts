@@ -94,7 +94,6 @@ export class GenerateCodingDialogComponent {
     public dialogRef: MatDialogRef<GenerateCodingDialogComponent>
   ) {
     this.generationModel = 'none';
-    console.log('varInfo', varInfo);
     if (varInfo) {
       if (varInfo.valuesComplete && varInfo.values && varInfo.values.length > 0) {
         this.elseMethod = 'auto';
@@ -174,6 +173,7 @@ export class GenerateCodingDialogComponent {
     }
   }
 
+  // eslint-disable-next-line class-methods-use-this
   drop(event: CdkDragDrop<OptionData[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
