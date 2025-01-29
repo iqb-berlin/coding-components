@@ -29,7 +29,6 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
-import { InlineImage } from './extensions/inline-image';
 import { AnchorId } from './extensions/anchorId';
 import { Indent } from './extensions/indent';
 import { HangingIndent } from './extensions/hanging-indent';
@@ -63,8 +62,6 @@ export class RichTextEditorComponent implements AfterViewInit {
 
   selectedFontColor = 'lightgrey';
   selectedHighlightColor = 'lightgrey';
-  selectedAnchorColor = '#adff2f';
-  selectedAnchorIdText = '';
   selectedFontSize = '20px';
   selectedIndentSize = 20;
   bulletListStyle: string = 'disc';
@@ -95,7 +92,6 @@ export class RichTextEditorComponent implements AfterViewInit {
     BulletListExtension,
     OrderedListExtension,
     HangingIndent,
-    InlineImage,
     BlockImage,
     Blockquote
   ];
@@ -143,52 +139,6 @@ export class RichTextEditorComponent implements AfterViewInit {
 
   applyHighlightColor(): void {
     this.editor.chain().focus().toggleHighlight({ color: this.selectedHighlightColor }).run();
-  }
-
-  applyAnchorId(): void {
-    const id = this.getAnchorIdFromSelection();
-    if (id) {
-      const activeAnchorId = this.editor.getAttributes('anchorId')['anchorId'];
-      const activeAnchorColor = this.editor.getAttributes('anchorId')['anchorColor'];
-      const activeParentAnchorId = this.editor.getAttributes('anchorId')['parentAnchorId'];
-      const activeParentAnchorColor = this.editor.getAttributes('anchorId')['parentAnchorColor'];
-      if (activeParentAnchorId) { // reset nested child
-        if (this.selectedAnchorColor === activeParentAnchorColor || this.selectedAnchorColor === activeAnchorColor) {
-          this.editor.chain().focus().setAnchorId({
-            anchorId: activeParentAnchorId,
-            parentAnchorId: '',
-            anchorColor: activeParentAnchorColor,
-            parentAnchorColor: ''
-          }).run();
-        } else { // set new color for nested Child
-          this.editor.chain().focus().setAnchorId({
-            anchorId: activeAnchorId,
-            parentAnchorId: activeParentAnchorId,
-            anchorColor: this.selectedAnchorColor,
-            parentAnchorColor: activeParentAnchorColor
-          }).run();
-        }
-      } else { // standard toggle
-        this.editor.chain().focus().toggleAnchorId({
-          anchorId: id,
-          parentAnchorId: (activeAnchorId !== id) ? activeAnchorId : '',
-          anchorColor: this.selectedAnchorColor,
-          parentAnchorColor: (activeAnchorId !== id) ? activeAnchorColor : ''
-        }).run();
-      }
-      this.resetSelectedAnchorIdText();
-    } else {
-      console.warn('No text selected for anchor!');
-    }
-  }
-
-  private getAnchorIdFromSelection(): string {
-    const selection = window?.getSelection()?.toString() || this.selectedAnchorIdText;
-    return selection.replace(/[^0-9a-zA-Z]/g, '_').substring(0, 20);
-  }
-
-  private resetSelectedAnchorIdText(): void {
-    this.selectedAnchorIdText = '';
   }
 
   alignText(direction: string): void {
@@ -257,11 +207,6 @@ export class RichTextEditorComponent implements AfterViewInit {
     this.editor.commands.unhangIndent(this.selectedIndentSize);
   }
 
-  async insertImage(): Promise<void> {
-    const mediaSrc = await FileService.loadImage();
-    this.editor.commands.insertInlineImage({ src: mediaSrc });
-  }
-
   async insertBlockImage(alignment: 'none' | 'right' | 'left'): Promise<void> {
     const mediaSrc = await FileService.loadImage();
     switch (alignment) {
@@ -281,30 +226,5 @@ export class RichTextEditorComponent implements AfterViewInit {
 
   toggleBlockquote(): void {
     this.editor.commands.toggleBlockquote();
-  }
-
-  insertToggleButton(): void {
-    this.editor.commands.insertContent('<aspect-nodeview-toggle-button></aspect-nodeview-toggle-button>');
-    this.editor.commands.focus();
-  }
-
-  insertDropList(): void {
-    this.editor.commands.insertContent('<aspect-nodeview-drop-list></aspect-nodeview-drop-list>');
-    this.editor.commands.focus();
-  }
-
-  insertTextField(): void {
-    this.editor.commands.insertContent('<aspect-nodeview-text-field></aspect-nodeview-text-field>');
-    this.editor.commands.focus();
-  }
-
-  insertButton() {
-    this.editor.commands.insertContent('<aspect-nodeview-button></aspect-nodeview-button>');
-    this.editor.commands.focus();
-  }
-
-  insertCheckbox() {
-    this.editor.commands.insertContent('<aspect-nodeview-checkbox></aspect-nodeview-checkbox>');
-    this.editor.commands.focus();
   }
 }
