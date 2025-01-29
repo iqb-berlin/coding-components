@@ -37,6 +37,10 @@
           [matTooltip]="'varList.add' | translate" matTooltipPosition="above">
           <mat-icon>add</mat-icon>
         </button>
+        <button mat-button (click)="renameVarScheme()"
+                [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'">
+          <mat-icon>edit</mat-icon>
+        </button>
         <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
           (click)="deleteVarScheme()" [matTooltip]="'varList.delete' | translate" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
@@ -53,10 +57,7 @@
                   [disabled]=" schemerService.userRole === 'RO'">
             <mat-icon>bolt</mat-icon>{{'varList.activate-base-no-value' | translate}}
           </button>
-          <button mat-menu-item (click)="renameVarScheme()"
-                  [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'">
-            <mat-icon>edit</mat-icon>{{'varList.rename' | translate}}
-          </button>
+
           <button mat-menu-item (click)="checkVarScheme()">
             <mat-icon>check</mat-icon>{{'varList.check' | translate}}
           </button>
