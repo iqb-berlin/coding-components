@@ -14,36 +14,36 @@
         </mat-form-field>
         <div class="fx-row-start-stretch fx-gap-10">
           <div class="fx-flex-fill fx-column-start-start">
+            <button mat-button [matTooltip]="'derive-processing.prompt' | translate"
+                    [disabled]="schemerService.userRole === 'RO'"
+                    (click)="editSourceParameters()">
+              <mat-icon>edit</mat-icon>
+              {{'derive-processing.prompt' | translate}}
+            </button>
+            <div style="margin-left:35px;margin-bottom: 10px">
             @if (varCoding.sourceType !== 'BASE' && varCoding.sourceType !== 'BASE_NO_VALUE') {
-              <div>Ableitungsmethode: {{'derive-method.' + varCoding.sourceType | translate}}</div>
+              <div >Ableitungsmethode: {{'derive-method.' + varCoding.sourceType | translate}}</div>
+              @if (varCoding.sourceParameters.solverExpression) {
+                <div>{{('derive-processing.SOLVER_EXPRESSION') | translate}}: {{varCoding.sourceParameters.solverExpression}}</div>
+              }
               @if (varCoding.deriveSources.length === 0) {
                 <div class="no-sources">
                   {{ 'derive-sources.error' | translate }}
                 </div>
               } @else {
-                <div>Quell-Variablen: {{varCoding.deriveSources | varAlias : 4 }}</div>
+                <div >Quell-Variablen: {{varCoding.deriveSources | varAlias : 4 }}</div>
               }
             }
-            @if (varCoding.sourceParameters.solverExpression) {
-              <div>{{('derive-processing.SOLVER_EXPRESSION') | translate}}: {{varCoding.sourceParameters.solverExpression}}</div>
-            }
-            @for (p of varCoding.sourceParameters.processing; track p) {
-              <div class="fx-row-center-center" style="font-size: small">
-                <mat-icon style="font-size: small; align-content: center;">check</mat-icon>
-                <div>{{('derive-processing.' + p) | translate}}</div>
+            </div>
+            <div style="margin-left:35px;margin-bottom: 10px">
+              @for (p of varCoding.sourceParameters.processing; track p) {
+                <div class="fx-row-start-start" style="font-size: small">
+                  <mat-icon style="font-size: small">check</mat-icon>
+                  <div>{{('derive-processing.' + p) | translate}}</div>
+                </div>
+              }
               </div>
-            }
           </div>
-
-
-
-          <button mat-button [matTooltip]="'derive-processing.prompt' | translate"
-                  [disabled]="schemerService.userRole === 'RO'"
-                  (click)="editSourceParameters()">
-            <mat-icon>edit</mat-icon>
-            {{'derive-processing.prompt' | translate}}
-          </button>
-
         </div>
       </div>
       <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">
