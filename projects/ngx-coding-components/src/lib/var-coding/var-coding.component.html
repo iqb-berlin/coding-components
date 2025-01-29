@@ -14,7 +14,7 @@
         </mat-form-field>
         <div class="fx-row-start-stretch fx-gap-10">
           <div class="fx-flex-fill fx-column-start-start">
-            @if (varCoding.sourceType !== 'BASE') {
+            @if (varCoding.sourceType !== 'BASE' && varCoding.sourceType !== 'BASE_NO_VALUE') {
               @if (varCoding.deriveSources.length === 0) {
                 <div class="no-sources">
                   {{ 'derive-sources.error' | translate }}
@@ -119,6 +119,12 @@
         <button mat-icon-button (click)="codingAsText()" [matTooltip]="'click.coding-as-text' | translate">
           <mat-icon>description</mat-icon>
         </button>
+        <button mat-icon-button (click)="deactivateBaseVar()"
+                [disabled]="schemerService.userRole === 'RO' || schemerService.getBaseVarsList().length === 1 || varCoding.sourceType !== 'BASE'"
+                [matTooltip]="'click.deactivate-base-var' | translate"
+        >
+          <mat-icon>cancel</mat-icon>
+        </button>
       </div>
       <div class="fx-row-start-center fx-gap-10">
         @if (schemerService.userRole !== 'RO') {
@@ -162,6 +168,7 @@
         <single-code (codeDataChanged)="lastChangeFrom$.next('single-code codes')" [varInfo]="varInfo"
                      [fragmentMode]="!!varCoding.fragmenting" [codeModel]="varCoding.codeModel"
                      [hasResidualAutoCode]="hasResidualAutoCode"
+                     [hasIntendedIncompleteAutoCode]="hasIntendedIncompleteAutoCode"
                      [code]="code" [codeIndex]="codeIndex" [allCodes]="varCoding.codes"></single-code>
       }
       @if (varCoding.codes.length === 0) {

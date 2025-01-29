@@ -8,7 +8,7 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { CodeModelType } from '@iqb/responses/coding-interfaces';
@@ -47,7 +47,7 @@ import { CodeInstructionComponent } from './code-instruction.component';
   standalone: true,
   imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput,
     ReactiveFormsModule, FormsModule, TranslateModule, CodeRulesComponent, CodeInstructionComponent,
-    MatDivider, MatMenu, MatMenuItem, MatMenuTrigger, MatButton]
+    MatDivider, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class SingleCodeComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
@@ -58,6 +58,7 @@ export class SingleCodeComponent {
   @Input() codeIndex: number | undefined;
   @Input() codeModel: CodeModelType | undefined;
   @Input() hasResidualAutoCode = false;
+  @Input() hasIntendedIncompleteAutoCode = false;
 
   constructor(
     public schemerService: SchemerService

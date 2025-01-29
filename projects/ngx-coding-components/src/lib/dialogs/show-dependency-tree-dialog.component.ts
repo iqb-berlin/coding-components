@@ -11,7 +11,7 @@ import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
 
 @Component({
   template: `
-    <h1 mat-dialog-title>{{'varlist.derived-tree.title' | translate}}</h1>
+    <h1 mat-dialog-title>{{'varList.derived-tree.title' | translate}}</h1>
 
     <mat-dialog-content>
       @if (errorMessage) {
@@ -25,7 +25,7 @@ import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
                 <div>{{vSource | varAlias}}</div>
               }
             } @else {
-              <div>{{'varlist.derived-tree.no-sources' | translate}}</div>
+              <div>{{'varList.derived-tree.no-sources' | translate}}</div>
             }
           </div>
           @if (vn.value.length > 0) {
@@ -59,7 +59,7 @@ export class ShowDependencyTreeDialogComponent {
       this.errorMessage = '';
     } catch {
       varNodes = [];
-      this.errorMessage = 'varlist.derived-tree.error';
+      this.errorMessage = 'varList.derived-tree.error';
     }
     if (!this.errorMessage) {
       const maxLevel = Math.max(...varNodes.map(n => n.level));

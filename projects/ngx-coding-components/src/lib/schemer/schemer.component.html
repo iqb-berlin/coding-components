@@ -2,7 +2,7 @@
   @if (basicVariables.length !== 0) {
     <div class="navi-bar fx-column-space-between-stretch">
       <div class="var-scheme-list fx-flex">
-        <div class="var-list-header">{{'varlist.base' | translate}}</div>
+        <div class="var-list-header">{{'varList.base' | translate}}</div>
         @for (varBasic of basicVariables; track varBasic) {
           <mat-nav-list class="fx-column-start-stretch">
             <div class="fx-row-start-center">
@@ -16,7 +16,7 @@
             </div>
           </mat-nav-list>
         }
-        <div class="var-list-header">{{'varlist.derived' | translate}}</div>
+        <div class="var-list-header">{{'varList.derived' | translate}}</div>
         @for (varScheme of derivedVariables; track varScheme) {
           <mat-nav-list class="fx-column-start-stretch">
             <div class="fx-row-start-center">
@@ -34,30 +34,34 @@
       <!-- # # # # # # # # # # # # # # # # # # # # # # # # -->
       <div class="var-list-buttons fx-row-space-between-center">
         <button mat-button (click)="addVarScheme()" [disabled]="schemerService.userRole === 'RO'"
-          [matTooltip]="'varlist.add' | translate" matTooltipPosition="above">
+          [matTooltip]="'varList.add' | translate" matTooltipPosition="above">
           <mat-icon>add</mat-icon>
         </button>
         <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
-          (click)="deleteVarScheme()" [matTooltip]="'varlist.delete' | translate" matTooltipPosition="above">
+          (click)="deleteVarScheme()" [matTooltip]="'varList.delete' | translate" matTooltipPosition="above">
           <mat-icon>delete</mat-icon>
         </button>
         <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
-                [matTooltip]="'varlist.copy' | translate" (click)="copyVarScheme()" matTooltipPosition="above">
+                [matTooltip]="'varList.copy' | translate" (click)="copyVarScheme()" matTooltipPosition="above">
           <mat-icon>content_copy</mat-icon>
         </button>
-        <button mat-button [matMenuTriggerFor]="otherFunctions" [matTooltip]="'varlist.load-and-save' | translate" matTooltipPosition="above">
+        <button mat-button [matMenuTriggerFor]="otherFunctions" [matTooltip]="'varList.more-actions' | translate" matTooltipPosition="above">
           <mat-icon>menu</mat-icon>
         </button>
         <mat-menu #otherFunctions="matMenu">
+          <button mat-menu-item (click)="activateBaseNoValueVars()"
+                  [disabled]=" schemerService.userRole === 'RO'">
+            <mat-icon>bolt</mat-icon>{{'varList.activate-base-no-value' | translate}}
+          </button>
           <button mat-menu-item (click)="renameVarScheme()"
                   [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'">
-            <mat-icon>edit</mat-icon>{{'varlist.rename' | translate}}
+            <mat-icon>edit</mat-icon>{{'varList.rename' | translate}}
           </button>
           <button mat-menu-item (click)="checkVarScheme()">
-            <mat-icon>check</mat-icon>{{'varlist.check' | translate}}
+            <mat-icon>check</mat-icon>{{'varList.check' | translate}}
           </button>
           <button mat-menu-item (click)="variableDependencyTree()" [disabled]="derivedVariables.length === 0">
-            <mat-icon>account_tree</mat-icon>{{'varlist.derived-tree.title' | translate}}
+            <mat-icon>account_tree</mat-icon>{{'varList.derived-tree.title' | translate}}
           </button>
         </mat-menu>
 

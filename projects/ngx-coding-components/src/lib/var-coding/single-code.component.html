@@ -1,5 +1,5 @@
 <div class="fx-row-start-stretch code fx-gap-10">
-  @if (code) {
+  @if (code && allCodes) {
     <button mat-icon-button [matMenuTriggerFor]="selectCodeType"
             [matTooltip]="'code.prompt.add-' + code.type | translate" [matTooltipShowDelay]="500"
             [disabled]="schemerService.userRole === 'RO'">
@@ -13,7 +13,7 @@
         <mat-icon style="color: gold">remove_done</mat-icon>
       } @else if (code.type === 'UNSET') {
         <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
-      } @else if (code.type === 'INTENDED_INCOMPLETE') {
+      } @else if (code.type === 'INTENDED_INCOMPLETE'  ) {
           <mat-icon style="color: darkgrey">disabled_by_default</mat-icon>
       } @else if (code.type === 'RESIDUAL') {
         <mat-icon>close</mat-icon>
@@ -23,7 +23,10 @@
     </button>
     <mat-menu #selectCodeType>
       @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
-        <button mat-menu-item (click)="code.type = codeType; setCodeChanged()">
+        <button mat-menu-item
+                [disabled]="(allCodes.length > 1) && (codeType === 'RESIDUAL_AUTO' ||  codeType === 'INTENDED_INCOMPLETE' || codeType === 'RESIDUAL') && (hasResidualAutoCode || hasIntendedIncompleteAutoCode)"
+                (click)="code.type = codeType; setCodeChanged()"
+        >
           @if (codeType === 'FULL_CREDIT') {
             <mat-icon style="color: limegreen">done_all</mat-icon>
           } @else if (codeType === 'PARTIAL_CREDIT') {
@@ -34,7 +37,7 @@
             <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
           } @else if (codeType === 'TO_CHECK') {
             <mat-icon style="color: blue"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/></svg></mat-icon>
-          } @else if (codeType === 'INTENDED_INCOMPLETE') {
+          } @else if (codeType === 'INTENDED_INCOMPLETE' ) {
               <mat-icon style="color: lightgrey">disabled_by_default</mat-icon>
           } @else if (codeType === 'RESIDUAL') {
             <mat-icon>close</mat-icon>

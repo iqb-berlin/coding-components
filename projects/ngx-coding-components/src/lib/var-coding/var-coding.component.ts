@@ -19,6 +19,8 @@ import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatDivider } from '@angular/material/divider';
+import { ConfirmDialogComponent, ConfirmDialogData } from '@ngx-coding-components/dialogs/confirm-dialog.component';
+import { CodingFactory } from '@iqb/responses/coding-factory';
 import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/generate-coding-dialog.component';
 import { ShowCodingData, ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
@@ -53,6 +55,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   set varCoding(value: VariableCodingData | null) {
     this._varCoding = value;
     this.updateHasResidualAutoCode();
+    this.updateHasIntendedIncompleteAutoCode();
   }
 
   get varCoding(): VariableCodingData | null {
@@ -63,6 +66,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   lastChangeFromSubscription: Subscription | null = null;
   varInfo: VariableInfo | undefined;
   hasResidualAutoCode = false;
+  hasIntendedIncompleteAutoCode = false;
 
   constructor(
     public schemerService: SchemerService,
@@ -70,6 +74,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     private translateService: TranslateService,
     private editTextDialog: MatDialog,
     private showCodingDialog: MatDialog,
+    private confirmDialog: MatDialog,
     private generateCodingDialog: MatDialog,
     private messageDialog: MatDialog,
     private editSourceParametersDialog: MatDialog
@@ -81,6 +86,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     ).subscribe(source => {
       if (source !== 'init') {
         this.updateHasResidualAutoCode();
+        this.updateHasIntendedIncompleteAutoCode();
         this.varCodingChanged.emit(this.varCoding);
       }
     });
@@ -97,6 +103,11 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   updateHasResidualAutoCode() {
     this.hasResidualAutoCode = this.varCoding ? !!this.varCoding.codes.find(c => c.type === 'RESIDUAL_AUTO') : false;
+  }
+
+  updateHasIntendedIncompleteAutoCode() {
+    this.hasIntendedIncompleteAutoCode = this.varCoding ? !!this.varCoding.codes
+      .find(c => c.type === 'INTENDED_INCOMPLETE') : false;
   }
 
   getSanitizedText(text: string): SafeHtml {
@@ -152,6 +163,35 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  deactivateBaseVar() {
+    if (this.schemerService.codingScheme) {
+      if (this.schemerService.codingScheme.variableCodings
+        .filter(c => c.sourceType === 'BASE').length > 1) {
+        const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
+          width: '400px',
+          data: <ConfirmDialogData>{
+            title: `Deaktiviere Variable '${this.varCoding?.alias || this.varCoding?.id}'`,
+            content: 'Es werden die vorhandenen Kodierungen entfernt und die Basisvariable deaktiviert.',
+            confirmButtonLabel: 'Deaktivieren',
+            showCancel: true
+          }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          if (result !== false && this.schemerService.codingScheme) {
+            if (this.varCoding && this.varCoding.sourceType === 'BASE') {
+              this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
+                .filter(c => c.id !== this.varCoding?.id);
+              this.varCoding = CodingFactory.createNoValueCodingVariable(this.varCoding.id);
+              this.schemerService.codingScheme.variableCodings.push(this.varCoding);
+              this.varCodingChanged.emit(this.varCoding);
+              this.varCoding = null;
+            }
+          }
+        });
+      }
+    }
+  }
+
   smartSchemer(event: MouseEvent) {
     if (this.varCoding) {
       if (event.ctrlKey) {
@@ -185,9 +225,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             this.varCoding.processing = newCoding.processing;
             this.varCoding.fragmenting = newCoding.fragmenting;
             this.varCoding.codeModel = newCoding.codeModel;
-            // this.varCoding.codeModelParameters = newCoding.codeModelParameters;
             this.varCoding.codes = newCoding.codes;
             this.updateHasResidualAutoCode();
+            this.updateHasIntendedIncompleteAutoCode();
             this.varCodingChanged.emit(this.varCoding);
           }
         });
@@ -209,6 +249,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         });
       } else {
         this.updateHasResidualAutoCode();
+        this.updateHasIntendedIncompleteAutoCode();
         this.varCodingChanged.emit(this.varCoding);
       }
     }

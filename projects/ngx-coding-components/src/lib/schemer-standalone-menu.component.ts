@@ -7,13 +7,16 @@ import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 import { FileService } from './services/file.service';
 import { UserRoleType } from './services/schemer.service';
 
 @Component({
   selector: 'schemer-standalone-menu',
   template: `
-    <button mat-fab [matMenuTriggerFor]="menu" matTooltip="Weitere Funktionen" matTooltipPosition="above">
+    <button mat-fab [matMenuTriggerFor]="menu"
+            [matTooltip] ="'varList.load-save-user-role' | translate"
+            matTooltipPosition="above">
       <mat-icon>menu</mat-icon>
     </button>
 
@@ -25,10 +28,6 @@ import { UserRoleType } from './services/schemer.service';
       <button mat-menu-item (click)="loadCodingScheme()">
         <mat-icon>input</mat-icon>Antwortschema laden
       </button>
-      <button mat-menu-item (click)="saveCodingScheme()">
-        <mat-icon>get_app</mat-icon>Antwortschema speichern
-      </button>
-      <mat-divider></mat-divider>
       <button mat-menu-item (click)="saveCodingScheme()">
         <mat-icon>get_app</mat-icon>Antwortschema speichern
       </button>
@@ -57,7 +56,7 @@ import { UserRoleType } from './services/schemer.service';
     '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
   ],
   standalone: true,
-  imports: [MatFabButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider]
+  imports: [MatFabButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, TranslateModule]
 })
 export class SchemerStandaloneMenuComponent {
   @Input() codingScheme: CodingScheme | null = null;

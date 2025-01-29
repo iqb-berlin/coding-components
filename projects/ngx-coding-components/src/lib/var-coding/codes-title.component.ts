@@ -6,7 +6,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
-import { MatLabel } from '@angular/material/form-field';
 import { MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { SchemerService } from '../services/schemer.service';
@@ -17,17 +16,19 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   template: `
     <div class="fx-row-space-between-start">
       @if (schemerService.userRole !== 'RO') {
-        <div (click)="sortCodes($event)"
-             [matTooltip]="'code.prompt.sort' | translate"
-             [matTooltipShowDelay]="500"
-             class="fx-row-start-center fx-gap-5"
-             matRipple
-             [style.cursor]="'pointer'">
-          <h1>{{ 'code.header' | translate }}</h1>
-          <mat-icon>swap_vert</mat-icon>
+        <div class="fx-row-start-start">
+          <h2>{{ 'code.header' | translate }}</h2>
+          <div (click)="sortCodes($event)"
+               [matTooltip]="'code.prompt.sort' | translate"
+               [matTooltipShowDelay]="500"
+               class="sort"
+               matRipple
+               [style.cursor]="'pointer'">
+            <mat-icon>swap_vert</mat-icon>
+          </div>
         </div>
       } @else {
-        <h1>{{ 'code.header' | translate }}</h1>
+        <h2>{{ 'code.header' | translate }}</h2>
       }
       <div class="fx-row-start-start">
         <div class="fx-column-start-start">
@@ -49,8 +50,17 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
       </div>
     </div>
   `,
+  styles: [
+    `
+     .sort {
+       align-items: center;
+       margin-left: 10px;
+       margin-top:25px;
+     }
+    `
+  ],
   standalone: true,
-  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatLabel, MatIconButton]
+  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatIconButton]
 })
 export class CodesTitleComponent {
   @Output() processingChanged = new EventEmitter<string[]>();

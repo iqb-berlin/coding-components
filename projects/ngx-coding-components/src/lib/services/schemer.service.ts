@@ -33,12 +33,13 @@ export class SchemerService {
     'RESIDUAL_AUTO'
   ];
 
-  codingToTextMode : CodingToTextMode = 'EXTENDED';
+  codingToTextMode: CodingToTextMode = 'EXTENDED';
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {
       return this.varList.find(v => v.id === varCoding.id);
-    } if (varCoding.sourceType === 'COPY_VALUE') {
+    }
+    if (varCoding.sourceType === 'COPY_VALUE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
         return this.varList.find(v => v.id === varCoding.deriveSources[0]);
       }
@@ -263,5 +264,12 @@ export class SchemerService {
     const returnValues: string[] = varIdsToTake.map(vId => this.getVariableAliasById(vId));
     if (maxEntries > 0 && maxEntries < varIds.length) returnValues.push('...');
     return returnValues.join(', ');
+  }
+
+  getBaseVarsList() {
+    if (this.codingScheme) {
+      return this.codingScheme.variableCodings.filter(c => c.sourceType === 'BASE');
+    }
+    return [];
   }
 }
