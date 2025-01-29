@@ -1,4 +1,7 @@
-<h1 mat-dialog-title>{{ 'coding.generate.dialog-title' | translate}} '{{schemerService.getVariableAliasById(varInfo.id)}}'</h1><mat-dialog-content>
+@if (varInfo) {
+  <h1 mat-dialog-title>{{ 'coding.generate.dialog-title' | translate}} '{{schemerService.getVariableAliasById(varInfo.id || '?')}}'</h1>
+}
+<mat-dialog-content>
   @if (varInfo) {
     <div>
       @for (info of ToTextFactory.varInfoAsText(varInfo); track info) {
