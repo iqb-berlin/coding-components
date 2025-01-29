@@ -230,13 +230,14 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false && this.schemerService.codingScheme) {
+          const timestamp = new Date().getTime();
           const dialogResultTyped: EditSourceParametersDialogData = dialogResult;
           let errorMessage = '';
           if (!this.schemerService.checkRenamedVarAliasOk(dialogResultTyped.selfAlias)) {
             errorMessage = 'data-error.variable-id.double';
           } else {
             const newVarScheme = <VariableCodingData>{
-              id: this.schemerService.changeNewVarIdIfExists(dialogResultTyped.selfAlias),
+              id: `d_${timestamp}`,
               alias: dialogResultTyped.selfAlias,
               label: '',
               sourceType: dialogResultTyped.sourceType,
