@@ -16,7 +16,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   template: `
     <div class="fx-row-space-between-start">
       @if (schemerService.userRole !== 'RO') {
-        <div class="fx-row-start-start">
+        <div class="fx-row-center-center" style="margin-top:10px">
           <h2>{{ 'code.header' | translate }}</h2>
           <div (click)="sortCodes($event)"
                [matTooltip]="'code.prompt.sort' | translate"
@@ -54,9 +54,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   styles: [
     `
      .sort {
-       align-items: center;
-       margin-left: 10px;
-       margin-top:25px;
+       margin-left: 20px;
      }
     `
   ],
