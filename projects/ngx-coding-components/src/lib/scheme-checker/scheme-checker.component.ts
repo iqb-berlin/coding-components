@@ -22,7 +22,7 @@ export class SchemeCheckerComponent {
     this._codingScheme = value;
     if (this._codingScheme) {
       this._codingScheme.variableCodings.filter(v => v.sourceType === 'BASE')
-        .map(v => v.id)
+        .map(v => v.alias || v.id)
         .sort()
         // eslint-disable-next-line no-return-assign
         .forEach(v => this.values[v] = '');
@@ -41,10 +41,10 @@ export class SchemeCheckerComponent {
     if (this._codingScheme) {
       const myValues: Response[] = [];
       this._codingScheme.variableCodings.forEach(cs => {
-        if (this.values[cs.id]) {
+        if (this.values[cs.alias || cs.id]) {
           myValues.push(<Response>{
             id: cs.id,
-            value: this.values[cs.id],
+            value: this.values[cs.alias || cs.id],
             status: 'VALUE_CHANGED'
           });
         } else if (cs.sourceType === 'BASE') {
@@ -65,4 +65,5 @@ export class SchemeCheckerComponent {
   }
 
   protected readonly Object = Object;
+  protected readonly JSON = JSON;
 }
