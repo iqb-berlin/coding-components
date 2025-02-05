@@ -50,7 +50,9 @@ type Data = {
       }
       @if (!isLoading) {
         @if(rawResponsesView){
-          {{JSON.stringify(this.dataSource.data)}}
+          <pre style="white-space: wrap;">
+            {{JSON.stringify(this.dataSource.data)}}
+          </pre>
         } @else {
           <table mat-table matSort matSortActive="id" matSortDirection="asc"
                  (matSortChange)="matSort(sort)" [dataSource]="dataSource" >
