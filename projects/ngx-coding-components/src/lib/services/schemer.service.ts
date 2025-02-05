@@ -229,7 +229,7 @@ export class SchemerService {
           }
         });
         this.orderOfCodeTypes.forEach(t => {
-          if (!(['RESIDUAL', 'RESIDUAL_AUTO'].includes(t))) {
+          if (!(['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(t))) {
             const allCodesOfType = codeList.filter(c => c.type === t);
             if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
           } else {
