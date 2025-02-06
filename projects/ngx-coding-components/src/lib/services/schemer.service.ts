@@ -187,7 +187,14 @@ export class SchemerService {
           ruleSetOperatorAnd: false,
           ruleSets: [<RuleSet>{
             ruleOperatorAnd: true,
-            rules: []
+            rules: [
+              {
+                method: 'MATCH',
+                parameters: [
+                  ''
+                ]
+              }
+            ]
           }],
           manualInstruction: ''
         };
