@@ -220,7 +220,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         data: <EditSourceParametersDialogData>{
           selfId: '',
           selfAlias: '',
-          sourceType: 'SUM_CODE',
+          sourceType: 'SUM_SCORE',
           sourceParameters: {
             processing: [],
             solverExpression: ''
