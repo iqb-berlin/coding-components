@@ -85,12 +85,21 @@ export class CodeRuleListComponent {
   changeRule(ruleSet:RuleSet, ruleToChangeIndex: number, newRuleMethod: RuleMethod) {
     if (ruleSet && ruleToChangeIndex >= 0) {
       const rule = ruleSet.rules[ruleToChangeIndex];
-      rule.method = newRuleMethod;
       const paramCount = this.schemerService.ruleMethodParameterCount[newRuleMethod];
       if (paramCount !== 0) {
-        rule.parameters = [''];
-        if (paramCount > 1) rule.parameters.push('');
+        if (
+          (this.textRules.includes(rule.method) &&
+            (newRuleMethod === 'NUMERIC_MATCH' || this.textRules.includes(newRuleMethod))) ||
+          (rule.method === 'NUMERIC_MATCH' && this.textRules.includes(newRuleMethod))) {
+          rule.parameters = ruleSet.rules[ruleToChangeIndex].parameters;
+        } else {
+          rule.parameters = [''];
+        }
+        if (rule.parameters && paramCount > 1) rule.parameters.push('');
+      } else {
+        rule.parameters = [];
       }
+      rule.method = newRuleMethod;
       this.setCodeRulesChanged();
     }
   }
