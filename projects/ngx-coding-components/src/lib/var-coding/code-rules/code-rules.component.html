@@ -31,15 +31,13 @@
                 </button>
               }
             </div>
-
                 <code-rule-list [fragmentMode]="fragmentMode || false" [ruleSet]="ruleSet" class="fx-flex-fill code-rule-list"
                                 [arrayMode]="varInfo && varInfo.multiple || false"
                                 (deleteRuleSetRequested)="deleteRuleSet(ruleSetIndex)"
-                                [canDeleteRuleSet]="true"
+                                [canDeleteRuleSet]="!!(code.ruleSets.length > 1 || varInfo && varInfo.multiple)"
                                 (codeRulesChanged)="setCodeRulesChanged()">
 
                 </code-rule-list>
-
           </div>
 
 
