@@ -1,0 +1,289 @@
+<mat-card>
+  <mat-card-content>
+    <div class="fx-row-start-stretch fx-gap-10">
+      @if (ruleSet) {
+        <div class="fx-column-start-stretch fx-flex-fill">
+          @for (rule of ruleSet.rules; track rule; let ruleIndex = $index) {
+            <div class="fx-row-start-center fx-flex-fill fx-gap-10"
+                 (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
+              <div class="fx-column-start-stretch fx-flex-fill">
+                <div class="rule">
+                  <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
+                       matTooltipShowDelay="500">
+                  <button mat-icon-button
+                          [matMenuTriggerFor]="selectCodeType"
+                          [disabled]="schemerService.userRole === 'RO'"
+                          [matTooltip]="'rule.prompt.change' | translate">
+                    @if(rule.method === 'MATCH') {
+                      <mat-icon svgIcon="match-word"></mat-icon>
+                    }
+                    @if(rule.method === 'MATCH_REGEX') {
+                      <mat-icon svgIcon="regular-expression"></mat-icon>
+                    }
+                    @if(rule.method === 'NUMERIC_MATCH') {
+                      <mat-icon style="color:#006064"> = </mat-icon>
+                    }
+                    @if(rule.method === 'NUMERIC_RANGE') {
+                      <mat-icon svgIcon="arrow-range"></mat-icon>
+                    }
+                    @if(rule.method === 'NUMERIC_MAX') {
+                      <mat-icon style="color:#006064"> ≤ </mat-icon>
+                    }
+                    @if(rule.method === 'NUMERIC_MORE_THAN') {
+                      <mat-icon style="color:#006064"> > </mat-icon>
+                    }
+                    @if(rule.method === 'NUMERIC_LESS_THAN') {
+                      <mat-icon style="color:#006064"> < </mat-icon>
+                    }
+                    @if(rule.method === 'NUMERIC_MIN') {
+                      <mat-icon style="color:#006064"> ≥ </mat-icon>
+                    }
+                    @if(rule.method === 'IS_TRUE') {
+                      <mat-icon style="color:#006064" >close</mat-icon>
+                    }
+                    @if(rule.method === 'IS_FALSE') {
+                      <mat-icon style="color:#006064" >check</mat-icon>
+                    }
+                    @if(rule.method  === 'IS_EMPTY') {
+                      <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
+                    }
+                    @if(rule.method  === 'IS_NULL') {
+                      <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
+                    }
+                  </button>
+                  <mat-menu #selectCodeType="matMenu">
+                    <span class="rule-group-menu">{{ 'rule.group-string' | translate }}</span>
+                    @for (rule of textRules; track rule) {
+                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                        @if(rule === 'MATCH') {
+                          <mat-icon svgIcon="match-word"></mat-icon>
+                        }
+                        @if(rule === 'MATCH_REGEX') {
+                          <mat-icon svgIcon="regular-expression"></mat-icon>
+                        }
+
+                        {{('rule.' + rule)  | translate}}
+                      </button>
+                    }
+                    <mat-divider></mat-divider>
+                    <span class="rule-group-menu">{{ 'rule.group-numeric' | translate }}</span>
+                    @for (rule of numericRules; track rule) {
+                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                        @if(rule === 'NUMERIC_MATCH') {
+                          <mat-icon style="color:#006064"> = </mat-icon>
+                        }
+                        @if(rule === 'NUMERIC_RANGE') {
+                          <mat-icon svgIcon="arrow-range"></mat-icon>
+                        }
+                        @if(rule === 'NUMERIC_MAX') {
+                          <mat-icon style="color:#006064"> ≤ </mat-icon>
+                        }
+                        @if(rule === 'NUMERIC_MORE_THAN') {
+                          <mat-icon style="color:#006064"> > </mat-icon>
+                        }
+                        @if(rule === 'NUMERIC_LESS_THAN') {
+                          <mat-icon style="color:#006064"> < </mat-icon>
+                        }
+                        @if(rule === 'NUMERIC_MIN') {
+                          <mat-icon style="color:#006064"> ≥ </mat-icon>
+                        }
+                        {{('rule.' + rule) | translate}}
+                      </button>
+                    }
+                    <mat-divider></mat-divider>
+                    <span class="rule-group-menu">{{ 'rule.group-logic' | translate }}</span>
+                    @for (rule of booleanRules; track rule) {
+                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                        @if(rule === 'IS_TRUE') {
+                          <mat-icon style="color:#006064" >close</mat-icon>
+                        }
+                        @if(rule === 'IS_FALSE') {
+                          <mat-icon style="color:#006064" >check</mat-icon>
+                        }
+                        {{('rule.' + rule) | translate}}
+                      </button>
+                    }
+                    <mat-divider></mat-divider>
+                    @for (rule of blankRules; track rule) {
+                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                        @if(rule === 'IS_EMPTY') {
+                          <mat-icon style="color:#006064"></mat-icon>
+                        }
+                        @if(rule === 'IS_NULL') {
+                          <mat-icon style="color:#006064"></mat-icon>
+                        }
+                        {{('rule.' + rule) | translate}}
+                      </button>
+                    }
+                  </mat-menu>
+                  <span class="rule-group">
+                    @if(textRules.includes(rule.method)) {
+                      {{'rule.group-string' | translate}}
+                    } @else if (numericRules.includes(rule.method)) {
+                      {{'rule.group-numeric' | translate}}
+                    } @else if (booleanRules.includes(rule.method)) {
+                      {{'rule.group-logic' | translate}}
+                    }
+                  </span>
+                    <span >{{('rule.' + rule.method) | translate}}</span>
+                  </div>
+
+
+                </div>
+                @if (schemerService.ruleMethodParameterCount[rule.method] < 0) {
+                  <mat-form-field>
+                    @if (rule.parameters) {
+                      <textarea matInput [disabled]="schemerService.userRole === 'RO'"
+                                [(ngModel)]="rule.parameters[0]"
+                                (ngModelChange)="setCodeRulesChanged()"
+                                cdkTextareaAutosize
+                                cdkAutosizeMinRows="2"
+                                cdkAutosizeMaxRows="8"></textarea>
+                    }
+                  </mat-form-field>
+                }
+                @if (schemerService.ruleMethodParameterCount[rule.method] > 0) {
+                  <mat-form-field>
+                    @if (rule.parameters) {
+                      <input matInput [disabled]="schemerService.userRole === 'RO'"
+                             [(ngModel)]="rule.parameters[0]"
+                             (ngModelChange)="setCodeRulesChanged()">
+                    }
+                  </mat-form-field>
+                }
+                @if (schemerService.ruleMethodParameterCount[rule.method] > 1) {
+                  <mat-form-field>
+                    @if (rule.parameters) {
+                      <input matInput [disabled]="schemerService.userRole === 'RO'"
+                             [(ngModel)]="rule.parameters[1]"
+                             (ngModelChange)="setCodeRulesChanged()">
+                    }
+                  </mat-form-field>
+                }
+              </div>
+              <div class="fx-column-start-center">
+                <button mat-icon-button [matTooltip]="'rule.prompt.delete' | translate"
+                        [disabled]="schemerService.userRole === 'RO'"
+                        (click)="deleteRule(ruleSet, ruleIndex)"
+                        [class]="showCodeButtonsOf === rule.method ? 'buttonDisplay' : 'buttonHide'">
+                  <mat-icon>delete_outlined</mat-icon>
+                </button>
+                @if (fragmentMode) {
+                  @if (schemerService.userRole !== 'RO') {
+                    <div>
+                      <button mat-flat-button (click)="editFragmentReference(rule)"
+                              [matTooltip]="'rule.reference.title' | translate">
+                        F {{ rule.fragment | ruleReference }}
+                      </button>
+                    </div>
+                  } @else {
+                    <div>F {{ rule.fragment | ruleReference }}</div>
+                  }
+                }
+              </div>
+            </div>
+          }
+          <div class="fx-row-space-between-center">
+            <button style="color:#006064"  mat-icon-button
+                    [matMenuTriggerFor]="addRuleMenu"
+                    [disabled]="schemerService.userRole === 'RO'"
+                    [matTooltip]="'rule.prompt.add' | translate">
+              <mat-icon>add</mat-icon>
+            </button>
+            <mat-menu #addRuleMenu="matMenu">
+              <span class="rule-group-menu">{{ 'rule.group-string' | translate }}</span>
+              @for (newSource of textRules; track newSource) {
+                <button mat-menu-item (click)="addRule(ruleSet, newSource)">
+                  @if(newSource === 'MATCH') {
+                    <mat-icon svgIcon="match-word"></mat-icon>
+                  }
+                  @if(newSource === 'MATCH_REGEX') {
+                    <mat-icon svgIcon="regular-expression"></mat-icon>
+                  }
+
+                  {{('rule.' + newSource) | translate}}
+                </button>
+              }
+              <mat-divider></mat-divider>
+              <span class="rule-group-menu">{{ 'rule.group-numeric' | translate }}</span>
+              @for (newSource of numericRules; track newSource) {
+                <button mat-menu-item (click)="addRule(ruleSet, newSource)">
+                  @if(newSource === 'NUMERIC_MATCH') {
+                    <mat-icon style="color:#006064"> = </mat-icon>
+                  }
+                  @if(newSource === 'NUMERIC_RANGE') {
+                    <mat-icon svgIcon="arrow-range"></mat-icon>
+                  }
+                  @if(newSource === 'NUMERIC_MAX') {
+                    <mat-icon style="color:#006064"> ≤ </mat-icon>
+                  }
+                  @if(newSource === 'NUMERIC_MORE_THAN') {
+                    <mat-icon style="color:#006064"> > </mat-icon>
+                  }
+                  @if(newSource === 'NUMERIC_LESS_THAN') {
+                    <mat-icon style="color:#006064"> < </mat-icon>
+                  }
+                  @if(newSource === 'NUMERIC_MIN') {
+                    <mat-icon style="color:#006064"> ≥ </mat-icon>
+                  }
+                  {{('rule.' + newSource) | translate}}
+                </button>
+              }
+              <mat-divider></mat-divider>
+              <span class="rule-group-menu">{{ 'rule.group-logic' | translate }}</span>
+              @for (newSource of booleanRules; track newSource) {
+                <button mat-menu-item (click)="addRule(ruleSet, newSource)">
+                  @if(newSource === 'IS_TRUE') {
+                    <mat-icon style="color:#006064" >close</mat-icon>
+                  }
+                  @if(newSource === 'IS_FALSE') {
+                    <mat-icon style="color:#006064">check</mat-icon>
+                  }
+                  {{('rule.' + newSource) | translate}}
+                </button>
+              }
+              <mat-divider></mat-divider>
+              @for (newSource of blankRules; track newSource) {
+                <button mat-menu-item
+                        (click)="addRule(ruleSet, newSource)">
+                  @if(newSource === 'IS_EMPTY') {
+                    <mat-icon style="color:#006064"></mat-icon>
+                  }
+                  @if(newSource === 'IS_NULL') {
+                    <mat-icon style="color:#006064"></mat-icon>
+                  }
+                  {{('rule.' + newSource) | translate}}
+                </button>
+              }
+            </mat-menu>
+            @if (ruleSet.rules.length === 0) {
+              <div class="no-rules">{{'rule.no-rules' | translate}}</div>
+            }
+            @if (ruleSet.rules.length > 1 && schemerService.userRole !== 'RO') {
+              <mat-button-toggle-group appearance="legacy"
+                                       [(ngModel)]="ruleSet.ruleOperatorAnd"
+                                       [matTooltip]="'rule.prompt.operator' | translate">
+                <mat-button-toggle [value]="false">{{"rule.operator.false" | translate }}</mat-button-toggle>
+                <mat-button-toggle [value]="true">{{"rule.operator.true" | translate }}</mat-button-toggle>
+              </mat-button-toggle-group>
+            }
+          </div>
+        </div>
+        @if (arrayMode || canDeleteRuleSet) {
+          <div class="fx-column-start-center" [style.border-left]="'4px solid lightgrey'">
+            @if (schemerService.userRole !== 'RO' && canDeleteRuleSet) {
+              <button style="color:red" mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate"
+                      (click)="deleteRuleSetRequested.emit()">
+                <mat-icon>
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z"/></svg>
+                </mat-icon>
+              </button>
+            }
+          </div>
+        }
+      } @else {
+        <div class="no-ruleset">{{'rule.no-ruleset' | translate}}</div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>
