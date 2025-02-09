@@ -39,10 +39,10 @@
                       <mat-icon style="color:#006064"> ≥ </mat-icon>
                     }
                     @if(rule.method === 'IS_TRUE') {
-                      <mat-icon style="color:#006064" >close</mat-icon>
+                      <mat-icon style="color:#006064" >check</mat-icon>
                     }
                     @if(rule.method === 'IS_FALSE') {
-                      <mat-icon style="color:#006064" >check</mat-icon>
+                      <mat-icon style="color:#006064" >close</mat-icon>
                     }
                     @if(rule.method  === 'IS_EMPTY') {
                       <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
@@ -95,10 +95,10 @@
                     @for (rule of booleanRules; track rule) {
                       <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
                         @if(rule === 'IS_TRUE') {
-                          <mat-icon style="color:#006064" >close</mat-icon>
+                          <mat-icon style="color:#006064" >check</mat-icon>
                         }
                         @if(rule === 'IS_FALSE') {
-                          <mat-icon style="color:#006064" >check</mat-icon>
+                          <mat-icon style="color:#006064" >close</mat-icon>
                         }
                         {{('rule.' + rule) | translate}}
                       </button>
@@ -107,10 +107,10 @@
                     @for (rule of blankRules; track rule) {
                       <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
                         @if(rule === 'IS_EMPTY') {
-                          <mat-icon style="color:#006064"></mat-icon>
+                          <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
                         }
                         @if(rule === 'IS_NULL') {
-                          <mat-icon style="color:#006064"></mat-icon>
+                          <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
                         }
                         {{('rule.' + rule) | translate}}
                       </button>
@@ -234,10 +234,10 @@
               @for (newSource of booleanRules; track newSource) {
                 <button mat-menu-item (click)="addRule(ruleSet, newSource)">
                   @if(newSource === 'IS_TRUE') {
-                    <mat-icon style="color:#006064" >close</mat-icon>
+                    <mat-icon style="color:#006064" >check</mat-icon>
                   }
                   @if(newSource === 'IS_FALSE') {
-                    <mat-icon style="color:#006064">check</mat-icon>
+                    <mat-icon style="color:#006064">close</mat-icon>
                   }
                   {{('rule.' + newSource) | translate}}
                 </button>
@@ -247,10 +247,10 @@
                 <button mat-menu-item
                         (click)="addRule(ruleSet, newSource)">
                   @if(newSource === 'IS_EMPTY') {
-                    <mat-icon style="color:#006064"></mat-icon>
+                    <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
                   }
                   @if(newSource === 'IS_NULL') {
-                    <mat-icon style="color:#006064"></mat-icon>
+                    <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
                   }
                   {{('rule.' + newSource) | translate}}
                 </button>
@@ -271,7 +271,7 @@
         </div>
         @if (arrayMode || canDeleteRuleSet) {
           <div class="fx-column-start-center" [style.border-left]="'4px solid lightgrey'">
-            @if (schemerService.userRole !== 'RO' && canDeleteRuleSet) {
+            @if (schemerService.userRole !== 'RO' && canDeleteRuleSet ) {
               <button style="color:red" mat-icon-button [matTooltip]="'rule-set.prompt.delete' | translate"
                       (click)="deleteRuleSetRequested.emit()">
                 <mat-icon>
