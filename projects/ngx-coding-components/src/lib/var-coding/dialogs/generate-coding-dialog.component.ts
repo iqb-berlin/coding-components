@@ -28,6 +28,7 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
+import { NgForOf } from '@angular/common';
 import { SchemerService } from '../../services/schemer.service';
 
 export interface GeneratedCodingData {
@@ -48,7 +49,12 @@ interface OptionData {
 @Component({
   templateUrl: 'generate-coding-dialog.component.html',
   styles: [
-    `.coding-action {
+    `.chip-list-column{
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+      .coding-action {
       background: #cccccc;
       color: black;
       padding: 4px 10px;
@@ -61,7 +67,7 @@ interface OptionData {
   imports: [MatDialogTitle, MatDialogContent, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule,
     MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove,
     MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton,
-    MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+    MatDialogActions, MatButton, MatDialogClose, TranslateModule, NgForOf]
 })
 
 export class GenerateCodingDialogComponent {

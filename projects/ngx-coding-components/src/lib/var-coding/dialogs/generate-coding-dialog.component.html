@@ -22,7 +22,7 @@
       <p [style.font-weight]="'bold'">{{ 'coding.generate.title' | translate}}</p>
       <p>{{ 'coding.generate.model.' + generationModel | translate}}</p>
       @if (generationModel === 'multi-choice') {
-        <div class="fx-column-start-stretch">
+
           <div class="fx-row-end-center">
             <mat-label [style.margin-right.px]="8">{{'coding.generate.model.multi-choice-order-prompt' | translate}}</mat-label>
             <mat-checkbox [(ngModel)]="multiChoiceOrderMatters" (click)="resetOptions()"></mat-checkbox>
@@ -37,17 +37,17 @@
             </mat-selection-list>
           }
           @if (multiChoiceOrderMatters) {
-            <div class="fx-column-start-stretch">
+            <div class="fx-column-start-stretch " >
               <div>{{'coding.generate.model.multi-choice-drag-prompt' | translate}}</div>
-              <div  class="fx-row-start-stretch fx-gap-10">
-                <mat-chip-listbox cdkDropList [style.width.%]="50" [style.max-height.px]="800"
+              <div  class="fx-row-start-stretch fx-gap-10"  >
+                <mat-chip-list class="dragOptionBox chip-list-column" cdkDropList [style.width.%]="50" [style.max-height.px]="800"
                   #optionSource="cdkDropList"
                   [cdkDropListConnectedTo]="selectedOptions"
                   [cdkDropListData]="options">
                   @for (c of options; track c) {
                     <mat-chip cdkDrag>{{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}</mat-chip>
                   }
-                </mat-chip-listbox>
+                </mat-chip-list>
                 @if (positionLabels.length > 0) {
                   <div
                     class="fx-column-start-stretch" [style.width.px]="50">
@@ -56,23 +56,22 @@
                     }
                   </div>
                 }
-                <mat-chip-listbox cdkDropList class="fx-flex-fill dragOptionBox"
+                <mat-chip-list cdkDropList class="dragOptionBox chip-list-column fx-flex-fill"
                   #selectedOptions="cdkDropList"
                   [cdkDropListConnectedTo]="[optionSource]"
                   [cdkDropListData]="selectedDragOptions"
                   (cdkDropListDropped)="drop($event)">
                   @for (c of selectedDragOptions; track c) {
-                    <mat-chip cdkDrag
+                    <mat-chip  class="no-wrap" cdkDrag
                       removable="true" (removed)="returnOption(c)">
                       {{c.value}}{{c.label ? ' - ' : '' }}{{c.label}}
                       <mat-icon matChipRemove>cancel</mat-icon>
                     </mat-chip>
                   }
-                </mat-chip-listbox>
+                </mat-chip-list>
               </div>
             </div>
           }
-        </div>
       }
       @if (generationModel === 'single-choice-some') {
         <mat-selection-list
