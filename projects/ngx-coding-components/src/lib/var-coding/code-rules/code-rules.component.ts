@@ -2,20 +2,19 @@ import {
   Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CodeData, VariableInfo } from '@iqb/responses';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { CodeData, RuleSet, VariableInfo } from '@iqb/responses';
+import { MatTabGroup } from '@angular/material/tabs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { MatInput } from '@angular/material/input';
-import { MatFormField } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
-import { JsonPipe } from '@angular/common';
+import {
+  SelectCodeRuleReferenceDialogComponent,
+  SelectCodeRuleReferenceDialogData
+} from '@ngx-coding-components/dialogs/select-code-rule-reference-dialog.component';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService } from '../../services/schemer.service';
 import { CodeRuleListComponent } from './code-rule-list.component';
@@ -27,9 +26,8 @@ import { MessageDialogComponent, MessageDialogData, MessageType } from '../../di
   styleUrls: ['./code-rules.component.scss'],
   standalone: true,
   imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup,
-    ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatTabGroup, MatTab, MatFormField,
-    MatInput, CdkTextareaAutosize, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, TranslateModule,
-    RuleReferencePipe, JsonPipe, CodeRuleListComponent]
+    ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatButton, TranslateModule,
+    RuleReferencePipe, CodeRuleListComponent]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
@@ -41,7 +39,9 @@ export class CodeRulesComponent {
   constructor(
     private messageDialog: MatDialog,
     private translateService: TranslateService,
-    public schemerService: SchemerService
+    public schemerService: SchemerService,
+    public editRuleReferenceDialog: MatDialog
+
   ) {}
 
   setCodeRulesChanged() {
@@ -55,11 +55,38 @@ export class CodeRulesComponent {
       rs.push({
         valueArrayPos: -1,
         ruleOperatorAnd: false,
-        rules: []
+        rules: [
+          {
+            method: 'MATCH',
+            parameters: [
+              ''
+            ]
+          }
+        ]
       });
       this.code.ruleSets = rs;
       if (this.ruleSetElement) this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
       this.setCodeRulesChanged();
+    }
+  }
+
+  editArrayReference(ruleSet: RuleSet) {
+    if (ruleSet) {
+      const dialogRef = this.editRuleReferenceDialog.open(
+        SelectCodeRuleReferenceDialogComponent, {
+          width: '400px',
+          data: <SelectCodeRuleReferenceDialogData>{
+            isFragmentMode: false,
+            value: ruleSet.valueArrayPos
+          },
+          autoFocus: false
+        });
+      dialogRef.afterClosed().subscribe(dialogResult => {
+        if (dialogResult !== false) {
+          ruleSet.valueArrayPos = dialogResult;
+          this.setCodeRulesChanged();
+        }
+      });
     }
   }
 
