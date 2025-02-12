@@ -14,7 +14,7 @@ import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card
 import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
-} from '@ngx-coding-components/dialogs/select-code-rule-reference-dialog.component';
+} from '../../dialogs/select-code-rule-reference-dialog.component';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService } from '../../services/schemer.service';
 import { CodeRuleListComponent } from './code-rule-list.component';
