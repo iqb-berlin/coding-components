@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CodeRuleListComponent } from '@ngx-coding-components/var-coding/code-rules/code-rule-list.component';
+import { CodeRuleListComponent } from './code-rule-list.component';
 
 describe('CodeRuleListComponent', () => {
   let component: CodeRuleListComponent;
