@@ -11,32 +11,18 @@
     </mat-form-field>
 
     @if (data.sourceType !== 'BASE') {
-      <div class="fx-column-start-stretch">
-        <div class="fx-row-start-center fx-gap-20">
-          <div>{{'derive-sources.prompt' | translate}}</div>
-            <mat-chip-listbox>
-              @for (source of data.deriveSources; track source) {
-                <mat-chip [removable]="true"
-                  (removed)="deleteDeriveSource(source)">
-                  {{source | varAlias}}
-                  <mat-icon matChipRemove>cancel</mat-icon>
-                </mat-chip>
-              }
-              @if (possibleNewSources.size > 0) {
-                <button mat-icon-button [matMenuTriggerFor]="menu">
-                  <mat-icon>add</mat-icon>
-                </button>
-              }
-            </mat-chip-listbox>
-          <mat-menu #menu="matMenu">
-            @for (newSource of possibleNewSources | keyvalue; track newSource) {
-              <button mat-menu-item (click)="addDeriveSource(newSource.key)">
-                {{newSource.value}}
-              </button>
-            }
-          </mat-menu>
-        </div>
-      </div>
+      <mat-form-field>
+        <mat-select  placeholder="Quell-Variablen" [formControl]="selectedSources" multiple (closed)="updateDeriveSources()">
+          <button (click)="toggleAllSelection()" style="margin: 10px" mat-stroked-button>Alle auswählen</button>
+          <mat-select-trigger>
+            Quell-Variablen
+            <span *ngIf="selectedSources.value" class="example-additional-selection">
+              ({{selectedSources.value.length}})
+            </span>
+          </mat-select-trigger>
+          <mat-option *ngFor="let source of possibleNewSources | keyvalue: compareFn" [value]="source.key">{{source.value}}</mat-option>
+        </mat-select>
+      </mat-form-field>
       <mat-form-field>
         <mat-label>{{ 'derive-method.prompt' | translate }}</mat-label>
         <mat-select required [(value)]="data.sourceType" (selectionChange)="updatePossibleDeriveProcessing()">
@@ -50,7 +36,6 @@
     }
 
     @if (possibleDeriveProcessing.length > 0) {
-      <div>{{ 'derive-processing.prompt' | translate }}</div>
       @for (p of possibleDeriveProcessing; track p) {
         <mat-checkbox [checked]="data.sourceParameters.processing?.includes(p)"
                       (change)="alterProcessing(p, $event.checked)">

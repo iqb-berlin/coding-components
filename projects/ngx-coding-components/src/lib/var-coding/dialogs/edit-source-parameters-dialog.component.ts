@@ -4,19 +4,17 @@ import {
 } from '@angular/material/dialog';
 import { SourceProcessingType, SourceType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { VariableSourceParameters } from '@iqb/responses/coding-interfaces';
-import { MatOption, MatSelect } from '@angular/material/select';
-import { MatChip, MatChipListbox, MatChipRemove } from '@angular/material/chips';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { MatIcon } from '@angular/material/icon';
-import { KeyValuePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { MatOption, MatSelect, MatSelectTrigger } from '@angular/material/select';
+import {
+  KeyValue, KeyValuePipe, NgForOf, NgIf
+} from '@angular/common';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SchemerService, VARIABLE_NAME_CHECK_PATTERN } from '../../services/schemer.service';
-import { VariableAliasPipe } from '../../pipes/variable-alias.pipe';
 
 export interface EditSourceParametersDialogData {
   selfId: string,
@@ -29,11 +27,10 @@ export interface EditSourceParametersDialogData {
 @Component({
   templateUrl: 'edit-source-parameters-dialog.component.html',
   standalone: true,
-  imports: [
+  imports: [MatSelectTrigger,
     MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule,
-    FormsModule, MatFormField, MatInput, MatCheckbox, MatLabel, MatSelect, MatOption, MatChipRemove,
-    MatMenu, MatChip, MatMenuTrigger, MatIcon, MatIconButton, MatMenuItem, VariableAliasPipe,
-    KeyValuePipe, MatChipListbox
+    FormsModule, MatFormField, MatInput, MatCheckbox, MatLabel, MatSelect, MatOption,
+    KeyValuePipe, NgForOf, ReactiveFormsModule, NgIf
   ]
 })
 export class EditSourceParametersDialog {
@@ -47,9 +44,9 @@ export class EditSourceParametersDialog {
       'MANUAL'];
 
   possibleDeriveProcessing: SourceProcessingType[] = [];
+  selectedSources = new FormControl();
   possibleNewSources: ReadonlyMap<string, string> = new Map([]);
   newVariableMode = false;
-
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: EditSourceParametersDialogData,
     public schemerService: SchemerService
@@ -83,10 +80,10 @@ export class EditSourceParametersDialog {
   updatePossibleNewSources() {
     if (this.schemerService.codingScheme) {
       this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
-        .filter(v => !([...this.data.deriveSources, this.data.selfAlias].includes(v.id)) &&
+        .filter(v => !([this.data.selfAlias].includes(v.id)) &&
           v.sourceType !== 'BASE_NO_VALUE')
-        .sort()
         .map(v => [v.id, v.alias || v.id]));
+      this.selectedSources.setValue(this.data.deriveSources);
     }
   }
 
@@ -114,17 +111,16 @@ export class EditSourceParametersDialog {
     }
   }
 
-  deleteDeriveSource(varId: string) {
-    const sourcePos = this.data.deriveSources.indexOf(varId);
-    if (sourcePos >= 0) this.data.deriveSources.splice(sourcePos, 1);
-    this.updatePossibleNewSources();
+  updateDeriveSources() {
+    this.data.deriveSources = this.selectedSources.value;
   }
 
-  addDeriveSource(varId: string) {
-    this.data.deriveSources.push(varId);
-    this.data.deriveSources.sort();
-    this.updatePossibleNewSources();
+  toggleAllSelection() {
+    this.selectedSources.setValue(Array.from(this.possibleNewSources.keys()));
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  compareFn = (a: KeyValue<string, string>, b: KeyValue<string, string>): number => a.value.localeCompare(b.value);
 
   protected readonly VARIABLE_NAME_CHECK_PATTERN = VARIABLE_NAME_CHECK_PATTERN;
 }
