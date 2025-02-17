@@ -35,18 +35,18 @@
       <div class="var-list-buttons fx-row-space-between-center">
         <button mat-button (click)="addVarScheme()" [disabled]="schemerService.userRole === 'RO'"
           [matTooltip]="'varList.add' | translate" matTooltipPosition="above">
-          <mat-icon>add</mat-icon>
+          <mat-icon class="bold-icon">add</mat-icon>
+        </button>
+        <button mat-button [disabled]="schemerService.userRole === 'RO'"
+                         (click)="deleteVarScheme()" [matTooltip]="'varList.delete' | translate" matTooltipPosition="above">
+        <mat-icon>delete</mat-icon>
         </button>
         <button mat-button (click)="renameVarScheme()"
                 [disabled]="(selectedCoding$ | async) === null || (selectedCoding$ | async)?.sourceType === 'BASE' || schemerService.userRole === 'RO'"
-                [matTooltip]="'varList.rename' | translate" matTooltipPosition="above"
-        >
+                [matTooltip]="'varList.rename' | translate" matTooltipPosition="above">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
-          (click)="deleteVarScheme()" [matTooltip]="'varList.delete' | translate" matTooltipPosition="above">
-          <mat-icon>delete</mat-icon>
-        </button>
+
         <button mat-button [disabled]="(selectedCoding$ | async) === null || schemerService.userRole === 'RO'"
                 [matTooltip]="'varList.copy' | translate" (click)="copyVarScheme()" matTooltipPosition="above">
           <mat-icon>content_copy</mat-icon>

@@ -21,7 +21,6 @@ import {
   SelectVariableDialogComponent,
   SelectVariableDialogData
 } from '../dialogs/select-variable-dialog.component';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
 import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
 import { SimpleInputDialogComponent, SimpleInputDialogData } from '../dialogs/simple-input-dialog.component';
 import { ShowDependencyTreeDialogComponent } from '../dialogs/show-dependency-tree-dialog.component';
@@ -98,7 +97,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   constructor(
     private translateService: TranslateService,
     public schemerService: SchemerService,
-    private confirmDialog: MatDialog,
     private messageDialog: MatDialog,
     private showCodingProblemsDialog: MatDialog,
     private selectVariableDialog: MatDialog,
@@ -271,50 +269,37 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   }
 
   deleteVarScheme() {
-    const selectedCoding = this.selectedCoding$.getValue();
-    if (selectedCoding) {
-      let warningMessageText;
-      if (selectedCoding.sourceType !== 'BASE') {
-        warningMessageText = `Die abgeleitete Variable "${selectedCoding.alias || selectedCoding.id}" wird gelöscht.`;
-      } else {
-        const varListIds = this.schemerService.varList.map(v => v.id);
-        if (varListIds.indexOf(selectedCoding.id) < 0) {
-          if (SchemerComponent.isEmptyCoding(selectedCoding)) {
-            warningMessageText = 'Die verschollene Basisvariable wird gelöscht.';
-          } else {
-            warningMessageText = `Achtung: Die verschollene Basisvariable wird einschließlich
-              aller Kodierinformationen gelöscht.`;
+    if (this.schemerService.codingScheme) {
+      const dialogData = <SelectVariableDialogData>{
+        title: 'Variable/Kodierung löschen',
+        prompt: 'Abgeleitete Variablen oder verwaiste Basisvariablen werden komplett gelöscht. ' +
+          'Bei Basisvariablen wird die Kodierung gelöscht.',
+        variables: this.schemerService.codingScheme.variableCodings
+          .filter(c => c.sourceType !== 'BASE_NO_VALUE'),
+        selectedVariable: this.selectedCoding$.getValue(),
+        codingStatus: this.codingStatus,
+        okButtonLabel: 'Löschen'
+      };
+      const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
+        width: '400px',
+        data: dialogData
+      });
+      dialogRef.afterClosed().subscribe((variables: string[]) => {
+        let changed = false;
+        if (variables && variables.length > 0) {
+          if (this.schemerService && this.schemerService.codingScheme) {
+            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
+              .filter(c => !variables.includes(c.alias || c.id));
+            changed = true;
+            this.selectedCoding$.next(null);
+            this.updateVariableLists();
+            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
           }
-        } else {
-          warningMessageText = `Alle Kodierinformationen der Basisvariable werden gelöscht.
-            Die Variable selbst kann nicht gelöscht werden, da sie eine gültige Basisvariable ist.`;
-        }
-      }
-      const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
-        width: '400px',
-        data: <ConfirmDialogData>{
-          title: `Löschen Variable '${selectedCoding.alias || selectedCoding.id}'`,
-          content: warningMessageText,
-          confirmButtonLabel: 'Löschen',
-          showCancel: true
-        }
-      });
-      dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this.schemerService.codingScheme) {
-          this.selectedCoding$.next(null);
-          this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-            .filter(c => c.id !== selectedCoding.id);
-          this.updateVariableLists();
-          this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-        }
-      });
-    } else {
-      this.messageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: 'Löschen Variable',
-          content: 'Bitte erst eine abgeleitete Variable oder eine BasisVariable verwaiste  auswählen!',
-          type: MessageType.error
+          if (changed) {
+            this.updateVariableLists();
+            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+            this.selectedCoding$.next(null);
+          }
         }
       });
     }
@@ -371,8 +356,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         title: 'Basisvariable ohne Wert aktivieren',
         prompt: 'Bitte Variable wählen!',
         variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.sourceType === 'BASE_NO_VALUE')
-          .map(c => this.schemerService.getVariableAliasById(c.id)),
+          .filter(c => c.sourceType === 'BASE_NO_VALUE'),
         okButtonLabel: 'Aktivieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
@@ -419,12 +403,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     const selectedCoding = this.selectedCoding$.getValue();
     if (selectedCoding && this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
-        title: 'Kodierung kopieren',
-        prompt: `Bitte Zielvariable wählen! Achtung:
-          Die Kodierungsdaten der Zielvariable werden komplett überschrieben.`,
+        title: `Kodierung von "${selectedCoding.alias}" kopieren `,
+        prompt: 'Die Kodierung der Zielvariable(n) wird überschrieben!',
         variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE')
-          .map(c => this.schemerService.getVariableAliasById(c.id)),
+          .filter(c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE'),
+        selectedVariable: this.selectedCoding$.getValue(),
+        codingStatus: this.codingStatus,
         okButtonLabel: 'Kopieren'
       };
       const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {

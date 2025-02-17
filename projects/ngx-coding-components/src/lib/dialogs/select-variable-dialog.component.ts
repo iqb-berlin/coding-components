@@ -7,6 +7,7 @@ import {
 import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { VariableCodingData } from '@iqb/responses';
 
 @Component({
   template: `
@@ -19,12 +20,24 @@ import { MatButton } from '@angular/material/button';
         }
         <mat-selection-list #variables multiple="true">
           @for (v of selectData.variables; track v) {
-            <mat-list-option [value]="v">
-              {{v}}
+            <mat-list-option [value]="v.alias">
+              <div class="fx-row-start-start">
+                @if(selectData.codingStatus){
+                  @if(selectData.codingStatus[v.id] === 'OK') {
+                    <div>&nbsp;&nbsp;</div>
+                  } @else {
+                    <div
+                      [class]="(this.selectData.codingStatus[v.id] === 'WARNING' ? 'problem-warning' : 'problem-error')"
+                      [style.text-align]="'center'">
+                      &nbsp;
+                    </div>
+                  }
+                }
+                {{v.alias}}
+              </div>
             </mat-list-option>
           }
         </mat-selection-list>
-
       </mat-dialog-content>
 
     <mat-dialog-actions align="end">
@@ -37,6 +50,10 @@ import { MatButton } from '@angular/material/button';
       </button>
     </mat-dialog-actions>
     `,
+  styles: [
+    '.problem-warning {background-color: #ffcc00; margin-right: 5px}',
+    '.problem-error {background-color: #ff3300; margin-right: 5px}'
+  ],
   standalone: true,
   imports: [MatDialogTitle,
     MatDialogContent,
@@ -63,6 +80,10 @@ export class SelectVariableDialogComponent implements OnInit {
       (this.selectData.okButtonLabel.length === 0)) {
       this.selectData.okButtonLabel = 'OK';
     }
+    this.selectData.variables.sort((a, b) => a.alias.localeCompare(b.alias));
+    setTimeout(() => {
+      this.setSelectedValues();
+    });
   }
 
   getSelected() : string[] {
@@ -78,11 +99,23 @@ export class SelectVariableDialogComponent implements OnInit {
     const selectedOptions = this.variablesElement?.selectedOptions.selected;
     this.dialogRef.close(selectedOptions?.map(o => o.value));
   }
+
+  private setSelectedValues() {
+    if (this.variablesElement && this.selectData.selectedVariable) {
+      this.variablesElement.options.forEach((option: MatListOption) => {
+        if (option.value === this.selectData.selectedVariable?.alias) {
+          option.selected = true;
+        }
+      });
+    }
+  }
 }
 
 export interface SelectVariableDialogData {
   title: string;
   prompt: string;
-  variables: string[];
+  variables: VariableCodingData[];
+  selectedVariable: VariableCodingData | null;
+  codingStatus: { [id: string]: string; },
   okButtonLabel: string;
 }
