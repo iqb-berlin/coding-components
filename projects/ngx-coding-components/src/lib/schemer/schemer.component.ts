@@ -379,25 +379,33 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         width: '400px',
         data: dialogData
       });
-      dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this.schemerService.codingScheme) {
-          const targetCoding = this.schemerService.codingScheme.variableCodings.find(c => (c.alias || c.id) === result);
-          if (targetCoding) {
-            targetCoding.sourceType = 'BASE';
-            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-              .filter(c => c.id !== targetCoding.id);
-            this.schemerService.codingScheme.variableCodings.push(targetCoding);
-            this.schemerService.varList.push({
-              id: targetCoding.id,
-              alias: targetCoding.alias || targetCoding.id,
-              type: 'string',
-              format: '',
-              multiple: true,
-              nullable: true,
-              values: [],
-              valuePositionLabels: []
-            });
-
+      dialogRef.afterClosed().subscribe((variables: string[]) => {
+        let changed = false;
+        if (variables && variables.length > 0) {
+          variables.forEach(v => {
+            if (this.schemerService && this.schemerService.codingScheme) {
+              const targetCoding = this.schemerService.codingScheme.variableCodings
+                .find(c => (c.alias || c.id) === v);
+              if (targetCoding) {
+                targetCoding.sourceType = 'BASE';
+                this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
+                  .filter(c => c.id !== targetCoding.id);
+                this.schemerService.codingScheme.variableCodings.push(targetCoding);
+                this.schemerService.varList.push({
+                  id: targetCoding.id,
+                  alias: targetCoding.alias || targetCoding.id,
+                  type: 'string',
+                  format: '',
+                  multiple: true,
+                  nullable: true,
+                  values: [],
+                  valuePositionLabels: []
+                });
+                changed = true;
+              }
+            }
+          });
+          if (changed) {
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);
             this.selectedCoding$.next(null);
@@ -423,22 +431,31 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         width: '400px',
         data: dialogData
       });
-      dialogRef.afterClosed().subscribe(result => {
-        if (result !== false && this.schemerService.codingScheme) {
-          const targetCoding = this.schemerService.codingScheme.variableCodings.find(c => (c.alias || c.id) === result);
-          if (targetCoding) {
-            const stringifiedCoding = JSON.stringify(selectedCoding);
-            const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
-            newCoding.id = targetCoding.id;
-            newCoding.alias = targetCoding.alias;
-            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-              .filter(c => c.id !== targetCoding.id);
-            if (newCoding.sourceType !== 'BASE' || targetCoding.sourceType !== 'BASE') {
-              newCoding.sourceType = targetCoding.sourceType;
-              newCoding.sourceParameters = targetCoding.sourceParameters;
-              newCoding.deriveSources = targetCoding.deriveSources;
+      dialogRef.afterClosed().subscribe((variables: string[]) => {
+        let changed = false;
+        if (variables && variables.length > 0) {
+          variables.forEach(v => {
+            if (this.schemerService && this.schemerService.codingScheme) {
+              const targetCoding = this.schemerService.codingScheme.variableCodings
+                .find(c => (c.alias || c.id) === v);
+              if (targetCoding) {
+                const stringifiedCoding = JSON.stringify(selectedCoding);
+                const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
+                newCoding.id = targetCoding.id;
+                newCoding.alias = targetCoding.alias;
+                this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
+                  .filter(c => c.id !== targetCoding.id);
+                if (newCoding.sourceType !== 'BASE' || targetCoding.sourceType !== 'BASE') {
+                  newCoding.sourceType = targetCoding.sourceType;
+                  newCoding.sourceParameters = targetCoding.sourceParameters;
+                  newCoding.deriveSources = targetCoding.deriveSources;
+                }
+                this.schemerService.codingScheme.variableCodings.push(newCoding);
+                changed = true;
+              }
             }
-            this.schemerService.codingScheme.variableCodings.push(newCoding);
+          });
+          if (changed) {
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);
           }

@@ -17,7 +17,7 @@ import { MatButton } from '@angular/material/button';
         } @else if (selectData.prompt) {
           {{selectData.prompt}}
         }
-        <mat-selection-list #variables multiple="false">
+        <mat-selection-list #variables multiple="true">
           @for (v of selectData.variables; track v) {
             <mat-list-option [value]="v">
               {{v}}
@@ -28,9 +28,13 @@ import { MatButton } from '@angular/material/button';
       </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-raised-button color="primary" [disabled]="!variables"
-      (click)="okButtonClick()">{{ selectData.okButtonLabel }}</button>
-      <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
+      <button mat-raised-button color="primary"
+        [disabled]="!variables || getSelected().length === 0"
+        (click)="okButtonClick()">{{ selectData.okButtonLabel }}
+      </button>
+      <button mat-raised-button
+        [mat-dialog-close]=[]>{{'dialog-cancel' | translate}}
+      </button>
     </mat-dialog-actions>
     `,
   standalone: true,
@@ -61,9 +65,18 @@ export class SelectVariableDialogComponent implements OnInit {
     }
   }
 
+  getSelected() : string[] {
+    if (this.variablesElement && this.variablesElement.selectedOptions) {
+      if (this.variablesElement.selectedOptions.selected.length > 0) {
+        return this.variablesElement.selectedOptions.selected.map(o => o.value);
+      }
+    }
+    return [];
+  }
+
   okButtonClick() {
     const selectedOptions = this.variablesElement?.selectedOptions.selected;
-    this.dialogRef.close(selectedOptions ? selectedOptions[0].value : '');
+    this.dialogRef.close(selectedOptions?.map(o => o.value));
   }
 }
 
