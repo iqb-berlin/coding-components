@@ -128,6 +128,9 @@ export class ShowCodingResultsComponent implements OnInit {
 
   ngOnInit() {
     if (this.codedVariablesOnly && this.data.responses) {
+      if (this.data.responses.some(r => r.subform !== undefined)) {
+        this.displayedColumns.unshift('subform');
+      }
       this.dataSource.data = this.data.responses
         .filter(response => this.data.varsWithCodes.includes(response.id));
     } else {
