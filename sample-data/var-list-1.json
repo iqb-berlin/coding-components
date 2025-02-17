@@ -30,6 +30,7 @@
   },
   {
     "id": "Paul",
+    "alias": "Paul",
     "type": "string",
     "format": "",
     "multiple": false,
@@ -58,6 +59,7 @@
   },
   {
     "id": "Susi",
+    "alias": "Susi",
     "type": "integer",
     "format": "",
     "multiple": false,
@@ -69,6 +71,7 @@
   },
   {
     "id": "Harry",
+    "alias": "Harry",
     "type": "string",
     "format": "",
     "multiple": false,
@@ -80,6 +83,7 @@
   },
   {
     "id": "Sven",
+    "alias": "Sven",
     "type": "no-value",
     "format": "",
     "multiple": false,

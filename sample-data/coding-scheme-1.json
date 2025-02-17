@@ -14,6 +14,7 @@
     },
     {
       "id": "Paul",
+      "alias": "Paul",
       "label": "",
       "sourceType": "BASE",
       "deriveSources": [],
@@ -23,6 +24,7 @@
     },
     {
       "id": "Sven",
+      "alias": "Sven",
       "label": "",
       "sourceType": "BASE_NO_VALUE",
       "deriveSources": [],
@@ -32,6 +34,7 @@
     },
     {
       "id": "Schnecke",
+      "alias": "Schnecke",
       "label": "Schnecke",
       "sourceType": "BASE",
       "deriveSources": [],
@@ -41,6 +44,7 @@
     },
     {
       "id": "Susi",
+      "alias": "Susi",
       "label": "",
       "sourceType": "BASE",
       "deriveSources": [],
@@ -83,7 +87,21 @@
       ]
     },
     {
-      "id": "ss",
+      "id": "derived",
+      "alias": "derived",
+      "label": "",
+      "sourceType": "CONCAT_CODE",
+      "deriveSources": [
+        "Otto",
+        "Paul"
+      ],
+      "processing": [],
+      "manualInstruction": "",
+      "codes": []
+    },
+    {
+      "id": "Derived2",
+      "alias": "Derived2",
       "label": "",
       "sourceType": "CONCAT_CODE",
       "deriveSources": [
