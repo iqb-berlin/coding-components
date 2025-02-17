@@ -5,7 +5,7 @@
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input matInput id="variableId" name="variableId" required
-             [readonly]="data.deriveSources.length === 0"
+             [readonly]="data.sourceType === 'BASE'"
              [pattern]="VARIABLE_NAME_CHECK_PATTERN"
              [(ngModel)]="data.selfAlias">
     </mat-form-field>
