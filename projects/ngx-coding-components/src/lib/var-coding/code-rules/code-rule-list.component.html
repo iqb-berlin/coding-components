@@ -8,124 +8,128 @@
                  (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
               <div class="fx-column-start-stretch fx-flex-fill">
                 <div class="rule">
-                  <div [matTooltip]="('rule.' + rule.method + '.description') | translate"
+                  <div class="fx-row-start-center fx-gap-5"
+                    [matTooltip]="('rule.' + rule.method + '.description') | translate"
                        matTooltipShowDelay="500">
-                  <button mat-icon-button
-                          [matMenuTriggerFor]="selectCodeType"
-                          [disabled]="schemerService.userRole === 'RO'"
-                          [matTooltip]="'rule.prompt.change' | translate">
-                    @if(rule.method === 'MATCH') {
-                      <mat-icon svgIcon="match-word"></mat-icon>
-                    }
-                    @if(rule.method === 'MATCH_REGEX') {
-                      <mat-icon svgIcon="regular-expression"></mat-icon>
-                    }
-                    @if(rule.method === 'NUMERIC_MATCH') {
-                      <mat-icon style="color:#006064"> = </mat-icon>
-                    }
-                    @if(rule.method === 'NUMERIC_RANGE') {
-                      <mat-icon svgIcon="arrow-range"></mat-icon>
-                    }
-                    @if(rule.method === 'NUMERIC_MAX') {
-                      <mat-icon style="color:#006064"> ≤ </mat-icon>
-                    }
-                    @if(rule.method === 'NUMERIC_MORE_THAN') {
-                      <mat-icon style="color:#006064"> > </mat-icon>
-                    }
-                    @if(rule.method === 'NUMERIC_LESS_THAN') {
-                      <mat-icon style="color:#006064"> < </mat-icon>
-                    }
-                    @if(rule.method === 'NUMERIC_MIN') {
-                      <mat-icon style="color:#006064"> ≥ </mat-icon>
-                    }
-                    @if(rule.method === 'IS_TRUE') {
-                      <mat-icon style="color:#006064" >check</mat-icon>
-                    }
-                    @if(rule.method === 'IS_FALSE') {
-                      <mat-icon style="color:#006064" >close</mat-icon>
-                    }
-                    @if(rule.method  === 'IS_EMPTY') {
-                      <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
-                    }
-                    @if(rule.method  === 'IS_NULL') {
-                      <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
-                    }
-                  </button>
-                  <mat-menu #selectCodeType="matMenu">
-                    <span class="rule-group-menu">{{ 'rule.group-string' | translate }}</span>
-                    @for (rule of textRules; track rule) {
-                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
-                        @if(rule === 'MATCH') {
-                          <mat-icon svgIcon="match-word"></mat-icon>
-                        }
-                        @if(rule === 'MATCH_REGEX') {
-                          <mat-icon svgIcon="regular-expression"></mat-icon>
-                        }
+                    <button mat-icon-button
+                            [matMenuTriggerFor]="selectCodeType"
+                            [disabled]="schemerService.userRole === 'RO'"
+                            [matTooltip]="'rule.prompt.change' | translate">
+                      @if(rule.method === 'MATCH') {
+                        <mat-icon svgIcon="match-word"></mat-icon>
+                      }
+                      @if(rule.method === 'MATCH_REGEX') {
+                        <mat-icon svgIcon="regular-expression"></mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_MATCH') {
+                          <mat-icon  class="centered-icon"> <span style="padding: 20px">=</span> </mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_RANGE') {
+                        <mat-icon svgIcon="arrow-range"></mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_MAX') {
+                        <mat-icon style="color:#006064"> ≤ </mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_MORE_THAN') {
+                        <mat-icon style="color:#006064"> > </mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_LESS_THAN') {
+                        <mat-icon style="color:#006064"> < </mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_MIN') {
+                        <mat-icon style="color:#006064"> ≥ </mat-icon>
+                      }
+                      @if(rule.method === 'IS_TRUE') {
+                        <mat-icon style="color:#006064" >check</mat-icon>
+                      }
+                      @if(rule.method === 'IS_FALSE') {
+                        <mat-icon style="color:#006064" >close</mat-icon>
+                      }
+                      @if(rule.method  === 'IS_EMPTY') {
+                        <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
+                      }
+                      @if(rule.method  === 'IS_NULL') {
+                        <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
+                      }
+                    </button>
+                    <mat-menu #selectCodeType="matMenu">
+                      <span class="rule-group-menu">{{ 'rule.group-string' | translate }}</span>
+                      @for (rule of textRules; track rule) {
+                        <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                          @if(rule === 'MATCH') {
+                            <mat-icon svgIcon="match-word"></mat-icon>
+                          }
+                          @if(rule === 'MATCH_REGEX') {
+                            <mat-icon svgIcon="regular-expression"></mat-icon>
+                          }
 
-                        {{('rule.' + rule)  | translate}}
-                      </button>
-                    }
-                    <mat-divider></mat-divider>
-                    <span class="rule-group-menu">{{ 'rule.group-numeric' | translate }}</span>
-                    @for (rule of numericRules; track rule) {
-                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
-                        @if(rule === 'NUMERIC_MATCH') {
-                          <mat-icon style="color:#006064"> = </mat-icon>
-                        }
-                        @if(rule === 'NUMERIC_RANGE') {
-                          <mat-icon svgIcon="arrow-range"></mat-icon>
-                        }
-                        @if(rule === 'NUMERIC_MAX') {
-                          <mat-icon style="color:#006064"> ≤ </mat-icon>
-                        }
-                        @if(rule === 'NUMERIC_MORE_THAN') {
-                          <mat-icon style="color:#006064"> > </mat-icon>
-                        }
-                        @if(rule === 'NUMERIC_LESS_THAN') {
-                          <mat-icon style="color:#006064"> < </mat-icon>
-                        }
-                        @if(rule === 'NUMERIC_MIN') {
-                          <mat-icon style="color:#006064"> ≥ </mat-icon>
-                        }
-                        {{('rule.' + rule) | translate}}
-                      </button>
-                    }
-                    <mat-divider></mat-divider>
-                    <span class="rule-group-menu">{{ 'rule.group-logic' | translate }}</span>
-                    @for (rule of booleanRules; track rule) {
-                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
-                        @if(rule === 'IS_TRUE') {
-                          <mat-icon style="color:#006064" >check</mat-icon>
-                        }
-                        @if(rule === 'IS_FALSE') {
-                          <mat-icon style="color:#006064" >close</mat-icon>
-                        }
-                        {{('rule.' + rule) | translate}}
-                      </button>
-                    }
-                    <mat-divider></mat-divider>
-                    @for (rule of blankRules; track rule) {
-                      <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
-                        @if(rule === 'IS_EMPTY') {
-                          <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
-                        }
-                        @if(rule === 'IS_NULL') {
-                          <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
-                        }
-                        {{('rule.' + rule) | translate}}
-                      </button>
-                    }
-                  </mat-menu>
-                  <span class="rule-group">
-                    @if(textRules.includes(rule.method)) {
-                      {{'rule.group-string' | translate}}
-                    } @else if (numericRules.includes(rule.method)) {
-                      {{'rule.group-numeric' | translate}}
-                    } @else if (booleanRules.includes(rule.method)) {
-                      {{'rule.group-logic' | translate}}
-                    }
-                  </span>
-                    <span >{{('rule.' + rule.method) | translate}}</span>
+                          {{('rule.' + rule)  | translate}}
+                        </button>
+                      }
+                      <mat-divider></mat-divider>
+                      <span class="rule-group-menu">{{ 'rule.group-numeric' | translate }}</span>
+                      @for (rule of numericRules; track rule) {
+                        <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                          <div class="fx-row-start-center">
+                          @if(rule === 'NUMERIC_MATCH') {
+                            <mat-icon style="color:#006064"> = </mat-icon>
+                          }
+                          @if(rule === 'NUMERIC_RANGE') {
+                            <mat-icon svgIcon="arrow-range"></mat-icon>
+                          }
+                          @if(rule === 'NUMERIC_MAX') {
+                            <mat-icon style="color:#006064"> ≤ </mat-icon>
+                          }
+                          @if(rule === 'NUMERIC_MORE_THAN') {
+                            <mat-icon style="color:#006064"> > </mat-icon>
+                          }
+                          @if(rule === 'NUMERIC_LESS_THAN') {
+                            <mat-icon style="color:#006064"> < </mat-icon>
+                          }
+                          @if(rule === 'NUMERIC_MIN') {
+                            <mat-icon style="color:#006064"> ≥ </mat-icon>
+                          }
+                          <span style="margin-top: 4px">{{('rule.' + rule) | translate}}</span>
+                          </div>
+                        </button>
+                      }
+                      <mat-divider></mat-divider>
+                      <span class="rule-group-menu">{{ 'rule.group-logic' | translate }}</span>
+                      @for (rule of booleanRules; track rule) {
+                        <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                          @if(rule === 'IS_TRUE') {
+                            <mat-icon style="color:#006064" >check</mat-icon>
+                          }
+                          @if(rule === 'IS_FALSE') {
+                            <mat-icon style="color:#006064" >close</mat-icon>
+                          }
+                          {{('rule.' + rule) | translate}}
+                        </button>
+                      }
+                      <mat-divider></mat-divider>
+                      @for (rule of blankRules; track rule) {
+                        <button mat-menu-item (click)="changeRule(ruleSet, ruleIndex, rule)">
+                          @if(rule === 'IS_EMPTY') {
+                            <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
+                          }
+                          @if(rule === 'IS_NULL') {
+                            <mat-icon style="color:#006064">check_box_outline_blank</mat-icon>
+                          }
+                          {{('rule.' + rule) | translate}}
+                        </button>
+                      }
+                    </mat-menu>
+                    <span class="rule-group">
+                      @if(textRules.includes(rule.method)) {
+                        {{'rule.group-string' | translate}}
+                      } @else if (numericRules.includes(rule.method)) {
+                        {{'rule.group-numeric' | translate}}
+                      } @else if (booleanRules.includes(rule.method)) {
+                        {{'rule.group-logic' | translate}}
+                      }
+                    </span>
+                    <span>{{('rule.' + rule.method) | translate}}</span>
+
                   </div>
 
 
@@ -208,25 +212,27 @@
               <span class="rule-group-menu">{{ 'rule.group-numeric' | translate }}</span>
               @for (newSource of numericRules; track newSource) {
                 <button mat-menu-item (click)="addRule(ruleSet, newSource)">
-                  @if(newSource === 'NUMERIC_MATCH') {
-                    <mat-icon style="color:#006064"> = </mat-icon>
-                  }
-                  @if(newSource === 'NUMERIC_RANGE') {
-                    <mat-icon svgIcon="arrow-range"></mat-icon>
-                  }
-                  @if(newSource === 'NUMERIC_MAX') {
-                    <mat-icon style="color:#006064"> ≤ </mat-icon>
-                  }
-                  @if(newSource === 'NUMERIC_MORE_THAN') {
-                    <mat-icon style="color:#006064"> > </mat-icon>
-                  }
-                  @if(newSource === 'NUMERIC_LESS_THAN') {
-                    <mat-icon style="color:#006064"> < </mat-icon>
-                  }
-                  @if(newSource === 'NUMERIC_MIN') {
-                    <mat-icon style="color:#006064"> ≥ </mat-icon>
-                  }
-                  {{('rule.' + newSource) | translate}}
+                  <div class="fx-row-start-center">
+                    @if(newSource === 'NUMERIC_MATCH') {
+                      <mat-icon style="color:#006064" > = </mat-icon>
+                    }
+                    @if(newSource === 'NUMERIC_RANGE') {
+                      <mat-icon svgIcon="arrow-range" ></mat-icon>
+                    }
+                    @if(newSource === 'NUMERIC_MAX') {
+                      <mat-icon style="color:#006064"> ≤ </mat-icon>
+                    }
+                    @if(newSource === 'NUMERIC_MORE_THAN') {
+                      <mat-icon style="color:#006064"> > </mat-icon>
+                    }
+                    @if(newSource === 'NUMERIC_LESS_THAN') {
+                      <mat-icon style="color:#006064"> < </mat-icon>
+                    }
+                    @if(newSource === 'NUMERIC_MIN') {
+                      <mat-icon style="color:#006064"> ≥ </mat-icon>
+                    }
+                    <span style="margin-top: 4px">{{('rule.' + newSource) | translate}}</span>
+                  </div>
                 </button>
               }
               <mat-divider></mat-divider>
