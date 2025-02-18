@@ -141,7 +141,7 @@ export class SchemerService {
           type: codeType,
           label: '',
           score: 0,
-          ruleSetOperatorAnd: false,
+          ruleSetOperatorAnd: true,
           ruleSets: [],
           manualInstruction: codeType === 'RESIDUAL_AUTO' ? '' :
             '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
@@ -158,7 +158,7 @@ export class SchemerService {
           type: codeType,
           label: '',
           score: 0,
-          ruleSetOperatorAnd: false,
+          ruleSetOperatorAnd: true,
           ruleSets: [],
           manualInstruction: ''
         };
@@ -184,9 +184,9 @@ export class SchemerService {
           type: codeType,
           label: '',
           score: codeType === 'FULL_CREDIT' ? 1 : 0,
-          ruleSetOperatorAnd: false,
+          ruleSetOperatorAnd: true,
           ruleSets: [<RuleSet>{
-            ruleOperatorAnd: true,
+            ruleOperatorAnd: false,
             rules: [
               {
                 method: 'MATCH',

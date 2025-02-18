@@ -57,6 +57,7 @@
           "score": 0,
           "ruleSets": [
             {
+              "ruleOperatorAnd": false,
               "rules": [
                 {
                   "method": "MATCH",

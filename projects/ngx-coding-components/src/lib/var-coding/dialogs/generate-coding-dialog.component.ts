@@ -23,12 +23,11 @@ import { MatInput } from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
-import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
+import { MatChip, MatChipRemove } from '@angular/material/chips';
 import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
-import { NgForOf } from '@angular/common';
 import { SchemerService } from '../../services/schemer.service';
 
 export interface GeneratedCodingData {
@@ -65,9 +64,9 @@ interface OptionData {
   ],
   standalone: true,
   imports: [MatDialogTitle, MatDialogContent, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule,
-    MatSelectionList, MatListOption, MatChipListbox, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove,
+    MatSelectionList, MatListOption, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove,
     MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton,
-    MatDialogActions, MatButton, MatDialogClose, TranslateModule, NgForOf]
+    MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 
 export class GenerateCodingDialogComponent {
@@ -287,9 +286,9 @@ export class GenerateCodingDialogComponent {
         }
         const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
         if (typeof newCode !== 'string') {
-          newCode.ruleSetOperatorAnd = false;
+          newCode.ruleSetOperatorAnd = true;
           newCode.ruleSets = [<RuleSet>{
-            ruleOperatorAnd: true,
+            ruleOperatorAnd: false,
             rules: numericRules
           }];
           this.dialogRef.close(newVardata);
@@ -299,7 +298,7 @@ export class GenerateCodingDialogComponent {
       } else if (this.generationModel === 'simple-input') {
         const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
         if (typeof newCode !== 'string') {
-          newCode.ruleSetOperatorAnd = false;
+          newCode.ruleSetOperatorAnd = true;
           newCode.ruleSets = [<RuleSet>{
             ruleOperatorAnd: false,
             rules: [
@@ -317,9 +316,9 @@ export class GenerateCodingDialogComponent {
           .forEach(o => {
             const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
             if (typeof newCode !== 'string') {
-              newCode.ruleSetOperatorAnd = false;
+              newCode.ruleSetOperatorAnd = true;
               newCode.ruleSets = [<RuleSet>{
-                ruleOperatorAnd: true,
+                ruleOperatorAnd: false,
                 rules: [<CodingRule>{
                   method: 'MATCH',
                   parameters: [o.value || '']
@@ -332,9 +331,9 @@ export class GenerateCodingDialogComponent {
           .forEach(o => {
             const newCode = this.schemerService.addCode(newVardata.codes, 'NO_CREDIT');
             if (typeof newCode !== 'string') {
-              newCode.ruleSetOperatorAnd = false;
+              newCode.ruleSetOperatorAnd = true;
               newCode.ruleSets = [<RuleSet>{
-                ruleOperatorAnd: true,
+                ruleOperatorAnd: false,
                 rules: [<CodingRule>{
                   method: 'MATCH',
                   parameters: [o.value || '']
@@ -349,7 +348,7 @@ export class GenerateCodingDialogComponent {
         const fullCreditRuleSets: RuleSet[] = [];
         this.selectedDragOptions.forEach((o, i) => {
           fullCreditRuleSets.push({
-            ruleOperatorAnd: true,
+            ruleOperatorAnd: false,
             valueArrayPos: i,
             rules: [
               {
@@ -390,9 +389,9 @@ export class GenerateCodingDialogComponent {
         const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
         if (typeof newCode !== 'string') {
           // newVardata.codeModel = 'RULES_ONLY';
-          newCode.ruleSetOperatorAnd = false;
+          newCode.ruleSetOperatorAnd = true;
           newCode.ruleSets = [<RuleSet>{
-            ruleOperatorAnd: true,
+            ruleOperatorAnd: false,
             rules: fullCreditRules
           }];
           this.dialogRef.close(newVardata);
