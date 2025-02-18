@@ -262,10 +262,10 @@
                 </button>
               }
             </mat-menu>
-            @if (ruleSet.rules.length === 0) {
+            @if (ruleSet && ruleSet.rules.length === 0) {
               <div class="no-rules">{{'rule.no-rules' | translate}}</div>
             }
-            @if (ruleSet.rules.length > 1 && schemerService.userRole !== 'RO') {
+            @if (ruleSet && ruleSet.rules.length > 1 && schemerService.userRole !== 'RO') {
               <mat-button-toggle-group appearance="legacy"
                                        [(ngModel)]="ruleSet.ruleOperatorAnd"
                                        [matTooltip]="'rule.prompt.operator' | translate">
