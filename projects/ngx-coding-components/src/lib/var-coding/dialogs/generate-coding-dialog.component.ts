@@ -159,7 +159,7 @@ export class GenerateCodingDialogComponent {
       if (!this.numericRuleText) {
         if (moreThenValue && maxValue && moreThenValue < maxValue) {
           this.numericRuleText =
-            `${this.translateService.instant('rule.NUMERIC_RANGE')} ${moreThenValue} / ${maxValue}`;
+            `${this.translateService.instant('rule.NUMERIC_FULL_RANGE')} ${moreThenValue} / ${maxValue}`;
         } else {
           const ruleTexts: string[] = [];
           if (moreThenValue) {
@@ -253,7 +253,7 @@ export class GenerateCodingDialogComponent {
           if (!(moreThenValue && minValue) && !(lessThenValue && maxValue)) {
             if (moreThenValue && maxValue && moreThenValue < maxValue) {
               numericRules.push({
-                method: 'NUMERIC_RANGE',
+                method: 'NUMERIC_FULL_RANGE',
                 parameters: [moreThenValue.toString(10), maxValue.toString(10)]
               });
             } else {

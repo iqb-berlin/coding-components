@@ -47,7 +47,7 @@ export class CodeRuleListComponent {
   @Input() canDeleteRuleSet = false;
   showCodeButtonsOf = '';
   textRules: RuleMethod[] = ['MATCH', 'MATCH_REGEX'];
-  numericRules: RuleMethod[] = ['NUMERIC_MATCH', 'NUMERIC_RANGE', 'NUMERIC_MIN', 'NUMERIC_MORE_THAN',
+  numericRules: RuleMethod[] = ['NUMERIC_MATCH', 'NUMERIC_FULL_RANGE', 'NUMERIC_MIN', 'NUMERIC_MORE_THAN',
     'NUMERIC_LESS_THAN', 'NUMERIC_MAX'];
 
   booleanRules: RuleMethod[] = ['IS_TRUE', 'IS_FALSE'];

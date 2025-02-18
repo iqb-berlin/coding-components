@@ -24,7 +24,7 @@
                       @if(rule.method === 'NUMERIC_MATCH') {
                           <mat-icon  class="centered-icon"> <span style="padding: 20px">=</span> </mat-icon>
                       }
-                      @if(rule.method === 'NUMERIC_RANGE') {
+                      @if(rule.method === 'NUMERIC_FULL_RANGE') {
                         <mat-icon svgIcon="arrow-range"></mat-icon>
                       }
                       @if(rule.method === 'NUMERIC_MAX') {
@@ -74,7 +74,7 @@
                           @if(rule === 'NUMERIC_MATCH') {
                             <mat-icon style="color:#006064"> = </mat-icon>
                           }
-                          @if(rule === 'NUMERIC_RANGE') {
+                          @if(rule === 'NUMERIC_FULL_RANGE') {
                             <mat-icon svgIcon="arrow-range"></mat-icon>
                           }
                           @if(rule === 'NUMERIC_MAX') {
@@ -216,7 +216,7 @@
                     @if(newSource === 'NUMERIC_MATCH') {
                       <mat-icon style="color:#006064" > = </mat-icon>
                     }
-                    @if(newSource === 'NUMERIC_RANGE') {
+                    @if(newSource === 'NUMERIC_FULL_RANGE') {
                       <mat-icon svgIcon="arrow-range" ></mat-icon>
                     }
                     @if(newSource === 'NUMERIC_MAX') {
