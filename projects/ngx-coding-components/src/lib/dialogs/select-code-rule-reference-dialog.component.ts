@@ -47,7 +47,7 @@ export interface SelectCodeRuleReferenceDialogData {
           type="number">
       </mat-form-field>
     </mat-dialog-content>
-    <mat-dialog-actions>
+    <mat-dialog-actions align="end">
       <button mat-raised-button color="primary" [disabled]="newSelection[0] === 'specific' && newValue <= 0"
       (click)="okButtonClick()">{{ 'dialog-save' | translate }}</button>
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
