@@ -22,7 +22,10 @@
                         <mat-icon svgIcon="regular-expression"></mat-icon>
                       }
                       @if(rule.method === 'NUMERIC_MATCH') {
-                          <mat-icon  class="centered-icon"> <span style="padding: 20px">=</span> </mat-icon>
+                          <mat-icon  class="centered-icon"> = </mat-icon>
+                      }
+                      @if(rule.method === 'NUMERIC_RANGE') {
+                        <mat-icon style="color:#006064"> ? </mat-icon>
                       }
                       @if(rule.method === 'NUMERIC_FULL_RANGE') {
                         <mat-icon svgIcon="arrow-range"></mat-icon>
