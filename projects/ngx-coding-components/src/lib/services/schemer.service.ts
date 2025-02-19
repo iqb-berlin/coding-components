@@ -154,7 +154,7 @@ export class SchemerService {
           .find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type));
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
-          id: 'INTENDED_INCOMPLETE' as const,
+          id: 0,
           type: codeType,
           label: '',
           score: 0,
