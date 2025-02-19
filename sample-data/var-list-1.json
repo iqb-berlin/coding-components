@@ -82,6 +82,27 @@
     "page": ""
   },
   {
+    "id": "Bo",
+    "alias": "Bo",
+    "type": "boolean",
+    "format": "",
+    "multiple": false,
+    "nullable": false,
+    "values": [
+      {
+        "value": "true",
+        "label": "Angekreuzt: "
+      },
+      {
+        "value": "false",
+        "label": "Nicht Angekreuzt: "
+      }
+    ],
+    "valuePositionLabels": [],
+    "page": "",
+    "valuesComplete": true
+  },
+  {
     "id": "Sven",
     "alias": "Sven",
     "type": "no-value",

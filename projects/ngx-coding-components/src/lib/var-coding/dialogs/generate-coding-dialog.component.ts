@@ -374,11 +374,25 @@ export class GenerateCodingDialogComponent {
             parameters: [this.selectedOption || '']
           });
         } else if (this.selectedOptions.length > 0) {
-          this.selectedOptions.forEach(s => {
-            fullCreditRules.push({
-              method: 'MATCH',
-              parameters: [s]
+          if (this.varInfo.type === 'boolean') {
+            this.selectedOptions.forEach(s => {
+              fullCreditRules.push({
+                method: (s === 'true') ? 'IS_TRUE' : 'IS_FALSE',
+                parameters: []
+              });
             });
+          } else {
+            this.selectedOptions.forEach(s => {
+              fullCreditRules.push({
+                method: 'MATCH',
+                parameters: [s]
+              });
+            });
+          }
+        } else if (this.varInfo.type === 'boolean') {
+          fullCreditRules.push({
+            method: 'IS_TRUE',
+            parameters: []
           });
         } else {
           fullCreditRules.push({
