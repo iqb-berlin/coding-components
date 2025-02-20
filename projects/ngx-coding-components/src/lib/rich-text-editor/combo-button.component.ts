@@ -6,7 +6,7 @@ import { CdkOverlayOrigin, CdkConnectedOverlay } from '@angular/cdk/overlay';
 import { MatInput } from '@angular/material/input';
 
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 
 @Component({
@@ -77,7 +77,7 @@ import { MatIconButton } from '@angular/material/button';
   ],
   standalone: true,
   imports: [
-    MatIconButton, MatTooltip, MatIcon, MatInput, CdkOverlayOrigin, CdkConnectedOverlay, MatActionList, MatListItem]
+    MatIconButton, MatTooltipModule, MatIcon, MatInput, CdkOverlayOrigin, CdkConnectedOverlay, MatActionList, MatListItem]
 })
 export class ComboButtonComponent {
   @Input() inputType!: 'color' | 'list';

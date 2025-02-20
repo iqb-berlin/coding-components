@@ -15,8 +15,7 @@ import 'zone.js';
         TranslateModule.forRoot({
           defaultLanguage: 'de',
           loader: {
-            provide: TranslateLoader,
-            useClass: SchemerTranslateLoader
+            provide: TranslateLoader, useClass: SchemerTranslateLoader
           }
         }))]
   });

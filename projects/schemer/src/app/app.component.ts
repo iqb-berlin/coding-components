@@ -19,6 +19,7 @@ import {
   MessageDialogData, MessageType
 } from '@ngx-coding-components/dialogs/message-dialog.component';
 import { SchemerComponent } from '@ngx-coding-components/schemer/schemer.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { VeronaAPIService, VosStartCommand } from './verona-api.service';
 
 @Component({
@@ -58,7 +59,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
       `
   ],
   standalone: true,
-  imports: [BrowserAnimationsModule, SchemerComponent, SchemerStandaloneMenuComponent]
+  imports: [BrowserAnimationsModule, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltipModule]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

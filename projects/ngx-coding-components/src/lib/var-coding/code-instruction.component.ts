@@ -6,7 +6,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
@@ -58,7 +58,7 @@ import { UserRoleType } from '../services/schemer.service';
     `
   ],
   standalone: true,
-  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatCardContent, TranslateModule]
+  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltipModule, MatIcon, MatCardContent, TranslateModule]
 })
 export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();

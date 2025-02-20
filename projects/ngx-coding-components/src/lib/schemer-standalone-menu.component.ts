@@ -5,7 +5,7 @@ import { CodingScheme, VariableInfo } from '@iqb/responses';
 import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { FileService } from './services/file.service';
@@ -56,7 +56,7 @@ import { UserRoleType } from './services/schemer.service';
     '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
   ],
   standalone: true,
-  imports: [MatFabButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, TranslateModule]
+  imports: [MatFabButton, MatTooltipModule, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, TranslateModule]
 })
 export class SchemerStandaloneMenuComponent {
   @Input() codingScheme: CodingScheme | null = null;

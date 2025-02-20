@@ -4,7 +4,7 @@ import {
 import { CodeData, ProcessingParameterType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -59,7 +59,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
     `
   ],
   standalone: true,
-  imports: [MatRipple, MatTooltip, MatIcon, TranslateModule, MatButton]
+  imports: [MatRipple, MatTooltipModule, MatIcon, TranslateModule, MatButton]
 })
 export class CodesTitleComponent {
   @Output() processingChanged = new EventEmitter<string[]>();

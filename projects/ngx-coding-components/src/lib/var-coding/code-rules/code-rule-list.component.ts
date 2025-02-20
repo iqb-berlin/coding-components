@@ -4,7 +4,7 @@ import {
 import { CodingRule, RuleMethod, RuleSet } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon, MatIconRegistry } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormField } from '@angular/material/form-field';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
@@ -34,7 +34,7 @@ const ARROW_RANGE = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewB
   templateUrl: './code-rule-list.component.html',
   styleUrls: ['./code-rule-list.component.scss'],
   standalone: true,
-  imports: [MatTooltip, MatIcon, TranslateModule, MatIconButton, CdkTextareaAutosize,
+  imports: [MatTooltipModule, MatIcon, TranslateModule, MatIconButton, CdkTextareaAutosize,
     FormsModule, MatButton, MatFormField, MatInput, RuleReferencePipe, MatButtonToggle, MatButtonToggleGroup,
     MatMenu, MatMenuItem, MatMenuTrigger, MatCard, MatCardContent, MatDivider]
 })
