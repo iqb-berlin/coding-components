@@ -7,7 +7,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
@@ -45,7 +45,7 @@ import { CodeInstructionComponent } from './code-instruction.component';
     }
   `,
   standalone: true,
-  imports: [MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput,
+  imports: [MatIconButton, MatTooltipModule, MatIcon, MatFormField, MatLabel, MatInput,
     ReactiveFormsModule, FormsModule, TranslateModule, CodeRulesComponent, CodeInstructionComponent,
     MatDivider, MatMenu, MatMenuItem, MatMenuTrigger]
 })

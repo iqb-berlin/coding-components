@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CodingScheme, VariableCodingData, VariableInfo } from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatDrawerContainer, MatDrawer, MatDrawerContent } from '@angular/material/sidenav';
 import { TranslateModule } from '@ngx-translate/core';
@@ -14,6 +14,7 @@ import {
 } from '@ngx-coding-components/schemer/schemer.component';
 import { SchemerStandaloneMenuComponent } from '@ngx-coding-components/schemer-standalone-menu.component';
 import { UserRoleType } from '@ngx-coding-components/services/schemer.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
 
@@ -26,8 +27,7 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
         </mat-drawer>
         <mat-drawer-content class="drawer-content">
           <div>
-            <button mat-icon-button (click)="drawer.toggle()"
-                    [matTooltip]="drawer.opened ? 'Check ausblenden' : 'Check einblenden'">
+            <button mat-icon-button (click)="drawer.toggle()">
               <mat-icon>{{drawer.opened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
             </button>
           </div>
@@ -90,7 +90,7 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
   ],
   standalone: true,
   imports: [TranslateModule, MatDrawerContainer, MatDrawer, SchemeCheckerComponent, MatDrawerContent, MatIconButton,
-    MatIcon, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltip]
+    MatIcon, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltipModule]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];

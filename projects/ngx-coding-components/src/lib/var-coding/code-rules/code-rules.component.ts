@@ -8,7 +8,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import {
@@ -25,7 +25,7 @@ import { MessageDialogComponent, MessageDialogData, MessageType } from '../../di
   templateUrl: './code-rules.component.html',
   styleUrls: ['./code-rules.component.scss'],
   standalone: true,
-  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup,
+  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltipModule, MatIcon, MatButtonToggleGroup,
     ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatButton, TranslateModule,
     RuleReferencePipe, CodeRuleListComponent]
 })

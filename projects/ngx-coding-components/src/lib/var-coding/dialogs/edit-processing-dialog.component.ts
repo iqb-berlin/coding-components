@@ -6,7 +6,7 @@ import { ProcessingParameterType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -44,7 +44,7 @@ export interface EditProcessingDialogData {
   standalone: true,
   imports: [
     MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule,
-    FormsModule, MatTooltip, MatFormField, MatInput, MatCheckbox, MatLabel
+    FormsModule, MatTooltipModule, MatFormField, MatInput, MatCheckbox, MatLabel
   ]
 })
 export class EditProcessingDialogComponent {

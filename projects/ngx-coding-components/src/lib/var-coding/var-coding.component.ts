@@ -9,7 +9,7 @@ import {
 } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
@@ -42,7 +42,7 @@ import {
   standalone: true,
   imports: [
     MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatMenuTrigger, MatIcon, MatIconButton, MatMenu,
-    MatMenuItem, MatTooltip, MatCard, MatCardSubtitle, MatCardContent,
+    MatMenuItem, MatTooltipModule, MatCard, MatCardSubtitle, MatCardContent,
     TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
     CodesTitleComponent, SingleCodeComponent, VariableAliasPipe, MatButton
   ]

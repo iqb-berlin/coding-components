@@ -10,7 +10,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
@@ -36,7 +36,7 @@ import {
 
   standalone: true,
   imports: [MatNavList,
-    MatTooltip,
+    MatTooltipModule,
     MatListItem,
     MatButton,
     MatIcon,
