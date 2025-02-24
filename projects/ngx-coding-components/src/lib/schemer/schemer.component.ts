@@ -403,7 +403,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     const selectedCoding = this.selectedCoding$.getValue();
     if (selectedCoding && this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
-        title: `Kodierung von "${selectedCoding.alias}" kopieren `,
+        title: `Kodierung von "${selectedCoding.alias || selectedCoding.id}" kopieren `,
         prompt: 'Die Kodierung der Zielvariable(n) wird überschrieben!',
         variables: this.schemerService.codingScheme.variableCodings
           .filter(c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE'),

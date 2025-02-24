@@ -20,7 +20,7 @@ import { VariableCodingData } from '@iqb/responses';
         }
         <mat-selection-list #variables multiple="true">
           @for (v of selectData.variables; track v) {
-            <mat-list-option [value]="v.alias">
+            <mat-list-option [value]="v.alias || v.id">
               <div class="fx-row-start-start">
                 @if(selectData.codingStatus){
                   @if(selectData.codingStatus[v.id] === 'OK') {
@@ -33,7 +33,7 @@ import { VariableCodingData } from '@iqb/responses';
                     </div>
                   }
                 }
-                {{v.alias}}
+                {{v.alias || v.id}}
               </div>
             </mat-list-option>
           }
@@ -83,7 +83,7 @@ export class SelectVariableDialogComponent implements OnInit {
     this.selectData.variables.sort((a, b) => a.alias.localeCompare(b.alias));
     setTimeout(() => {
       this.setSelectedValues();
-    });
+    }, 500);
   }
 
   getSelected() : string[] {

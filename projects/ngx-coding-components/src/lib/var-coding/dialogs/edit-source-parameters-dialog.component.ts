@@ -80,7 +80,7 @@ export class EditSourceParametersDialog {
   updatePossibleNewSources() {
     if (this.schemerService.codingScheme) {
       this.possibleNewSources = new Map(this.schemerService.codingScheme.variableCodings
-        .filter(v => !([this.data.selfAlias].includes(v.id)) &&
+        .filter(v => !([this.data.selfAlias].includes(v.alias || v.id)) &&
           v.sourceType !== 'BASE_NO_VALUE')
         .map(v => [v.id, v.alias || v.id]));
       this.selectedSources.setValue(this.data.deriveSources);
