@@ -80,7 +80,11 @@ export class SelectVariableDialogComponent implements OnInit {
       (this.selectData.okButtonLabel.length === 0)) {
       this.selectData.okButtonLabel = 'OK';
     }
-    this.selectData.variables.sort((a, b) => a.alias.localeCompare(b.alias));
+    this.selectData.variables.sort((a, b) => {
+      const compareValueA = a.alias || a.id;
+      const compareValueB = b.alias || b.id;
+      return compareValueA.localeCompare(compareValueB);
+    });
     setTimeout(() => {
       this.setSelectedValues();
     }, 500);
