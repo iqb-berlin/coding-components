@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { CodingSchemeDialogComponent } from '@ngx-coding-components/dialogs/coding-scheme-dialog.component';
 import { SchemerService, UserRoleType } from '../services/schemer.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
@@ -99,6 +100,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     public schemerService: SchemerService,
     private messageDialog: MatDialog,
     private showCodingProblemsDialog: MatDialog,
+    private showCodingSchemeDialog:MatDialog,
     private selectVariableDialog: MatDialog,
     private editSourceParametersDialog: MatDialog,
     private inputDialog: MatDialog
@@ -456,6 +458,16 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
       dialogRef.afterClosed().subscribe();
     }
+  }
+
+  showCodingScheme(): void {
+    if (!this.codingScheme) {
+      return;
+    }
+    this.showCodingSchemeDialog.open(CodingSchemeDialogComponent, {
+      width: '600px',
+      data: { codingScheme: this.codingScheme }
+    });
   }
 
   variableDependencyTree() {
