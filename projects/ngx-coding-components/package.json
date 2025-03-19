@@ -4,7 +4,7 @@
   "exports": {
     "./lib/ngx-coding-components.module": "./lib/ngx-coding-components.module.d.ts"
   },
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "description": "Angular components for coding responses in assessments of IQB.",
@@ -18,17 +18,17 @@
   "homepage": "https://github.com/iqb-berlin/coding-components#readme",
   "peerDependencies": {
     "mathjs": "^12.4.2",
-    "@angular/animations": "^18.2.13",
-    "@angular/cdk": "^18.2.14",
-    "@angular/common": "^18.2.13",
-    "@angular/compiler": "^18.2.13",
-    "@angular/core": "^18.2.13",
-    "@angular/elements": "^18.2.13",
-    "@angular/forms": "^18.2.13",
-    "@angular/material": "^18.2.14",
-    "@angular/platform-browser": "^18.2.13",
-    "@angular/platform-browser-dynamic": "^18.2.13",
-    "@angular/router": "^18.2.13",
+    "@angular/animations": "19.1.8",
+    "@angular/cdk": "19.1.5",
+    "@angular/common": "19.1.8",
+    "@angular/compiler": "19.1.8",
+    "@angular/core": "19.1.8",
+    "@angular/elements": "19.1.8",
+    "@angular/forms": "19.1.8",
+    "@angular/material": "19.1.5",
+    "@angular/platform-browser": "19.1.8",
+    "@angular/platform-browser-dynamic": "19.1.8",
+    "@angular/router": "19.1.8",
     "@iqb/responses": "^3.7.0",
     "@ngx-translate/core": "^15.0.0",
     "@tiptap/core": "^2.1.10",
@@ -55,10 +55,10 @@
     "@tiptap/extension-text-align": "^2.1.10",
     "@tiptap/extension-text-style": "^2.1.10",
     "@tiptap/extension-underline": "^2.1.10",
-    "ngx-tiptap": "^11.1.0",
-    "ngx-build-plus": "^18.0.0",
+    "ngx-tiptap": "^10.1.0",
+    "ngx-build-plus": "^19.0.0",
     "rxjs": "~7.8.0",
-    "zone.js": "~0.14.10"
+    "zone.js": "~0.15.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
