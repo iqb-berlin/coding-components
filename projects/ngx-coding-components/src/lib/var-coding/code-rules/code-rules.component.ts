@@ -10,7 +10,7 @@ import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
@@ -25,7 +25,7 @@ import { MessageDialogComponent, MessageDialogData, MessageType } from '../../di
   templateUrl: './code-rules.component.html',
   styleUrls: ['./code-rules.component.scss'],
   standalone: true,
-  imports: [MatCard, MatCardSubtitle, MatIconButton, MatTooltipModule, MatIcon, MatButtonToggleGroup,
+  imports: [MatCard, MatIconButton, MatTooltipModule, MatIcon, MatButtonToggleGroup,
     ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatButton, TranslateModule,
     RuleReferencePipe, CodeRuleListComponent]
 })
