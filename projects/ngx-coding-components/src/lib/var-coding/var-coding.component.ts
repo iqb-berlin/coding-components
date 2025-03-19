@@ -13,7 +13,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -222,10 +221,14 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           if (typeof dialogResult !== 'undefined' &&
             dialogResult !== false && dialogResult !== null && this.varCoding) {
             const newCoding = dialogResult as GeneratedCodingData;
-            this.varCoding.processing = newCoding.processing;
-            this.varCoding.fragmenting = newCoding.fragmenting;
-            this.varCoding.codeModel = newCoding.codeModel;
-            this.varCoding.codes = newCoding.codes;
+
+            Object.assign(this.varCoding, {
+              processing: newCoding.processing,
+              fragmenting: newCoding.fragmenting,
+              codeModel: newCoding.codeModel,
+              codes: newCoding.codes
+            });
+
             this.updateHasResidualAutoCode();
             this.updateHasIntendedIncompleteAutoCode();
             this.varCodingChanged.emit(this.varCoding);
@@ -270,11 +273,17 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (typeof dialogResult !== 'undefined' && dialogResult !== false && this.varCoding) {
-          const dialogResultTyped: EditSourceParametersDialogData = dialogResult;
-          this.varCoding.alias = dialogResultTyped.selfAlias;
-          this.varCoding.sourceType = dialogResultTyped.sourceType;
-          this.varCoding.sourceParameters = dialogResultTyped.sourceParameters;
-          this.varCoding.deriveSources = dialogResultTyped.deriveSources;
+          const {
+            selfAlias, sourceType, sourceParameters, deriveSources
+          } = dialogResult as EditSourceParametersDialogData;
+
+          Object.assign(this.varCoding, {
+            alias: selfAlias,
+            sourceType,
+            sourceParameters,
+            deriveSources
+          });
+
           this.varCodingChanged.emit(this.varCoding);
         }
       });

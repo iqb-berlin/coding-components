@@ -225,16 +225,21 @@ export class SchemerService {
   sortCodes(codeList: CodeData[], normaliseCodeIds = false) {
     if (codeList.length > 1) {
       if (normaliseCodeIds) {
-        this.orderOfCodeTypes.forEach(t => {
-          const allCodesOfType = codeList.filter(c => c.type === t);
+        this.orderOfCodeTypes.forEach((type, typeIndex) => {
+          const allCodesOfType = codeList.filter(code => code.type === type);
+
           if (allCodesOfType.length > 1) {
-            const startValue = allCodesOfType.length > 9 ?
-              (this.orderOfCodeTypes.indexOf(t) + 1) * 100 + 1 : (this.orderOfCodeTypes.indexOf(t) + 1) * 10 + 1;
-            allCodesOfType.forEach((c: CodeData, index: number) => {
-              if (c.id !== null) c.id = startValue + index;
+            const startValueBase = (typeIndex + 1) * (allCodesOfType.length > 9 ? 100 : 10);
+            const startValue = startValueBase + 1;
+
+            allCodesOfType.forEach((code: CodeData, index: number) => {
+              if (code.id !== null) {
+                code.id = startValue + index;
+              }
             });
           }
         });
+
         this.orderOfCodeTypes.forEach(t => {
           if (!(['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(t))) {
             const allCodesOfType = codeList.filter(c => c.type === t);
@@ -246,13 +251,16 @@ export class SchemerService {
         });
       }
       codeList.sort((a: CodeData, b: CodeData) => {
+        const getTypeOrder = (type: CodeType): number => this.orderOfCodeTypes.indexOf(type);
+
         if (a.type === b.type) {
-          if (a.id === null) return b.id === null ? 0 : -1;
-          if (b.id === null) return 1;
-          if (a.id === b.id) return 0;
-          return a.id < b.id ? -1 : 1;
+          if (a.id === b.id) return 0; // Both IDs are the same
+          if (a.id === null) return -1; // `null` ID comes first
+          if (b.id === null) return 1; // `null` ID comes last
+          return a.id < b.id ? -1 : 1; // Sort IDs in ascending order
         }
-        return this.orderOfCodeTypes.indexOf(a.type) < this.orderOfCodeTypes.indexOf(b.type) ? -1 : 1;
+
+        return getTypeOrder(a.type) - getTypeOrder(b.type);
       });
     }
   }
