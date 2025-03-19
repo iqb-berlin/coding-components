@@ -64,6 +64,7 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
 export class CodesTitleComponent {
   @Output() processingChanged = new EventEmitter<string[]>();
   @Output() fragmentingChanged = new EventEmitter<string>();
+  @Output() codeListChanged = new EventEmitter<CodeData[]>();
   @Input() codeList: CodeData[] | undefined;
   @Input() fragmenting? = '';
   @Input() processing: ProcessingParameterType[] | undefined;
@@ -77,6 +78,7 @@ export class CodesTitleComponent {
   sortCodes(event: MouseEvent) {
     if (this.codeList && this.schemerService.userRole !== 'RO') {
       this.schemerService.sortCodes(this.codeList, event.ctrlKey);
+      this.codeListChanged.emit(this.codeList);
     }
   }
 

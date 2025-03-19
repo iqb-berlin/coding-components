@@ -166,6 +166,7 @@
     <codes-title [codeList]="varCoding.codes"
                  [fragmenting]="varCoding.fragmenting"
                  [processing]="varCoding.processing"
+                 (codeListChanged)="varCodingChanged.emit(varCoding)"
                  (processingChanged)="lastChangeFrom$.next('var-codes-full processing')"
                  (fragmentingChanged)="varCoding.fragmenting = $event;lastChangeFrom$.next('var-codes-full fragmenting')"></codes-title>
     @if (varCoding.codes) {
