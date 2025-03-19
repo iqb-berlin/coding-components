@@ -9,7 +9,6 @@ import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-coding-scheme-dialog',
   template: `
     <mat-dialog-content>
       <div class="fx-row-space-between-end">
