@@ -50,6 +50,10 @@
         "build": {
           "builder": "ngx-build-plus:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "@iqb/responses",
+              "@iqb/responses/coding-factory"
+            ],
             "outputPath": "dist/coding-components-serve",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -152,6 +156,10 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "@iqb/responses",
+              "@iqb/responses/coding-factory"
+            ],
             "outputPath": "dist/schemer",
             "index": "projects/schemer/src/index.html",
             "main": "projects/schemer/src/main.ts",
