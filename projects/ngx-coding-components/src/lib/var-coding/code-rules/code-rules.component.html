@@ -6,7 +6,7 @@
           <h4>Regelsätze</h4>
           <div class="fx-row-end-center">
             @if (code.ruleSets.length > 1 && schemerService.userRole !== 'RO') {
-              <mat-button-toggle-group appearance="legacy" (valueChange)="setCodeRulesChanged()"
+              <mat-button-toggle-group appearance="legacy" (ngModelChange)="setCodeRulesChanged()"
                                        [(ngModel)]="code.ruleSetOperatorAnd"
                                        [matTooltip]="'rule-set.prompt.operator' | translate">
                 <mat-button-toggle [value]="false">{{"rule.operator.false" | translate }}</mat-button-toggle>
