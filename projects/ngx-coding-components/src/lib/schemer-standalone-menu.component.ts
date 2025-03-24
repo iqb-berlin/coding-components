@@ -1,13 +1,14 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { CodingScheme, VariableInfo } from '@iqb/responses';
 import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileService } from './services/file.service';
 import { UserRoleType } from './services/schemer.service';
 

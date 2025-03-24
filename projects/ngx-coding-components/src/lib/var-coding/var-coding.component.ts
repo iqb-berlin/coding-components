@@ -4,9 +4,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import {
-  CodeType, CodingToTextMode, VariableCodingData, VariableInfo
-} from '@iqb/responses';
+import { CodingToTextMode } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -19,6 +17,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
 import { MatDivider } from '@angular/material/divider';
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { VariableCodingData, CodeType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
 import { SchemerService } from '../services/schemer.service';
 import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/generate-coding-dialog.component';

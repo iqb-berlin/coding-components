@@ -1,13 +1,13 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { CodeData, ProcessingParameterType } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { CodeData, ProcessingParameterType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { SchemerService } from '../services/schemer.service';
 import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialogs/edit-processing-dialog.component';
 

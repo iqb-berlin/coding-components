@@ -5,13 +5,13 @@ import {
 import {
   CodingAsText,
   CodingToTextMode,
-  ToTextFactory,
-  VariableCodingData
+  ToTextFactory
 } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 
 export interface ShowCodingData {
   varCoding: VariableCodingData,

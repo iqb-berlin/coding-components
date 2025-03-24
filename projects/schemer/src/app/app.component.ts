@@ -1,13 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Subject, takeUntil } from 'rxjs';
-import {
-  CodingScheme,
-  CodingSchemeVersionMajor,
-  CodingSchemeVersionMinor,
-  VariableCodingData,
-  VariableInfo
-} from '@iqb/responses';
+
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -20,6 +14,10 @@ import {
 } from '@ngx-coding-components/dialogs/message-dialog.component';
 import { SchemerComponent } from '@ngx-coding-components/schemer/schemer.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import {
+  CodingScheme, VariableCodingData, CodingSchemeVersionMajor, CodingSchemeVersionMinor
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VeronaAPIService, VosStartCommand } from './verona-api.service';
 
 @Component({

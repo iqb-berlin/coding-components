@@ -44,20 +44,10 @@ export class SimpleInputDialogComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public inputData: SimpleInputDialogData) {}
 
   ngOnInit(): void {
-    if ((typeof this.inputData.title === 'undefined') || (this.inputData.title.length === 0)) {
-      this.inputData.title = 'Dateneingabe';
-    }
-    if ((typeof this.inputData.saveButtonLabel === 'undefined') ||
-      (this.inputData.saveButtonLabel.length === 0)) {
-      this.inputData.saveButtonLabel = 'OK';
-    }
-    if ((typeof this.inputData.placeholder === 'undefined') ||
-      (this.inputData.placeholder.length === 0)) {
-      this.inputData.placeholder = 'Bitte eingeben';
-    }
-    if (!this.inputData.showCancel) {
-      this.showCancel = false;
-    }
+    this.inputData.title = this.inputData.title?.trim() || 'Dateneingabe';
+    this.inputData.saveButtonLabel = this.inputData.saveButtonLabel?.trim() || 'OK';
+    this.inputData.placeholder = this.inputData.placeholder?.trim() || 'Bitte eingeben';
+    this.showCancel = this.inputData.showCancel;
   }
 }
 

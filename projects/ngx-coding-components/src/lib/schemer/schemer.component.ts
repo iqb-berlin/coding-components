@@ -1,9 +1,7 @@
 import {
   AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild
 } from '@angular/core';
-import {
-  CodingScheme, CodingSchemeProblem, VariableCodingData, VariableInfo
-} from '@iqb/responses';
+import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -14,6 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { CodingScheme, VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { CodingSchemeDialogComponent } from '../dialogs/coding-scheme-dialog.component';
 import { SchemerService, UserRoleType } from '../services/schemer.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
@@ -185,8 +185,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.schemerService.codingScheme.variableCodings.map(c => c.id) : [];
     this.codingStatus = {};
     if (this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
-      this.problems = this.schemerService.codingScheme
-        ?.validate(this.schemerService.varList);
+      this.problems =
+        CodingSchemeFactory.validate(this.schemerService.varList, this.schemerService.codingScheme.variableCodings);
       this.schemerService.codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = 'OK';
         const breakingProblem = this.problems

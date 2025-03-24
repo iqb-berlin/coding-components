@@ -75,11 +75,8 @@ export class SelectCodeRuleReferenceDialogComponent {
     }
   }
 
-  okButtonClick() {
-    if (this.newSelection[0] === 'specific') {
-      this.dialogRef.close(this.newValue - 1);
-    } else {
-      this.dialogRef.close(this.newSelection[0]);
-    }
+  okButtonClick(): void {
+    const result = this.newSelection[0] === 'specific' ? this.newValue - 1 : this.newSelection[0];
+    this.dialogRef.close(result);
   }
 }

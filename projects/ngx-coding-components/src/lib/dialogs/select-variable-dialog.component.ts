@@ -7,7 +7,7 @@ import {
 import { MatSelectionList, MatListOption } from '@angular/material/list';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
-import { VariableCodingData } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 
 @Component({
   template: `
@@ -90,13 +90,8 @@ export class SelectVariableDialogComponent implements OnInit {
     }, 500);
   }
 
-  getSelected() : string[] {
-    if (this.variablesElement && this.variablesElement.selectedOptions) {
-      if (this.variablesElement.selectedOptions.selected.length > 0) {
-        return this.variablesElement.selectedOptions.selected.map(o => o.value);
-      }
-    }
-    return [];
+  getSelected(): string[] {
+    return this.variablesElement?.selectedOptions?.selected?.map(o => o.value) || [];
   }
 
   okButtonClick() {
@@ -104,14 +99,15 @@ export class SelectVariableDialogComponent implements OnInit {
     this.dialogRef.close(selectedOptions?.map(o => o.value));
   }
 
-  private setSelectedValues() {
-    if (this.variablesElement && this.selectData.selectedVariable) {
-      this.variablesElement.options.forEach((option: MatListOption) => {
-        if (option.value === this.selectData.selectedVariable?.alias) {
-          option.selected = true;
-        }
-      });
+  private setSelectedValues(): void {
+    if (!this.variablesElement?.options || !this.selectData.selectedVariable?.alias) {
+      return;
     }
+
+    const selectedAlias = this.selectData.selectedVariable.alias;
+    this.variablesElement.options.forEach(option => {
+      option.selected = option.value === selectedAlias;
+    });
   }
 }
 

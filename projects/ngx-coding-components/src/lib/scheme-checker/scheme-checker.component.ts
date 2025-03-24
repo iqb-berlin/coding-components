@@ -1,9 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { Response, CodingScheme } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { Response } from '@iqbspecs/response/response.interface';
+import { CodingSchemeFactory } from '@iqb/responses';
 import { ShowCodingResultsComponent } from './show-coding-results.component';
 
 @Component({
@@ -59,7 +61,7 @@ export class SchemeCheckerComponent {
       this.showCodingResultsDialog.open(ShowCodingResultsComponent, {
         width: '800px',
         height: '600px',
-        data: { responses: this._codingScheme.code(myValues), varsWithCodes: varsWithCodes }
+        data: { responses: CodingSchemeFactory.code(myValues, this._codingScheme.variableCodings), varsWithCodes: varsWithCodes }
       });
     }
   }

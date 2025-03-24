@@ -2,7 +2,6 @@ import {
   Component, EventEmitter, Input, Output, ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { CodeData, RuleSet, VariableInfo } from '@iqb/responses';
 import { MatTabGroup } from '@angular/material/tabs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -11,6 +10,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
+import { CodeData, RuleSet } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
@@ -49,25 +50,28 @@ export class CodeRulesComponent {
   }
 
   addRuleSet() {
-    if (this.code) {
-      const rs = this.code.ruleSets;
-      this.code.ruleSets = [];
-      rs.push({
-        valueArrayPos: -1,
-        ruleOperatorAnd: false,
-        rules: [
-          {
-            method: 'MATCH',
-            parameters: [
-              ''
-            ]
-          }
-        ]
-      });
-      this.code.ruleSets = rs;
-      if (this.ruleSetElement) this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
-      this.setCodeRulesChanged();
+    if (!this.code) {
+      return;
     }
+
+    const newRuleSet: RuleSet = {
+      valueArrayPos: -1,
+      ruleOperatorAnd: false,
+      rules: [
+        {
+          method: 'MATCH',
+          parameters: ['']
+        }
+      ]
+    };
+
+    this.code.ruleSets = [...this.code.ruleSets, newRuleSet];
+
+    if (this.ruleSetElement) {
+      this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
+    }
+
+    this.setCodeRulesChanged();
   }
 
   editArrayReference(ruleSet: RuleSet) {

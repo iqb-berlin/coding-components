@@ -1,7 +1,6 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { CodeData } from '@iqb/responses';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -9,6 +8,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { UserRoleType } from '../services/schemer.service';
 

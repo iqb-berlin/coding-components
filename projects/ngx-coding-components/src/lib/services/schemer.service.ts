@@ -1,14 +1,9 @@
 import { Injectable } from '@angular/core';
+import { CodingToTextMode } from '@iqb/responses';
 import {
-  CodeData,
-  CodeType,
-  CodingScheme, CodingToTextMode,
-  DeriveConcatDelimiter,
-  RuleMethodParameterCount, RuleSet,
-  VariableCodingData,
-  VariableInfo,
-  VariableValue
-} from '@iqb/responses';
+  CodeData, CodeType, CodingScheme, DeriveConcatDelimiter, RuleMethodParameterCount, VariableCodingData, RuleSet
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo, VariableValue } from '@iqbspecs/variable-info/variable-info.interface';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
@@ -49,7 +44,8 @@ export class SchemerService {
         let totalCodesCount = 0;
         varCoding.deriveSources.forEach(s => {
           if (this.codingScheme) {
-            const coding = this.codingScheme.variableCodings.find(v => v.id === s);
+            const coding = this.codingScheme.variableCodings
+              .find(v => v.id === s);
             codes.push(coding ? coding.codes.map(c => c.id) : []);
             totalCodesCount += coding ? coding.codes.length : 0;
           }
@@ -58,17 +54,14 @@ export class SchemerService {
         if (totalCodesCount < 10) {
           codes.forEach(c => {
             if (resultArray.length > 0) {
-              const newArray: string[] = [];
-              resultArray.forEach(oldEntry => {
-                c.forEach(cEntry => {
-                  if (cEntry !== null) newArray.push(`${oldEntry}${DeriveConcatDelimiter}${cEntry}`);
-                });
-              });
-              resultArray = newArray;
+              resultArray = resultArray
+                .flatMap(oldEntry => c.filter(cEntry => cEntry !== null)
+                  .map(cEntry => `${oldEntry}${DeriveConcatDelimiter}${cEntry}`)
+                );
             } else {
-              c.forEach(cEntry => {
-                if (cEntry !== null) resultArray.push(cEntry.toString(10));
-              });
+              resultArray = c
+                .filter(cEntry => cEntry !== null)
+                .map(cEntry => cEntry.toString(10));
             }
           });
         }
@@ -104,27 +97,17 @@ export class SchemerService {
     return undefined;
   }
 
-  changeNewVarIdIfExists(checkId: string): string {
-    let idToCheck = checkId;
-    let modifier = 0;
-    let idFound = true;
-    while (idFound) {
-      if (modifier > 0) idToCheck = `${checkId}_${modifier}`;
-      // eslint-disable-next-line @typescript-eslint/no-loop-func
-      idFound = !!this.allVariableIds.find(v => v.toUpperCase() === idToCheck.toUpperCase());
-      modifier += 1;
-    }
-    return idToCheck;
-  }
-
   checkRenamedVarAliasOk(checkAlias: string, checkId?: string): boolean {
-    if (this.codingScheme && this.codingScheme.variableCodings && checkAlias) {
-      const normalisedAlias = checkAlias?.toUpperCase();
-      const doubleFound = this.codingScheme.variableCodings
-        .find(v => v.alias?.toUpperCase() === normalisedAlias && v.id !== checkId);
-      return !doubleFound;
+    if (!checkAlias || !this.codingScheme?.variableCodings) {
+      return false; // Ein Alias wird benötigt, und eine Codierungsstruktur muss vorhanden sein.
     }
-    return !checkAlias;
+
+    const normalisedAlias = checkAlias.toUpperCase();
+    const hasDuplicate = this.codingScheme.variableCodings.some(
+      variable => variable.alias?.toUpperCase() === normalisedAlias && variable.id !== checkId
+    );
+
+    return !hasDuplicate;
   }
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {

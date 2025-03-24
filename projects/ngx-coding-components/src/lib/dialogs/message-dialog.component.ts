@@ -40,25 +40,19 @@ export class MessageDialogComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public messageData: MessageDialogData) { }
 
   ngOnInit(): void {
-    if ((typeof this.messageData.title === 'undefined') || (this.messageData.title.length === 0)) {
-      switch (this.messageData.type) {
-        case MessageType.error: {
-          this.messageData.title = 'Achtung: Fehler';
-          break;
-        }
-        case MessageType.warning: {
-          this.messageData.title = 'Achtung: Warnung';
-          break;
-        }
-        default: {
-          this.messageData.title = 'Hinweis';
-          break;
-        }
-      }
-    }
-    if ((typeof this.messageData.closeButtonLabel === 'undefined') ||
-      (this.messageData.closeButtonLabel.length === 0)) {
-      this.messageData.closeButtonLabel = 'Schließen';
+    this.messageData.title = this.messageData.title?.trim() || this.getDefaultTitle(this.messageData.type);
+    this.messageData.closeButtonLabel = this.messageData.closeButtonLabel?.trim() || 'Schließen';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private getDefaultTitle(type: MessageType): string {
+    switch (type) {
+      case MessageType.error:
+        return 'Achtung: Fehler';
+      case MessageType.warning:
+        return 'Achtung: Warnung';
+      default:
+        return 'Hinweis';
     }
   }
 }

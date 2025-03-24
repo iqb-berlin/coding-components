@@ -1,9 +1,19 @@
 import { Inject, Injectable } from '@angular/core';
 import { fromEvent, Observable, Subject } from 'rxjs';
-import {
-  CodingScheme, VariableInfo, VariableInfoShort, CodingSchemeVersionMajor, CodingSchemeVersionMinor
-} from '@iqb/responses';
 import { DOCUMENT } from '@angular/common';
+import {
+  CodingScheme,
+  CodingSchemeVersionMajor,
+  CodingSchemeVersionMinor
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+
+export interface VariableInfoShort {
+  id: string,
+  alias: string,
+  label: string,
+  page: string
+}
 
 @Injectable({
   providedIn: 'root'

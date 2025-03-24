@@ -4,7 +4,6 @@ import {
 import {
   Component, Inject, OnInit, ViewChild
 } from '@angular/core';
-import { Response } from '@iqb/responses';
 import {
   MatCell, MatCellDef,
   MatColumnDef, MatHeaderCell,
@@ -20,6 +19,7 @@ import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-to
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatInput } from '@angular/material/input';
+import { Response } from '@iqbspecs/response/response.interface';
 
 type Data = {
   responses:Response[],

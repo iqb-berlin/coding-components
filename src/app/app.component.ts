@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { CodingScheme, VariableCodingData, VariableInfo } from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,9 +13,10 @@ import {
 } from '@ngx-coding-components/schemer/schemer.component';
 import { SchemerStandaloneMenuComponent } from '@ngx-coding-components/schemer-standalone-menu.component';
 import { UserRoleType } from '@ngx-coding-components/services/schemer.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import sampleVarList1 from '../../sample-data/var-list-1.json';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { CodingScheme, VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
+import sampleVarList1 from '../../sample-data/var-list-1.json';
 
 @Component({
   selector: 'app-root',
@@ -94,7 +94,7 @@ import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
-  codings1 = new CodingScheme(sampleCodings1.variableCodings);
+  codings1: CodingScheme | null = sampleCodings1 ? new CodingScheme(sampleCodings1.variableCodings) : null;
   userRole: UserRoleType = 'RW_MAXIMAL';
   title = 'coding-components';
 

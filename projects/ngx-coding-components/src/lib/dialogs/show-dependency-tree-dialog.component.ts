@@ -2,11 +2,12 @@ import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { CodingScheme, VariableGraphNode } from '@iqb/responses';
+import { CodingSchemeFactory, VariableGraphNode } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
 import { KeyValuePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
+import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
 
 @Component({
@@ -55,7 +56,7 @@ export class ShowDependencyTreeDialogComponent {
     const newVarNodeRows = new Map<string, string[]>();
     let varNodes: VariableGraphNode[];
     try {
-      varNodes = codingScheme.getVariableDependencyTree();
+      varNodes = CodingSchemeFactory.getVariableDependencyTree(codingScheme.variableCodings);
       this.errorMessage = '';
     } catch {
       varNodes = [];

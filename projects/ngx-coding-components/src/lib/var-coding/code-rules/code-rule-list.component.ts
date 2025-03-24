@@ -1,7 +1,6 @@
 import {
   Component, EventEmitter, Input, Output, inject
 } from '@angular/core';
-import { CodingRule, RuleMethod, RuleSet } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon, MatIconRegistry } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -16,6 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatDivider } from '@angular/material/divider';
 import { DomSanitizer } from '@angular/platform-browser';
+import { CodingRule, RuleMethod, RuleSet } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService } from '../../services/schemer.service';
 import {

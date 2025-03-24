@@ -1,7 +1,6 @@
 import {
   Component, EventEmitter, Input, Output
 } from '@angular/core';
-import { CodeData, VariableInfo } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
@@ -11,7 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { CodeModelType } from '@iqb/responses/coding-interfaces';
+import { CodeData, CodeModelType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from '../services/schemer.service';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
 import { CodeInstructionComponent } from './code-instruction.component';

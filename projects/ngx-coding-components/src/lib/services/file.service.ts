@@ -13,19 +13,33 @@ export class FileService {
 
   static async loadFile(fileTypes: string[] = [], asBase64: boolean = false): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-      const fileUploadElement = document.createElement('input');
-      fileUploadElement.type = 'file';
-      fileUploadElement.accept = fileTypes.toString();
-      fileUploadElement.addEventListener('change', event => {
-        const uploadedFile = (event.target as HTMLInputElement).files?.[0];
-        const reader = new FileReader();
-        reader.onload = loadEvent => resolve(loadEvent.target?.result as string);
-        reader.onerror = errorEvent => reject(errorEvent);
-        if (uploadedFile) {
-          asBase64 ? reader.readAsDataURL(uploadedFile) : reader.readAsText(uploadedFile);
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = fileTypes.join(','); // Set allowable file types
+
+      // eslint-disable-next-line consistent-return
+      fileInput.addEventListener('change', event => {
+        const inputElement = event.target as HTMLInputElement;
+        const uploadedFile = inputElement.files?.[0]; // Get the selected file
+
+        if (!uploadedFile) {
+          return reject(new Error('No file selected or file is invalid.'));
         }
+
+        const reader = new FileReader();
+
+        // Resolves when file is successfully read
+        reader.onload = () => resolve(reader.result as string);
+
+        // Rejects if reading encounters an error
+        reader.onerror = () => reject(new Error('Error reading file.'));
+
+        // Read file content as Base64 or plain text
+        asBase64 ? reader.readAsDataURL(uploadedFile) : reader.readAsText(uploadedFile);
       });
-      fileUploadElement.click();
+
+      // Trigger the file picker
+      fileInput.click();
     });
   }
 
