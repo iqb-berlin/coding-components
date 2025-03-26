@@ -52,7 +52,8 @@
           "options": {
             "allowedCommonJsDependencies": [
               "@iqb/responses",
-              "@iqb/responses/coding-factory"
+              "@iqb/responses/coding-factory",
+              "@iqbspecs/coding-scheme"
             ],
             "outputPath": "dist/coding-components-serve",
             "index": "src/index.html",
@@ -79,8 +80,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "2mb"
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
