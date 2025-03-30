@@ -20,28 +20,47 @@ import { UserRoleType } from '../services/schemer.service';
         <mat-card-subtitle class="hover-area">
           <div class="fx-row-space-between-center">
             <div class="fx-row-start-center">
-              <div [style.color]="'grey'" [style.font-size]="'smaller'">
-                {{'manual-instruction.code.title' | translate}}</div>
-              <button mat-icon-button [matTooltip]="'manual-instruction.code.prompt-edit' | translate"
+              <div
+                [style.color]="'grey'"
+                [style.font-size]="'smaller'">
+                {{'manual-instruction.code.title' | translate}}
+              </div>
+              <button mat-icon-button
+                      [matTooltip]="'manual-instruction.code.prompt-edit' | translate"
                       [disabled]="userRole === 'RO'"
                       (click)="editTextDialog_manualInstruction()">
-                <mat-icon>edit</mat-icon>
+                <mat-icon>
+                  edit
+                </mat-icon>
               </button>
-              @if (hasResidualAutoCode && code.manualInstruction) {
+              @if ((hasResidualAutoCode) && code.manualInstruction) {
                 <mat-icon [style.color]="'red'"
-                          [matTooltip]="'manual-instruction.code.error-residual-auto' | translate">error</mat-icon>
+                          [matTooltip]="'manual-instruction.code.error-residual-auto' | translate">
+                  error
+                </mat-icon>
+              }
+              @if ((hasIntendedIncompleteCode) && code.manualInstruction) {
+                <mat-icon [style.color]="'red'"
+                          [matTooltip]="'manual-instruction.code.error-intended-incomplete' | translate">
+                  error
+                </mat-icon>
               }
             </div>
             @if (code.manualInstruction) {
-              <button mat-icon-button (click)="wipeInstructions()" class="wipe-button"
+              <button mat-icon-button
+                      (click)="wipeInstructions()" class="wipe-button"
                       [disabled]="userRole === 'RO'"
-                      [matTooltip]="'manual-instruction.code.wipe' | translate" [matTooltipShowDelay]="500">
-                <mat-icon>close</mat-icon>
+                      [matTooltip]="'manual-instruction.code.wipe' | translate"
+                      [matTooltipShowDelay]="500">
+                <mat-icon>
+                  close
+                </mat-icon>
               </button>
             }
           </div>
         </mat-card-subtitle>
-        <mat-card-content [style.overflow-x]="'auto'">
+        <mat-card-content
+          [style.overflow-x]="'auto'">
           <div [innerHTML]="code ? getSanitizedText(code.manualInstruction) : null"></div>
         </mat-card-content>
       </mat-card>
@@ -64,6 +83,7 @@ export class CodeInstructionComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
   @Input() userRole: UserRoleType = 'RO';
+  @Input() hasIntendedIncompleteCode = false;
   @Input() hasResidualAutoCode = false;
 
   constructor(

@@ -105,7 +105,7 @@
                      (ngModelChange)="setCodeChanged()">
             </mat-form-field>
           }
-          @if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(code.type) && (code.id !== null)) {
+          @if (['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type) && (code.id !== null)) {
             <button mat-icon-button [style.width.px]="50"
                     (click)="setCodeInvalid()"
                     [matTooltip]="'code.make-invalid' | translate">
@@ -115,25 +115,43 @@
         }
       </div>
       @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
-        <code-rules [style.padding-left.px]="4" [style.height]="'calc(100% - 60px)'"
-                    [code]="code" [fragmentMode]="fragmentMode" [varInfo]="varInfo"
-                    (codeRulesChanged)="setCodeChanged()"></code-rules>
-      } @else if (codeModel === 'MANUAL_ONLY' && code.type !== 'RESIDUAL_AUTO') {
-        <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
-                          [hasResidualAutoCode]="hasResidualAutoCode" ></code-instruction>
+        <code-rules
+          [style.padding-left.px]="4"
+          [style.height]="'calc(100% - 60px)'"
+          [code]="code"
+          [fragmentMode]="fragmentMode"
+          [varInfo]="varInfo"
+          (codeRulesChanged)="setCodeChanged()">
+        </code-rules>
+      } @else if (codeModel === 'MANUAL_ONLY' && (code.type !== 'RESIDUAL_AUTO' && code.type !== 'INTENDED_INCOMPLETE')) {
+        <code-instruction
+          [code]="code" (codeDataChanged)="setCodeChanged()"
+          [userRole]="schemerService.userRole"
+          [hasResidualAutoCode]="hasResidualAutoCode"
+          [hasIntendedIncompleteCode] ="hasIntendedIncompleteAutoCode">
+        </code-instruction>
       }
     </div>
     @if (codeModel === 'NONE') {
       @if ((code.type === 'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE') && !code.manualInstruction) {
         <div class="fx-flex-fill"></div>
       }  @else {
-        <code-instruction [code]="code" (codeDataChanged)="setCodeChanged()" [userRole]="schemerService.userRole"
-                          [hasResidualAutoCode]="hasResidualAutoCode"
-                          class="fx-flex-fill" ></code-instruction>
+        <code-instruction
+          [code]="code"
+          (codeDataChanged)="setCodeChanged()"
+          [userRole]="schemerService.userRole"
+          [hasResidualAutoCode]="hasResidualAutoCode"
+          [hasIntendedIncompleteCode] ="hasIntendedIncompleteAutoCode"
+          class="fx-flex-fill" >
+
+        </code-instruction>
       }
     }
-    <button mat-icon-button (click)="deleteCode(codeIndex)" [disabled]="schemerService.userRole === 'RO'"
-            [matTooltip]="'code.prompt.delete' | translate">
+    <button
+      mat-icon-button
+      (click)="deleteCode(codeIndex)"
+      [disabled]="schemerService.userRole === 'RO'"
+      [matTooltip]="'code.prompt.delete' | translate">
       <mat-icon>delete</mat-icon>
     </button>
   }
