@@ -30,6 +30,24 @@ export class SchemerService {
 
   codingToTextMode: CodingToTextMode = 'EXTENDED';
 
+  findDuplicateVariables(): { id: string, alias: string, count: number }[] {
+    const variableMap = new Map<string, { count: number, alias: string }>();
+
+    this.varList.forEach(variable => {
+      const key = variable.id; // Oder `variable.alias`, falls nach Aliases gesucht wird
+      if (!variableMap.has(key)) {
+        variableMap.set(key, { count: 1, alias: variable.alias ?? '' });
+      } else {
+        const entry = variableMap.get(key)!;
+        variableMap.set(key, { ...entry, count: entry.count + 1 });
+      }
+    });
+
+    return Array.from(variableMap)
+      .filter(([_, value]) => value.count > 1)
+      .map(([id, value]) => ({ id, alias: value.alias, count: value.count }));
+  }
+
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {
       return this.varList.find(v => v.id === varCoding.id);
@@ -43,25 +61,27 @@ export class SchemerService {
         const codes: (number | 'INVALID' | 'INTENDED_INCOMPLETE')[][] = [];
         let totalCodesCount = 0;
         varCoding.deriveSources.forEach(s => {
-          if (this.codingScheme) {
-            const coding = this.codingScheme.variableCodings
-              .find(v => v.id === s);
-            codes.push(coding ? coding.codes.map(c => c.id) : []);
-            totalCodesCount += coding ? coding.codes.length : 0;
+          const coding = this.codingScheme?.variableCodings
+            .find(v => v.id === s);
+          if (coding?.codes) {
+            codes.push(coding.codes.map(c => c.id));
+            totalCodesCount += coding.codes.length;
+          } else {
+            codes.push([]);
           }
         });
         let resultArray: string[] = [];
         if (totalCodesCount < 10) {
-          codes.forEach(c => {
+          codes.forEach(currentCodeSet => {
+            const filteredCodes = currentCodeSet
+              .filter(code => code !== null);
+
             if (resultArray.length > 0) {
-              resultArray = resultArray
-                .flatMap(oldEntry => c.filter(cEntry => cEntry !== null)
-                  .map(cEntry => `${oldEntry}${DeriveConcatDelimiter}${cEntry}`)
-                );
+              resultArray = resultArray.flatMap(existingEntry => filteredCodes
+                .map(code => `${existingEntry}${DeriveConcatDelimiter}${code}`)
+              );
             } else {
-              resultArray = c
-                .filter(cEntry => cEntry !== null)
-                .map(cEntry => cEntry.toString(10));
+              resultArray = filteredCodes.map(code => code.toString(10));
             }
           });
         }
@@ -99,7 +119,7 @@ export class SchemerService {
 
   checkRenamedVarAliasOk(checkAlias: string, checkId?: string): boolean {
     if (!checkAlias || !this.codingScheme?.variableCodings) {
-      return false; // Ein Alias wird benötigt, und eine Codierungsstruktur muss vorhanden sein.
+      return false;
     }
 
     const normalisedAlias = checkAlias.toUpperCase();
@@ -113,8 +133,10 @@ export class SchemerService {
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
     if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
       const maxCode = codeList.length > 0 ? Math.max(...codeList
-        .filter(c => typeof c.id === 'number').map(c => Number(c.id) || 0)) : 0;
-      const hasNullCode = codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
+        .filter(c => typeof c.id === 'number')
+        .map(c => Number(c.id) || 0)) : 0;
+      const hasNullCode = codeList.length > 0 ? !!codeList
+        .find(c => c.id === 0) : false;
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
         const firstResidualOrIntendedIncomplete = codeList
           .find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type));

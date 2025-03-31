@@ -43,7 +43,7 @@ import sampleVarList1 from '../../sample-data/var-list-1.json';
         [varList]="varList1"
         [userRole]="userRole"
         [codingScheme]="codings1"
-        (varListChanged)="setNewVarlist($event)"
+        (varListChanged)="setNewVarList($event)"
         (userRoleChanged)="userRole = $event"
         (codingSchemeChanged)="setNewCodingScheme($event)"
         [style.height.px]="0"></schemer-standalone-menu>
@@ -102,7 +102,7 @@ export class AppComponent {
     console.log(this.codings1);
   }
 
-  setNewVarlist(varList: VariableInfo[] | null) {
+  setNewVarList(varList: VariableInfo[] | null) {
     if (varList) {
       this.varList1 = varList;
       const variableCodings: VariableCodingData[] = [];

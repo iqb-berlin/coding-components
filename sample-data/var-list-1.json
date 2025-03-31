@@ -1,7 +1,36 @@
 [
   {
-    "id": "Otto",
-    "alias": "Ottfried",
+    "id": "Otto1",
+    "alias": "Ottfried2",
+    "type": "string",
+    "format": "",
+    "multiple": true,
+    "nullable": false,
+    "values": [
+      {
+        "value": "Apfel",
+        "label": ""
+      },
+      {
+        "value": "Melone",
+        "label": ""
+      },
+      {
+        "value": "Birne",
+        "label": ""
+      },
+      {
+        "value": "Birne2",
+        "label": ""
+      }
+    ],
+    "valuePositionLabels": [],
+    "valuesComplete": true,
+    "page": ""
+  },
+  {
+    "id": "Otto2",
+    "alias": "Ottfried2",
     "type": "string",
     "format": "",
     "multiple": true,
@@ -31,6 +60,35 @@
   {
     "id": "Paul",
     "alias": "Paul",
+    "type": "string",
+    "format": "",
+    "multiple": false,
+    "nullable": false,
+    "values": [
+      {
+        "value": "1",
+        "label": "erste Option"
+      },
+      {
+        "value": "2",
+        "label": "zweite Option"
+      },
+      {
+        "value": "3",
+        "label": "dritte Option"
+      },
+      {
+        "value": "4",
+        "label": "vierte Option"
+      }
+    ],
+    "valuePositionLabels": [],
+    "valuesComplete": true,
+    "page": ""
+  },
+  {
+    "id": "Paul",
+    "alias": "Paul222",
     "type": "string",
     "format": "",
     "multiple": false,

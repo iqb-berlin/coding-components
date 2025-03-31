@@ -35,7 +35,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
         [userRole]="userRole"
         [codingScheme]="codings"
         (userRoleChanged)="setUserRole($event)"
-        (varListChanged)="setNewVarlist($event)"
+        (varListChanged)="setNewVarList($event)"
         (codingSchemeChanged)="setNewCodingScheme($event)"
       [style.height.px]="0"></schemer-standalone-menu>
     }
@@ -132,7 +132,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.veronaAPIService.sendVosSchemeChangedNotification(this.codings);
   }
 
-  setNewVarlist(varList: VariableInfo[] | null) {
+  setNewVarList(varList: VariableInfo[] | null) {
     if (varList) {
       this.varList = varList;
       const variableCodings: VariableCodingData[] = [];

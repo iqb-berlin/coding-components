@@ -14,6 +14,7 @@ import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { CodingScheme, VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { DuplicateSelectionDialog } from '@ngx-coding-components/dialogs/duplicate-selection-dialog.component';
 import { CodingSchemeDialogComponent } from '../dialogs/coding-scheme-dialog.component';
 import { SchemerService, UserRoleType } from '../services/schemer.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
@@ -79,6 +80,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       } else {
         this.schemerService.varList = value;
       }
+      this.checkForDuplicateVariables();
       this.selectVarScheme();
       this.updateVariableLists();
     }
@@ -96,6 +98,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   varCodingChangedSubscription: Subscription | null = null;
 
   constructor(
+    private duplicateSelectionDialog: MatDialog,
     private translateService: TranslateService,
     public schemerService: SchemerService,
     private messageDialog: MatDialog,
@@ -114,6 +117,22 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       ).subscribe(() => {
         this.updateVariableLists();
         this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+      });
+    }
+  }
+
+  checkForDuplicateVariables(): void {
+    const duplicateVariables = this.schemerService.findDuplicateVariables();
+    if (duplicateVariables.length > 0) {
+      const dialogRef = this.duplicateSelectionDialog.open(DuplicateSelectionDialog, {
+        data: duplicateVariables,
+        width: '600px'
+      });
+
+      dialogRef.afterClosed().subscribe(selectedVariable => {
+        if (selectedVariable) {
+          console.log('Variable wurde zum Kodierungsschema hinzugefügt:', selectedVariable);
+        }
       });
     }
   }
