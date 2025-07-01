@@ -19,7 +19,7 @@ import { ListItem } from '@tiptap/extension-list-item';
 import { Bold } from '@tiptap/extension-bold';
 import { Italic } from '@tiptap/extension-italic';
 import { Strike } from '@tiptap/extension-strike';
-import { NgxTiptapModule } from 'ngx-tiptap';
+import { TiptapEditorDirective } from 'ngx-tiptap';
 import { MatMenuTrigger, MatMenu } from '@angular/material/menu';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
@@ -48,7 +48,7 @@ import { ComboButtonComponent } from './combo-button.component';
   imports: [
     MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatSelect, MatOption,
     ComboButtonComponent, MatInput, ReactiveFormsModule, FormsModule,
-    MatMenuTrigger, MatMenu, MatButton, NgxTiptapModule
+    MatMenuTrigger, MatMenu, MatButton, TiptapEditorDirective
   ]
 })
 export class RichTextEditorComponent implements AfterViewInit {
