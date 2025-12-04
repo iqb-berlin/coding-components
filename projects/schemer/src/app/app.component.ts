@@ -24,10 +24,10 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
   selector: 'app-root',
   template: `
     <iqb-schemer class="coder-body"
-      [varList]="varList"
-      [codingScheme]="codings"
-      [userRole]="userRole"
-      (codingSchemeChanged)="emitCodingSchemeChanged()"
+                 [varList]="varList"
+                 [codingScheme]="codings"
+                 [userRole]="userRole"
+                 (codingSchemeChanged)="emitCodingSchemeChanged()"
     ></iqb-schemer>
     @if (isStandalone) {
       <schemer-standalone-menu
@@ -37,24 +37,24 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
         (userRoleChanged)="setUserRole($event)"
         (varListChanged)="setNewVarlist($event)"
         (codingSchemeChanged)="setNewCodingScheme($event)"
-      [style.height.px]="0"></schemer-standalone-menu>
+        [style.height.px]="0"></schemer-standalone-menu>
     }
-    `,
+  `,
   styles: [
     `
-        .coder-body {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          bottom: 0;
-          padding: 0;
-          margin: 0;
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: stretch;
-        }
-      `
+      .coder-body {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        padding: 0;
+        margin: 0;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: stretch;
+      }
+    `
   ],
   standalone: true,
   imports: [BrowserAnimationsModule, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltipModule]
@@ -93,13 +93,16 @@ export class AppComponent implements OnInit, OnDestroy {
               data: <MessageDialogData>{
                 title: 'Achtung: Abweichende Daten-Version',
                 content: `Sie haben eine abweichende Daten-Version des Kodierschemas geladen: ${messageText}.
-                Nach dem Speichern ist das Schema auf die Version
-                ${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor} geändert.`,
+                  Nach dem Speichern ist das Schema auf die Version
+                  ${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor} geändert.`,
                 type: MessageType.warning
               }
             });
           }
           this.codings = new CodingScheme(message.codingScheme);
+          if (compareVersionResult !== 'OK') {
+            this.emitCodingSchemeChanged();
+          }
         } else {
           this.codings = new CodingScheme([]);
         }
