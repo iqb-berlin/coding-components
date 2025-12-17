@@ -1,8 +1,19 @@
 import {
-  AfterViewInit, Component, EventEmitter, Input, OnDestroy, Output, ViewChild
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  ViewChild
 } from '@angular/core';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
-import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  firstValueFrom,
+  Subscription
+} from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingFactory } from '@iqb/responses/coding-factory';
@@ -12,18 +23,33 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatNavList, MatListItem } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { CodingScheme, VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodingScheme,
+  VariableCodingData
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { CodingSchemeDialogComponent } from '../dialogs/coding-scheme-dialog.component';
 import { SchemerService, UserRoleType } from '../services/schemer.service';
+import { FileService } from '../services/file.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import {
   SelectVariableDialogComponent,
   SelectVariableDialogData
 } from '../dialogs/select-variable-dialog.component';
-import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
-import { SimpleInputDialogComponent, SimpleInputDialogData } from '../dialogs/simple-input-dialog.component';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData
+} from '../dialogs/confirm-dialog.component';
+import {
+  MessageDialogComponent,
+  MessageDialogData,
+  MessageType
+} from '../dialogs/message-dialog.component';
+import {
+  SimpleInputDialogComponent,
+  SimpleInputDialogData
+} from '../dialogs/simple-input-dialog.component';
 import { ShowDependencyTreeDialogComponent } from '../dialogs/show-dependency-tree-dialog.component';
 import {
   EditSourceParametersDialog,
@@ -36,7 +62,8 @@ import {
   styleUrls: ['./schemer.component.scss'], // ,    // encapsulation: ViewEncapsulation.ShadowDom
 
   standalone: true,
-  imports: [MatNavList,
+  imports: [
+    MatNavList,
     MatTooltipModule,
     MatListItem,
     MatButton,
@@ -46,11 +73,14 @@ import {
     TranslateModule,
     MatMenu,
     MatMenuItem,
-    MatMenuTrigger]
+    MatMenuTrigger
+  ]
 })
-
 export class SchemerComponent implements OnDestroy, AfterViewInit {
-  @ViewChild(VarCodingComponent) varCodingElement: VarCodingComponent | undefined;
+  @ViewChild(VarCodingComponent) varCodingElement:
+  | VarCodingComponent
+  | undefined;
+
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
   @Input()
@@ -90,7 +120,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   basicVariables: VariableCodingData[] = [];
   derivedVariables: VariableCodingData[] = [];
-  codingStatus: { [id: string]: string; } = {};
+  codingStatus: { [id: string]: string } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
   problems: CodingSchemeProblem[] = [];
   varCodingChangedSubscription: Subscription | null = null;
@@ -100,102 +130,144 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     public schemerService: SchemerService,
     private messageDialog: MatDialog,
     private showCodingProblemsDialog: MatDialog,
-    private showCodingSchemeDialog:MatDialog,
+    private showCodingSchemeDialog: MatDialog,
     private selectVariableDialog: MatDialog,
     private editSourceParametersDialog: MatDialog,
     private inputDialog: MatDialog
-  ) {
-  }
+  ) {}
 
   ngAfterViewInit() {
     if (this.varCodingElement) {
-      this.varCodingChangedSubscription = this.varCodingElement.varCodingChanged.pipe(
-        debounceTime(300)
-      ).subscribe(() => {
-        this.updateVariableLists();
-        this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-      });
+      this.varCodingChangedSubscription = this.varCodingElement.varCodingChanged
+        .pipe(debounceTime(300))
+        .subscribe(() => {
+          this.updateVariableLists();
+          this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+        });
     }
   }
 
   updateVariableLists() {
-    if (this.schemerService.varList && this.schemerService.varList.length > 0 &&
-      this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
+    if (
+      this.schemerService.varList &&
+      this.schemerService.varList.length > 0 &&
+      this.schemerService.codingScheme &&
+      this.schemerService.codingScheme.variableCodings
+    ) {
       // remove orphan+empty base variables
       const varListIds = this.schemerService.varList.map(v => v.id);
-      const varCodingsToDelete = [...this.schemerService.codingScheme.variableCodings
-        .filter(bv => bv.sourceType === 'BASE' && varListIds.indexOf(bv.id) < 0 && SchemerComponent.isEmptyCoding(bv))
-        .map(bv => bv.id)];
+      const varCodingsToDelete = [
+        ...this.schemerService.codingScheme.variableCodings
+          .filter(
+            bv => bv.sourceType === 'BASE' &&
+              varListIds.indexOf(bv.id) < 0 &&
+              SchemerComponent.isEmptyCoding(bv)
+          )
+          .map(bv => bv.id)
+      ];
       if (varCodingsToDelete.length > 0) {
         varCodingsToDelete.forEach(vc => {
           if (this.schemerService.codingScheme) {
-            const varCodingIndexToDelete = this.schemerService.codingScheme.variableCodings
-              .findIndex(vcd => vcd.id === vc);
+            const varCodingIndexToDelete =
+              this.schemerService.codingScheme.variableCodings.findIndex(
+                vcd => vcd.id === vc
+              );
             if (varCodingIndexToDelete >= 0) {
-              this.schemerService.codingScheme.variableCodings.splice(varCodingIndexToDelete, 1);
+              this.schemerService.codingScheme.variableCodings.splice(
+                varCodingIndexToDelete,
+                1
+              );
             }
           }
         });
       }
       // add new base variables
-      const allBaseVariableIds = this.schemerService.codingScheme.variableCodings
-        .filter(v => v.sourceType === 'BASE').map(bv => bv.id);
+      const allBaseVariableIds =
+        this.schemerService.codingScheme.variableCodings
+          .filter(v => v.sourceType === 'BASE')
+          .map(bv => bv.id);
       this.schemerService.varList
-        .filter(vi => allBaseVariableIds.indexOf(vi.id) < 0 && vi.type !== 'no-value')
+        .filter(
+          vi => allBaseVariableIds.indexOf(vi.id) < 0 && vi.type !== 'no-value'
+        )
         .forEach(vi => {
-          const found = this.schemerService.codingScheme?.variableCodings
-            .find(v => v.id === vi.id);
+          const found = this.schemerService.codingScheme?.variableCodings.find(
+            v => v.id === vi.id
+          );
           if (!found) {
             const newBaseVariable = CodingFactory.createCodingVariable(vi.id);
             newBaseVariable.alias = vi.alias || vi.id;
             if (this.schemerService.codingScheme) {
-              this.schemerService.codingScheme.variableCodings
-                .push(newBaseVariable);
+              this.schemerService.codingScheme.variableCodings.push(
+                newBaseVariable
+              );
             }
           }
         });
     }
     // update aliases
     this.schemerService.varList.forEach(vi => {
-      if (this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
-        const coding = this.schemerService.codingScheme.variableCodings.find(vc => vc.id === vi.id);
+      if (
+        this.schemerService.codingScheme &&
+        this.schemerService.codingScheme.variableCodings
+      ) {
+        const coding = this.schemerService.codingScheme.variableCodings.find(
+          vc => vc.id === vi.id
+        );
         if (coding) coding.alias = vi.alias || vi.id;
       }
     });
-    this.basicVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
-      this.schemerService.codingScheme?.variableCodings.filter(c => (c.sourceType === 'BASE'))
-        .sort((a, b) => {
-          const idA = (a.alias || a.id).toUpperCase();
-          const idB = (b.alias || b.id).toUpperCase();
-          if (idA < idB) return -1;
-          if (idA > idB) return 1;
-          return 0;
-        }) : [];
-    this.derivedVariables = this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings ?
-      this.schemerService.codingScheme?.variableCodings
-        .filter(c => (c.sourceType !== 'BASE' && c.sourceType !== 'BASE_NO_VALUE'))
-        .sort((a, b) => {
-          const idA = (a.alias || a.id).toUpperCase();
-          const idB = (b.alias || b.id).toUpperCase();
-          if (idA < idB) return -1;
-          if (idA > idB) return 1;
-          return 0;
-        }) : [];
+    this.basicVariables =
+      this.schemerService.codingScheme &&
+      this.schemerService.codingScheme.variableCodings ?
+        this.schemerService.codingScheme?.variableCodings
+          .filter(c => c.sourceType === 'BASE')
+          .sort((a, b) => {
+            const idA = (a.alias || a.id).toUpperCase();
+            const idB = (b.alias || b.id).toUpperCase();
+            if (idA < idB) return -1;
+            if (idA > idB) return 1;
+            return 0;
+          }) :
+        [];
+    this.derivedVariables =
+      this.schemerService.codingScheme &&
+      this.schemerService.codingScheme.variableCodings ?
+        this.schemerService.codingScheme?.variableCodings
+          .filter(
+            c => c.sourceType !== 'BASE' && c.sourceType !== 'BASE_NO_VALUE'
+          )
+          .sort((a, b) => {
+            const idA = (a.alias || a.id).toUpperCase();
+            const idB = (b.alias || b.id).toUpperCase();
+            if (idA < idB) return -1;
+            if (idA > idB) return 1;
+            return 0;
+          }) :
+        [];
     this.schemerService.allVariableIds = this.schemerService.codingScheme ?
-      this.schemerService.codingScheme.variableCodings.map(c => c.id) : [];
+      this.schemerService.codingScheme.variableCodings.map(c => c.id) :
+      [];
     this.codingStatus = {};
-    if (this.schemerService.codingScheme && this.schemerService.codingScheme.variableCodings) {
-      this.problems =
-        CodingSchemeFactory.validate(this.schemerService.varList, this.schemerService.codingScheme.variableCodings);
+    if (
+      this.schemerService.codingScheme &&
+      this.schemerService.codingScheme.variableCodings
+    ) {
+      this.problems = CodingSchemeFactory.validate(
+        this.schemerService.varList,
+        this.schemerService.codingScheme.variableCodings
+      );
       this.schemerService.codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = 'OK';
-        const breakingProblem = this.problems
-          .find(p => p.variableId === (v.alias || v.id) && p.breaking);
+        const breakingProblem = this.problems.find(
+          p => p.variableId === (v.alias || v.id) && p.breaking
+        );
         if (breakingProblem) {
           this.codingStatus[v.id] = 'ERROR';
         } else {
-          const minorProblem = this.problems
-            .find(p => p.variableId === (v.alias || v.id) && !p.breaking);
+          const minorProblem = this.problems.find(
+            p => p.variableId === (v.alias || v.id) && !p.breaking
+          );
           if (minorProblem) this.codingStatus[v.id] = 'WARNING';
         }
       });
@@ -206,34 +278,180 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     this.selectedCoding$.next(coding);
   }
 
+  async exportVariable(): Promise<void> {
+    if (
+      !this.schemerService.codingScheme ||
+      this.schemerService.codingScheme.variableCodings.length === 0
+    ) {
+      this.messageDialog.open(MessageDialogComponent, {
+        width: '400px',
+        data: <MessageDialogData>{
+          title: 'Export Variable',
+          content: 'Kein Antwortschema bzw. keine Variablen vorhanden.',
+          type: MessageType.info
+        }
+      });
+      return;
+    }
+
+    const dialogRef = this.selectVariableDialog.open(
+      SelectVariableDialogComponent,
+      {
+        width: '600px',
+        data: <SelectVariableDialogData>{
+          title: 'Variable exportieren',
+          prompt: 'Bitte Variable auswählen',
+          variables: this.schemerService.codingScheme.variableCodings,
+          selectedVariable: this.selectedCoding$.getValue(),
+          codingStatus: this.codingStatus,
+          okButtonLabel: 'Export'
+        }
+      }
+    );
+
+    const selectedAliases = await firstValueFrom(dialogRef.afterClosed());
+    const selectedAlias =
+      Array.isArray(selectedAliases) && selectedAliases.length > 0 ?
+        selectedAliases[0] :
+        null;
+    if (!selectedAlias) return;
+
+    const selectedVar = this.schemerService.codingScheme.variableCodings.find(
+      v => (v.alias || v.id) === selectedAlias
+    );
+    if (!selectedVar) return;
+
+    const payload = {
+      type: 'iqb-variable-export',
+      version: 1,
+      variableId: selectedVar.id,
+      variableCoding: selectedVar
+    };
+
+    FileService.saveToFile(
+      JSON.stringify(payload, null, 2),
+      `${selectedVar.id}.variable.json`
+    );
+  }
+
+  async importVariable(): Promise<void> {
+    if (this.schemerService.userRole === 'RO') return;
+    if (!this.schemerService.codingScheme) {
+      this.messageDialog.open(MessageDialogComponent, {
+        width: '400px',
+        data: <MessageDialogData>{
+          title: 'Import Variable',
+          content: 'Kein Antwortschema geladen.',
+          type: MessageType.error
+        }
+      });
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(await FileService.loadFile(['.json']));
+      if (
+        !parsed ||
+        parsed.type !== 'iqb-variable-export' ||
+        parsed.version !== 1 ||
+        !parsed.variableCoding
+      ) {
+        throw new Error('Ungültiges Import-Format.');
+      }
+
+      const importedVar: VariableCodingData = parsed.variableCoding;
+      if (!importedVar.id) {
+        throw new Error('Import enthält keine Variable-ID.');
+      }
+
+      const existingIndex =
+        this.schemerService.codingScheme.variableCodings.findIndex(
+          v => v.id === importedVar.id
+        );
+
+      if (existingIndex >= 0) {
+        const confirmRef = this.messageDialog.open(ConfirmDialogComponent, {
+          width: '450px',
+          data: <ConfirmDialogData>{
+            title: 'Variable überschreiben?',
+            content: `Die Variable '${
+              importedVar.alias || importedVar.id
+            }' existiert bereits. Überschreiben?`,
+            confirmButtonLabel: 'Überschreiben',
+            showCancel: true
+          }
+        });
+        const confirmed = await firstValueFrom(confirmRef.afterClosed());
+        if (!confirmed) return;
+        this.schemerService.codingScheme.variableCodings.splice(
+          existingIndex,
+          1,
+          importedVar
+        );
+      } else {
+        this.schemerService.codingScheme.variableCodings.push(importedVar);
+      }
+
+      this.updateVariableLists();
+      this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+    } catch (e) {
+      this.messageDialog.open(MessageDialogComponent, {
+        width: '450px',
+        data: <MessageDialogData>{
+          title: 'Import Variable - Fehler',
+          content:
+            e instanceof Error ? e.message : 'Unbekannter Fehler beim Import.',
+          type: MessageType.error
+        }
+      });
+    }
+  }
+
   private static isEmptyCoding(coding: VariableCodingData): boolean {
     if (coding.label && coding.label !== coding.id) return false;
-    if (coding.processing.length > 0 || coding.fragmenting || coding.codes.length > 0) return false;
-    return !(coding.manualInstruction.length > 0 || coding.codeModel !== 'NONE');
+    if (
+      coding.processing.length > 0 ||
+      coding.fragmenting ||
+      coding.codes.length > 0
+    ) return false;
+    return !(
+      coding.manualInstruction.length > 0 || coding.codeModel !== 'NONE'
+    );
   }
 
   addVarScheme() {
-    if (this.schemerService.userRole !== 'RO' && this.schemerService.codingScheme) {
-      const dialogRef = this.editSourceParametersDialog.open(EditSourceParametersDialog, {
-        width: '600px',
-        minHeight: '400px',
-        data: <EditSourceParametersDialogData>{
-          selfId: '',
-          selfAlias: '',
-          sourceType: 'SUM_SCORE',
-          sourceParameters: {
-            processing: [],
-            solverExpression: ''
-          },
-          deriveSources: []
+    if (
+      this.schemerService.userRole !== 'RO' &&
+      this.schemerService.codingScheme
+    ) {
+      const dialogRef = this.editSourceParametersDialog.open(
+        EditSourceParametersDialog,
+        {
+          width: '600px',
+          minHeight: '400px',
+          data: <EditSourceParametersDialogData>{
+            selfId: '',
+            selfAlias: '',
+            sourceType: 'SUM_SCORE',
+            sourceParameters: {
+              processing: [],
+              solverExpression: ''
+            },
+            deriveSources: []
+          }
         }
-      });
+      );
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false && this.schemerService.codingScheme) {
           const timestamp = new Date().getTime();
-          const dialogResultTyped: EditSourceParametersDialogData = dialogResult;
+          const dialogResultTyped: EditSourceParametersDialogData =
+            dialogResult;
           let errorMessage = '';
-          if (!this.schemerService.checkRenamedVarAliasOk(dialogResultTyped.selfAlias)) {
+          if (
+            !this.schemerService.checkRenamedVarAliasOk(
+              dialogResultTyped.selfAlias
+            )
+          ) {
             errorMessage = 'data-error.variable-id.double';
           } else {
             const newVarScheme = <VariableCodingData>{
@@ -274,24 +492,31 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     if (this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
         title: 'Variable/Kodierung löschen',
-        prompt: 'Abgeleitete Variablen oder verwaiste Basisvariablen werden komplett gelöscht. ' +
+        prompt:
+          'Abgeleitete Variablen oder verwaiste Basisvariablen werden komplett gelöscht. ' +
           'Bei Basisvariablen wird die Kodierung gelöscht.',
-        variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.sourceType !== 'BASE_NO_VALUE'),
+        variables: this.schemerService.codingScheme.variableCodings.filter(
+          c => c.sourceType !== 'BASE_NO_VALUE'
+        ),
         selectedVariable: this.selectedCoding$.getValue(),
         codingStatus: this.codingStatus,
         okButtonLabel: 'Löschen'
       };
-      const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
-        width: '400px',
-        data: dialogData
-      });
+      const dialogRef = this.selectVariableDialog.open(
+        SelectVariableDialogComponent,
+        {
+          width: '400px',
+          data: dialogData
+        }
+      );
       dialogRef.afterClosed().subscribe((variables: string[]) => {
         let changed = false;
         if (variables && variables.length > 0) {
           if (this.schemerService && this.schemerService.codingScheme) {
-            this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-              .filter(c => !variables.includes(c.alias || c.id));
+            this.schemerService.codingScheme.variableCodings =
+              this.schemerService.codingScheme.variableCodings.filter(
+                c => !variables.includes(c.alias || c.id)
+              );
             changed = true;
             this.selectedCoding$.next(null);
             this.updateVariableLists();
@@ -324,12 +549,19 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       });
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false) {
-          if (!this.schemerService.checkRenamedVarAliasOk(result, selectedCoding.id)) {
+          if (
+            !this.schemerService.checkRenamedVarAliasOk(
+              result,
+              selectedCoding.id
+            )
+          ) {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
                 title: 'Variable umbenennen - Fehler',
-                content: this.translateService.instant('data-error.variable-id.double'),
+                content: this.translateService.instant(
+                  'data-error.variable-id.double'
+                ),
                 type: MessageType.error
               }
             });
@@ -357,26 +589,36 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       const dialogData = <SelectVariableDialogData>{
         title: 'Basisvariable ohne Wert aktivieren',
         prompt: 'Bitte Variable wählen!',
-        variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.sourceType === 'BASE_NO_VALUE'),
+        variables: this.schemerService.codingScheme.variableCodings.filter(
+          c => c.sourceType === 'BASE_NO_VALUE'
+        ),
         okButtonLabel: 'Aktivieren'
       };
-      const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
-        width: '400px',
-        data: dialogData
-      });
+      const dialogRef = this.selectVariableDialog.open(
+        SelectVariableDialogComponent,
+        {
+          width: '400px',
+          data: dialogData
+        }
+      );
       dialogRef.afterClosed().subscribe((variables: string[]) => {
         let changed = false;
         if (variables && variables.length > 0) {
           variables.forEach(v => {
             if (this.schemerService && this.schemerService.codingScheme) {
-              const targetCoding = this.schemerService.codingScheme.variableCodings
-                .find(c => (c.alias || c.id) === v);
+              const targetCoding =
+                this.schemerService.codingScheme.variableCodings.find(
+                  c => (c.alias || c.id) === v
+                );
               if (targetCoding) {
                 targetCoding.sourceType = 'BASE';
-                this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-                  .filter(c => c.id !== targetCoding.id);
-                this.schemerService.codingScheme.variableCodings.push(targetCoding);
+                this.schemerService.codingScheme.variableCodings =
+                  this.schemerService.codingScheme.variableCodings.filter(
+                    c => c.id !== targetCoding.id
+                  );
+                this.schemerService.codingScheme.variableCodings.push(
+                  targetCoding
+                );
                 this.schemerService.varList.push({
                   id: targetCoding.id,
                   alias: targetCoding.alias || targetCoding.id,
@@ -405,38 +647,55 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     const selectedCoding = this.selectedCoding$.getValue();
     if (selectedCoding && this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
-        title: `Kodierung von "${selectedCoding.alias || selectedCoding.id}" kopieren `,
+        title: `Kodierung von "${
+          selectedCoding.alias || selectedCoding.id
+        }" kopieren `,
         prompt: 'Die Kodierung der Zielvariable(n) wird überschrieben!',
-        variables: this.schemerService.codingScheme.variableCodings
-          .filter(c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE'),
+        variables: this.schemerService.codingScheme.variableCodings.filter(
+          c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE'
+        ),
         selectedVariable: this.selectedCoding$.getValue(),
         codingStatus: this.codingStatus,
         okButtonLabel: 'Kopieren'
       };
-      const dialogRef = this.selectVariableDialog.open(SelectVariableDialogComponent, {
-        width: '400px',
-        data: dialogData
-      });
+      const dialogRef = this.selectVariableDialog.open(
+        SelectVariableDialogComponent,
+        {
+          width: '400px',
+          data: dialogData
+        }
+      );
       dialogRef.afterClosed().subscribe((variables: string[]) => {
         let changed = false;
         if (variables && variables.length > 0) {
           variables.forEach(v => {
             if (this.schemerService && this.schemerService.codingScheme) {
-              const targetCoding = this.schemerService.codingScheme.variableCodings
-                .find(c => (c.alias || c.id) === v);
+              const targetCoding =
+                this.schemerService.codingScheme.variableCodings.find(
+                  c => (c.alias || c.id) === v
+                );
               if (targetCoding) {
                 const stringifiedCoding = JSON.stringify(selectedCoding);
-                const newCoding = JSON.parse(stringifiedCoding) as VariableCodingData;
+                const newCoding = JSON.parse(
+                  stringifiedCoding
+                ) as VariableCodingData;
                 newCoding.id = targetCoding.id;
                 newCoding.alias = targetCoding.alias;
-                this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-                  .filter(c => c.id !== targetCoding.id);
-                if (newCoding.sourceType !== 'BASE' || targetCoding.sourceType !== 'BASE') {
+                this.schemerService.codingScheme.variableCodings =
+                  this.schemerService.codingScheme.variableCodings.filter(
+                    c => c.id !== targetCoding.id
+                  );
+                if (
+                  newCoding.sourceType !== 'BASE' ||
+                  targetCoding.sourceType !== 'BASE'
+                ) {
                   newCoding.sourceType = targetCoding.sourceType;
                   newCoding.sourceParameters = targetCoding.sourceParameters;
                   newCoding.deriveSources = targetCoding.deriveSources;
                 }
-                this.schemerService.codingScheme.variableCodings.push(newCoding);
+                this.schemerService.codingScheme.variableCodings.push(
+                  newCoding
+                );
                 changed = true;
               }
             }
@@ -452,10 +711,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   checkVarScheme() {
     if (this.problems) {
-      const dialogRef = this.showCodingProblemsDialog.open(ShowCodingProblemsDialogComponent, {
-        width: '1000px',
-        data: this.problems
-      });
+      const dialogRef = this.showCodingProblemsDialog.open(
+        ShowCodingProblemsDialogComponent,
+        {
+          width: '1000px',
+          data: this.problems
+        }
+      );
       dialogRef.afterClosed().subscribe();
     }
   }
@@ -471,10 +733,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   }
 
   variableDependencyTree() {
-    this.showCodingProblemsDialog.open(ShowDependencyTreeDialogComponent, {
-      width: '1000px',
-      data: this.codingScheme
-    }).afterClosed().subscribe();
+    this.showCodingProblemsDialog
+      .open(ShowDependencyTreeDialogComponent, {
+        width: '1000px',
+        data: this.codingScheme
+      })
+      .afterClosed()
+      .subscribe();
   }
 
   ngOnDestroy(): void {
