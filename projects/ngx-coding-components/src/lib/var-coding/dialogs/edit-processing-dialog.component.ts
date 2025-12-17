@@ -1,6 +1,10 @@
 import { Component, Inject } from '@angular/core';
 import {
-  MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+  MAT_DIALOG_DATA,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+  MatDialogClose
 } from '@angular/material/dialog';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
@@ -12,39 +16,55 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { ProcessingParameterType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 
 export interface EditProcessingDialogData {
-  processing: ProcessingParameterType[],
-  fragmenting: string
+  processing: ProcessingParameterType[];
+  fragmenting: string;
 }
 
 @Component({
   template: `
-    <h1 mat-dialog-title>{{'processing.prompt' | translate}}</h1>
+    <h1 mat-dialog-title>{{ 'processing.prompt' | translate }}</h1>
 
     <mat-dialog-content>
       <div class="fx-column-start-start">
-        <div>{{'processing.label' | translate}}</div>
+        <div>{{ 'processing.label' | translate }}</div>
         @for (p of allProcessings; track p) {
-          <mat-checkbox [checked]="data.processing ? (data.processing.includes(p)) : false"
-                        (change)="alterProcessing(p, $event.checked)">
-            {{'processing.' + p | translate}}
-          </mat-checkbox>
+        <mat-checkbox
+          [checked]="data.processing ? data.processing.includes(p) : false"
+          (change)="alterProcessing(p, $event.checked)"
+        >
+          {{ 'processing.' + p | translate }}
+        </mat-checkbox>
         }
       </div>
       <mat-form-field [matTooltip]="'fragmenting.tooltip' | translate">
         <mat-label>{{ 'fragmenting.prompt' | translate }}</mat-label>
-        <input matInput [(ngModel)]="data.fragmenting">
+        <input matInput [(ngModel)]="data.fragmenting" />
       </mat-form-field>
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
-      <button mat-raised-button color="primary" [mat-dialog-close]="data">{{ 'dialog-save' | translate }}</button>
-      <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
+      <button mat-raised-button color="primary" [mat-dialog-close]="data">
+        {{ 'dialog-save' | translate }}
+      </button>
+      <button mat-raised-button [mat-dialog-close]="false">
+        {{ 'dialog-cancel' | translate }}
+      </button>
     </mat-dialog-actions>
-    `,
+  `,
   standalone: true,
   imports: [
-    MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule,
-    FormsModule, MatTooltipModule, MatFormField, MatInput, MatCheckbox, MatLabel
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslateModule,
+    FormsModule,
+    MatTooltipModule,
+    MatFormField,
+    MatInput,
+    MatCheckbox,
+    MatLabel
   ]
 })
 export class EditProcessingDialogComponent {
@@ -54,24 +74,26 @@ export class EditProcessingDialogComponent {
     'IGNORE_DISPENSABLE_SPACES',
     'SORT_ARRAY',
     'REPLAY_REQUIRED',
-    'ATTACHMENT'
+    'ATTACHMENT',
+    'CODER_TRAINING_REQUIRED'
   ];
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public data: EditProcessingDialogData
-  ) {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: EditProcessingDialogData) {
     this.data.processing = [...this.data.processing];
   }
 
-  alterProcessing(processingId: ProcessingParameterType, checked: boolean): void {
+  alterProcessing(
+    processingId: ProcessingParameterType,
+    checked: boolean
+  ): void {
     if (checked) {
-      // Add the processing if not already present
       if (!this.data.processing.includes(processingId)) {
         this.data.processing.push(processingId);
       }
     } else {
-      // Remove the processing if it exists
-      this.data.processing = this.data.processing.filter(p => p !== processingId);
+      this.data.processing = this.data.processing.filter(
+        p => p !== processingId
+      );
     }
   }
 }

@@ -162,7 +162,8 @@
     "IGNORE_DISPENSABLE_SPACES": "Doppelte Leerzeichen entfernen",
     "SORT_ARRAY": "Werte sortieren",
     "REPLAY_REQUIRED": "Für Kodierung komplette Unit-Ansicht erforderlich (Replay)",
-    "ATTACHMENT": "Für Kodierung separate Datei erforderlich (Bild, Audio)"
+    "ATTACHMENT": "Für Kodierung separate Datei erforderlich (Bild, Audio)",
+    "CODER_TRAINING_REQUIRED": "Erhöhter Schulungsaufwand"
   },
   "fragmenting": {
     "prompt": "Fragment(e)",
