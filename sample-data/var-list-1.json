@@ -1,7 +1,7 @@
 [
  {
   "id": "testVarId",
-  "alias": "hotspot-image_1",
+  "alias": "hotspot_image_1",
   "type": "boolean",
   "format": "",
   "multiple": "true",
