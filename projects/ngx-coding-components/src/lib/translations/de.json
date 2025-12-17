@@ -11,6 +11,8 @@
     "load-save-user-role": "Laden / Speichern / NutzerRechte festlegen",
     "more-actions": "Weitere Aktionen",
     "copy": "Kodierung kopieren",
+    "copy-code": "Code kopieren",
+    "paste-code": "Code einfügen",
     "check": "Prüfe Syntax Kodierschema",
     "show": "Zeige Kodierschema",
     "activate-base-no-value": "Aktiviere Basisvariable ohne Wert",
@@ -214,6 +216,7 @@
     },
     "error-message": {
       "residual-exists": "Es existiert bereits ein Code für 'Alle anderen Antworten'.",
+      "nothing-to-paste": "Es wurde kein Code kopiert.",
       "fatal-error": "Ein schwerer Fehler ist aufgetreten",
       "type-not-supported": "Der Code-Typ wird nicht unterstützt.",
       "no-access": "Es fehlen für diese Aktion die Zugriffsrechte."

@@ -79,6 +79,20 @@ export class SingleCodeComponent {
 
   constructor(public schemerService: SchemerService) {}
 
+  canCopySingleCode(): boolean {
+    if (this.schemerService.userRole === 'RO') {
+      return false;
+    }
+    return !!this.code;
+  }
+
+  copySingleCode() {
+    if (!this.code) {
+      return;
+    }
+    this.schemerService.copySingleCode(this.code);
+  }
+
   codeIdIsUnique(
     codeToValidate: number | 'INTENDED_INCOMPLETE' | 'INVALID',
     codeIndex?: number
@@ -99,31 +113,6 @@ export class SingleCodeComponent {
   deleteCode(codeIndex?: number) {
     if (this.allCodes && typeof codeIndex !== 'undefined') {
       this.schemerService.deleteCode(this.allCodes, codeIndex);
-      this.setCodeChanged();
-    }
-  }
-
-  canDuplicateCode(): boolean {
-    if (this.schemerService.userRole === 'RO') {
-      return false;
-    }
-    if (!this.code) {
-      return false;
-    }
-    return !['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
-      this.code.type
-    );
-  }
-
-  duplicateCode(codeIndex?: number) {
-    if (!this.allCodes || typeof codeIndex === 'undefined') {
-      return;
-    }
-    const duplicateResult = this.schemerService.duplicateCode(
-      this.allCodes,
-      codeIndex
-    );
-    if (typeof duplicateResult !== 'string') {
       this.setCodeChanged();
     }
   }

@@ -26,6 +26,7 @@ export class SchemerService {
   allVariableIds: string[] = [];
   ruleMethodParameterCount = RuleMethodParameterCount;
   userRole: UserRoleType = 'RW_MAXIMAL';
+  copiedCode: CodeData | null = null;
   orderOfCodeTypes: CodeType[] = [
     'FULL_CREDIT',
     'PARTIAL_CREDIT',
@@ -124,6 +125,60 @@ export class SchemerService {
     );
 
     return !hasDuplicate;
+  }
+
+  copySingleCode(code: CodeData): boolean {
+    if (!code) return false;
+    // deep clone to avoid mutating the source code when editing/pasting
+    this.copiedCode = JSON.parse(JSON.stringify(code)) as CodeData;
+    return true;
+  }
+
+  canPasteSingleCodeInto(codeList: CodeData[]): boolean {
+    if (!this.copiedCode) return false;
+    if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return false;
+    if (!codeList) return false;
+
+    const typeToPaste = this.copiedCode.type;
+    if (
+      ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(typeToPaste)
+    ) {
+      const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+      );
+      if (firstResidualOrIntendedIncomplete) return false;
+    }
+    return true;
+  }
+
+  pasteSingleCode(codeList: CodeData[]): CodeData | string {
+    if (!this.copiedCode) return 'code.error-message.nothing-to-paste';
+    if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return 'code.error-message.no-access';
+    if (!codeList) return 'code.error-message.fatal-error';
+
+    const typeToPaste = this.copiedCode.type;
+
+    // For these types, the target may only contain one of {RESIDUAL, RESIDUAL_AUTO, INTENDED_INCOMPLETE}
+    if (
+      ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(typeToPaste)
+    ) {
+      const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+      );
+      if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
+    }
+
+    const addResult = this.addCode(codeList, typeToPaste);
+    if (typeof addResult === 'string') return addResult;
+
+    const created = addResult;
+    const payload = JSON.parse(JSON.stringify(this.copiedCode)) as CodeData;
+
+    // Keep generated id/type (must behave like newly created code of this type)
+    const { id, type } = created;
+    Object.assign(created, payload);
+    created.id = id;
+    created.type = type;
+
+    return created;
   }
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {

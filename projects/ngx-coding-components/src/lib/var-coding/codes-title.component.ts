@@ -5,47 +5,70 @@ import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRipple } from '@angular/material/core';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { CodeData, ProcessingParameterType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodeData,
+  ProcessingParameterType
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { SchemerService } from '../services/schemer.service';
-import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialogs/edit-processing-dialog.component';
+import {
+  EditProcessingDialogComponent,
+  EditProcessingDialogData
+} from './dialogs/edit-processing-dialog.component';
 
 @Component({
   selector: 'codes-title',
   template: `
     <div class="fx-row-space-between-start">
       @if (schemerService.userRole !== 'RO') {
-        <div class="fx-row-center-center" style="margin-top:10px">
-          <h2>{{ 'code.header' | translate }}</h2>
-          <div (click)="sortCodes($event)"
-               [matTooltip]="'code.prompt.sort' | translate"
-               [matTooltipShowDelay]="500"
-               class="sort"
-               matRipple
-               [style.cursor]="'pointer'">
-            <mat-icon>swap_vert</mat-icon>
-          </div>
-        </div>
-      } @else {
+      <div class="fx-row-center-center" style="margin-top:10px">
         <h2>{{ 'code.header' | translate }}</h2>
+        <div
+          (click)="sortCodes($event)"
+          [matTooltip]="'code.prompt.sort' | translate"
+          [matTooltipShowDelay]="500"
+          class="sort"
+          matRipple
+          [style.cursor]="'pointer'"
+        >
+          <mat-icon>swap_vert</mat-icon>
+        </div>
+        <button
+          mat-icon-button
+          (click)="pasteRequested.emit()"
+          [disabled]="!canPaste"
+          [matTooltip]="'varList.paste-code' | translate"
+          [matTooltipShowDelay]="500"
+        >
+          <mat-icon>content_paste</mat-icon>
+        </button>
+      </div>
+      } @else {
+      <h2>{{ 'code.header' | translate }}</h2>
       }
       <div class="fx-column-start-center">
-        <button mat-button [matTooltip]="'processing.prompt' | translate"
-                [disabled]="schemerService.userRole === 'RO'"
-                (click)="editProcessingAndFragments()">
+        <button
+          mat-button
+          [matTooltip]="'processing.prompt' | translate"
+          [disabled]="schemerService.userRole === 'RO'"
+          (click)="editProcessingAndFragments()"
+        >
           <mat-icon>edit</mat-icon>
-          {{'processing.prompt' | translate}}
+          {{ 'processing.prompt' | translate }}
         </button>
         <div class="fx-column-start-start">
           @for (p of processing; track p) {
-            <div class="fx-row-center-center" style="font-size: small">
-              <mat-icon style="font-size: small; align-content: center;">check</mat-icon>
-              <div>{{('processing.' + p) | translate}}</div>
-            </div>
-          }
-          @if (fragmenting) {
-            <div style="font-size: small">{{ 'fragmenting.prompt' | translate }}: "{{fragmenting}}"</div>
+          <div class="fx-row-center-center" style="font-size: small">
+            <mat-icon style="font-size: small; align-content: center;"
+              >check</mat-icon
+            >
+            <div>{{ 'processing.' + p | translate }}</div>
+          </div>
+          } @if (fragmenting) {
+          <div style="font-size: small">
+            {{ 'fragmenting.prompt' | translate }}: "{{ fragmenting }}"
+          </div>
           }
         </div>
       </div>
@@ -53,27 +76,35 @@ import { EditProcessingDialogComponent, EditProcessingDialogData } from './dialo
   `,
   styles: [
     `
-     .sort {
-       margin-left: 20px;
-     }
+      .sort {
+        margin-left: 20px;
+      }
     `
   ],
   standalone: true,
-  imports: [MatRipple, MatTooltipModule, MatIcon, TranslateModule, MatButton]
+  imports: [
+    MatRipple,
+    MatTooltipModule,
+    MatIcon,
+    TranslateModule,
+    MatButton,
+    MatIconButton
+  ]
 })
 export class CodesTitleComponent {
   @Output() processingChanged = new EventEmitter<string[]>();
   @Output() fragmentingChanged = new EventEmitter<string>();
   @Output() codeListChanged = new EventEmitter<CodeData[]>();
+  @Output() pasteRequested = new EventEmitter<void>();
   @Input() codeList: CodeData[] | undefined;
   @Input() fragmenting? = '';
   @Input() processing: ProcessingParameterType[] | undefined;
+  @Input() canPaste = false;
 
   constructor(
     public schemerService: SchemerService,
     private editProcessingDialog: MatDialog
-  ) {
-  }
+  ) {}
 
   sortCodes(event: MouseEvent) {
     if (this.codeList && this.schemerService.userRole !== 'RO') {
@@ -84,12 +115,15 @@ export class CodesTitleComponent {
 
   editProcessingAndFragments() {
     if (this.schemerService.userRole !== 'RO') {
-      const dialogRef = this.editProcessingDialog.open(EditProcessingDialogComponent, {
-        data: {
-          fragmenting: this.fragmenting,
-          processing: this.processing
+      const dialogRef = this.editProcessingDialog.open(
+        EditProcessingDialogComponent,
+        {
+          data: {
+            fragmenting: this.fragmenting,
+            processing: this.processing
+          }
         }
-      });
+      );
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false) {
           const dialogResultTyped: EditProcessingDialogData = dialogResult;

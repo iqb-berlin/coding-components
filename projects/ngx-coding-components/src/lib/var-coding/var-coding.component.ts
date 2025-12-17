@@ -1,12 +1,23 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingToTextMode } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
-import { MatCard, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import {
+  MatCard,
+  MatCardSubtitle,
+  MatCardContent
+} from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -14,19 +25,38 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
+import {
+  MatButtonToggle,
+  MatButtonToggleGroup
+} from '@angular/material/button-toggle';
 import { MatDivider } from '@angular/material/divider';
 import { CodingFactory } from '@iqb/responses/coding-factory';
-import { VariableCodingData, CodeType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  VariableCodingData,
+  CodeType
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../dialogs/confirm-dialog.component';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData
+} from '../dialogs/confirm-dialog.component';
 import { SchemerService } from '../services/schemer.service';
-import { GenerateCodingDialogComponent, GeneratedCodingData } from './dialogs/generate-coding-dialog.component';
-import { ShowCodingData, ShowCodingDialogComponent } from '../dialogs/show-coding-dialog.component';
+import {
+  GenerateCodingDialogComponent,
+  GeneratedCodingData
+} from './dialogs/generate-coding-dialog.component';
+import {
+  ShowCodingData,
+  ShowCodingDialogComponent
+} from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { CodesTitleComponent } from './codes-title.component';
 
-import { MessageDialogComponent, MessageDialogData, MessageType } from '../dialogs/message-dialog.component';
+import {
+  MessageDialogComponent,
+  MessageDialogData,
+  MessageType
+} from '../dialogs/message-dialog.component';
 import { SingleCodeComponent } from './single-code.component';
 import { VariableAliasPipe } from '../pipes/variable-alias.pipe';
 import {
@@ -40,10 +70,28 @@ import {
   styleUrls: ['./var-coding.component.scss'],
   standalone: true,
   imports: [
-    MatFormField, MatLabel, MatInput, ReactiveFormsModule, FormsModule, MatMenuTrigger, MatIcon, MatIconButton, MatMenu,
-    MatMenuItem, MatTooltipModule, MatCard, MatCardSubtitle, MatCardContent,
-    TranslateModule, MatButtonToggleGroup, MatButtonToggle, MatDivider,
-    CodesTitleComponent, SingleCodeComponent, VariableAliasPipe, MatButton
+    MatFormField,
+    MatLabel,
+    MatInput,
+    ReactiveFormsModule,
+    FormsModule,
+    MatMenuTrigger,
+    MatIcon,
+    MatIconButton,
+    MatMenu,
+    MatMenuItem,
+    MatTooltipModule,
+    MatCard,
+    MatCardSubtitle,
+    MatCardContent,
+    TranslateModule,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    MatDivider,
+    CodesTitleComponent,
+    SingleCodeComponent,
+    VariableAliasPipe,
+    MatButton
   ]
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
@@ -77,18 +125,18 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     private generateCodingDialog: MatDialog,
     private messageDialog: MatDialog,
     private editSourceParametersDialog: MatDialog
-  ) { }
+  ) {}
 
   ngOnInit() {
-    this.lastChangeFromSubscription = this.lastChangeFrom$.pipe(
-      debounceTime(500)
-    ).subscribe(source => {
-      if (source !== 'init') {
-        this.updateHasResidualAutoCode();
-        this.updateHasIntendedIncompleteAutoCode();
-        this.varCodingChanged.emit(this.varCoding);
-      }
-    });
+    this.lastChangeFromSubscription = this.lastChangeFrom$
+      .pipe(debounceTime(500))
+      .subscribe(source => {
+        if (source !== 'init') {
+          this.updateHasResidualAutoCode();
+          this.updateHasIntendedIncompleteAutoCode();
+          this.varCodingChanged.emit(this.varCoding);
+        }
+      });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -97,16 +145,21 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   updateVarInfo() {
-    this.varInfo = this.varCoding ? this.schemerService.getVarInfoByCoding(this.varCoding) : undefined;
+    this.varInfo = this.varCoding ?
+      this.schemerService.getVarInfoByCoding(this.varCoding) :
+      undefined;
   }
 
   updateHasResidualAutoCode() {
-    this.hasResidualAutoCode = this.varCoding ? !!this.varCoding.codes.find(c => c.type === 'RESIDUAL_AUTO') : false;
+    this.hasResidualAutoCode = this.varCoding ?
+      !!this.varCoding.codes.find(c => c.type === 'RESIDUAL_AUTO') :
+      false;
   }
 
   updateHasIntendedIncompleteAutoCode() {
-    this.hasIntendedIncompleteAutoCode = this.varCoding ? !!this.varCoding.codes
-      .find(c => c.type === 'INTENDED_INCOMPLETE') : false;
+    this.hasIntendedIncompleteAutoCode = this.varCoding ?
+      !!this.varCoding.codes.find(c => c.type === 'INTENDED_INCOMPLETE') :
+      false;
   }
 
   getSanitizedText(text: string): SafeHtml {
@@ -118,7 +171,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       const dialogRef = this.editTextDialog.open(RichTextEditDialogComponent, {
         width: '1100px',
         data: {
-          title: this.translateService.instant('manual-instruction.coding.prompt-edit'),
+          title: this.translateService.instant(
+            'manual-instruction.coding.prompt-edit'
+          ),
           content: this.varCoding.manualInstruction || '',
           defaultFontSize: 20,
           editorHeightPx: 400
@@ -145,8 +200,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   codingAsText() {
     if (this.varCoding) {
-      const deriveSourcesAliases = this.varCoding.deriveSources
-        .map(ds => this.schemerService.getVariableAliasById(ds));
+      const deriveSourcesAliases = this.varCoding.deriveSources.map(ds => this.schemerService.getVariableAliasById(ds)
+      );
       const dialogRef = this.showCodingDialog.open(ShowCodingDialogComponent, {
         width: '1000px',
         data: <ShowCodingData>{
@@ -156,7 +211,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (typeof dialogResult === 'string') {
-          this.schemerService.codingToTextMode = dialogResult as CodingToTextMode;
+          this.schemerService.codingToTextMode =
+            dialogResult as CodingToTextMode;
         }
       });
     }
@@ -164,13 +220,19 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   deactivateBaseVar() {
     if (this.schemerService.codingScheme) {
-      if (this.schemerService.codingScheme.variableCodings
-        .filter(c => c.sourceType === 'BASE').length > 1) {
+      if (
+        this.schemerService.codingScheme.variableCodings.filter(
+          c => c.sourceType === 'BASE'
+        ).length > 1
+      ) {
         const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
           width: '400px',
           data: <ConfirmDialogData>{
-            title: `Deaktiviere Variable '${this.varCoding?.alias || this.varCoding?.id}'`,
-            content: 'Es werden die vorhandenen Kodierungen entfernt und die Basisvariable deaktiviert.',
+            title: `Deaktiviere Variable '${
+              this.varCoding?.alias || this.varCoding?.id
+            }'`,
+            content:
+              'Es werden die vorhandenen Kodierungen entfernt und die Basisvariable deaktiviert.',
             confirmButtonLabel: 'Deaktivieren',
             showCancel: true
           }
@@ -178,10 +240,16 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         dialogRef.afterClosed().subscribe(result => {
           if (result !== false && this.schemerService.codingScheme) {
             if (this.varCoding && this.varCoding.sourceType === 'BASE') {
-              this.schemerService.codingScheme.variableCodings = this.schemerService.codingScheme.variableCodings
-                .filter(c => c.id !== this.varCoding?.id);
-              this.varCoding = CodingFactory.createNoValueCodingVariable(this.varCoding.id);
-              this.schemerService.codingScheme.variableCodings.push(this.varCoding);
+              this.schemerService.codingScheme.variableCodings =
+                this.schemerService.codingScheme.variableCodings.filter(
+                  c => c.id !== this.varCoding?.id
+                );
+              this.varCoding = CodingFactory.createNoValueCodingVariable(
+                this.varCoding.id
+              );
+              this.schemerService.codingScheme.variableCodings.push(
+                this.varCoding
+              );
               this.varCodingChanged.emit(this.varCoding);
               this.varCoding = null;
             }
@@ -213,13 +281,20 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           this.varCodingChanged.emit(this.varCoding);
         }
       } else {
-        const dialogRef = this.generateCodingDialog.open(GenerateCodingDialogComponent, {
-          width: '1000px',
-          data: this.varInfo
-        });
+        const dialogRef = this.generateCodingDialog.open(
+          GenerateCodingDialogComponent,
+          {
+            width: '1000px',
+            data: this.varInfo
+          }
+        );
         dialogRef.afterClosed().subscribe(dialogResult => {
-          if (typeof dialogResult !== 'undefined' &&
-            dialogResult !== false && dialogResult !== null && this.varCoding) {
+          if (
+            typeof dialogResult !== 'undefined' &&
+            dialogResult !== false &&
+            dialogResult !== null &&
+            this.varCoding
+          ) {
             const newCoding = dialogResult as GeneratedCodingData;
 
             Object.assign(this.varCoding, {
@@ -240,7 +315,10 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   addCode(codeType: CodeType) {
     if (this.varCoding && this.varCoding.codes) {
-      const addResult = this.schemerService.addCode(this.varCoding.codes, codeType);
+      const addResult = this.schemerService.addCode(
+        this.varCoding.codes,
+        codeType
+      );
       if (typeof addResult === 'string') {
         this.messageDialog.open(MessageDialogComponent, {
           width: '400px',
@@ -258,24 +336,62 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  editSourceParameters() {
-    if (this.schemerService.userRole !== 'RO' && this.varCoding) {
-      const dialogRef = this.editSourceParametersDialog.open(EditSourceParametersDialog, {
-        width: '600px',
-        minHeight: '400px',
-        data: <EditSourceParametersDialogData>{
-          selfId: this.varCoding.id,
-          selfAlias: this.varCoding.alias || this.varCoding.id,
-          sourceType: this.varCoding.sourceType,
-          sourceParameters: this.varCoding.sourceParameters,
-          deriveSources: this.varCoding.deriveSources
+  canPasteSingleCode(): boolean {
+    if (!this.varCoding || !this.varCoding.codes) {
+      return false;
+    }
+    return this.schemerService.canPasteSingleCodeInto(this.varCoding.codes);
+  }
+
+  pasteSingleCode() {
+    if (!this.varCoding || !this.varCoding.codes) {
+      return;
+    }
+    const pasteResult = this.schemerService.pasteSingleCode(
+      this.varCoding.codes
+    );
+    if (typeof pasteResult === 'string') {
+      this.messageDialog.open(MessageDialogComponent, {
+        width: '400px',
+        data: <MessageDialogData>{
+          title: this.translateService.instant('code.prompt.add'),
+          content: this.translateService.instant(pasteResult),
+          type: MessageType.error
         }
       });
+    } else {
+      this.updateHasResidualAutoCode();
+      this.updateHasIntendedIncompleteAutoCode();
+      this.varCodingChanged.emit(this.varCoding);
+    }
+  }
+
+  editSourceParameters() {
+    if (this.schemerService.userRole !== 'RO' && this.varCoding) {
+      const dialogRef = this.editSourceParametersDialog.open(
+        EditSourceParametersDialog,
+        {
+          width: '600px',
+          minHeight: '400px',
+          data: <EditSourceParametersDialogData>{
+            selfId: this.varCoding.id,
+            selfAlias: this.varCoding.alias || this.varCoding.id,
+            sourceType: this.varCoding.sourceType,
+            sourceParameters: this.varCoding.sourceParameters,
+            deriveSources: this.varCoding.deriveSources
+          }
+        }
+      );
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult !== 'undefined' && dialogResult !== false && this.varCoding) {
+        if (
+          typeof dialogResult !== 'undefined' &&
+          dialogResult !== false &&
+          this.varCoding
+        ) {
           const {
             selfAlias, sourceType, sourceParameters, deriveSources
-          } = dialogResult as EditSourceParametersDialogData;
+          } =
+            dialogResult as EditSourceParametersDialogData;
 
           Object.assign(this.varCoding, {
             alias: selfAlias,
