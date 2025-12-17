@@ -1,9 +1,18 @@
 import { Component, Inject } from '@angular/core';
 import {
-  CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag
+  CdkDragDrop,
+  moveItemInArray,
+  transferArrayItem,
+  CdkDropList,
+  CdkDrag
 } from '@angular/cdk/drag-drop';
 import {
-  MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogContent,
+  MatDialogActions,
+  MatDialogClose
 } from '@angular/material/dialog';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -20,59 +29,94 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
 import {
-  CodeData, CodeModelType, CodingRule, ProcessingParameterType, RuleSet, VariableCodingData
+  CodeData,
+  CodeModelType,
+  CodingRule,
+  ProcessingParameterType,
+  RuleSet,
+  VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { ToTextFactory } from '@iqb/responses';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from '../../services/schemer.service';
 
 export interface GeneratedCodingData {
-  id: string,
-  alias: string,
-  processing: ProcessingParameterType[],
-  fragmenting: string,
-  codeModel: CodeModelType,
-  codes: CodeData[]
+  id: string;
+  alias: string;
+  processing: ProcessingParameterType[];
+  fragmenting: string;
+  codeModel: CodeModelType;
+  codes: CodeData[];
 }
 
 interface OptionData {
-  value: string,
-  oldIndex: number,
-  label?: string
+  value: string;
+  oldIndex: number;
+  label?: string;
 }
 
 @Component({
   templateUrl: 'generate-coding-dialog.component.html',
   styles: [
-    `.chip-list-column{
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
+    `
+      .chip-list-column {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
       .coding-action {
-      background: #cccccc;
-      color: black;
-      padding: 4px 10px;
-    }
-    .dragOptionBox {
-      border: darkgray 1px solid;
-    }`
+        background: #cccccc;
+        color: black;
+        padding: 4px 10px;
+      }
+      .dragOptionBox {
+        border: darkgray 1px solid;
+      }
+    `
   ],
   standalone: true,
-  imports: [MatDialogTitle, MatDialogContent, MatLabel, MatCheckbox, ReactiveFormsModule, FormsModule,
-    MatSelectionList, MatListOption, CdkDropList, MatChip, CdkDrag, MatIcon, MatChipRemove,
-    MatFormField, MatSelect, MatOption, MatInput, CdkTextareaAutosize, MatRadioGroup, MatRadioButton,
-    MatDialogActions, MatButton, MatDialogClose, TranslateModule]
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatLabel,
+    MatCheckbox,
+    ReactiveFormsModule,
+    FormsModule,
+    MatSelectionList,
+    MatListOption,
+    CdkDropList,
+    MatChip,
+    CdkDrag,
+    MatIcon,
+    MatChipRemove,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatInput,
+    CdkTextareaAutosize,
+    MatRadioGroup,
+    MatRadioButton,
+    MatDialogActions,
+    MatButton,
+    MatDialogClose,
+    TranslateModule
+  ]
 })
-
 export class GenerateCodingDialogComponent {
-  generationModel: 'none' | 'single-choice-some' | 'single-choice-many' | 'multi-choice' |
-  'integer' | 'simple-input';
+  generationModel:
+  | 'none'
+  | 'single-choice-some'
+  | 'single-choice-many'
+  | 'multi-choice'
+  | 'integer'
+  | 'simple-input'
+  | 'boolean-multi';
 
   protected readonly ToTextFactory = ToTextFactory;
   selectedOption: string = '';
   selectedOptions: string[] = [];
   positionLabels: string[] = [];
+  booleanMultiSelections: boolean[] = [];
   multiChoiceOrderMatters = false;
   singleChoiceLongVersion = false;
   _options: OptionData[] = [];
@@ -107,7 +151,9 @@ export class GenerateCodingDialogComponent {
         this.positionLabels = varInfo.valuePositionLabels;
       } else {
         this.generationModel =
-          varInfo.values.length > 20 ? 'single-choice-many' : 'single-choice-some';
+          varInfo.values.length > 20 ?
+            'single-choice-many' :
+            'single-choice-some';
       }
 
       this._options = varInfo.values.map((v, i) => ({
@@ -116,6 +162,16 @@ export class GenerateCodingDialogComponent {
         label: v.label
       }));
       this.resetOptions();
+      return;
+    }
+
+    if (varInfo.multiple && varInfo.type === 'boolean') {
+      this.elseMethod = 'auto';
+      this.generationModel = 'boolean-multi';
+      this.positionLabels = varInfo.valuePositionLabels;
+      this.booleanMultiSelections = (this.positionLabels || []).map(
+        () => false
+      );
       return;
     }
 
@@ -141,14 +197,18 @@ export class GenerateCodingDialogComponent {
 
     const truncate = (text: string | undefined): string | undefined => {
       if (!text) return text;
-      return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+      return text.length > maxLength ?
+        `${text.slice(0, maxLength - 1)}…` :
+        text;
     };
 
-    this.options = this._options.map(o => ({
-      value: truncate(o.value),
-      oldIndex: o.oldIndex,
-      label: truncate(o.label)
-    } as OptionData));
+    this.options = this._options.map(
+      o => ({
+        value: truncate(o.value),
+        oldIndex: o.oldIndex,
+        label: truncate(o.label)
+      } as OptionData)
+    );
 
     this.selectedOptions = [];
     this.selectedDragOptions = [];
@@ -158,43 +218,69 @@ export class GenerateCodingDialogComponent {
     this.numericRuleError = false;
     const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
     if (matchValue) {
-      this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_MATCH')}: ${matchValue}`;
+      this.numericRuleText = `${this.translateService.instant(
+        'rule.NUMERIC_MATCH'
+      )}: ${matchValue}`;
     } else {
-      const moreThenValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+      const moreThenValue = CodingFactory.getValueAsNumber(
+        this.numericMoreThen
+      );
       const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
       const minValue = CodingFactory.getValueAsNumber(this.numericMin);
-      const lessThenValue = CodingFactory.getValueAsNumber(this.numericLessThen);
+      const lessThenValue = CodingFactory.getValueAsNumber(
+        this.numericLessThen
+      );
       this.numericRuleText = '';
       if (moreThenValue && minValue) {
-        this.numericRuleText = this.translateService.instant('coding.generate.only-one-lower-limit');
+        this.numericRuleText = this.translateService.instant(
+          'coding.generate.only-one-lower-limit'
+        );
         this.numericRuleError = true;
       }
       if (lessThenValue && maxValue) {
-        this.numericRuleText += ` ${this.translateService.instant('coding.generate.only-one-upper-limit')}`;
+        this.numericRuleText += ` ${this.translateService.instant(
+          'coding.generate.only-one-upper-limit'
+        )}`;
         this.numericRuleError = true;
       }
       if (!this.numericRuleText) {
         const ruleTexts: string[] = [];
-        const hasFullRange = moreThenValue && maxValue && moreThenValue < maxValue;
+        const hasFullRange =
+          moreThenValue && maxValue && moreThenValue < maxValue;
         if (hasFullRange) {
-          this.numericRuleText = `${this.translateService.instant('rule.NUMERIC_FULL_RANGE')} ${moreThenValue} / ${maxValue}`;
+          this.numericRuleText = `${this.translateService.instant(
+            'rule.NUMERIC_FULL_RANGE'
+          )} ${moreThenValue} / ${maxValue}`;
         } else {
           if (moreThenValue) {
-            ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MORE_THAN')} ${moreThenValue}`);
+            ruleTexts.push(
+              `${this.translateService.instant(
+                'rule.NUMERIC_MORE_THAN'
+              )} ${moreThenValue}`
+            );
           }
           if (minValue) {
-            ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MIN')} ${minValue}`);
+            ruleTexts.push(
+              `${this.translateService.instant('rule.NUMERIC_MIN')} ${minValue}`
+            );
           }
           if (lessThenValue) {
-            ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_LESS_THAN')} ${lessThenValue}`);
+            ruleTexts.push(
+              `${this.translateService.instant(
+                'rule.NUMERIC_LESS_THAN'
+              )} ${lessThenValue}`
+            );
           }
           if (maxValue) {
-            ruleTexts.push(`${this.translateService.instant('rule.NUMERIC_MAX')} ${maxValue}`);
+            ruleTexts.push(
+              `${this.translateService.instant('rule.NUMERIC_MAX')} ${maxValue}`
+            );
           }
 
-          this.numericRuleText = ruleTexts.length > 0 ?
-            ruleTexts.join('; ') :
-            this.translateService.instant('coding.generate.empty-value');
+          this.numericRuleText =
+            ruleTexts.length > 0 ?
+              ruleTexts.join('; ') :
+              this.translateService.instant('coding.generate.empty-value');
           this.numericRuleError = ruleTexts.length === 0;
         }
       }
@@ -212,11 +298,9 @@ export class GenerateCodingDialogComponent {
       previousContainer, container, previousIndex, currentIndex
     } = event;
 
-    // Check if the item was dropped within the same container
     if (previousContainer === container) {
       moveItemInArray(container.data, previousIndex, currentIndex);
     } else {
-      // Item was moved to a different container
       transferArrayItem(
         previousContainer.data,
         container.data,
@@ -227,22 +311,21 @@ export class GenerateCodingDialogComponent {
   }
 
   returnOption(optionToReturn: OptionData): void {
-    const removeIndex = this.selectedDragOptions.findIndex(o => o.value === optionToReturn.value);
-
-    // Remove the option from the selectedDragOptions list if it exists
+    const removeIndex = this.selectedDragOptions.findIndex(
+      o => o.value === optionToReturn.value
+    );
     if (removeIndex === -1) {
       return;
     }
     this.selectedDragOptions.splice(removeIndex, 1);
+    const insertIndex = this.options.findIndex(
+      o => o.oldIndex > optionToReturn.oldIndex
+    );
 
-    // Determine the correct insertion index in the options list
-    const insertIndex = this.options.findIndex(o => o.oldIndex > optionToReturn.oldIndex);
-
-    // Add the option to the correct position or append it if no suitable position is found
     if (insertIndex === -1) {
-      this.options.push(optionToReturn); // Append to the end of the options list
+      this.options.push(optionToReturn);
     } else {
-      this.options.splice(insertIndex, 0, optionToReturn); // Insert at the correct position
+      this.options.splice(insertIndex, 0, optionToReturn);
     }
   }
 
@@ -268,13 +351,21 @@ export class GenerateCodingDialogComponent {
       };
       if (['auto', 'instruction'].includes(this.elseMethod)) {
         const newResidualCode = this.schemerService.addCode(
-          newVardata.codes, this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO');
-        if (typeof newResidualCode !== 'string' && this.singleChoiceLongVersion) {
+          newVardata.codes,
+          this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO'
+        );
+        if (
+          typeof newResidualCode !== 'string' &&
+          this.singleChoiceLongVersion
+        ) {
           // todo: seems to fail - why?
           newResidualCode.id = 'INVALID';
         }
       }
-      if (this.generationModel === 'integer' || (this.textAsNumeric && this.generationModel === 'simple-input')) {
+      if (
+        this.generationModel === 'integer' ||
+        (this.textAsNumeric && this.generationModel === 'simple-input')
+      ) {
         const numericRules: CodingRule[] = [];
         const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
         if (matchValue !== null) {
@@ -283,12 +374,17 @@ export class GenerateCodingDialogComponent {
             parameters: [matchValue.toString(10)]
           });
         } else {
-          const moreThanValue = CodingFactory.getValueAsNumber(this.numericMoreThen);
+          const moreThanValue = CodingFactory.getValueAsNumber(
+            this.numericMoreThen
+          );
           const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
           const minValue = CodingFactory.getValueAsNumber(this.numericMin);
-          const lessThanValue = CodingFactory.getValueAsNumber(this.numericLessThen);
+          const lessThanValue = CodingFactory.getValueAsNumber(
+            this.numericLessThen
+          );
 
-          const hasRangeOverlap = moreThanValue && maxValue && moreThanValue < maxValue;
+          const hasRangeOverlap =
+            moreThanValue && maxValue && moreThanValue < maxValue;
 
           if (hasRangeOverlap) {
             numericRules.push({
@@ -325,67 +421,103 @@ export class GenerateCodingDialogComponent {
             }
           }
         }
-        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        const newCode = this.schemerService.addCode(
+          newVardata.codes,
+          'FULL_CREDIT'
+        );
         if (typeof newCode !== 'string') {
           newCode.ruleSetOperatorAnd = true;
-          newCode.ruleSets = [<RuleSet>{
-            ruleOperatorAnd: false,
-            rules: numericRules
-          }];
+          newCode.ruleSets = [
+            <RuleSet>{
+              ruleOperatorAnd: false,
+              rules: numericRules
+            }
+          ];
           this.dialogRef.close(newVardata);
         } else {
           this.dialogRef.close(null);
         }
       } else if (this.generationModel === 'simple-input') {
-        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        const newCode = this.schemerService.addCode(
+          newVardata.codes,
+          'FULL_CREDIT'
+        );
         if (typeof newCode !== 'string') {
           newCode.ruleSetOperatorAnd = true;
-          newCode.ruleSets = [<RuleSet>{
-            ruleOperatorAnd: false,
-            rules: [
-              {
-                method: 'MATCH',
-                parameters: [this.selectedOption || '']
-              }
-            ]
-          }];
+          newCode.ruleSets = [
+            <RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [
+                {
+                  method: 'MATCH',
+                  parameters: [this.selectedOption || '']
+                }
+              ]
+            }
+          ];
           this.dialogRef.close(newVardata);
         }
-      } else if (this.generationModel === 'single-choice-some' && this.singleChoiceLongVersion) {
+      } else if (
+        this.generationModel === 'single-choice-some' &&
+        this.singleChoiceLongVersion
+      ) {
         // eslint-disable-next-line eqeqeq
-        this.options.filter(o => this.selectedOptions[0] && o.value == this.selectedOptions[0])
+        this.options
+          .filter(
+            o => this.selectedOptions[0] && o.value == this.selectedOptions[0]
+          )
           .forEach(o => {
-            const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+            const newCode = this.schemerService.addCode(
+              newVardata.codes,
+              'FULL_CREDIT'
+            );
             if (typeof newCode !== 'string') {
               newCode.ruleSetOperatorAnd = true;
-              newCode.ruleSets = [<RuleSet>{
-                ruleOperatorAnd: false,
-                rules: [<CodingRule>{
-                  method: 'MATCH',
-                  parameters: [o.value || '']
-                }]
-              }];
+              newCode.ruleSets = [
+                <RuleSet>{
+                  ruleOperatorAnd: false,
+                  rules: [
+                    <CodingRule>{
+                      method: 'MATCH',
+                      parameters: [o.value || '']
+                    }
+                  ]
+                }
+              ];
             }
           });
         // eslint-disable-next-line eqeqeq
-        this.options.filter(o => !(this.selectedOptions[0] && o.value == this.selectedOptions[0]))
+        this.options
+          .filter(
+            o => !(this.selectedOptions[0] && o.value == this.selectedOptions[0])
+          )
           .forEach(o => {
-            const newCode = this.schemerService.addCode(newVardata.codes, 'NO_CREDIT');
+            const newCode = this.schemerService.addCode(
+              newVardata.codes,
+              'NO_CREDIT'
+            );
             if (typeof newCode !== 'string') {
               newCode.ruleSetOperatorAnd = true;
-              newCode.ruleSets = [<RuleSet>{
-                ruleOperatorAnd: false,
-                rules: [<CodingRule>{
-                  method: 'MATCH',
-                  parameters: [o.value || '']
-                }]
-              }];
+              newCode.ruleSets = [
+                <RuleSet>{
+                  ruleOperatorAnd: false,
+                  rules: [
+                    <CodingRule>{
+                      method: 'MATCH',
+                      parameters: [o.value || '']
+                    }
+                  ]
+                }
+              ];
             }
           });
         // newVardata.codeModel = 'RULES_ONLY';
         this.schemerService.sortCodes(newVardata.codes, true);
         this.dialogRef.close(newVardata);
-      } else if (this.generationModel === 'multi-choice' && this.multiChoiceOrderMatters) {
+      } else if (
+        this.generationModel === 'multi-choice' &&
+        this.multiChoiceOrderMatters
+      ) {
         const fullCreditRuleSets: RuleSet[] = [];
         this.selectedDragOptions.forEach((o, i) => {
           fullCreditRuleSets.push({
@@ -399,7 +531,10 @@ export class GenerateCodingDialogComponent {
             ]
           });
         });
-        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        const newCode = this.schemerService.addCode(
+          newVardata.codes,
+          'FULL_CREDIT'
+        );
         if (typeof newCode !== 'string') {
           newCode.ruleSetOperatorAnd = true;
           newCode.ruleSets = fullCreditRuleSets;
@@ -407,7 +542,37 @@ export class GenerateCodingDialogComponent {
         } else {
           this.dialogRef.close(null);
         }
-      } else if (['multi-choice', 'single-choice-many', 'single-choice-some'].includes(this.generationModel)) {
+      } else if (this.generationModel === 'boolean-multi') {
+        const fullCreditRuleSets: RuleSet[] = [];
+        (this.booleanMultiSelections || []).forEach((isSelected, i) => {
+          fullCreditRuleSets.push({
+            ruleOperatorAnd: false,
+            valueArrayPos: i,
+            rules: [
+              {
+                method: isSelected ? 'IS_TRUE' : 'IS_FALSE',
+                parameters: []
+              }
+            ]
+          });
+        });
+
+        const newCode = this.schemerService.addCode(
+          newVardata.codes,
+          'FULL_CREDIT'
+        );
+        if (typeof newCode !== 'string') {
+          newCode.ruleSetOperatorAnd = true;
+          newCode.ruleSets = fullCreditRuleSets;
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else if (
+        ['multi-choice', 'single-choice-many', 'single-choice-some'].includes(
+          this.generationModel
+        )
+      ) {
         const fullCreditRules: CodingRule[] = [];
         if (this.generationModel === 'single-choice-many') {
           fullCreditRules.push({
@@ -418,7 +583,7 @@ export class GenerateCodingDialogComponent {
           if (this.varInfo.type === 'boolean') {
             this.selectedOptions.forEach(s => {
               fullCreditRules.push({
-                method: (s === 'true') ? 'IS_TRUE' : 'IS_FALSE',
+                method: s === 'true' ? 'IS_TRUE' : 'IS_FALSE',
                 parameters: []
               });
             });
@@ -441,13 +606,18 @@ export class GenerateCodingDialogComponent {
             parameters: ['']
           });
         }
-        const newCode = this.schemerService.addCode(newVardata.codes, 'FULL_CREDIT');
+        const newCode = this.schemerService.addCode(
+          newVardata.codes,
+          'FULL_CREDIT'
+        );
         if (typeof newCode !== 'string') {
           newCode.ruleSetOperatorAnd = true;
-          newCode.ruleSets = [<RuleSet>{
-            ruleOperatorAnd: false,
-            rules: fullCreditRules
-          }];
+          newCode.ruleSets = [
+            <RuleSet>{
+              ruleOperatorAnd: false,
+              rules: fullCreditRules
+            }
+          ];
           this.dialogRef.close(newVardata);
         } else {
           this.dialogRef.close(null);

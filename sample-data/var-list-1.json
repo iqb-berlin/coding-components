@@ -1,4 +1,16 @@
 [
+ {
+  "id": "testVarId",
+  "alias": "hotspot-image_1",
+  "type": "boolean",
+  "format": "",
+  "multiple": "true",
+  "nullable": "false",
+  "values": [],
+  "valuePositionLabels": ["Rectangle(0)", "Rectangle(1)"],
+  "page": "",
+  "valuesComplete": true
+},
   {
     "id": "Otto",
     "alias": "Ottfried",
