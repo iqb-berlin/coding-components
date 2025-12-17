@@ -1,9 +1,18 @@
 import { Injectable } from '@angular/core';
 import { CodingToTextMode } from '@iqb/responses';
 import {
-  CodeData, CodeType, CodingScheme, DeriveConcatDelimiter, RuleMethodParameterCount, VariableCodingData, RuleSet
+  CodeData,
+  CodeType,
+  CodingScheme,
+  DeriveConcatDelimiter,
+  RuleMethodParameterCount,
+  VariableCodingData,
+  RuleSet
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { VariableInfo, VariableValue } from '@iqbspecs/variable-info/variable-info.interface';
+import {
+  VariableInfo,
+  VariableValue
+} from '@iqbspecs/variable-info/variable-info.interface';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
@@ -44,8 +53,9 @@ export class SchemerService {
         let totalCodesCount = 0;
         varCoding.deriveSources.forEach(s => {
           if (this.codingScheme) {
-            const coding = this.codingScheme.variableCodings
-              .find(v => v.id === s);
+            const coding = this.codingScheme.variableCodings.find(
+              v => v.id === s
+            );
             codes.push(coding ? coding.codes.map(c => c.id) : []);
             totalCodesCount += coding ? coding.codes.length : 0;
           }
@@ -54,10 +64,12 @@ export class SchemerService {
         if (totalCodesCount < 10) {
           codes.forEach(c => {
             if (resultArray.length > 0) {
-              resultArray = resultArray
-                .flatMap(oldEntry => c.filter(cEntry => cEntry !== null)
-                  .map(cEntry => `${oldEntry}${DeriveConcatDelimiter}${cEntry}`)
-                );
+              resultArray = resultArray.flatMap(oldEntry => c
+                .filter(cEntry => cEntry !== null)
+                .map(
+                  cEntry => `${oldEntry}${DeriveConcatDelimiter}${cEntry}`
+                )
+              );
             } else {
               resultArray = c
                 .filter(cEntry => cEntry !== null)
@@ -72,9 +84,12 @@ export class SchemerService {
           format: '',
           multiple: false,
           nullable: false,
-          values: resultArray.map(r => <VariableValue>{
-            value: r, label: ''
-          }),
+          values: resultArray.map(
+            r => <VariableValue>{
+              value: r,
+              label: ''
+            }
+          ),
           valuePositionLabels: [],
           valuesComplete: true,
           page: ''
@@ -104,7 +119,8 @@ export class SchemerService {
 
     const normalisedAlias = checkAlias.toUpperCase();
     const hasDuplicate = this.codingScheme.variableCodings.some(
-      variable => variable.alias?.toUpperCase() === normalisedAlias && variable.id !== checkId
+      variable => variable.alias?.toUpperCase() === normalisedAlias &&
+        variable.id !== checkId
     );
 
     return !hasDuplicate;
@@ -112,12 +128,19 @@ export class SchemerService {
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
     if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
-      const maxCode = codeList.length > 0 ? Math.max(...codeList
-        .filter(c => typeof c.id === 'number').map(c => Number(c.id) || 0)) : 0;
-      const hasNullCode = codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
+      const maxCode =
+        codeList.length > 0 ?
+          Math.max(
+            ...codeList
+              .filter(c => typeof c.id === 'number')
+              .map(c => Number(c.id) || 0)
+          ) :
+          0;
+      const hasNullCode =
+        codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
-        const firstResidualOrIntendedIncomplete = codeList
-          .find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type));
+        const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+        );
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
           id: hasNullCode ? maxCode + 1 : 0,
@@ -126,15 +149,17 @@ export class SchemerService {
           score: 0,
           ruleSetOperatorAnd: true,
           ruleSets: [],
-          manualInstruction: codeType === 'RESIDUAL_AUTO' ? '' :
-            '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
+          manualInstruction:
+            codeType === 'RESIDUAL_AUTO' ?
+              '' :
+              '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
         };
         codeList.push(newCode);
         return newCode;
       }
       if (codeType === 'INTENDED_INCOMPLETE') {
-        const firstResidualOrIntendedIncomplete = codeList
-          .find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type));
+        const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+        );
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
           id: 0,
@@ -149,11 +174,21 @@ export class SchemerService {
         return newCode;
       }
 
-      if (['FULL_CREDIT', 'PARTIAL_CREDIT', 'NO_CREDIT', 'UNSET', 'TO_CHECK'].includes(codeType)) {
+      if (
+        [
+          'FULL_CREDIT',
+          'PARTIAL_CREDIT',
+          'NO_CREDIT',
+          'UNSET',
+          'TO_CHECK'
+        ].includes(codeType)
+      ) {
         let newCodeId = -1;
-        codeList.filter(c => typeof c.id === 'number').forEach(c => {
-          if (c.type === codeType && c.id && Number(c.id) > newCodeId) newCodeId = Number(c.id);
-        });
+        codeList
+          .filter(c => typeof c.id === 'number')
+          .forEach(c => {
+            if (c.type === codeType && c.id && Number(c.id) > newCodeId) newCodeId = Number(c.id);
+          });
         if (newCodeId < 0) {
           newCodeId = this.orderOfCodeTypes.indexOf(codeType) + 1;
           const alreadyUsed = codeList.find(c => c.id === newCodeId);
@@ -168,21 +203,26 @@ export class SchemerService {
           label: '',
           score: codeType === 'FULL_CREDIT' ? 1 : 0,
           ruleSetOperatorAnd: true,
-          ruleSets: [<RuleSet>{
-            ruleOperatorAnd: false,
-            rules: [
-              {
-                method: 'MATCH',
-                parameters: [
-                  ''
-                ]
-              }
-            ]
-          }],
+          ruleSets: [
+            <RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [
+                {
+                  method: 'MATCH',
+                  parameters: ['']
+                }
+              ]
+            }
+          ],
           manualInstruction: ''
         };
-        const firstFollowerCode = codeList.length > 0 ? codeList.findIndex(
-          c => this.orderOfCodeTypes.indexOf(c.type) > this.orderOfCodeTypes.indexOf(codeType)) : -1;
+        const firstFollowerCode =
+          codeList.length > 0 ?
+            codeList.findIndex(
+              c => this.orderOfCodeTypes.indexOf(c.type) >
+                  this.orderOfCodeTypes.indexOf(codeType)
+            ) :
+            -1;
         if (firstFollowerCode < 0) {
           codeList.push(newCode);
         } else {
@@ -205,6 +245,35 @@ export class SchemerService {
     return false;
   }
 
+  duplicateCode(codeList: CodeData[], codeIndex: number): CodeData | string {
+    if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return 'code.error-message.no-access';
+    if (codeIndex < 0 || codeIndex >= codeList.length) return 'code.error-message.invalid-index';
+
+    const sourceCode = codeList[codeIndex];
+    if (
+      ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
+        sourceCode.type
+      )
+    ) {
+      return 'code.error-message.type-not-supported';
+    }
+
+    const maxCode =
+      codeList.length > 0 ?
+        Math.max(
+          ...codeList
+            .filter(c => typeof c.id === 'number')
+            .map(c => Number(c.id) || 0)
+        ) :
+        0;
+
+    const duplicated: CodeData = JSON.parse(JSON.stringify(sourceCode));
+    duplicated.id = maxCode + 1;
+
+    codeList.splice(codeIndex + 1, 0, duplicated);
+    return duplicated;
+  }
+
   sortCodes(codeList: CodeData[], normaliseCodeIds = false) {
     if (codeList.length > 1) {
       if (normaliseCodeIds) {
@@ -212,7 +281,8 @@ export class SchemerService {
           const allCodesOfType = codeList.filter(code => code.type === type);
 
           if (allCodesOfType.length > 1) {
-            const startValueBase = (typeIndex + 1) * (allCodesOfType.length > 9 ? 100 : 10);
+            const startValueBase =
+              (typeIndex + 1) * (allCodesOfType.length > 9 ? 100 : 10);
             const startValue = startValueBase + 1;
 
             allCodesOfType.forEach((code: CodeData, index: number) => {
@@ -224,11 +294,14 @@ export class SchemerService {
         });
 
         this.orderOfCodeTypes.forEach(t => {
-          if (!(['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(t))) {
+          if (
+            !['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(t)
+          ) {
             const allCodesOfType = codeList.filter(c => c.type === t);
             if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
           } else {
-            const allResidualCodes = codeList.filter(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type));
+            const allResidualCodes = codeList.filter(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type)
+            );
             if (allResidualCodes.length === 1) allResidualCodes[0].id = 0;
           }
         });
@@ -250,23 +323,30 @@ export class SchemerService {
 
   getVariableAliasById(varId: string): string {
     if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '?';
-    const findVar = this.codingScheme.variableCodings
-      .find(v => v.id === varId);
+    const findVar = this.codingScheme.variableCodings.find(
+      v => v.id === varId
+    );
     if (findVar) return findVar.alias || findVar.id;
     return '?';
   }
 
   getVariableAliasByIdListString(varIds: string[], maxEntries: number): string {
     if (!this.codingScheme || !this.codingScheme.variableCodings) return '';
-    const varIdsToTake = maxEntries > 0 && maxEntries <= varIds.length ? varIds.slice(0, maxEntries) : varIds;
-    const returnValues: string[] = varIdsToTake.map(vId => this.getVariableAliasById(vId));
+    const varIdsToTake =
+      maxEntries > 0 && maxEntries <= varIds.length ?
+        varIds.slice(0, maxEntries) :
+        varIds;
+    const returnValues: string[] = varIdsToTake.map(vId => this.getVariableAliasById(vId)
+    );
     if (maxEntries > 0 && maxEntries < varIds.length) returnValues.push('...');
     return returnValues.join(', ');
   }
 
   getBaseVarsList() {
     if (this.codingScheme) {
-      return this.codingScheme.variableCodings.filter(c => c.sourceType === 'BASE');
+      return this.codingScheme.variableCodings.filter(
+        c => c.sourceType === 'BASE'
+      );
     }
     return [];
   }

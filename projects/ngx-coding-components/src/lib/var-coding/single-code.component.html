@@ -1,158 +1,234 @@
 <div class="fx-row-start-stretch code fx-gap-10">
   @if (code && allCodes) {
-    <button mat-icon-button [matMenuTriggerFor]="selectCodeType"
-            [matTooltip]="'code.prompt.add-' + code.type | translate" [matTooltipShowDelay]="500"
-            [disabled]="schemerService.userRole === 'RO'">
-      @if (code.type === 'FULL_CREDIT') {
-        <mat-icon style="color: limegreen">done_all</mat-icon>
-      } @else if (code.type === 'PARTIAL_CREDIT') {
-        <mat-icon style="color: green">check</mat-icon>
-      } @else if (code.type === 'TO_CHECK') {
-        <mat-icon style="color: blue"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/></svg></mat-icon>
-      } @else if (code.type === 'NO_CREDIT') {
-        <mat-icon style="color: gold">remove_done</mat-icon>
-      } @else if (code.type === 'UNSET') {
-        <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
-      } @else if (code.type === 'INTENDED_INCOMPLETE'  ) {
-          <mat-icon style="color: darkgrey">disabled_by_default</mat-icon>
-      } @else if (code.type === 'RESIDUAL') {
-        <mat-icon>close</mat-icon>
-      } @else if (code.type === 'RESIDUAL_AUTO') {
-        <mat-icon style="color: orangered">close</mat-icon>
-      }
-    </button>
-    <mat-menu #selectCodeType>
-      @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
-        <button mat-menu-item
-                [disabled]="(allCodes.length > 1) && (codeType === 'RESIDUAL_AUTO' ||  codeType === 'INTENDED_INCOMPLETE' || codeType === 'RESIDUAL') && (hasResidualAutoCode || hasIntendedIncompleteAutoCode)"
-                (click)="code.type = codeType; setCodeChanged()"
-        >
-          @if (codeType === 'FULL_CREDIT') {
-            <mat-icon style="color: limegreen">done_all</mat-icon>
-          } @else if (codeType === 'PARTIAL_CREDIT') {
-            <mat-icon style="color: green">check</mat-icon>
-          } @else if (codeType === 'NO_CREDIT') {
-            <mat-icon style="color: gold">remove_done</mat-icon>
-          } @else if (codeType === 'UNSET') {
-            <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
-          } @else if (codeType === 'TO_CHECK') {
-            <mat-icon style="color: blue"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/></svg></mat-icon>
-          } @else if (codeType === 'INTENDED_INCOMPLETE' ) {
-              <mat-icon style="color: lightgrey">disabled_by_default</mat-icon>
-          } @else if (codeType === 'RESIDUAL') {
-            <mat-icon>close</mat-icon>
-          } @else if (codeType === 'RESIDUAL_AUTO') {
-            <mat-icon style="color: orangered">close</mat-icon>
-          } @else {
-            <div>{{'code type ' + codeType + ' unknown'}}</div>
-          }
-          {{'code.prompt.add-' + codeType | translate}}
-        </button>
-        @if (codeType === 'UNSET') {
-          <mat-divider></mat-divider>
-        }
-      }
-    </mat-menu>
-    <div class="fx-column-start-stretch " [style.width.%]="codeModel === 'NONE' ? 60 : 100">
-      <div class="code-main-data fx-row-start-center fx-gap-5">
-        @if (code.id === 'INVALID') {
-          <div [class]="code.type === 'RESIDUAL_AUTO' ? 'type-residual-auto fx-flex-fill' : 'fx-flex-fill type-no-residual-auto'">
-            {{'code.type-label.' + code.type | translate}}; {{'code.is-invalid' | translate}}
-          </div>
-          <button mat-icon-button [style.width.px]="50"
-                  (click)="setCodeValid()"
-                  [matTooltip]="'code.make-not-invalid' | translate">
-            <mat-icon>do_not_disturb_off</mat-icon></button>
-        }
-        @if (code.id === 'INTENDED_INCOMPLETE') {
-          <div [class]="'type-intended-incomplete fx-flex-fill'">
-            {{'code.type-label.' + code.type | translate}}
-          </div>
-        }
-        @if (code.id !== 'INVALID' && code.id !== 'INTENDED_INCOMPLETE') {
-          <mat-form-field [class]="codeIdIsUnique(code.id, codeIndex) ? 'unique-id' : 'not-unique-id'" [style.width.px]="80">
-            <mat-label>{{'code.id' | translate}}</mat-label>
-            <input matInput
-                   required
-                   [(ngModel)]="code.id"
-                   (ngModelChange)="setCodeChanged()"
-                   type="number">
-          </mat-form-field>
-          @if (code.type === 'UNSET') {
-            <mat-form-field class="fx-flex-fill">
-              <mat-label>{{'code.description' | translate}}</mat-label>
-              <input matInput
-                     [placeholder]="'code.description' | translate"
-                     [(ngModel)]="code.label"
-                     (ngModelChange)="setCodeChanged()">
-            </mat-form-field>
-          } @else {
-            <div [class]="code.type === 'RESIDUAL_AUTO' ? 'type-residual-auto fx-flex-fill' : 'fx-flex-fill'"
-                 style="align-content: center">
-              {{'code.type-label.' + code.type | translate}}
-            </div>
-          }
-          @if (!(['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
-            <mat-form-field
-              [class]="code.score > 0 ? 'correct' : 'not-correct'"
-              [style.width.px]="100">
-              <mat-label>{{'code.score' | translate}}</mat-label>
-              <input matInput
-                     type="number"
-                     required
-                     [disabled]="code.type === 'NO_CREDIT'"
-                     [(ngModel)]="code.score"
-                     (ngModelChange)="setCodeChanged()">
-            </mat-form-field>
-          }
-          @if (['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type) && (code.id !== null)) {
-            <button mat-icon-button [style.width.px]="50"
-                    (click)="setCodeInvalid()"
-                    [matTooltip]="'code.make-invalid' | translate">
-              <mat-icon>do_not_disturb_on</mat-icon>
-            </button>
-          }
-        }
-      </div>
-      @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL', 'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
-        <code-rules
-          [style.padding-left.px]="4"
-          [style.height]="'calc(100% - 60px)'"
-          [code]="code"
-          [fragmentMode]="fragmentMode"
-          [varInfo]="varInfo"
-          (codeRulesChanged)="setCodeChanged()">
-        </code-rules>
-      } @else if (codeModel === 'MANUAL_ONLY' && (code.type !== 'RESIDUAL_AUTO' && code.type !== 'INTENDED_INCOMPLETE')) {
-        <code-instruction
-          [code]="code" (codeDataChanged)="setCodeChanged()"
-          [userRole]="schemerService.userRole"
-          [hasResidualAutoCode]="hasResidualAutoCode"
-          [hasIntendedIncompleteCode] ="hasIntendedIncompleteAutoCode">
-        </code-instruction>
-      }
-    </div>
-    @if (codeModel === 'NONE') {
-      @if ((code.type === 'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE') && !code.manualInstruction) {
-        <div class="fx-flex-fill"></div>
-      }  @else {
-        <code-instruction
-          [code]="code"
-          (codeDataChanged)="setCodeChanged()"
-          [userRole]="schemerService.userRole"
-          [hasResidualAutoCode]="hasResidualAutoCode"
-          [hasIntendedIncompleteCode] ="hasIntendedIncompleteAutoCode"
-          class="fx-flex-fill" >
-
-        </code-instruction>
-      }
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="selectCodeType"
+    [matTooltip]="'code.prompt.add-' + code.type | translate"
+    [matTooltipShowDelay]="500"
+    [disabled]="schemerService.userRole === 'RO'"
+  >
+    @if (code.type === 'FULL_CREDIT') {
+    <mat-icon style="color: limegreen">done_all</mat-icon>
+    } @else if (code.type === 'PARTIAL_CREDIT') {
+    <mat-icon style="color: green">check</mat-icon>
+    } @else if (code.type === 'TO_CHECK') {
+    <mat-icon style="color: blue"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24px"
+        viewBox="0 -960 960 960"
+        width="24px"
+      >
+        <path
+          d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"
+        /></svg
+    ></mat-icon>
+    } @else if (code.type === 'NO_CREDIT') {
+    <mat-icon style="color: gold">remove_done</mat-icon>
+    } @else if (code.type === 'UNSET') {
+    <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
+    } @else if (code.type === 'INTENDED_INCOMPLETE' ) {
+    <mat-icon style="color: darkgrey">disabled_by_default</mat-icon>
+    } @else if (code.type === 'RESIDUAL') {
+    <mat-icon>close</mat-icon>
+    } @else if (code.type === 'RESIDUAL_AUTO') {
+    <mat-icon style="color: orangered">close</mat-icon>
     }
+  </button>
+  <mat-menu #selectCodeType>
+    @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
     <button
-      mat-icon-button
-      (click)="deleteCode(codeIndex)"
-      [disabled]="schemerService.userRole === 'RO'"
-      [matTooltip]="'code.prompt.delete' | translate">
-      <mat-icon>delete</mat-icon>
+      mat-menu-item
+      [disabled]="
+        allCodes.length > 1 &&
+        (codeType === 'RESIDUAL_AUTO' ||
+          codeType === 'INTENDED_INCOMPLETE' ||
+          codeType === 'RESIDUAL') &&
+        (hasResidualAutoCode || hasIntendedIncompleteAutoCode)
+      "
+      (click)="code.type = codeType; setCodeChanged()"
+    >
+      @if (codeType === 'FULL_CREDIT') {
+      <mat-icon style="color: limegreen">done_all</mat-icon>
+      } @else if (codeType === 'PARTIAL_CREDIT') {
+      <mat-icon style="color: green">check</mat-icon>
+      } @else if (codeType === 'NO_CREDIT') {
+      <mat-icon style="color: gold">remove_done</mat-icon>
+      } @else if (codeType === 'UNSET') {
+      <mat-icon style="color: lightgrey">check_box_outline_blank</mat-icon>
+      } @else if (codeType === 'TO_CHECK') {
+      <mat-icon style="color: blue"
+        ><svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="24px"
+          viewBox="0 -960 960 960"
+          width="24px"
+        >
+          <path
+            d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"
+          /></svg
+      ></mat-icon>
+      } @else if (codeType === 'INTENDED_INCOMPLETE' ) {
+      <mat-icon style="color: lightgrey">disabled_by_default</mat-icon>
+      } @else if (codeType === 'RESIDUAL') {
+      <mat-icon>close</mat-icon>
+      } @else if (codeType === 'RESIDUAL_AUTO') {
+      <mat-icon style="color: orangered">close</mat-icon>
+      } @else {
+      <div>{{ "code type " + codeType + " unknown" }}</div>
+      }
+      {{ "code.prompt.add-" + codeType | translate }}
     </button>
+    @if (codeType === 'UNSET') {
+    <mat-divider></mat-divider>
+    } }
+  </mat-menu>
+  <div
+    class="fx-column-start-stretch"
+    [style.width.%]="codeModel === 'NONE' ? 60 : 100"
+  >
+    <div class="code-main-data fx-row-start-center fx-gap-5">
+      @if (code.id === 'INVALID') {
+      <div
+        [class]="
+          code.type === 'RESIDUAL_AUTO'
+            ? 'type-residual-auto fx-flex-fill'
+            : 'fx-flex-fill type-no-residual-auto'
+        "
+      >
+        {{ "code.type-label." + code.type | translate }};
+        {{ "code.is-invalid" | translate }}
+      </div>
+      <button
+        mat-icon-button
+        [style.width.px]="50"
+        (click)="setCodeValid()"
+        [matTooltip]="'code.make-not-invalid' | translate"
+      >
+        <mat-icon>do_not_disturb_off</mat-icon>
+      </button>
+      } @if (code.id === 'INTENDED_INCOMPLETE') {
+      <div [class]="'type-intended-incomplete fx-flex-fill'">
+        {{ "code.type-label." + code.type | translate }}
+      </div>
+      } @if (code.id !== 'INVALID' && code.id !== 'INTENDED_INCOMPLETE') {
+      <mat-form-field
+        [class]="
+          codeIdIsUnique(code.id, codeIndex) ? 'unique-id' : 'not-unique-id'
+        "
+        [style.width.px]="80"
+      >
+        <mat-label>{{ "code.id" | translate }}</mat-label>
+        <input
+          matInput
+          required
+          [(ngModel)]="code.id"
+          (ngModelChange)="setCodeChanged()"
+          type="number"
+        />
+      </mat-form-field>
+      @if (code.type === 'UNSET') {
+      <mat-form-field class="fx-flex-fill">
+        <mat-label>{{ "code.description" | translate }}</mat-label>
+        <input
+          matInput
+          [placeholder]="'code.description' | translate"
+          [(ngModel)]="code.label"
+          (ngModelChange)="setCodeChanged()"
+        />
+      </mat-form-field>
+      } @else {
+      <div
+        [class]="
+          code.type === 'RESIDUAL_AUTO'
+            ? 'type-residual-auto fx-flex-fill'
+            : 'fx-flex-fill'
+        "
+        style="align-content: center"
+      >
+        {{ "code.type-label." + code.type | translate }}
+      </div>
+      } @if (!(['RESIDUAL',
+      'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
+      <mat-form-field
+        [class]="code.score > 0 ? 'correct' : 'not-correct'"
+        [style.width.px]="100"
+      >
+        <mat-label>{{ "code.score" | translate }}</mat-label>
+        <input
+          matInput
+          type="number"
+          required
+          [disabled]="code.type === 'NO_CREDIT'"
+          [(ngModel)]="code.score"
+          (ngModelChange)="setCodeChanged()"
+        />
+      </mat-form-field>
+      } @if (['RESIDUAL',
+      'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type) && (code.id !==
+      null)) {
+      <button
+        mat-icon-button
+        [style.width.px]="50"
+        (click)="setCodeInvalid()"
+        [matTooltip]="'code.make-invalid' | translate"
+      >
+        <mat-icon>do_not_disturb_on</mat-icon>
+      </button>
+      } }
+    </div>
+    @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL',
+    'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
+    <code-rules
+      [style.padding-left.px]="4"
+      [style.height]="'calc(100% - 60px)'"
+      [code]="code"
+      [fragmentMode]="fragmentMode"
+      [varInfo]="varInfo"
+      (codeRulesChanged)="setCodeChanged()"
+    >
+    </code-rules>
+    } @else if (codeModel === 'MANUAL_ONLY' && (code.type !== 'RESIDUAL_AUTO' &&
+    code.type !== 'INTENDED_INCOMPLETE')) {
+    <code-instruction
+      [code]="code"
+      (codeDataChanged)="setCodeChanged()"
+      [userRole]="schemerService.userRole"
+      [hasResidualAutoCode]="hasResidualAutoCode"
+      [hasIntendedIncompleteCode]="hasIntendedIncompleteAutoCode"
+    >
+    </code-instruction>
+    }
+  </div>
+  @if (codeModel === 'NONE') { @if ((code.type === 'RESIDUAL_AUTO' || code.type
+  === 'INTENDED_INCOMPLETE') && !code.manualInstruction) {
+  <div class="fx-flex-fill"></div>
+  } @else {
+  <code-instruction
+    [code]="code"
+    (codeDataChanged)="setCodeChanged()"
+    [userRole]="schemerService.userRole"
+    [hasResidualAutoCode]="hasResidualAutoCode"
+    [hasIntendedIncompleteCode]="hasIntendedIncompleteAutoCode"
+    class="fx-flex-fill"
+  >
+  </code-instruction>
+  } }
+  <button
+    mat-icon-button
+    (click)="duplicateCode(codeIndex)"
+    [disabled]="!canDuplicateCode()"
+    [matTooltip]="'varList.copy' | translate"
+  >
+    <mat-icon>content_copy</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    (click)="deleteCode(codeIndex)"
+    [disabled]="schemerService.userRole === 'RO'"
+    [matTooltip]="'code.prompt.delete' | translate"
+  >
+    <mat-icon>delete</mat-icon>
+  </button>
   }
 </div>

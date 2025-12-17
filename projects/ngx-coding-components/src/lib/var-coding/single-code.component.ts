@@ -10,7 +10,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { CodeData, CodeModelType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodeData,
+  CodeModelType
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from '../services/schemer.service';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
@@ -45,9 +48,23 @@ import { CodeInstructionComponent } from './code-instruction.component';
     }
   `,
   standalone: true,
-  imports: [MatIconButton, MatTooltipModule, MatIcon, MatFormField, MatLabel, MatInput,
-    ReactiveFormsModule, FormsModule, TranslateModule, CodeRulesComponent, CodeInstructionComponent,
-    MatDivider, MatMenu, MatMenuItem, MatMenuTrigger]
+  imports: [
+    MatIconButton,
+    MatTooltipModule,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    ReactiveFormsModule,
+    FormsModule,
+    TranslateModule,
+    CodeRulesComponent,
+    CodeInstructionComponent,
+    MatDivider,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger
+  ]
 })
 export class SingleCodeComponent {
   @Output() codeDataChanged = new EventEmitter<CodeData>();
@@ -60,20 +77,53 @@ export class SingleCodeComponent {
   @Input() hasResidualAutoCode = false;
   @Input() hasIntendedIncompleteAutoCode = false;
 
-  constructor(
-    public schemerService: SchemerService
-  ) { }
+  constructor(public schemerService: SchemerService) {}
 
-  codeIdIsUnique(codeToValidate: number | 'INTENDED_INCOMPLETE' | 'INVALID', codeIndex?: number): boolean {
-    if (!this.allCodes || codeToValidate === 'INVALID' || codeToValidate === 'INTENDED_INCOMPLETE') return true;
-    const firstEqualCode = this.allCodes
-      .find((c: CodeData, index: number) => index !== codeIndex && c.id === codeToValidate);
+  codeIdIsUnique(
+    codeToValidate: number | 'INTENDED_INCOMPLETE' | 'INVALID',
+    codeIndex?: number
+  ): boolean {
+    if (
+      !this.allCodes ||
+      codeToValidate === 'INVALID' ||
+      codeToValidate === 'INTENDED_INCOMPLETE'
+    ) {
+      return true;
+    }
+    const firstEqualCode = this.allCodes.find(
+      (c: CodeData, index: number) => index !== codeIndex && c.id === codeToValidate
+    );
     return !firstEqualCode;
   }
 
   deleteCode(codeIndex?: number) {
     if (this.allCodes && typeof codeIndex !== 'undefined') {
       this.schemerService.deleteCode(this.allCodes, codeIndex);
+      this.setCodeChanged();
+    }
+  }
+
+  canDuplicateCode(): boolean {
+    if (this.schemerService.userRole === 'RO') {
+      return false;
+    }
+    if (!this.code) {
+      return false;
+    }
+    return !['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
+      this.code.type
+    );
+  }
+
+  duplicateCode(codeIndex?: number) {
+    if (!this.allCodes || typeof codeIndex === 'undefined') {
+      return;
+    }
+    const duplicateResult = this.schemerService.duplicateCode(
+      this.allCodes,
+      codeIndex
+    );
+    if (typeof duplicateResult !== 'string') {
       this.setCodeChanged();
     }
   }
@@ -91,10 +141,20 @@ export class SingleCodeComponent {
 
   setCodeValid() {
     if (this.code && this.allCodes) {
-      const hasNullCode = this.allCodes.length > 0 ? !!this.allCodes.find(c => c.id === 0) : false;
+      const hasNullCode =
+        this.allCodes.length > 0 ?
+          !!this.allCodes.find(c => c.id === 0) :
+          false;
       if (hasNullCode) {
-        this.code.id = this.allCodes.length > 0 ? Math.max(...this.allCodes
-          .filter(c => typeof c.id === 'number').map(c => Number(c.id) || 0)) + 1 : 0;
+        let maxId = 0;
+        if (this.allCodes.length > 0) {
+          maxId = Math.max(
+            ...this.allCodes
+              .filter(c => typeof c.id === 'number')
+              .map(c => Number(c.id) || 0)
+          );
+        }
+        this.code.id = maxId + 1;
       } else {
         this.code.id = 0;
       }
