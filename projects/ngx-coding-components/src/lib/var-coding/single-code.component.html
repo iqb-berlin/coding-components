@@ -90,11 +90,9 @@
     <div class="code-main-data fx-row-start-center fx-gap-5">
       @if (code.id === 'INVALID') {
       <div
-        [class]="
-          code.type === 'RESIDUAL_AUTO'
-            ? 'type-residual-auto fx-flex-fill'
-            : 'fx-flex-fill type-no-residual-auto'
-        "
+        class="fx-flex-fill"
+        [class.type-residual-auto]="code.type === 'RESIDUAL_AUTO'"
+        [class.type-no-residual-auto]="code.type !== 'RESIDUAL_AUTO'"
       >
         {{ "code.type-label." + code.type | translate }};
         {{ "code.is-invalid" | translate }}
@@ -113,9 +111,8 @@
       </div>
       } @if (code.id !== 'INVALID' && code.id !== 'INTENDED_INCOMPLETE') {
       <mat-form-field
-        [class]="
-          codeIdIsUnique(code.id, codeIndex) ? 'unique-id' : 'not-unique-id'
-        "
+        [class.unique-id]="codeIdIsUnique(code.id, codeIndex)"
+        [class.not-unique-id]="!codeIdIsUnique(code.id, codeIndex)"
         [style.width.px]="80"
       >
         <mat-label>{{ "code.id" | translate }}</mat-label>
@@ -139,11 +136,8 @@
       </mat-form-field>
       } @else {
       <div
-        [class]="
-          code.type === 'RESIDUAL_AUTO'
-            ? 'type-residual-auto fx-flex-fill'
-            : 'fx-flex-fill'
-        "
+        class="fx-flex-fill"
+        [class.type-residual-auto]="code.type === 'RESIDUAL_AUTO'"
         style="align-content: center"
       >
         {{ "code.type-label." + code.type | translate }}
@@ -151,7 +145,8 @@
       } @if (!(['RESIDUAL',
       'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
       <mat-form-field
-        [class]="code.score > 0 ? 'correct' : 'not-correct'"
+        [class.correct]="code.score > 0"
+        [class.not-correct]="code.score <= 0"
         [style.width.px]="100"
       >
         <mat-label>{{ "code.score" | translate }}</mat-label>

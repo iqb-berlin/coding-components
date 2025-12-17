@@ -27,6 +27,12 @@ export class SchemerService {
   ruleMethodParameterCount = RuleMethodParameterCount;
   userRole: UserRoleType = 'RW_MAXIMAL';
   copiedCode: CodeData | null = null;
+  private static readonly residualTypes: CodeType[] = [
+    'RESIDUAL',
+    'RESIDUAL_AUTO',
+    'INTENDED_INCOMPLETE'
+  ];
+
   orderOfCodeTypes: CodeType[] = [
     'FULL_CREDIT',
     'PARTIAL_CREDIT',
@@ -140,10 +146,8 @@ export class SchemerService {
     if (!codeList) return false;
 
     const typeToPaste = this.copiedCode.type;
-    if (
-      ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(typeToPaste)
-    ) {
-      const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+    if (SchemerService.residualTypes.includes(typeToPaste)) {
+      const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
       );
       if (firstResidualOrIntendedIncomplete) return false;
     }
@@ -158,10 +162,8 @@ export class SchemerService {
     const typeToPaste = this.copiedCode.type;
 
     // For these types, the target may only contain one of {RESIDUAL, RESIDUAL_AUTO, INTENDED_INCOMPLETE}
-    if (
-      ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(typeToPaste)
-    ) {
-      const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+    if (SchemerService.residualTypes.includes(typeToPaste)) {
+      const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
       );
       if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
     }
@@ -194,7 +196,7 @@ export class SchemerService {
       const hasNullCode =
         codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
-        const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+        const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
         );
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
@@ -213,7 +215,7 @@ export class SchemerService {
         return newCode;
       }
       if (codeType === 'INTENDED_INCOMPLETE') {
-        const firstResidualOrIntendedIncomplete = codeList.find(c => ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(c.type)
+        const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
         );
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
