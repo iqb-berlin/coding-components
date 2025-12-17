@@ -23,17 +23,32 @@ export class SchemeCheckerComponent {
     this.values = {};
     this._codingScheme = value;
     if (this._codingScheme) {
-      this._codingScheme.variableCodings.filter(v => v.sourceType === 'BASE')
+      this._codingScheme.variableCodings
+        .filter(v => v.sourceType === 'BASE')
         .map(v => v.alias || v.id)
         .sort()
         // eslint-disable-next-line no-return-assign
-        .forEach(v => this.values[v] = '');
+        .forEach(v => (this.values[v] = ''));
     }
   }
 
-  constructor(
-    private showCodingResultsDialog: MatDialog
-  ) {}
+  constructor(private showCodingResultsDialog: MatDialog) {}
+
+  private static parseInputValue(raw: string): string | unknown[] {
+    const trimmed = (raw || '').trim();
+    if (!trimmed) return '';
+    if (trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch {
+        // fall back to string
+      }
+    }
+    return trimmed;
+  }
 
   updateInputValue(sourceElement: EventTarget | null, targetVariable: string) {
     if (sourceElement) this.values[targetVariable] = (sourceElement as HTMLInputElement).value;
@@ -46,7 +61,9 @@ export class SchemeCheckerComponent {
         if (this.values[cs.alias || cs.id]) {
           myValues.push(<Response>{
             id: cs.id,
-            value: this.values[cs.alias || cs.id],
+            value: SchemeCheckerComponent.parseInputValue(
+              this.values[cs.alias || cs.id]
+            ),
             status: 'VALUE_CHANGED'
           });
         } else if (cs.sourceType === 'BASE') {
@@ -57,11 +74,20 @@ export class SchemeCheckerComponent {
           });
         }
       });
-      const varsWithCodes: string[] = this._codingScheme.variableCodings.filter(v => v.codes.length > 0).map(v => v.id);
+      const varsWithCodes: string[] = this._codingScheme.variableCodings
+        .filter(v => v.codes.length > 0)
+        .map(v => v.id);
       this.showCodingResultsDialog.open(ShowCodingResultsComponent, {
         width: '800px',
         height: '600px',
-        data: { responses: CodingSchemeFactory.code(myValues, this._codingScheme.variableCodings), varsWithCodes: varsWithCodes }
+        data: {
+          responses: CodingSchemeFactory.code(
+            myValues,
+            this._codingScheme.variableCodings
+          ),
+          varsWithCodes: varsWithCodes,
+          variableCodings: this._codingScheme.variableCodings
+        }
       });
     }
   }

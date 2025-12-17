@@ -12,6 +12,26 @@
   "valuesComplete": true
 },
   {
+    "id": "FRAG1",
+    "alias": "FRAG1",
+    "type": "string",
+    "format": "",
+    "multiple": false,
+    "nullable": true,
+    "values": [],
+    "valuePositionLabels": []
+  },
+  {
+    "id": "ARR1",
+    "alias": "ARR1",
+    "type": "string",
+    "format": "",
+    "multiple": true,
+    "nullable": true,
+    "values": [],
+    "valuePositionLabels": ["Pos1", "Pos2", "Pos3"]
+  },
+  {
     "id": "Otto",
     "alias": "Ottfried",
     "type": "string",

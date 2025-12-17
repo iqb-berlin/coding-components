@@ -13,6 +13,82 @@
       "codes": []
     },
     {
+      "id": "FRAG1",
+      "alias": "FRAG1",
+      "label": "Fragment-Test",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "fragmenting": "([A-Za-z]+)-(\\d+)",
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": true,
+              "valueArrayPos": -1,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["ABC"],
+                  "fragment": 0
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "ARR1",
+      "alias": "ARR1",
+      "label": "Array+Fragment-Test",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "fragmenting": "([A-Za-z]+)-(\\d+)",
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": true,
+              "valueArrayPos": 1,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["123"],
+                  "fragment": 1
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
       "id": "Paul",
       "alias": "Paul",
       "label": "",
