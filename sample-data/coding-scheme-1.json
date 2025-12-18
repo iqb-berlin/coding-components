@@ -1,20 +1,67 @@
 {
   "variableCodings": [
     {
-      "id": "Otto",
-      "alias": "Ottfried",
+      "id": "I07_OPEN",
+      "alias": "I07_OPEN",
       "label": "",
       "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
       "deriveSources": [],
-      "processing": [
-        "REMOVE_WHITE_SPACES"
-      ],
+      "processing": ["REMOVE_WHITE_SPACES"],
       "manualInstruction": "",
+      "codeModel": "NONE",
       "codes": []
     },
     {
-      "id": "FRAG1",
-      "alias": "FRAG1",
+      "id": "I01_HOTSPOT",
+      "alias": "I01_HOTSPOT",
+      "label": "Boolean/Array Test",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Markieren Sie alle passenden Bereiche im Bild.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": true,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["true"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Antwort erfüllt das Kriterium.</p>"
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Alle übrigen Antworten.</p>"
+        }
+      ]
+    },
+    {
+      "id": "I02_FRAG",
+      "alias": "I02_FRAG",
       "label": "Fragment-Test",
       "sourceType": "BASE",
       "sourceParameters": {
@@ -24,7 +71,7 @@
       "deriveSources": [],
       "processing": [],
       "fragmenting": "([A-Za-z]+)-(\\d+)",
-      "manualInstruction": "",
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Geben Sie eine Antwort im Format &lt;WORT&gt;-&lt;ZAHL&gt; ein (z. B. ABC-12).</p>",
       "codeModel": "NONE",
       "codes": [
         {
@@ -46,13 +93,13 @@
               ]
             }
           ],
-          "manualInstruction": ""
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Bewertung basiert nur auf dem Textfragment (vor dem Bindestrich).</p>"
         }
       ]
     },
     {
-      "id": "ARR1",
-      "alias": "ARR1",
+      "id": "I03_ARRAY",
+      "alias": "I03_ARRAY",
       "label": "Array+Fragment-Test",
       "sourceType": "BASE",
       "sourceParameters": {
@@ -62,7 +109,7 @@
       "deriveSources": [],
       "processing": [],
       "fragmenting": "([A-Za-z]+)-(\\d+)",
-      "manualInstruction": "",
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Mehrfachantwort: Es wird nur Position 2 (Pos2) berücksichtigt; bewertet wird das Zahlenfragment (z. B. XYZ-123).</p>",
       "codeModel": "NONE",
       "codes": [
         {
@@ -84,77 +131,647 @@
               ]
             }
           ],
-          "manualInstruction": ""
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Es wird nur Position 2 (valueArrayPos=1) berücksichtigt.</p>"
         }
       ]
     },
     {
-      "id": "Paul",
-      "alias": "Paul",
-      "label": "",
+      "id": "I04_MC",
+      "alias": "I04_MC",
+      "label": "MC Test",
       "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
       "deriveSources": [],
       "processing": [],
-      "manualInstruction": "",
-      "codes": []
-    },
-    {
-      "id": "Sven",
-      "alias": "Sven",
-      "label": "",
-      "sourceType": "BASE_NO_VALUE",
-      "deriveSources": [],
-      "processing": [],
-      "manualInstruction": "",
-      "codes": []
-    },
-    {
-      "id": "Schnecke",
-      "alias": "Schnecke",
-      "label": "Schnecke",
-      "sourceType": "BASE",
-      "deriveSources": [],
-      "processing": [],
-      "manualInstruction": "ss",
-      "codes": []
-    },
-    {
-      "id": "Susi",
-      "alias": "Susi",
-      "label": "",
-      "sourceType": "BASE",
-      "deriveSources": [],
-      "processing": [],
-      "manualInstruction": "",
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Wählen Sie die richtige Option.</p>",
+      "codeModel": "NONE",
       "codes": [
         {
-          "id": 1,
-          "label": "teilweise richtig",
+          "id": 25,
+          "type": "PARTIAL_CREDIT",
+          "label": "",
           "score": 0,
+          "ruleSetOperatorAnd": true,
           "ruleSets": [
             {
               "ruleOperatorAnd": false,
               "rules": [
                 {
                   "method": "MATCH",
-                  "parameters": [
-                    "22222"
-                  ]
+                  "parameters": ["B"]
                 }
               ]
-            }],
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Teilweise korrekt (z. B. Option B).</p>"
+        },
+        {
+          "id": 2,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["A"]
+                }
+              ]
+            }
+          ],
           "manualInstruction": ""
         },
         {
-          "id": 11,
+          "id": 19,
+          "type": "NO_CREDIT",
           "label": "",
           "score": 0,
+          "ruleSetOperatorAnd": true,
           "ruleSets": [
             {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["C"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 7,
+          "type": "TO_CHECK",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["D"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Alle anderen Antworten</p>"
+        }
+      ]
+    },
+    {
+      "id": "I05_TEXT",
+      "alias": "I05_TEXT",
+      "label": "Text Test",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Begründen Sie Ihre Antwort kurz.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "TO_CHECK",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["foo"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Manuell prüfen und ggf. nachkodieren.</p>"
+        },
+        {
+          "id": 0,
+          "type": "INTENDED_INCOMPLETE",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Antwort absichtlich unvollständig.</p>"
+        }
+      ]
+    },
+    {
+      "id": "I06_NUM",
+      "alias": "I06_NUM",
+      "label": "Number Test",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": []
+    },
+    {
+      "id": "I08_SC",
+      "alias": "I08_SC",
+      "label": "",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": []
+    },
+    {
+      "id": "I12_NOVALUE",
+      "alias": "I12_NOVALUE",
+      "label": "",
+      "sourceType": "BASE_NO_VALUE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": []
+    },
+    {
+      "id": "I10_TEXT2",
+      "alias": "I10_TEXT2",
+      "label": "",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": []
+    },
+    {
+      "id": "I11_BOOL",
+      "alias": "I11_BOOL",
+      "label": "",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "",
+      "codeModel": "NONE",
+      "codes": []
+    },
+    {
+      "id": "I13_COMMENT",
+      "alias": "I13_COMMENT",
+      "label": "Schnecke",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "ss",
+      "codeModel": "NONE",
+      "codes": []
+    },
+    {
+      "id": "I09_NUM2",
+      "alias": "I09_NUM2",
+      "label": "",
+      "sourceType": "BASE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Numerische Aufgabe: bitte Ergebnis als Zahl eingeben.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 31,
+          "type": "PARTIAL_CREDIT",
+          "label": "teilweise richtig",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["22222"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Teilpunkte bei fast korrektem Ergebnis.</p>"
+        },
+        {
+          "id": 3,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["999"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Vollpunkte für korrektes Ergebnis.</p>"
+        },
+        {
+          "id": 12,
+          "type": "TO_CHECK",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["12345"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Sonderfälle manuell prüfen.</p>"
+        },
+        {
+          "id": 11,
+          "type": "NO_CREDIT",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
               "rules": [
                 {
                   "method": "ELSE",
                   "parameters": []
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Sonst: 0 Punkte.</p>"
+        }
+      ]
+    },
+    {
+      "id": "D01_CONCAT",
+      "alias": "D01_CONCAT",
+      "label": "Kombinierte Antwort (Concat)",
+      "sourceType": "CONCAT_CODE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": ["I07_OPEN", "I08_SC"],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Automatisch aus I07_OPEN und I08_SC erzeugt.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": true,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["Apfel##1"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Beispiel für korrekte Kombination.</p>"
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "D02_COPY",
+      "alias": "D02_COPY",
+      "label": "Kopie von I04_MC",
+      "sourceType": "COPY_VALUE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": ["I04_MC"],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Spiegelt die Auswahl aus I04_MC.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["A"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "D03_SUM_CODE",
+      "alias": "D03_SUM_CODE",
+      "label": "Summe Codes",
+      "sourceType": "SUM_CODE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": ["I04_MC", "I01_HOTSPOT"],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Aggregiert Codes aus I04_MC und I01_HOTSPOT.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["1"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "D04_SUM_SCORE",
+      "alias": "D04_SUM_SCORE",
+      "label": "Summen-Score",
+      "sourceType": "SUM_SCORE",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": ["I04_MC", "I05_TEXT"],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Berechnet einen Summenwert über Quellen.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["2"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "D05_UNIQUE",
+      "alias": "D05_UNIQUE",
+      "label": "Eindeutige Werte",
+      "sourceType": "UNIQUE_VALUES",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": ["I03_ARRAY"],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Leitet eindeutige Werte aus I03_ARRAY ab.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["X"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "D06_SOLVER",
+      "alias": "D06_SOLVER",
+      "label": "Solver Ergebnis",
+      "sourceType": "SOLVER",
+      "sourceParameters": {
+        "solverExpression": "1+1",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Berechnung über solverExpression (Demo).</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["2"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
+    },
+    {
+      "id": "D07_MANUAL",
+      "alias": "D07_MANUAL",
+      "label": "Manuelle Kodierung",
+      "sourceType": "MANUAL",
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": [],
+      "processing": [],
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Diese Variable wird manuell kodiert.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["OK"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 2,
+          "type": "NO_CREDIT",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["NOK"]
                 }
               ]
             }
@@ -164,31 +781,49 @@
       ]
     },
     {
-      "id": "derived",
-      "alias": "derived",
-      "label": "",
+      "id": "D08_CONCAT_2",
+      "alias": "D08_CONCAT_2",
+      "label": "Kombinierte Antwort 2",
       "sourceType": "CONCAT_CODE",
-      "deriveSources": [
-        "Otto",
-        "Paul"
-      ],
+      "sourceParameters": {
+        "solverExpression": "",
+        "processing": []
+      },
+      "deriveSources": ["I07_OPEN", "I08_SC"],
       "processing": [],
-      "manualInstruction": "",
-      "codes": []
-    },
-    {
-      "id": "Derived2",
-      "alias": "Derived2",
-      "label": "",
-      "sourceType": "CONCAT_CODE",
-      "deriveSources": [
-        "Otto",
-        "Paul"
-      ],
-      "processing": [],
-      "manualInstruction": "",
-      "codes": []
+      "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Zweite Concat-Variable zum Testen.</p>",
+      "codeModel": "NONE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "label": "",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": ["Birne##2"]
+                }
+              ]
+            }
+          ],
+          "manualInstruction": ""
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "label": "",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [],
+          "manualInstruction": ""
+        }
+      ]
     }
   ],
-  "version": "3.0"
+  "version": "3.3"
 }

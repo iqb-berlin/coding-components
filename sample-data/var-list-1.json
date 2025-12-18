@@ -1,19 +1,19 @@
 [
- {
-  "id": "testVarId",
-  "alias": "hotspot_image_1",
-  "type": "boolean",
-  "format": "",
-  "multiple": "true",
-  "nullable": "false",
-  "values": [],
-  "valuePositionLabels": ["Rectangle(0)", "Rectangle(1)"],
-  "page": "",
-  "valuesComplete": true
-},
   {
-    "id": "FRAG1",
-    "alias": "FRAG1",
+    "id": "I01_HOTSPOT",
+    "alias": "I01_HOTSPOT",
+    "type": "boolean",
+    "format": "",
+    "multiple": true,
+    "nullable": false,
+    "values": [],
+    "valuePositionLabels": ["Rectangle(0)", "Rectangle(1)"],
+    "page": "",
+    "valuesComplete": true
+  },
+  {
+    "id": "I02_FRAG",
+    "alias": "I02_FRAG",
     "type": "string",
     "format": "",
     "multiple": false,
@@ -22,8 +22,8 @@
     "valuePositionLabels": []
   },
   {
-    "id": "ARR1",
-    "alias": "ARR1",
+    "id": "I03_ARRAY",
+    "alias": "I03_ARRAY",
     "type": "string",
     "format": "",
     "multiple": true,
@@ -32,8 +32,57 @@
     "valuePositionLabels": ["Pos1", "Pos2", "Pos3"]
   },
   {
-    "id": "Otto",
-    "alias": "Ottfried",
+    "id": "I04_MC",
+    "alias": "I04_MC",
+    "type": "string",
+    "format": "",
+    "multiple": false,
+    "nullable": false,
+    "values": [
+      {
+        "value": "A",
+        "label": "Option A"
+      },
+      {
+        "value": "B",
+        "label": "Option B"
+      },
+      {
+        "value": "C",
+        "label": "Option C"
+      }
+    ],
+    "valuePositionLabels": [],
+    "valuesComplete": true,
+    "page": ""
+  },
+  {
+    "id": "I05_TEXT",
+    "alias": "I05_TEXT",
+    "type": "string",
+    "format": "",
+    "multiple": false,
+    "nullable": true,
+    "values": [],
+    "valuePositionLabels": [],
+    "valuesComplete": false,
+    "page": ""
+  },
+  {
+    "id": "I06_NUM",
+    "alias": "I06_NUM",
+    "type": "integer",
+    "format": "",
+    "multiple": false,
+    "nullable": true,
+    "values": [],
+    "valuePositionLabels": [],
+    "valuesComplete": false,
+    "page": ""
+  },
+  {
+    "id": "I07_OPEN",
+    "alias": "I07_OPEN",
     "type": "string",
     "format": "",
     "multiple": true,
@@ -61,8 +110,8 @@
     "page": ""
   },
   {
-    "id": "Paul",
-    "alias": "Paul",
+    "id": "I08_SC",
+    "alias": "I08_SC",
     "type": "string",
     "format": "",
     "multiple": false,
@@ -90,8 +139,8 @@
     "page": ""
   },
   {
-    "id": "Susi",
-    "alias": "Susi",
+    "id": "I09_NUM2",
+    "alias": "I09_NUM2",
     "type": "integer",
     "format": "",
     "multiple": false,
@@ -102,8 +151,8 @@
     "page": ""
   },
   {
-    "id": "Harry",
-    "alias": "Harry",
+    "id": "I10_TEXT2",
+    "alias": "I10_TEXT2",
     "type": "string",
     "format": "",
     "multiple": false,
@@ -114,8 +163,8 @@
     "page": ""
   },
   {
-    "id": "Bo",
-    "alias": "Bo",
+    "id": "I11_BOOL",
+    "alias": "I11_BOOL",
     "type": "boolean",
     "format": "",
     "multiple": false,
@@ -135,8 +184,8 @@
     "valuesComplete": true
   },
   {
-    "id": "Sven",
-    "alias": "Sven",
+    "id": "I12_NOVALUE",
+    "alias": "I12_NOVALUE",
     "type": "no-value",
     "format": "",
     "multiple": false,
