@@ -6,10 +6,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
-export default function (config) {
+export default function karmaConfig(config) {
   config.set({
     basePath: '',
     frameworks: ['jasmine'],
@@ -35,7 +35,7 @@ export default function (config) {
       suppressAll: true
     },
     coverageReporter: {
-      dir: path.join(__dirname, '../../coverage/ngx-coding-components'),
+      dir: path.join(dirname, '../../coverage/ngx-coding-components'),
       subdir: '.',
       reporters: [{ type: 'html' }, { type: 'text-summary' }],
       check: {
