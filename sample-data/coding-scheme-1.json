@@ -10,9 +10,9 @@
         "processing": []
       },
       "deriveSources": [],
-      "processing": ["REMOVE_WHITE_SPACES"],
+      "processing": ["IGNORE_ALL_SPACES"],
       "manualInstruction": "",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -27,7 +27,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Markieren Sie alle passenden Bereiche im Bild.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -72,7 +72,7 @@
       "processing": [],
       "fragmenting": "([A-Za-z]+)-(\\d+)",
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Geben Sie eine Antwort im Format &lt;WORT&gt;-&lt;ZAHL&gt; ein (z. B. ABC-12).</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -110,7 +110,7 @@
       "processing": [],
       "fragmenting": "([A-Za-z]+)-(\\d+)",
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Mehrfachantwort: Es wird nur Position 2 (Pos2) berücksichtigt; bewertet wird das Zahlenfragment (z. B. XYZ-123).</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -147,7 +147,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Wählen Sie die richtige Option.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 25,
@@ -248,7 +248,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Begründen Sie Ihre Antwort kurz.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -292,7 +292,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -307,7 +307,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -322,7 +322,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -337,7 +337,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -352,7 +352,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -367,7 +367,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "ss",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": []
     },
     {
@@ -382,7 +382,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Numerische Aufgabe: bitte Ergebnis als Zahl eingeben.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 31,
@@ -474,7 +474,7 @@
       "deriveSources": ["I07_OPEN", "I08_SC"],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Automatisch aus I07_OPEN und I08_SC erzeugt.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -518,7 +518,7 @@
       "deriveSources": ["I04_MC"],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Spiegelt die Auswahl aus I04_MC.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -562,7 +562,7 @@
       "deriveSources": ["I04_MC", "I01_HOTSPOT"],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Aggregiert Codes aus I04_MC und I01_HOTSPOT.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -606,7 +606,7 @@
       "deriveSources": ["I04_MC", "I05_TEXT"],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Berechnet einen Summenwert über Quellen.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -650,7 +650,7 @@
       "deriveSources": ["I03_ARRAY"],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Leitet eindeutige Werte aus I03_ARRAY ab.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -694,7 +694,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Berechnung über solverExpression (Demo).</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -738,7 +738,7 @@
       "deriveSources": [],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Diese Variable wird manuell kodiert.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,
@@ -792,7 +792,7 @@
       "deriveSources": ["I07_OPEN", "I08_SC"],
       "processing": [],
       "manualInstruction": "<p style=\"padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0\">Zweite Concat-Variable zum Testen.</p>",
-      "codeModel": "NONE",
+      "codeModel": "MANUAL_AND_RULES",
       "codes": [
         {
           "id": 1,

@@ -11,8 +11,6 @@ import 'zone.js';
 if (environment.production) {
   enableProdMode();
 }
-// bootstrapApplication(AppComponent, appConfig)
-//   .catch((err) => console.error(err));
 
 (async () => {
   const app = await createApplication({
