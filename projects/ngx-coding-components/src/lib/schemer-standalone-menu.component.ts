@@ -7,7 +7,11 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFabButton } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
-import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodingScheme,
+  CodingSchemeVersionMajor,
+  CodingSchemeVersionMinor
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileService } from './services/file.service';
 import { UserRoleType } from './services/schemer.service';
@@ -26,14 +30,15 @@ import { UserRoleType } from './services/schemer.service';
 
     <mat-menu #menu="matMenu">
       <button mat-menu-item (click)="loadVariables()">
-        <mat-icon>input</mat-icon>Variablenliste laden
+        <mat-icon>input</mat-icon>{{ 'varList.load-variables' | translate }}
       </button>
       <mat-divider></mat-divider>
       <button mat-menu-item (click)="loadCodingScheme()">
-        <mat-icon>input</mat-icon>Antwortschema laden
+        <mat-icon>input</mat-icon>{{ 'varList.load-coding-scheme' | translate }}
       </button>
       <button mat-menu-item (click)="saveCodingScheme()">
-        <mat-icon>get_app</mat-icon>Antwortschema speichern
+        <mat-icon>get_app</mat-icon
+        >{{ 'varList.save-coding-scheme' | translate }}
       </button>
       <mat-divider></mat-divider>
       <button
@@ -43,7 +48,7 @@ import { UserRoleType } from './services/schemer.service';
       >
         @if (userRole === 'RO') {
         <mat-icon>check</mat-icon>
-        } Rolle: Nur lesen
+        } {{ 'varList.role.ro' | translate }}
       </button>
       <button
         mat-menu-item
@@ -52,7 +57,7 @@ import { UserRoleType } from './services/schemer.service';
       >
         @if (userRole === 'RW_MINIMAL') {
         <mat-icon>check</mat-icon>
-        } Rolle: RW minimal
+        } {{ 'varList.role.rw-minimal' | translate }}
       </button>
       <button
         mat-menu-item
@@ -61,7 +66,7 @@ import { UserRoleType } from './services/schemer.service';
       >
         @if (userRole === 'RW_MAXIMAL') {
         <mat-icon>check</mat-icon>
-        } Rolle: RW maximal
+        } {{ 'varList.role.rw-maximal' | translate }}
       </button>
     </mat-menu>
   `,
@@ -89,8 +94,12 @@ export class SchemerStandaloneMenuComponent {
   @Output() varListChanged = new EventEmitter<VariableInfo[] | null>();
 
   saveCodingScheme(): void {
+    const payload = {
+      variableCodings: this.codingScheme?.variableCodings ?? [],
+      version: `${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`
+    };
     FileService.saveToFile(
-      JSON.stringify(this.codingScheme),
+      JSON.stringify(payload, null, 2),
       'coding-scheme.json'
     );
   }
@@ -102,7 +111,14 @@ export class SchemerStandaloneMenuComponent {
 
   async loadCodingScheme(): Promise<void> {
     const codingsParsed = JSON.parse(await FileService.loadFile(['.json']));
-    this.codingScheme = new CodingScheme(codingsParsed.variableCodings);
+    let variableCodings = [];
+    if (Array.isArray(codingsParsed?.variableCodings)) {
+      variableCodings = codingsParsed.variableCodings;
+    } else if (Array.isArray(codingsParsed)) {
+      variableCodings = codingsParsed;
+    }
+
+    this.codingScheme = new CodingScheme(variableCodings);
     this.codingSchemeChanged.emit(this.codingScheme);
   }
 }

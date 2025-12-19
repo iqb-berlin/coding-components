@@ -9,6 +9,14 @@
     "delete": "Variable(n) löschen",
     "rename": "Variable umbenennen",
     "load-save-user-role": "Laden / Speichern / NutzerRechte festlegen",
+    "load-variables": "Variablenliste laden",
+    "load-coding-scheme": "Antwortschema laden",
+    "save-coding-scheme": "Antwortschema speichern",
+    "role": {
+      "ro": "Rolle: Nur lesen",
+      "rw-minimal": "Rolle: RW minimal",
+      "rw-maximal": "Rolle: RW maximal"
+    },
     "more-actions": "Weitere Aktionen",
     "copy": "Kodierung kopieren",
     "copy-code": "Code kopieren",
@@ -16,10 +24,69 @@
     "check": "Prüfe Syntax Kodierschema",
     "show": "Zeige Kodierschema",
     "activate-base-no-value": "Aktiviere Basisvariable ohne Wert",
+    "export-variable": "Variable exportieren",
+    "import-variable": "Variable importieren",
     "derived-tree": {
       "title": "Ableitungen Liste",
       "error": "Darstellung nicht möglich: Zirkelbezug",
       "no-sources": "(Keine Quellen)"
+    }
+  },
+
+  "schemer": {
+    "export": {
+      "title": "Variable exportieren",
+      "no-scheme": "Kein Antwortschema bzw. keine Variablen vorhanden.",
+      "select": {
+        "title": "Variable exportieren",
+        "prompt": "Bitte Variable auswählen",
+        "ok": "Export"
+      }
+    },
+    "import": {
+      "title": "Variable importieren",
+      "no-scheme": "Kein Antwortschema geladen.",
+      "invalid-format": "Ungültiges Import-Format.",
+      "missing-id": "Import enthält keine Variable-ID.",
+      "overwrite": {
+        "title": "Variable überschreiben?",
+        "content": "Die Variable '{{variable}}' existiert bereits. Überschreiben?",
+        "confirm": "Überschreiben"
+      },
+      "error": {
+        "title": "Variable importieren - Fehler",
+        "unknown": "Unbekannter Fehler beim Import."
+      }
+    },
+    "add": {
+      "error": {
+        "title": "Neue Variable - Fehler"
+      }
+    },
+    "delete": {
+      "title": "Variable/Kodierung löschen",
+      "prompt": "Abgeleitete Variablen oder verwaiste Basisvariablen werden komplett gelöscht. Bei Basisvariablen wird die Kodierung gelöscht.",
+      "ok": "Löschen"
+    },
+    "rename": {
+      "title": "Variable umbenennen",
+      "prompt": "Bitte neue Kennung der Variablen '{{variable}}' eingeben.",
+      "placeholder": "Variablen-Kennung",
+      "save": "Speichern",
+      "select-derived-first": "Bitte erst eine abgeleitete Variable auswählen!",
+      "error": {
+        "title": "Variable umbenennen - Fehler"
+      }
+    },
+    "activate-base-no-value": {
+      "title": "Basisvariable ohne Wert aktivieren",
+      "prompt": "Bitte Variable wählen!",
+      "ok": "Aktivieren"
+    },
+    "copy": {
+      "title": "Kodierung von \"{{variable}}\" kopieren",
+      "prompt": "Die Kodierung der Zielvariable(n) wird überschrieben!",
+      "ok": "Kopieren"
     }
   },
 

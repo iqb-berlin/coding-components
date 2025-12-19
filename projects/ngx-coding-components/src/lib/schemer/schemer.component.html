@@ -125,7 +125,7 @@
         </button>
         <button mat-menu-item (click)="exportVariable()">
           <mat-icon>get_app</mat-icon>
-          Variable exportieren
+          {{ "varList.export-variable" | translate }}
         </button>
         <button
           mat-menu-item
@@ -133,7 +133,7 @@
           [disabled]="schemerService.userRole === 'RO'"
         >
           <mat-icon>input</mat-icon>
-          Variable importieren
+          {{ "varList.import-variable" | translate }}
         </button>
         <button
           mat-menu-item

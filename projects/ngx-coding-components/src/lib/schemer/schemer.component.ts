@@ -25,6 +25,8 @@ import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import {
   CodingScheme,
+  CodingSchemeVersionMajor,
+  CodingSchemeVersionMinor,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
@@ -253,6 +255,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     private inputDialog: MatDialog
   ) {}
 
+  private tr(
+    key: string, // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: any
+  ): string {
+    return this.translateService.instant(key, params);
+  }
+
   ngAfterViewInit() {
     if (this.varCodingElement) {
       this.varCodingChangedSubscription = this.varCodingElement.varCodingChanged
@@ -407,8 +416,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.messageDialog.open(MessageDialogComponent, {
         width: '400px',
         data: <MessageDialogData>{
-          title: 'Export Variable',
-          content: 'Kein Antwortschema bzw. keine Variablen vorhanden.',
+          title: this.tr('schemer.export.title'),
+          content: this.tr('schemer.export.no-scheme'),
           type: MessageType.info
         }
       });
@@ -420,12 +429,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       {
         width: '600px',
         data: <SelectVariableDialogData>{
-          title: 'Variable exportieren',
-          prompt: 'Bitte Variable auswählen',
+          title: this.tr('schemer.export.select.title'),
+          prompt: this.tr('schemer.export.select.prompt'),
           variables: this.schemerService.codingScheme.variableCodings,
           selectedVariable: this.selectedCoding$.getValue(),
           codingStatus: this.codingStatus,
-          okButtonLabel: 'Export'
+          okButtonLabel: this.tr('schemer.export.select.ok')
         }
       }
     );
@@ -461,8 +470,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.messageDialog.open(MessageDialogComponent, {
         width: '400px',
         data: <MessageDialogData>{
-          title: 'Import Variable',
-          content: 'Kein Antwortschema geladen.',
+          title: this.tr('schemer.import.title'),
+          content: this.tr('schemer.import.no-scheme'),
           type: MessageType.error
         }
       });
@@ -477,12 +486,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         parsed.version !== 1 ||
         !parsed.variableCoding
       ) {
-        throw new Error('Ungültiges Import-Format.');
+        throw new Error(this.tr('schemer.import.invalid-format'));
       }
 
       const importedVar: VariableCodingData = parsed.variableCoding;
       if (!importedVar.id) {
-        throw new Error('Import enthält keine Variable-ID.');
+        throw new Error(this.tr('schemer.import.missing-id'));
       }
 
       const existingIndex =
@@ -494,11 +503,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
         const confirmRef = this.messageDialog.open(ConfirmDialogComponent, {
           width: '450px',
           data: <ConfirmDialogData>{
-            title: 'Variable überschreiben?',
-            content: `Die Variable '${
-              importedVar.alias || importedVar.id
-            }' existiert bereits. Überschreiben?`,
-            confirmButtonLabel: 'Überschreiben',
+            title: this.tr('schemer.import.overwrite.title'),
+            content: this.tr('schemer.import.overwrite.content', {
+              variable: importedVar.alias || importedVar.id
+            }),
+            confirmButtonLabel: this.tr('schemer.import.overwrite.confirm'),
             showCancel: true
           }
         });
@@ -519,9 +528,11 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.messageDialog.open(MessageDialogComponent, {
         width: '450px',
         data: <MessageDialogData>{
-          title: 'Import Variable - Fehler',
+          title: this.tr('schemer.import.error.title'),
           content:
-            e instanceof Error ? e.message : 'Unbekannter Fehler beim Import.',
+            e instanceof Error ?
+              e.message :
+              this.tr('schemer.import.error.unknown'),
           type: MessageType.error
         }
       });
@@ -595,7 +606,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
-                title: 'Neue Variable - Fehler',
+                title: this.tr('schemer.add.error.title'),
                 content: this.translateService.instant(errorMessage),
                 type: MessageType.error
               }
@@ -612,16 +623,14 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   deleteVarScheme() {
     if (this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
-        title: 'Variable/Kodierung löschen',
-        prompt:
-          'Abgeleitete Variablen oder verwaiste Basisvariablen werden komplett gelöscht. ' +
-          'Bei Basisvariablen wird die Kodierung gelöscht.',
+        title: this.tr('schemer.delete.title'),
+        prompt: this.tr('schemer.delete.prompt'),
         variables: this.schemerService.codingScheme.variableCodings.filter(
           c => c.sourceType !== 'BASE_NO_VALUE'
         ),
         selectedVariable: this.selectedCoding$.getValue(),
         codingStatus: this.codingStatus,
-        okButtonLabel: 'Löschen'
+        okButtonLabel: this.tr('schemer.delete.ok')
       };
       const dialogRef = this.selectVariableDialog.open(
         SelectVariableDialogComponent,
@@ -657,11 +666,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     const selectedCoding = this.selectedCoding$.getValue();
     if (selectedCoding && selectedCoding.sourceType !== 'BASE') {
       const dialogData = <SimpleInputDialogData>{
-        title: 'Variable umbenennen',
-        prompt: `Bitte neue Kennung der Variablen '${selectedCoding.alias}' eingeben.`,
-        placeholder: 'Variablen-Kennung',
+        title: this.tr('schemer.rename.title'),
+        prompt: this.tr('schemer.rename.prompt', {
+          variable: selectedCoding.alias
+        }),
+        placeholder: this.tr('schemer.rename.placeholder'),
         value: selectedCoding.alias,
-        saveButtonLabel: 'Speichern',
+        saveButtonLabel: this.tr('schemer.rename.save'),
         showCancel: true
       };
       const dialogRef = this.inputDialog.open(SimpleInputDialogComponent, {
@@ -679,7 +690,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
-                title: 'Variable umbenennen - Fehler',
+                title: this.tr('schemer.rename.error.title'),
                 content: this.translateService.instant(
                   'data-error.variable-id.double'
                 ),
@@ -697,8 +708,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.messageDialog.open(MessageDialogComponent, {
         width: '400px',
         data: <MessageDialogData>{
-          title: 'Variable umbenennen',
-          content: 'Bitte erst eine abgeleitete Variable auswählen!',
+          title: this.tr('schemer.rename.title'),
+          content: this.tr('schemer.rename.select-derived-first'),
           type: MessageType.error
         }
       });
@@ -708,12 +719,12 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   activateBaseNoValueVars() {
     if (this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
-        title: 'Basisvariable ohne Wert aktivieren',
-        prompt: 'Bitte Variable wählen!',
+        title: this.tr('schemer.activate-base-no-value.title'),
+        prompt: this.tr('schemer.activate-base-no-value.prompt'),
         variables: this.schemerService.codingScheme.variableCodings.filter(
           c => c.sourceType === 'BASE_NO_VALUE'
         ),
-        okButtonLabel: 'Aktivieren'
+        okButtonLabel: this.tr('schemer.activate-base-no-value.ok')
       };
       const dialogRef = this.selectVariableDialog.open(
         SelectVariableDialogComponent,
@@ -768,16 +779,16 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     const selectedCoding = this.selectedCoding$.getValue();
     if (selectedCoding && this.schemerService.codingScheme) {
       const dialogData = <SelectVariableDialogData>{
-        title: `Kodierung von "${
-          selectedCoding.alias || selectedCoding.id
-        }" kopieren `,
-        prompt: 'Die Kodierung der Zielvariable(n) wird überschrieben!',
+        title: this.tr('schemer.copy.title', {
+          variable: selectedCoding.alias || selectedCoding.id
+        }),
+        prompt: this.tr('schemer.copy.prompt'),
         variables: this.schemerService.codingScheme.variableCodings.filter(
           c => c.id !== selectedCoding.id && c.sourceType !== 'BASE_NO_VALUE'
         ),
         selectedVariable: this.selectedCoding$.getValue(),
         codingStatus: this.codingStatus,
-        okButtonLabel: 'Kopieren'
+        okButtonLabel: this.tr('schemer.copy.ok')
       };
       const dialogRef = this.selectVariableDialog.open(
         SelectVariableDialogComponent,
@@ -847,9 +858,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     if (!this.codingScheme) {
       return;
     }
+    const payload = {
+      variableCodings: this.codingScheme.variableCodings,
+      version: `${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`
+    };
     this.showCodingSchemeDialog.open(CodingSchemeDialogComponent, {
       width: '600px',
-      data: { codingScheme: this.codingScheme }
+      data: { codingScheme: payload }
     });
   }
 
