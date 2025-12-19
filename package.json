@@ -15,7 +15,7 @@
     "npm_publish": "cd dist/ngx-coding-components && npm publish --access public",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
-    "validate:scheme": "node validate-coding-scheme.js"
+    "validate:scheme": "node scripts/validate-coding-scheme.js"
   },
   "dependencies": {
     "@angular/animations": "^20.0.5",
