@@ -116,6 +116,7 @@ export class GenerateCodingDialogComponent {
   selectedOption: string = '';
   selectedOptions: string[] = [];
   positionLabels: string[] = [];
+  selectedArrayPos = -1;
   booleanMultiSelections: boolean[] = [];
   multiChoiceOrderMatters = false;
   singleChoiceLongVersion = false;
@@ -143,8 +144,8 @@ export class GenerateCodingDialogComponent {
       return;
     }
 
-    if (varInfo.valuesComplete && varInfo.values?.length > 0) {
-      this.elseMethod = 'auto';
+    if (varInfo.values?.length > 0) {
+      this.elseMethod = varInfo.valuesComplete ? 'auto' : 'instruction';
 
       if (varInfo.multiple) {
         this.generationModel = 'multi-choice';
@@ -172,6 +173,14 @@ export class GenerateCodingDialogComponent {
       this.booleanMultiSelections = (this.positionLabels || []).map(
         () => false
       );
+      return;
+    }
+
+    if (varInfo.multiple && varInfo.type === 'string') {
+      this.elseMethod = 'instruction';
+      this.generationModel = 'simple-input';
+      this.positionLabels = varInfo.valuePositionLabels;
+      this.selectedArrayPos = this.positionLabels.length > 0 ? 0 : -1;
       return;
     }
 
@@ -430,6 +439,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSets = [
             <RuleSet>{
               ruleOperatorAnd: false,
+              valueArrayPos: this.varInfo.multiple ? this.selectedArrayPos : -1,
               rules: numericRules
             }
           ];
@@ -447,6 +457,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSets = [
             <RuleSet>{
               ruleOperatorAnd: false,
+              valueArrayPos: this.varInfo.multiple ? this.selectedArrayPos : -1,
               rules: [
                 {
                   method: 'MATCH',

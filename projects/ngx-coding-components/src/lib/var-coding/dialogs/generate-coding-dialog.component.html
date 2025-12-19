@@ -1,5 +1,5 @@
 @if (varInfo) {
-  <h1 mat-dialog-title>
+<h1 mat-dialog-title>
   {{ "coding.generate.dialog-title" | translate }} '{{
     schemerService.getVariableAliasById(varInfo.id || "?")
   }}'
@@ -138,7 +138,17 @@
         }
       </mat-select>
     </mat-form-field>
-    } @if (generationModel === 'simple-input') {
+    } @if (generationModel === 'simple-input') { @if (varInfo.multiple &&
+    positionLabels.length > 0) {
+    <mat-form-field>
+      <mat-label>Position</mat-label>
+      <mat-select [(value)]="selectedArrayPos">
+        @for (pl of positionLabels; track pl; let i = $index) {
+        <mat-option [value]="i">{{ pl }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    }
     <div class="fx-row-start-center">
       <mat-label>{{
         "coding.generate.model.simple-input-numeric" | translate
