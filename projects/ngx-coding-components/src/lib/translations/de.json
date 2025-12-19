@@ -18,6 +18,7 @@
       "rw-maximal": "Rolle: RW maximal"
     },
     "more-actions": "Weitere Aktionen",
+    "info": "Info",
     "copy": "Kodierung kopieren",
     "copy-code": "Code kopieren",
     "paste-code": "Code einfügen",
@@ -34,6 +35,10 @@
   },
 
   "schemer": {
+    "info": {
+      "title": "Schemer – Informationen",
+      "content": "Der Schemer dient zum Erstellen und Bearbeiten von Kodierschemata für Variablen.\n\n- Basisvariablen bilden die Grundlage der Kodierung.\n- Abgeleitete Variablen können Werte aus anderen Variablen übernehmen oder berechnen.\n- Das Kodierschema wird im Format '@iqbspecs/coding-scheme' erzeugt und beim Export immer mit der Version 3.3 versehen.\n\nHinweis zur Kompatibilität: Beim Laden älterer Dateien (ohne Versionsfeld oder mit älterer Version) werden die Kodierungen übernommen und beim nächsten Speichern/Export im aktuellen Format (3.3) ausgegeben."
+    },
     "export": {
       "title": "Variable exportieren",
       "no-scheme": "Kein Antwortschema bzw. keine Variablen vorhanden.",

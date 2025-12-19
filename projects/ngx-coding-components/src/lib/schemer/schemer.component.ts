@@ -20,7 +20,7 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatNavList, MatListItem } from '@angular/material/list';
+import { MatNavList, MatListItem, MatDivider } from '@angular/material/list';
 import { AsyncPipe } from '@angular/common';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import {
@@ -79,7 +79,8 @@ import {
     TranslateModule,
     MatMenu,
     MatMenuItem,
-    MatMenuTrigger
+    MatMenuTrigger,
+    MatDivider
   ]
 })
 export class SchemerComponent implements OnDestroy, AfterViewInit {
@@ -260,6 +261,17 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     params?: any
   ): string {
     return this.translateService.instant(key, params);
+  }
+
+  showSchemerInfo(): void {
+    this.messageDialog.open(MessageDialogComponent, {
+      width: '650px',
+      data: <MessageDialogData>{
+        title: this.tr('schemer.info.title'),
+        content: this.tr('schemer.info.content'),
+        type: MessageType.info
+      }
+    });
   }
 
   ngAfterViewInit() {

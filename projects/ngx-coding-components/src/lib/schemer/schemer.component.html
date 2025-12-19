@@ -107,6 +107,11 @@
         <mat-icon>menu</mat-icon>
       </button>
       <mat-menu #otherFunctions="matMenu">
+        <button mat-menu-item (click)="showSchemerInfo()">
+          <mat-icon>info</mat-icon>
+          {{ "varList.info" | translate }}
+        </button>
+        <mat-divider></mat-divider>
         <button
           mat-menu-item
           (click)="activateBaseNoValueVars()"
