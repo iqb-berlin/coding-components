@@ -9,6 +9,11 @@ module.exports = {
       }
     },
     {
+      files: ['**/*.html'],
+      parser: '@angular-eslint/template-parser',
+      plugins: ['@angular-eslint/template']
+    },
+    {
       files: ['**/karma.conf.js'],
       extends: '@iqb/eslint-config/javascript',
       env: {
