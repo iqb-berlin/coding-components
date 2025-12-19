@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { CodeRuleListComponent } from './code-rule-list.component';
 
 describe('CodeRuleListComponent', () => {
@@ -7,7 +8,15 @@ describe('CodeRuleListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CodeRuleListComponent]
+      imports: [
+        CodeRuleListComponent,
+        TranslateModule.forRoot({
+          loader: {
+            provide: TranslateLoader,
+            useClass: TranslateFakeLoader
+          }
+        })
+      ]
     })
       .compileComponents();
   });
