@@ -1,0 +1,17 @@
+{
+  "derive-method": {
+    "label": "Derivation method",
+    "prompt": "Derivation method",
+    "BASE": "Base variable",
+    "COPY_VALUE": "Copy value",
+    "CONCAT_CODE": "Concatenate codes",
+    "SUM_CODE": "Sum codes",
+    "SUM_SCORE": "Sum scores",
+    "MANUAL": "Manual"
+  },
+  "derive-sources": {
+    "label": "Source variables",
+    "prompt": "Source variable(s)",
+    "error": "No source defined"
+  }
+}
