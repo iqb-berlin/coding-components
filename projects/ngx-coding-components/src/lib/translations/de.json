@@ -187,6 +187,8 @@
   },
   "id": "ID",
   "description-position": "Position/Zuordnung",
+  "page": "Seite",
+  "page.tooltip": "Seitenzahl der Variable im Test",
   "code-model": {
     "prompt": "Anzeige Code",
     "NONE": "Regeln und Instruktionen",

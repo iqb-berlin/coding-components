@@ -13,6 +13,16 @@
           (change)="lastChangeFrom$.next('label')"
         />
       </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ "page" | translate }}</mat-label>
+        <input
+          matInput
+          [(ngModel)]="varCoding.page"
+          [disabled]="schemerService.userRole === 'RO'"
+          (change)="lastChangeFrom$.next('page')"
+          [matTooltip]="'page.tooltip' | translate"
+        />
+      </mat-form-field>
       <div class="fx-row-start-stretch fx-gap-10">
         <div class="fx-flex-fill fx-column-start-start">
           <button
@@ -31,24 +41,28 @@
               Ableitungsmethode:
               {{ "derive-method." + varCoding.sourceType | translate }}
             </div>
-            @if (varCoding.sourceParameters.solverExpression &&
-            varCoding.sourceType === 'SOLVER') {
+            @if (varCoding.sourceParameters &&
+            varCoding.sourceParameters.solverExpression && varCoding.sourceType
+            === 'SOLVER') {
             <div>
               {{ "derive-processing.SOLVER_EXPRESSION" | translate }}:
               {{ varCoding.sourceParameters.solverExpression }}
             </div>
-            } @if (varCoding.deriveSources.length === 0) {
+            } @if (varCoding.deriveSources && varCoding.deriveSources.length ===
+            0) {
             <div class="no-sources">
               {{ "derive-sources.error" | translate }}
             </div>
             } @else {
             <div>
-              Quell-Variablen: {{ varCoding.deriveSources | varAlias : 10 }}
+              Quell-Variablen:
+              {{ varCoding.deriveSources || [] | varAlias : 10 }}
             </div>
             } }
           </div>
           <div style="margin-left: 35px; margin-bottom: 10px">
-            @for (p of varCoding.sourceParameters.processing; track p) {
+            @for (p of (varCoding.sourceParameters?.processing || []); track p)
+            {
             <div class="fx-row-start-start" style="font-size: small">
               <mat-icon style="font-size: small">check</mat-icon>
               <div>{{ "derive-processing." + p | translate }}</div>
@@ -88,7 +102,9 @@
       <mat-card-content class="instructions">
         <div
           [innerHTML]="
-            varCoding ? getSanitizedText(varCoding.manualInstruction) : null
+            varCoding && varCoding.manualInstruction
+              ? getSanitizedText(varCoding.manualInstruction)
+              : null
           "
         ></div>
       </mat-card-content>
@@ -162,8 +178,8 @@
         hideSingleSelectionIndicator="true"
       >
         <mat-button-toggle
-          [value]="'NONE'"
-          [matTooltip]="'code-model.NONE' | translate"
+          [value]="'MANUAL_AND_RULES'"
+          [matTooltip]="'code-model.MANUAL_AND_RULES' | translate"
           ><mat-icon>vertical_split</mat-icon></mat-button-toggle
         >
         <mat-button-toggle
