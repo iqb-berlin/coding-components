@@ -85,7 +85,7 @@
   </mat-menu>
   <div
     class="fx-column-start-stretch"
-    [style.width.%]="codeModel === 'NONE' ? 60 : 100"
+    [style.width.%]="(codeModel ?? 'NONE') === 'NONE' ? 60 : 100"
   >
     <div class="code-main-data fx-row-start-center fx-gap-5">
       @if (code.id === 'INVALID') {
@@ -142,11 +142,11 @@
       >
         {{ "code.type-label." + code.type | translate }}
       </div>
-      } @if (!(['RESIDUAL',
-      'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
+      } @if (code.type !== 'RESIDUAL' && code.type !== 'RESIDUAL_AUTO' &&
+      code.type !== 'INTENDED_INCOMPLETE') {
       <mat-form-field
-        [class.correct]="code.score > 0"
-        [class.not-correct]="code.score <= 0"
+        [class.correct]="(code.score ?? 0) > 0"
+        [class.not-correct]="(code.score ?? 0) <= 0"
         [style.width.px]="100"
       >
         <mat-label>{{ "code.score" | translate }}</mat-label>
@@ -159,9 +159,8 @@
           (ngModelChange)="setCodeChanged()"
         />
       </mat-form-field>
-      } @if (['RESIDUAL',
-      'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type) && (code.id !==
-      null)) {
+      } @if ((code.type === 'RESIDUAL' || code.type === 'RESIDUAL_AUTO' ||
+      code.type === 'INTENDED_INCOMPLETE') && (code.id !== null)) {
       <button
         mat-icon-button
         [style.width.px]="50"
@@ -172,8 +171,8 @@
       </button>
       } }
     </div>
-    @if (codeModel !== 'MANUAL_ONLY' && !(['RESIDUAL',
-    'RESIDUAL_AUTO','INTENDED_INCOMPLETE'].includes(code.type))) {
+    @if (codeModel !== 'MANUAL_ONLY' && code.type !== 'RESIDUAL' && code.type
+    !== 'RESIDUAL_AUTO' && code.type !== 'INTENDED_INCOMPLETE') {
     <code-rules
       [style.padding-left.px]="4"
       [style.height]="'calc(100% - 60px)'"
@@ -195,8 +194,9 @@
     </code-instruction>
     }
   </div>
-  @if (codeModel === 'NONE') { @if ((code.type === 'RESIDUAL_AUTO' || code.type
-  === 'INTENDED_INCOMPLETE') && !code.manualInstruction) {
+  @if ((codeModel ?? 'NONE') === 'NONE') { @if (code.type && (code.type ===
+  'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE') &&
+  !code.manualInstruction) {
   <div class="fx-flex-fill"></div>
   } @else {
   <code-instruction

@@ -5,7 +5,8 @@ import {
   CodingScheme,
   CodingSchemeVersionMajor,
   CodingSchemeVersionMinor
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+} from '@iqbspecs/coding-scheme';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
 export interface VariableInfoShort {
@@ -73,10 +74,10 @@ export class VeronaAPIService {
       timeStamp: String(Date.now()),
       codingScheme: JSON.stringify(newScheme),
       codingSchemeType: `iqb@${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`,
-      variables: scheme ? scheme.variableCodings.map(c => <VariableInfoShort>{
+      variables: scheme ? scheme.variableCodings.map((c: VariableCodingData) => <VariableInfoShort>{
         id: c.id,
-        alias: c.alias,
-        label: c.label,
+        alias: c.alias || c.id,
+        label: c.label || '',
         page: c.page || ''
       }) : []
     });

@@ -11,7 +11,7 @@ import {
   CodingScheme,
   CodingSchemeVersionMajor,
   CodingSchemeVersionMinor
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+} from '@iqbspecs/coding-scheme';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileService } from './services/file.service';
 import { UserRoleType } from './services/schemer.service';

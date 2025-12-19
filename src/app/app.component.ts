@@ -14,10 +14,8 @@ import { SchemerComponent } from '@ngx-coding-components/schemer/schemer.compone
 import { SchemerStandaloneMenuComponent } from '@ngx-coding-components/schemer-standalone-menu.component';
 import { UserRoleType } from '@ngx-coding-components/services/schemer.service';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import {
-  CodingScheme,
-  VariableCodingData
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingScheme } from '@iqbspecs/coding-scheme';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import sampleCodings1 from '../../sample-data/coding-scheme-1.json';
 import sampleVarList1 from '../../sample-data/var-list-1.json';
 

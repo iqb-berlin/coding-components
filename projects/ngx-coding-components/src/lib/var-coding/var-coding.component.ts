@@ -152,13 +152,15 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   updateHasResidualAutoCode() {
     this.hasResidualAutoCode = this.varCoding ?
-      !!this.varCoding.codes.find(c => c.type === 'RESIDUAL_AUTO') :
+      !!(this.varCoding.codes || []).find(c => c.type === 'RESIDUAL_AUTO') :
       false;
   }
 
   updateHasIntendedIncompleteAutoCode() {
     this.hasIntendedIncompleteAutoCode = this.varCoding ?
-      !!this.varCoding.codes.find(c => c.type === 'INTENDED_INCOMPLETE') :
+      !!(this.varCoding.codes || []).find(
+        c => c.type === 'INTENDED_INCOMPLETE'
+      ) :
       false;
   }
 
@@ -200,7 +202,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   codingAsText() {
     if (this.varCoding) {
-      const deriveSourcesAliases = this.varCoding.deriveSources.map(ds => this.schemerService.getVariableAliasById(ds)
+      const deriveSourcesAliases = (this.varCoding.deriveSources || []).map(
+        ds => this.schemerService.getVariableAliasById(ds)
       );
       const dialogRef = this.showCodingDialog.open(ShowCodingDialogComponent, {
         width: '1000px',
@@ -263,21 +266,21 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     if (this.varCoding) {
       if (event.ctrlKey) {
         if (this.schemerService.codingScheme && this.varCoding) {
-          this.varCoding?.codes.forEach(c => {
+          (this.varCoding?.codes || []).forEach(c => {
             if (!c.type || c.type === 'UNSET') {
-              if (/teilw/i.exec(c.label)) {
+              if (/teilw/i.exec(c.label || '')) {
                 c.label = '';
                 c.type = 'PARTIAL_CREDIT';
-              } else if (/richtig/i.exec(c.label)) {
+              } else if (/richtig/i.exec(c.label || '')) {
                 c.label = '';
                 c.type = 'FULL_CREDIT';
-              } else if (/falsch/i.exec(c.label)) {
+              } else if (/falsch/i.exec(c.label || '')) {
                 c.label = '';
                 c.type = 'NO_CREDIT';
               }
             }
           });
-          this.schemerService.sortCodes(this.varCoding.codes, true);
+          this.schemerService.sortCodes(this.varCoding?.codes || [], true);
           this.varCodingChanged.emit(this.varCoding);
         }
       } else {

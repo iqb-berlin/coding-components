@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { CodingScheme } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingScheme } from '@iqbspecs/coding-scheme';
 import { Response } from '@iqbspecs/response/response.interface';
 import { CodingSchemeFactory } from '@iqb/responses';
 import { ShowCodingResultsComponent } from './show-coding-results.component';
@@ -75,7 +75,7 @@ export class SchemeCheckerComponent {
         }
       });
       const varsWithCodes: string[] = this._codingScheme.variableCodings
-        .filter(v => v.codes.length > 0)
+        .filter(v => v.codes && v.codes.length > 0)
         .map(v => v.id);
       this.showCodingResultsDialog.open(ShowCodingResultsComponent, {
         width: '800px',

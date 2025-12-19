@@ -26,9 +26,9 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import {
   CodingScheme,
   CodingSchemeVersionMajor,
-  CodingSchemeVersionMinor,
-  VariableCodingData
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+  CodingSchemeVersionMinor
+} from '@iqbspecs/coding-scheme';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { CodingSchemeDialogComponent } from '../dialogs/coding-scheme-dialog.component';
 import { SchemerService, UserRoleType } from '../services/schemer.service';
@@ -554,12 +554,13 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   private static isEmptyCoding(coding: VariableCodingData): boolean {
     if (coding.label && coding.label !== coding.id) return false;
     if (
-      coding.processing.length > 0 ||
+      (coding.processing && coding.processing.length > 0) ||
       coding.fragmenting ||
-      coding.codes.length > 0
+      (coding.codes && coding.codes.length > 0)
     ) return false;
     return !(
-      coding.manualInstruction.length > 0 || coding.codeModel !== 'NONE'
+      (coding.manualInstruction && coding.manualInstruction.length > 0) ||
+      coding.codeModel !== 'MANUAL_AND_RULES'
     );
   }
 
@@ -606,7 +607,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
               sourceParameters: dialogResultTyped.sourceParameters,
               deriveSources: dialogResultTyped.deriveSources,
               processing: [],
-              codeModel: 'NONE',
+              codeModel: 'MANUAL_AND_RULES',
               manualInstruction: '',
               codes: [],
               page: ''

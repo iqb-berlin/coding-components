@@ -3,12 +3,14 @@ import { CodingToTextMode } from '@iqb/responses';
 import {
   CodeData,
   CodeType,
-  CodingScheme,
-  DeriveConcatDelimiter,
-  RuleMethodParameterCount,
   VariableCodingData,
   RuleSet
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodingScheme,
+  DeriveConcatDelimiter,
+  RuleMethodParameterCount
+} from '@iqbspecs/coding-scheme';
 import {
   VariableInfo,
   VariableValue
@@ -52,24 +54,26 @@ export class SchemerService {
     }
     if (varCoding.sourceType === 'COPY_VALUE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
-        return this.varList.find(v => v.id === varCoding.deriveSources[0]);
+        return this.varList.find(
+          v => v.id === (varCoding.deriveSources || [])[0]
+        );
       }
     } else if (varCoding.sourceType === 'CONCAT_CODE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
         const codes: (number | 'INVALID' | 'INTENDED_INCOMPLETE')[][] = [];
         let totalCodesCount = 0;
-        varCoding.deriveSources.forEach(s => {
+        varCoding.deriveSources.forEach((s: string) => {
           if (this.codingScheme) {
             const coding = this.codingScheme.variableCodings.find(
               v => v.id === s
             );
-            codes.push(coding ? coding.codes.map(c => c.id) : []);
-            totalCodesCount += coding ? coding.codes.length : 0;
+            codes.push(coding ? (coding.codes || []).map(c => c.id) : []);
+            totalCodesCount += coding ? (coding.codes || []).length : 0;
           }
         });
         let resultArray: string[] = [];
         if (totalCodesCount < 10) {
-          codes.forEach(c => {
+          codes.forEach((c: (number | 'INVALID' | 'INTENDED_INCOMPLETE')[]) => {
             if (resultArray.length > 0) {
               resultArray = resultArray.flatMap(oldEntry => c
                 .filter(cEntry => cEntry !== null)
@@ -126,7 +130,7 @@ export class SchemerService {
 
     const normalisedAlias = checkAlias.toUpperCase();
     const hasDuplicate = this.codingScheme.variableCodings.some(
-      variable => variable.alias?.toUpperCase() === normalisedAlias &&
+      (variable: VariableCodingData) => variable.alias?.toUpperCase() === normalisedAlias &&
         variable.id !== checkId
     );
 
@@ -143,11 +147,11 @@ export class SchemerService {
   canPasteSingleCodeInto(codeList: CodeData[]): boolean {
     if (!this.copiedCode) return false;
     if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return false;
-    if (!codeList) return false;
-
-    const typeToPaste = this.copiedCode.type;
-    if (SchemerService.residualTypes.includes(typeToPaste)) {
-      const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
+    if (!this.copiedCode) return false;
+    const typeToPaste = this.copiedCode.type as CodeType | undefined;
+    if (typeToPaste && SchemerService.residualTypes.includes(typeToPaste)) {
+      const firstResidualOrIntendedIncomplete = codeList.find(
+        c => c.type && SchemerService.residualTypes.includes(c.type)
       );
       if (firstResidualOrIntendedIncomplete) return false;
     }
@@ -159,19 +163,22 @@ export class SchemerService {
     if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return 'code.error-message.no-access';
     if (!codeList) return 'code.error-message.fatal-error';
 
-    const typeToPaste = this.copiedCode.type;
+    const typeToPaste = this.copiedCode.type as CodeType | undefined;
 
     // For these types, the target may only contain one of {RESIDUAL, RESIDUAL_AUTO, INTENDED_INCOMPLETE}
-    if (SchemerService.residualTypes.includes(typeToPaste)) {
-      const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
+    if (typeToPaste && SchemerService.residualTypes.includes(typeToPaste)) {
+      const firstResidualOrIntendedIncomplete = codeList.find(
+        c => c.type && SchemerService.residualTypes.includes(c.type as CodeType)
       );
       if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
     }
 
-    const addResult = this.addCode(codeList, typeToPaste);
+    const addResult = typeToPaste ?
+      this.addCode(codeList, typeToPaste) :
+      'code.error-message.fatal-error';
     if (typeof addResult === 'string') return addResult;
 
-    const created = addResult;
+    const created = addResult as CodeData;
     const payload = JSON.parse(JSON.stringify(this.copiedCode)) as CodeData;
 
     // Keep generated id/type (must behave like newly created code of this type)
@@ -196,7 +203,8 @@ export class SchemerService {
       const hasNullCode =
         codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
       if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
-        const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
+        const firstResidualOrIntendedIncomplete = codeList.find(
+          c => c.type && SchemerService.residualTypes.includes(c.type as CodeType)
         );
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
@@ -215,7 +223,8 @@ export class SchemerService {
         return newCode;
       }
       if (codeType === 'INTENDED_INCOMPLETE') {
-        const firstResidualOrIntendedIncomplete = codeList.find(c => SchemerService.residualTypes.includes(c.type)
+        const firstResidualOrIntendedIncomplete = codeList.find(
+          c => c.type && SchemerService.residualTypes.includes(c.type as CodeType)
         );
         if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
         const newCode = {
@@ -276,7 +285,7 @@ export class SchemerService {
         const firstFollowerCode =
           codeList.length > 0 ?
             codeList.findIndex(
-              c => this.orderOfCodeTypes.indexOf(c.type) >
+              c => this.orderOfCodeTypes.indexOf(c.type as CodeType) >
                   this.orderOfCodeTypes.indexOf(codeType)
             ) :
             -1;
@@ -309,7 +318,7 @@ export class SchemerService {
     const sourceCode = codeList[codeIndex];
     if (
       ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
-        sourceCode.type
+        sourceCode.type as CodeType
       )
     ) {
       return 'code.error-message.type-not-supported';
@@ -357,7 +366,7 @@ export class SchemerService {
             const allCodesOfType = codeList.filter(c => c.type === t);
             if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
           } else {
-            const allResidualCodes = codeList.filter(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type)
+            const allResidualCodes = codeList.filter(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type as CodeType)
             );
             if (allResidualCodes.length === 1) allResidualCodes[0].id = 0;
           }
@@ -373,7 +382,9 @@ export class SchemerService {
           return a.id < b.id ? -1 : 1; // Sort IDs in ascending order
         }
 
-        return getTypeOrder(a.type) - getTypeOrder(b.type);
+        return (
+          getTypeOrder(a.type as CodeType) - getTypeOrder(b.type as CodeType)
+        );
       });
     }
   }
@@ -381,7 +392,7 @@ export class SchemerService {
   getVariableAliasById(varId: string): string {
     if (!varId || !this.codingScheme || !this.codingScheme.variableCodings) return '?';
     const findVar = this.codingScheme.variableCodings.find(
-      v => v.id === varId
+      (v: VariableCodingData) => v.id === varId
     );
     if (findVar) return findVar.alias || findVar.id;
     return '?';
@@ -402,7 +413,7 @@ export class SchemerService {
   getBaseVarsList() {
     if (this.codingScheme) {
       return this.codingScheme.variableCodings.filter(
-        c => c.sourceType === 'BASE'
+        (c: VariableCodingData) => c.sourceType === 'BASE'
       );
     }
     return [];

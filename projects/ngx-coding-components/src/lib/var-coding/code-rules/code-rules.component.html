@@ -1,50 +1,71 @@
 <mat-card [style.height.%]="100">
   <mat-card-content>
-    @if (code ) {
-      @if(code.ruleSets.length > 1 || varInfo && varInfo.multiple) {
-        <div class="fx-row-space-between-start">
-          <h4>Regelsätze</h4>
-          <div class="fx-row-end-center">
-            @if (code.ruleSets.length > 1 && schemerService.userRole !== 'RO') {
-              <mat-button-toggle-group appearance="legacy" (ngModelChange)="setCodeRulesChanged()"
-                                       [(ngModel)]="code.ruleSetOperatorAnd"
-                                       [matTooltip]="'rule-set.prompt.operator' | translate">
-                <mat-button-toggle [value]="false">{{"rule.operator.false" | translate }}</mat-button-toggle>
-                <mat-button-toggle [value]="true">{{"rule.operator.true" | translate }}</mat-button-toggle>
-              </mat-button-toggle-group>
-            }
-          </div>
-        </div>
-      }
-        @for (ruleSet of code.ruleSets; track ruleSet; let ruleSetIndex = $index) {
-          <div class="fx-row-start-start">
-            <div class="fx-column-center-center">
-              @if(code.ruleSets.length > 1 || varInfo && varInfo.multiple) {<h4>{{ ruleSetIndex + 1 }}</h4>}
-              @if ((varInfo && varInfo.multiple || false) && ruleSet.rules.length > 0 && schemerService.userRole !== 'RO') {
-                <button mat-flat-button (click)="editArrayReference(ruleSet)"
-                        [matTooltip]="'rule-set.reference.title' | translate">
-                  A {{ ruleSet.valueArrayPos | ruleReference }}
-                </button>
-              }
-            </div>
-                <code-rule-list [fragmentMode]="fragmentMode || false" [ruleSet]="ruleSet" class="fx-flex-fill code-rule-list"
-                                [arrayMode]="varInfo && varInfo.multiple || false"
-                                (deleteRuleSetRequested)="deleteRuleSet(ruleSetIndex)"
-                                [canDeleteRuleSet]="!!(code.ruleSets.length > 1 || varInfo && varInfo.multiple)"
-                                (codeRulesChanged)="setCodeRulesChanged()">
-
-                </code-rule-list>
-          </div>
-
-
+    @if (code ) { @if(code.ruleSets && code.ruleSets.length > 1 || varInfo &&
+    varInfo.multiple) {
+    <div class="fx-row-space-between-start">
+      <h4>Regelsätze</h4>
+      <div class="fx-row-end-center">
+        @if (code.ruleSets && code.ruleSets.length > 1 &&
+        schemerService.userRole !== 'RO') {
+        <mat-button-toggle-group
+          appearance="legacy"
+          (ngModelChange)="setCodeRulesChanged()"
+          [(ngModel)]="code.ruleSetOperatorAnd"
+          [matTooltip]="'rule-set.prompt.operator' | translate"
+        >
+          <mat-button-toggle [value]="false">{{
+            "rule.operator.false" | translate
+          }}</mat-button-toggle>
+          <mat-button-toggle [value]="true">{{
+            "rule.operator.true" | translate
+          }}</mat-button-toggle>
+        </mat-button-toggle-group>
         }
+      </div>
+    </div>
+    } @for (ruleSet of code.ruleSets; track ruleSet; let ruleSetIndex = $index)
+    {
+    <div class="fx-row-start-start">
+      <div class="fx-column-center-center">
+        @if(code.ruleSets && code.ruleSets.length > 1 || varInfo &&
+        varInfo.multiple) {
+        <h4>{{ ruleSetIndex + 1 }}</h4>
+        } @if ((varInfo && varInfo.multiple || false) && ruleSet.rules.length >
+        0 && schemerService.userRole !== 'RO') {
+        <button
+          mat-flat-button
+          (click)="editArrayReference(ruleSet)"
+          [matTooltip]="'rule-set.reference.title' | translate"
+        >
+          A {{ ruleSet.valueArrayPos | ruleReference }}
+        </button>
+        }
+      </div>
+      <code-rule-list
+        [fragmentMode]="fragmentMode || false"
+        [ruleSet]="ruleSet"
+        class="fx-flex-fill code-rule-list"
+        [arrayMode]="(varInfo && varInfo.multiple) || false"
+        (deleteRuleSetRequested)="deleteRuleSet(ruleSetIndex)"
+        [canDeleteRuleSet]="
+          !!(
+            (code.ruleSets && code.ruleSets.length > 1) ||
+            (varInfo && varInfo.multiple)
+          )
+        "
+        (codeRulesChanged)="setCodeRulesChanged()"
+      >
+      </code-rule-list>
+    </div>
 
-    }
-    @if (varInfo?.multiple && schemerService.userRole !== 'RO') {
-      <button mat-icon-button [matTooltip]="'rule-set.prompt.add' | translate"
-              (click)="addRuleSet()">
-        <mat-icon>add</mat-icon>
-      </button>
+    } } @if (varInfo?.multiple && schemerService.userRole !== 'RO') {
+    <button
+      mat-icon-button
+      [matTooltip]="'rule-set.prompt.add' | translate"
+      (click)="addRuleSet()"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
     }
   </mat-card-content>
 </mat-card>

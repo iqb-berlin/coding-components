@@ -355,12 +355,12 @@ export class GenerateCodingDialogComponent {
         processing: [],
         fragmenting: '',
         manualInstruction: '',
-        codeModel: 'NONE',
+        codeModel: 'MANUAL_AND_RULES',
         codes: []
       };
       if (['auto', 'instruction'].includes(this.elseMethod)) {
         const newResidualCode = this.schemerService.addCode(
-          newVardata.codes,
+          newVardata.codes || [],
           this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO'
         );
         if (
@@ -431,7 +431,7 @@ export class GenerateCodingDialogComponent {
           }
         }
         const newCode = this.schemerService.addCode(
-          newVardata.codes,
+          newVardata.codes || [],
           'FULL_CREDIT'
         );
         if (typeof newCode !== 'string') {
@@ -449,7 +449,7 @@ export class GenerateCodingDialogComponent {
         }
       } else if (this.generationModel === 'simple-input') {
         const newCode = this.schemerService.addCode(
-          newVardata.codes,
+          newVardata.codes || [],
           'FULL_CREDIT'
         );
         if (typeof newCode !== 'string') {
@@ -479,7 +479,7 @@ export class GenerateCodingDialogComponent {
           )
           .forEach(o => {
             const newCode = this.schemerService.addCode(
-              newVardata.codes,
+              newVardata.codes || [],
               'FULL_CREDIT'
             );
             if (typeof newCode !== 'string') {
@@ -504,7 +504,7 @@ export class GenerateCodingDialogComponent {
           )
           .forEach(o => {
             const newCode = this.schemerService.addCode(
-              newVardata.codes,
+              newVardata.codes || [],
               'NO_CREDIT'
             );
             if (typeof newCode !== 'string') {
@@ -523,7 +523,9 @@ export class GenerateCodingDialogComponent {
             }
           });
         // newVardata.codeModel = 'RULES_ONLY';
-        this.schemerService.sortCodes(newVardata.codes, true);
+        if (newVardata.codes) {
+          this.schemerService.sortCodes(newVardata.codes, true);
+        }
         this.dialogRef.close(newVardata);
       } else if (
         this.generationModel === 'multi-choice' &&
@@ -543,7 +545,7 @@ export class GenerateCodingDialogComponent {
           });
         });
         const newCode = this.schemerService.addCode(
-          newVardata.codes,
+          newVardata.codes || [],
           'FULL_CREDIT'
         );
         if (typeof newCode !== 'string') {
@@ -569,7 +571,7 @@ export class GenerateCodingDialogComponent {
         });
 
         const newCode = this.schemerService.addCode(
-          newVardata.codes,
+          newVardata.codes || [],
           'FULL_CREDIT'
         );
         if (typeof newCode !== 'string') {
@@ -618,7 +620,7 @@ export class GenerateCodingDialogComponent {
           });
         }
         const newCode = this.schemerService.addCode(
-          newVardata.codes,
+          newVardata.codes || [],
           'FULL_CREDIT'
         );
         if (typeof newCode !== 'string') {
