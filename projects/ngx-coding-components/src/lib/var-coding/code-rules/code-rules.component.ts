@@ -1,16 +1,26 @@
 import {
-  Component, EventEmitter, Input, Output, ViewChild
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabGroup } from '@angular/material/tabs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import {
+  MatButtonToggleGroup,
+  MatButtonToggle
+} from '@angular/material/button-toggle';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
-import { CodeData, RuleSet } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodeData,
+  RuleSet
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   SelectCodeRuleReferenceDialogComponent,
@@ -19,16 +29,27 @@ import {
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService } from '../../services/schemer.service';
 import { CodeRuleListComponent } from './code-rule-list.component';
-import { MessageDialogComponent, MessageDialogData, MessageType } from '../../dialogs/message-dialog.component';
 
 @Component({
   selector: 'code-rules',
   templateUrl: './code-rules.component.html',
   styleUrls: ['./code-rules.component.scss'],
   standalone: true,
-  imports: [MatCard, MatIconButton, MatTooltipModule, MatIcon, MatButtonToggleGroup,
-    ReactiveFormsModule, FormsModule, MatButtonToggle, MatCardContent, MatButton, TranslateModule,
-    RuleReferencePipe, CodeRuleListComponent]
+  imports: [
+    MatCard,
+    MatIconButton,
+    MatTooltipModule,
+    MatIcon,
+    MatButtonToggleGroup,
+    ReactiveFormsModule,
+    FormsModule,
+    MatButtonToggle,
+    MatCardContent,
+    MatButton,
+    TranslateModule,
+    RuleReferencePipe,
+    CodeRuleListComponent
+  ]
 })
 export class CodeRulesComponent {
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
@@ -38,11 +59,8 @@ export class CodeRulesComponent {
   @ViewChild(MatTabGroup) ruleSetElement: MatTabGroup | undefined;
 
   constructor(
-    private messageDialog: MatDialog,
-    private translateService: TranslateService,
     public schemerService: SchemerService,
     public editRuleReferenceDialog: MatDialog
-
   ) {}
 
   setCodeRulesChanged() {
@@ -65,7 +83,7 @@ export class CodeRulesComponent {
       ]
     };
 
-    this.code.ruleSets = [...this.code.ruleSets, newRuleSet];
+    this.code.ruleSets = [...(this.code.ruleSets || []), newRuleSet];
 
     if (this.ruleSetElement) {
       this.ruleSetElement.selectedIndex = this.code.ruleSets.length - 1;
@@ -77,14 +95,16 @@ export class CodeRulesComponent {
   editArrayReference(ruleSet: RuleSet) {
     if (ruleSet) {
       const dialogRef = this.editRuleReferenceDialog.open(
-        SelectCodeRuleReferenceDialogComponent, {
+        SelectCodeRuleReferenceDialogComponent,
+        {
           width: '400px',
           data: <SelectCodeRuleReferenceDialogData>{
             isFragmentMode: false,
             value: ruleSet.valueArrayPos
           },
           autoFocus: false
-        });
+        }
+      );
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (dialogResult !== false) {
           ruleSet.valueArrayPos = dialogResult;
@@ -95,18 +115,11 @@ export class CodeRulesComponent {
   }
 
   deleteRuleSet(ruleSetToDeleteIndex: number) {
-    if (this.code && ruleSetToDeleteIndex >= 0) {
-      this.code.ruleSets.splice(ruleSetToDeleteIndex, 1);
-      this.setCodeRulesChanged();
-    } else {
-      this.messageDialog.open(MessageDialogComponent, {
-        width: '400px',
-        data: <MessageDialogData>{
-          title: this.translateService.instant('rule-set.prompt.delete'),
-          content: this.translateService.instant('rule-set.delete-error'),
-          type: MessageType.error
-        }
-      });
+    if (!this.code || !this.code.ruleSets) {
+      return;
     }
+
+    this.code.ruleSets.splice(ruleSetToDeleteIndex, 1);
+    this.setCodeRulesChanged();
   }
 }
