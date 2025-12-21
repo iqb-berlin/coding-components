@@ -4,6 +4,7 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslateService } from '@ngx-translate/core';
 import {
   SchemerStandaloneMenuComponent
 } from '@ngx-coding-components/schemer-standalone-menu.component';
@@ -15,9 +16,8 @@ import {
 import { SchemerComponent } from '@ngx-coding-components/schemer/schemer.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import {
-  CodingScheme, VariableCodingData, CodingSchemeVersionMajor, CodingSchemeVersionMinor
-} from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingScheme, CodingSchemeVersionMajor, CodingSchemeVersionMinor } from '@iqbspecs/coding-scheme';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VeronaAPIService, VosStartCommand } from './verona-api.service';
 
 @Component({
@@ -68,7 +68,8 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'schemer';
   constructor(
     private veronaAPIService: VeronaAPIService,
-    private messageDialog: MatDialog
+    private messageDialog: MatDialog,
+    private translate: TranslateService
   ) { }
 
   ngOnInit(): void {
@@ -80,21 +81,22 @@ export class AppComponent implements OnInit, OnDestroy {
         if (message.codingScheme) {
           const compareVersionResult = CodingScheme.checkVersion(message.codingScheme);
           if (compareVersionResult !== 'OK') {
-            let messageText;
+            let messageTextKey = 'schemer.version-mismatch.major-less';
             if (compareVersionResult === 'MINOR_GREATER') {
-              messageText = 'Größere Nebenversion';
+              messageTextKey = 'schemer.version-mismatch.minor-greater';
             } else if (compareVersionResult === 'MAJOR_GREATER') {
-              messageText = 'Größere Hauptversion';
-            } else {
-              messageText = 'Geringere Hauptversion';
+              messageTextKey = 'schemer.version-mismatch.major-greater';
             }
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
-                title: 'Achtung: Abweichende Daten-Version',
-                content: `Sie haben eine abweichende Daten-Version des Kodierschemas geladen: ${messageText}.
-                  Nach dem Speichern ist das Schema auf die Version
-                  ${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor} geändert.`,
+                title: this.translate.instant('schemer.version-mismatch.title'),
+                content: this.translate.instant('schemer.version-mismatch.content', {
+                  mismatch: this.translate.instant(messageTextKey),
+                  major: CodingSchemeVersionMajor,
+                  minor: CodingSchemeVersionMinor
+                }),
+                closeButtonLabel: this.translate.instant('close'),
                 type: MessageType.warning
               }
             });

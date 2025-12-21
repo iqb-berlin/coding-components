@@ -4,6 +4,7 @@ import {
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { TranslateService } from '@ngx-translate/core';
 
 export enum MessageType {
   error,
@@ -37,22 +38,25 @@ export enum MessageType {
   imports: [MatDialogTitle, MatIcon, MatDialogContent, MatDialogActions, MatButton, MatDialogClose]
 })
 export class MessageDialogComponent implements OnInit {
-  constructor(@Inject(MAT_DIALOG_DATA) public messageData: MessageDialogData) { }
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public messageData: MessageDialogData,
+    private translate: TranslateService
+  ) { }
 
   ngOnInit(): void {
     this.messageData.title = this.messageData.title?.trim() || this.getDefaultTitle(this.messageData.type);
-    this.messageData.closeButtonLabel = this.messageData.closeButtonLabel?.trim() || 'Schließen';
+    this.messageData.closeButtonLabel = this.messageData.closeButtonLabel?.trim() || this.translate.instant('close');
   }
 
   // eslint-disable-next-line class-methods-use-this
   private getDefaultTitle(type: MessageType): string {
     switch (type) {
       case MessageType.error:
-        return 'Achtung: Fehler';
+        return this.translate.instant('message-dialog.default-title.error');
       case MessageType.warning:
-        return 'Achtung: Warnung';
+        return this.translate.instant('message-dialog.default-title.warning');
       default:
-        return 'Hinweis';
+        return this.translate.instant('message-dialog.default-title.info');
     }
   }
 }
