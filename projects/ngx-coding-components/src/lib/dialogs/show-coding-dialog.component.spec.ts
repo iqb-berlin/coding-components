@@ -1,4 +1,6 @@
 import { ToTextFactory } from '@iqb/responses';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { ShowCodingDialogComponent } from './show-coding-dialog.component';
 
 describe('ShowCodingDialogComponent', () => {
@@ -6,9 +8,9 @@ describe('ShowCodingDialogComponent', () => {
     spyOn(ToTextFactory, 'sourceAsText').and.returnValue('SRC');
     spyOn(ToTextFactory, 'processingAsText').and.returnValue('PROC');
     spyOn(ToTextFactory, 'codeAsText').and.callFake((code: unknown, mode: unknown) => ({
-      id: code.id,
-      score: code.score,
-      label: code.label,
+      id: (code as { id: number }).id,
+      score: (code as { score: number }).score,
+      label: (code as { label: string }).label,
       ruleSetDescriptions: [`mode:${mode}`],
       ruleSetOperatorAnd: true,
       hasManualInstruction: false
@@ -27,7 +29,7 @@ describe('ShowCodingDialogComponent', () => {
         fragmenting: 'f',
         manualInstruction: 'mi',
         codes: [{ id: 1, score: 1, label: 'c1' }]
-      } as unknown,
+      } as VariableCodingData,
       mode: 'SIMPLE'
     });
 
@@ -56,13 +58,13 @@ describe('ShowCodingDialogComponent', () => {
         fragmenting: '',
         manualInstruction: '',
         codes: [{ id: 1, score: 1, label: 'c1' }]
-      } as unknown,
+      } as VariableCodingData,
       mode: 'SIMPLE'
     });
 
     (ToTextFactory.codeAsText as jasmine.Spy).calls.reset();
 
-    c.updateText({ checked: false } as unknown);
+    c.updateText({ checked: false } as MatSlideToggleChange);
 
     expect(c.mode).toBe('EXTENDED');
     expect(ToTextFactory.codeAsText).toHaveBeenCalledWith(jasmine.objectContaining({ id: 1 }), 'EXTENDED');
@@ -80,7 +82,7 @@ describe('ShowCodingDialogComponent', () => {
         fragmenting: '',
         manualInstruction: '',
         codes: []
-      } as unknown,
+      } as VariableCodingData,
       mode: 'EXTENDED'
     });
 

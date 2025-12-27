@@ -1,22 +1,28 @@
-import { ResolveVarListDuplicatesDialogComponent } from './resolve-varlist-duplicates-dialog.component';
+import { MatDialogRef } from '@angular/material/dialog';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { SchemerService } from '../services/schemer.service';
+import {
+  ResolveVarListDuplicatesDialogComponent,
+  ResolveVarListDuplicatesDialogData
+} from './resolve-varlist-duplicates-dialog.component';
 
 describe('ResolveVarListDuplicatesDialogComponent', () => {
-  type VarListEntry = { id: string; alias: string };
+  type VarListEntry = VariableInfo;
 
   const createComponent = (options: {
-    varList: VarListEntry[];
+    varList: Partial<VarListEntry>[];
     reservedIds?: string[];
   }) => {
     const dialogRef = {
       close: jasmine.createSpy('close')
-    } as unknown as { close: jasmine.Spy };
+    } as unknown as MatDialogRef<ResolveVarListDuplicatesDialogComponent>;
 
-    const data = {
-      varList: options.varList,
+    const data: ResolveVarListDuplicatesDialogData = {
+      varList: options.varList as VariableInfo[],
       reservedIds: options.reservedIds ?? []
-    } as unknown;
+    };
 
-    const schemerService = {} as unknown;
+    const schemerService = jasmine.createSpyObj<SchemerService>('SchemerService', ['setVarList']);
 
     return {
       component: new ResolveVarListDuplicatesDialogComponent(dialogRef, data, schemerService),
@@ -100,7 +106,7 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
 
     expect(dialogRef.close).toHaveBeenCalled();
     const payload = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as {
-      varList: VarListEntry[];
+      varList: VariableInfo[];
       idRenameMap: Record<string, string>;
     };
 
@@ -112,7 +118,8 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
   });
 
   it('sanitizeVarName should replace invalid chars and enforce min length', () => {
-    const sanitize = (ResolveVarListDuplicatesDialogComponent as unknown as { sanitizeVarName: (raw: string) => string }).sanitizeVarName;
+    const sanitize = (ResolveVarListDuplicatesDialogComponent as unknown as
+      { sanitizeVarName: (raw: string) => string }).sanitizeVarName;
 
     expect(sanitize('a')).toBe('a_');
     expect(sanitize('')).toBe('VAR');

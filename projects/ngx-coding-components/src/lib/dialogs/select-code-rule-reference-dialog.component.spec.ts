@@ -1,10 +1,11 @@
-import { SelectCodeRuleReferenceDialogComponent } from './select-code-rule-reference-dialog.component';
+import { MatDialogRef } from '@angular/material/dialog';
+import { SelectCodeRuleReferenceDialogComponent, SelectCodeRuleReferenceDialogData }
+  from './select-code-rule-reference-dialog.component';
 
 describe('SelectCodeRuleReferenceDialogComponent', () => {
-  const createComponent = (data: unknown) => {
-    const dialogRef = {
-      close: jasmine.createSpy('close')
-    } as unknown as { close: jasmine.Spy };
+  const createComponent = (data: SelectCodeRuleReferenceDialogData) => {
+    const dialogRef = jasmine.createSpyObj < MatDialogRef<
+    SelectCodeRuleReferenceDialogComponent >>('MatDialogRef', ['close']);
 
     const component = new SelectCodeRuleReferenceDialogComponent(data, dialogRef);
     return { component, dialogRef };
@@ -24,8 +25,8 @@ describe('SelectCodeRuleReferenceDialogComponent', () => {
     expect(component.newValue).toBe(0);
   });
 
-  it('should default selection to ANY when value is falsy/non-number', () => {
-    const { component } = createComponent({ isFragmentMode: false, value: null });
+  it('should default selection to ANY when value is ANY (or falsy)', () => {
+    const { component } = createComponent({ isFragmentMode: false, value: 'ANY' });
 
     expect(component.newSelection).toEqual(['ANY']);
     expect(component.newValue).toBe(0);

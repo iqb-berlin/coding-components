@@ -1,44 +1,32 @@
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { TranslateService } from '@ngx-translate/core';
+import { MatDialogRef } from '@angular/material/dialog';
+import { CodeData, CodeType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { SchemerService } from '../../services/schemer.service';
 import { GenerateCodingDialogComponent } from './generate-coding-dialog.component';
 
 describe('GenerateCodingDialogComponent', () => {
-  type DialogRefStub = { close: jasmine.Spy };
-  type TranslateServiceStub = { instant: (key: string) => string };
-  type SchemerServiceStub = { addCode: jasmine.Spy; sortCodes: jasmine.Spy };
-  type VarInfoStub = {
-    id: string;
-    alias: string;
-    type: string;
-    multiple: boolean;
-    values: Array<{ value: string; label?: string }>;
-    valuesComplete: boolean;
-    valuePositionLabels: string[];
-  };
+  const createComponent = (overrides: Partial<VariableInfo> = {}) => {
+    const dialogRef = jasmine.createSpyObj<MatDialogRef<GenerateCodingDialogComponent>>('MatDialogRef', ['close']);
 
-  const createComponent = (overrides: Partial<VarInfoStub> = {}) => {
-    const dialogRef = {
-      close: jasmine.createSpy('close')
-    } as DialogRefStub;
+    const translateService = jasmine.createSpyObj<TranslateService>('TranslateService', ['instant']);
+    translateService.instant.and.callFake((key: string) => key);
 
-    const translateService = {
-      instant: (key: string) => key
-    } as TranslateServiceStub;
+    const schemerService = jasmine.createSpyObj<SchemerService>('SchemerService', ['addCode', 'sortCodes']);
 
-    const schemerService = {
-      addCode: jasmine.createSpy('addCode'),
-      sortCodes: jasmine.createSpy('sortCodes')
-    } as SchemerServiceStub;
-
-    const varInfo = {
+    const varInfo: VariableInfo = {
       id: 'v1',
       alias: 'V1',
       type: 'string',
+      format: '',
       multiple: false,
+      nullable: false,
       values: [],
       valuesComplete: true,
       valuePositionLabels: [],
       ...overrides
-    } as VarInfoStub;
+    } as VariableInfo;
 
     const component = new GenerateCodingDialogComponent(
       varInfo,
@@ -66,7 +54,8 @@ describe('GenerateCodingDialogComponent', () => {
     });
   });
 
-  it('constructor should set generationModel to single-choice-many when values > 20 and set elseMethod based on valuesComplete', () => {
+  it('constructor should set generationModel to single-choice-many when values > 20 ' +
+    'and set elseMethod based on valuesComplete', () => {
     const values = Array.from({ length: 21 }).map((_, i) => ({
       value: `v${i}`,
       label: `label${i}`
@@ -169,7 +158,7 @@ describe('GenerateCodingDialogComponent', () => {
   });
 
   it('generateButtonClick should close null when generationModel is none', () => {
-    const { component, dialogRef } = createComponent(null as unknown as Partial<VarInfoStub>);
+    const { component, dialogRef } = createComponent();
 
     component.generationModel = 'none';
     component.generateButtonClick();
@@ -186,21 +175,22 @@ describe('GenerateCodingDialogComponent', () => {
     component.generationModel = 'integer';
     component.numericMatch = '7';
 
-    schemerService.addCode.and.callFake((codes: unknown, type: string) => {
-      const codesArray = codes as Array<{ id: number; type: string }>;
-      const code = { id: 1, type };
-      codesArray.push(code);
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = { id: 1, type } as CodeData;
+      codes.push(code);
       return code;
     });
 
     component.generateButtonClick();
 
     expect(dialogRef.close).toHaveBeenCalled();
-    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as { id: string; codes: unknown[] };
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as
+      { id: string; codes: unknown[] };
     expect(closed.id).toBe('v1');
     expect(closed.codes.length).toBeGreaterThan(0);
 
-    const fullCredit = (closed.codes as Array<{ type: string; ruleSets: Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
+    const fullCredit = (closed.codes as Array<
+    { type: string; ruleSets: Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
       .find(c => c.type === 'FULL_CREDIT')!;
     expect(fullCredit.ruleSets[0].rules[0].method).toBe('NUMERIC_MATCH');
     expect(fullCredit.ruleSets[0].rules[0].parameters).toEqual(['7']);
@@ -231,17 +221,17 @@ describe('GenerateCodingDialogComponent', () => {
     component.generationModel = 'simple-input';
     component.selectedOption = 'abc';
 
-    schemerService.addCode.and.callFake((codes: unknown, type: string) => {
-      const codesArray = codes as Array<{ id: number; type: string }>;
-      const code = { id: 1, type };
-      codesArray.push(code);
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = { id: 1, type } as CodeData;
+      codes.push(code);
       return code;
     });
 
     component.generateButtonClick();
 
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as { codes: unknown[] };
-    const fullCredit = (closed.codes as Array<{ type: string; ruleSets: Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
+    const fullCredit = (closed.codes as Array<{ type: string; ruleSets:
+    Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
       .find(c => c.type === 'FULL_CREDIT')!;
     expect(fullCredit.ruleSets[0].rules[0]).toEqual({
       method: 'MATCH',
@@ -253,7 +243,7 @@ describe('GenerateCodingDialogComponent', () => {
     const { component, dialogRef, schemerService } = createComponent({
       type: 'string',
       multiple: true,
-      values: [{ value: 'A' }, { value: 'B' }],
+      values: [{ value: 'A', label: 'A' }, { value: 'B', label: 'B' }],
       valuePositionLabels: ['p1', 'p2']
     });
 
@@ -264,17 +254,17 @@ describe('GenerateCodingDialogComponent', () => {
       { value: 'B', oldIndex: 1 }
     ];
 
-    schemerService.addCode.and.callFake((codes: unknown, type: string) => {
-      const codesArray = codes as Array<{ id: number; type: string }>;
-      const code = { id: 1, type };
-      codesArray.push(code);
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = { id: 1, type } as CodeData;
+      codes.push(code);
       return code;
     });
 
     component.generateButtonClick();
 
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as { codes: unknown[] };
-    const fullCredit = (closed.codes as Array<{ type: string; ruleSets: Array<{ valueArrayPos?: number; rules: unknown[] }> }>)
+    const fullCredit = (closed.codes as Array<{ type: string; ruleSets: Array<
+    { valueArrayPos?: number; rules: unknown[] }> }>)
       .find(c => c.type === 'FULL_CREDIT')!;
     expect(fullCredit.ruleSets.length).toBe(2);
     expect(fullCredit.ruleSets[0].valueArrayPos).toBe(0);
@@ -291,10 +281,9 @@ describe('GenerateCodingDialogComponent', () => {
     component.generationModel = 'boolean-multi';
     component.booleanMultiSelections = [true, false];
 
-    schemerService.addCode.and.callFake((codes: unknown, type: string) => {
-      const codesArray = codes as Array<{ id: number; type: string }>;
-      const code = { id: 1, type };
-      codesArray.push(code);
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = { id: 1, type } as CodeData;
+      codes.push(code);
       return code;
     });
 
@@ -309,7 +298,7 @@ describe('GenerateCodingDialogComponent', () => {
 
   it('returnOption should reinsert option in oldIndex order', () => {
     const { component } = createComponent({
-      values: [{ value: 'A' }, { value: 'B' }, { value: 'C' }]
+      values: [{ value: 'A', label: 'A' }, { value: 'B', label: 'B' }, { value: 'C', label: 'C' }]
     });
 
     // simulate that B was moved into selectedDragOptions

@@ -1,4 +1,7 @@
-import { EditSourceParametersDialog } from './edit-source-parameters-dialog.component';
+import { SourceType, VariableSourceParameters, SourceProcessingType } from
+  '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { EditSourceParametersDialog, EditSourceParametersDialogData } from './edit-source-parameters-dialog.component';
+import { SchemerService } from '../../services/schemer.service';
 
 describe('EditSourceParametersDialog', () => {
   const createDialog = (options: {
@@ -17,11 +20,11 @@ describe('EditSourceParametersDialog', () => {
       baseSourceParameters.processing = [...options.sourceParameters.processing];
     }
 
-    const data = {
+    const data: EditSourceParametersDialogData = {
       selfId: options.selfId ?? 'v1',
       selfAlias: options.selfAlias ?? 'V1',
-      sourceType: options.sourceType ?? 'COPY_VALUE',
-      sourceParameters: baseSourceParameters,
+      sourceType: (options.sourceType as SourceType) ?? 'COPY_VALUE',
+      sourceParameters: baseSourceParameters as VariableSourceParameters,
       deriveSources: [...(options.deriveSources ?? [])]
     };
 
@@ -36,9 +39,9 @@ describe('EditSourceParametersDialog', () => {
             { id: 'v3', alias: 'V3', sourceType: 'BASE_NO_VALUE' }
           ]
         }
-    } as unknown;
+    } as unknown as SchemerService;
 
-    return new EditSourceParametersDialog(data as unknown, schemerService as unknown);
+    return new EditSourceParametersDialog(data, schemerService);
   };
 
   it('should set newVariableMode when selfId is missing', () => {
@@ -52,7 +55,7 @@ describe('EditSourceParametersDialog', () => {
 
     (dialog.data as unknown as { sourceType: string }).sourceType = 'UNIQUE_VALUES';
     dialog.updatePossibleDeriveProcessing();
-    expect(dialog.possibleDeriveProcessing).toContain('TO_LOWER_CASE');
+    expect(dialog.possibleDeriveProcessing).toContain('TO_LOWER_CASE' as SourceProcessingType);
 
     (dialog.data as unknown as { sourceType: string }).sourceType = 'SOLVER';
     dialog.updatePossibleDeriveProcessing();
@@ -81,22 +84,22 @@ describe('EditSourceParametersDialog', () => {
   it('alterProcessing should add/remove entries when processing list exists', () => {
     const dialog = createDialog({ sourceParameters: { processing: [] } });
 
-    dialog.alterProcessing('SORT' as unknown as Parameters<EditSourceParametersDialog['alterProcessing']>[0], true);
-    expect((dialog.data as unknown as { sourceParameters: { processing: string[] } }).sourceParameters.processing).toEqual(['SORT']);
+    dialog.alterProcessing('SORT' as SourceProcessingType, true);
+    expect(dialog.data.sourceParameters.processing).toEqual(['SORT' as SourceProcessingType]);
 
-    dialog.alterProcessing('SORT' as unknown as Parameters<EditSourceParametersDialog['alterProcessing']>[0], true);
-    expect((dialog.data as unknown as { sourceParameters: { processing: string[] } }).sourceParameters.processing).toEqual(['SORT']);
+    dialog.alterProcessing('SORT' as SourceProcessingType, true);
+    expect(dialog.data.sourceParameters.processing).toEqual(['SORT' as SourceProcessingType]);
 
-    dialog.alterProcessing('SORT' as unknown as Parameters<EditSourceParametersDialog['alterProcessing']>[0], false);
-    expect((dialog.data as unknown as { sourceParameters: { processing: string[] } }).sourceParameters.processing).toEqual([]);
+    dialog.alterProcessing('SORT' as SourceProcessingType, false);
+    expect(dialog.data.sourceParameters.processing).toEqual([]);
   });
 
   it('alterProcessing should do nothing when processing list is missing', () => {
     const dialog = createDialog({ sourceParameters: {} });
 
-    dialog.alterProcessing('SORT' as unknown as Parameters<EditSourceParametersDialog['alterProcessing']>[0], true);
+    dialog.alterProcessing('SORT' as SourceProcessingType, true);
 
-    expect((dialog.data as unknown as { sourceParameters: { processing: string[] } }).sourceParameters.processing).toEqual(['SORT']);
+    expect(dialog.data.sourceParameters.processing).toEqual(['SORT' as SourceProcessingType]);
   });
 
   it('updateDeriveSources should copy selectedSources value into data.deriveSources', () => {
@@ -105,7 +108,7 @@ describe('EditSourceParametersDialog', () => {
     dialog.selectedSources.setValue(['v2']);
     dialog.updateDeriveSources();
 
-    expect((dialog.data as unknown as { deriveSources: string[] }).deriveSources).toEqual(['v2']);
+    expect(dialog.data.deriveSources).toEqual(['v2']);
   });
 
   it('toggleAllSelection should select all possibleNewSources keys', () => {

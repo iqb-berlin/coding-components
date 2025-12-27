@@ -1,4 +1,5 @@
-import { CodingSchemeFactory } from '@iqb/responses';
+import { CodingSchemeFactory, VariableGraphNode } from '@iqb/responses';
+import { CodingScheme } from '@iqbspecs/coding-scheme';
 import { ShowDependencyTreeDialogComponent } from './show-dependency-tree-dialog.component';
 
 describe('ShowDependencyTreeDialogComponent', () => {
@@ -7,7 +8,7 @@ describe('ShowDependencyTreeDialogComponent', () => {
 
     const c = new ShowDependencyTreeDialogComponent({
       variableCodings: []
-    } as unknown as { variableCodings: unknown[] });
+    } as unknown as CodingScheme);
 
     expect(c.errorMessage).toBe('varList.derived-tree.error');
     expect(Array.from(c.varNodeRows.keys())).toEqual([]);
@@ -15,14 +16,20 @@ describe('ShowDependencyTreeDialogComponent', () => {
 
   it('should compute varNodeRows for nodes with level > 0 in descending order', () => {
     spyOn(CodingSchemeFactory, 'getVariableDependencyTree').and.returnValue([
-      { id: 'A', level: 0, sources: [] },
-      { id: 'B', level: 1, sources: ['A'] },
-      { id: 'C', level: 2, sources: ['A', 'B'] }
-    ] as unknown as Array<{ id: string; level: number; sources: string[] }>);
+      {
+        id: 'A', level: 0, sources: [], page: ''
+      },
+      {
+        id: 'B', level: 1, sources: ['A'], page: ''
+      },
+      {
+        id: 'C', level: 2, sources: ['A', 'B'], page: ''
+      }
+    ] as VariableGraphNode[]);
 
     const c = new ShowDependencyTreeDialogComponent({
       variableCodings: []
-    } as unknown as { variableCodings: unknown[] });
+    } as unknown as CodingScheme);
 
     expect(c.errorMessage).toBe('');
 
@@ -35,12 +42,14 @@ describe('ShowDependencyTreeDialogComponent', () => {
 
   it('should set empty sources list when sources do not resolve to nodes', () => {
     spyOn(CodingSchemeFactory, 'getVariableDependencyTree').and.returnValue([
-      { id: 'B', level: 1, sources: ['X'] }
-    ] as unknown as Array<{ id: string; level: number; sources: string[] }>);
+      {
+        id: 'B', level: 1, sources: ['X'], page: ''
+      }
+    ] as VariableGraphNode[]);
 
     const c = new ShowDependencyTreeDialogComponent({
       variableCodings: []
-    } as unknown as { variableCodings: unknown[] });
+    } as unknown as CodingScheme);
 
     expect(c.varNodeRows.get('B')).toEqual([]);
   });

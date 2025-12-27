@@ -35,12 +35,10 @@ describe('schemer-varlist-utils', () => {
     });
 
     it('should return arrays/objects unchanged (cast)', () => {
-      const arr = [{ id: 'x' }];
-      const arrUnknown = arr as unknown;
+      const arrUnknown = [{ id: 'x' }] as unknown;
       expect(parseVarListInput(arrUnknown)).toBe(arrUnknown);
 
-      const obj = { foo: 'bar' };
-      const objUnknown = obj as unknown;
+      const objUnknown = { foo: 'bar' } as unknown;
       expect(parseVarListInput(objUnknown)).toBe(objUnknown);
     });
   });

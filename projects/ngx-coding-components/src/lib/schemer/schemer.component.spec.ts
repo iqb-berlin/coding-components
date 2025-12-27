@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
@@ -8,6 +9,7 @@ import { FileService } from '../services/file.service';
 import { SchemerComponent } from './schemer.component';
 
 class FakeTranslateService {
+  // eslint-disable-next-line class-methods-use-this
   instant(key: string): string {
     return key;
   }

@@ -1,26 +1,11 @@
-import { SelectVariableDialogComponent } from './select-variable-dialog.component';
+import { MatDialogRef } from '@angular/material/dialog';
+import { SelectVariableDialogComponent, SelectVariableDialogData } from './select-variable-dialog.component';
 
 describe('SelectVariableDialogComponent', () => {
-  type VariableStub = { id: string; alias?: string | null };
-  type SelectDataStub = {
-    title: string;
-    prompt: string;
-    variables: VariableStub[];
-    selectedVariable: VariableStub | null;
-    codingStatus: Record<string, unknown>;
-    okButtonLabel: string;
-  };
-  type VariablesElementStub = {
-    selectedOptions?: { selected: Array<{ value: string }> };
-    options?: Array<{ value: string; selected: boolean }>;
-  };
+  const createComponent = (overrides?: Partial<SelectVariableDialogData>) => {
+    const dialogRef = jasmine.createSpyObj<MatDialogRef<SelectVariableDialogComponent>>('MatDialogRef', ['close']);
 
-  const createComponent = (overrides?: Partial<SelectDataStub>) => {
-    const dialogRef = {
-      close: jasmine.createSpy('close')
-    } as unknown as { close: jasmine.Spy };
-
-    const selectData = {
+    const selectData: SelectVariableDialogData = {
       title: '',
       prompt: '',
       variables: [],
@@ -28,9 +13,9 @@ describe('SelectVariableDialogComponent', () => {
       codingStatus: {},
       okButtonLabel: '',
       ...overrides
-    } as SelectDataStub;
+    };
 
-    const component = new SelectVariableDialogComponent(selectData as unknown, dialogRef);
+    const component = new SelectVariableDialogComponent(selectData, dialogRef);
 
     return { component, dialogRef, selectData };
   };
@@ -40,9 +25,9 @@ describe('SelectVariableDialogComponent', () => {
       title: '',
       okButtonLabel: '',
       variables: [
-        { id: 'b', alias: 'B' },
-        { id: 'a', alias: '' },
-        { id: 'c', alias: 'A' }
+        { id: 'b', alias: 'B', sourceType: 'BASE' },
+        { id: 'a', alias: '', sourceType: 'BASE' },
+        { id: 'c', alias: 'A', sourceType: 'BASE' }
       ]
     });
 
@@ -63,11 +48,11 @@ describe('SelectVariableDialogComponent', () => {
 
     expect(component.getSelected()).toEqual([]);
 
-    component.variablesElement = {
+    (component as unknown as { variablesElement: unknown }).variablesElement = {
       selectedOptions: {
         selected: [{ value: 'x' }, { value: 'y' }]
       }
-    } as unknown as VariablesElementStub;
+    };
 
     expect(component.getSelected()).toEqual(['x', 'y']);
   });
@@ -75,11 +60,11 @@ describe('SelectVariableDialogComponent', () => {
   it('okButtonClick should close dialog with selected values (or undefined if none)', () => {
     const { component, dialogRef } = createComponent();
 
-    component.variablesElement = {
+    (component as unknown as { variablesElement: unknown }).variablesElement = {
       selectedOptions: {
         selected: [{ value: 'v1' }, { value: 'v2' }]
       }
-    } as unknown as VariablesElementStub;
+    };
 
     component.okButtonClick();
 
@@ -93,16 +78,16 @@ describe('SelectVariableDialogComponent', () => {
 
   it('ngOnInit should preselect the selectedVariable alias after timeout', () => {
     const { component } = createComponent({
-      selectedVariable: { id: 'x', alias: 'AliasX' },
-      variables: [{ id: 'x', alias: 'AliasX' }]
+      selectedVariable: { id: 'x', alias: 'AliasX', sourceType: 'BASE' },
+      variables: [{ id: 'x', alias: 'AliasX', sourceType: 'BASE' }]
     });
 
     const option1 = { value: 'AliasX', selected: false };
     const option2 = { value: 'Other', selected: false };
 
-    component.variablesElement = {
+    (component as unknown as { variablesElement: unknown }).variablesElement = {
       options: [option1, option2]
-    } as unknown as VariablesElementStub;
+    };
 
     spyOn(window, 'setTimeout').and.callFake(((fn: () => void) => {
       fn();
@@ -118,14 +103,14 @@ describe('SelectVariableDialogComponent', () => {
   it('ngOnInit should not throw and should not select anything when selectedVariable is null or has no alias', () => {
     const { component } = createComponent({
       selectedVariable: null,
-      variables: [{ id: 'x', alias: 'AliasX' }]
+      variables: [{ id: 'x', alias: 'AliasX', sourceType: 'BASE' }]
     });
 
     const option1 = { value: 'AliasX', selected: true };
 
-    component.variablesElement = {
+    (component as unknown as { variablesElement: unknown }).variablesElement = {
       options: [option1]
-    } as unknown as VariablesElementStub;
+    };
 
     spyOn(window, 'setTimeout').and.callFake(((fn: () => void) => {
       fn();

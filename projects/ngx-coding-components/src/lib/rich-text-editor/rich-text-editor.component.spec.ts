@@ -1,3 +1,4 @@
+import { Editor } from '@tiptap/core';
 import { RichTextEditorComponent } from './rich-text-editor.component';
 import { FileService } from '../services/file.service';
 
@@ -92,11 +93,11 @@ describe('RichTextEditorComponent', () => {
     const fakeEditor: FakeEditor = {
       chain: () => chain,
       commands: commandSpyHost,
-      isActive: (name: string) => !!active[name],
+      isActive: (name: string) => active[name],
       getAttributes: () => ({})
     };
 
-    component.editor = fakeEditor;
+    component.editor = fakeEditor as unknown as Editor;
     return { component, chain, commands: commandSpyHost };
   };
 
