@@ -91,6 +91,10 @@
               ],
               "outputHashing": "all"
             },
+            "elements": {
+              "outputPath": "dist/coding-components-elements",
+              "outputHashing": "none"
+            },
             "development": {
               "buildOptimizer": false,
               "optimization": false,

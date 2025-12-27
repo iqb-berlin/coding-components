@@ -11,3 +11,4 @@ export * from './lib/dialogs/select-variable-dialog.component';
 export * from './lib/dialogs/show-coding-dialog.component';
 export * from './lib/dialogs/simple-input-dialog.component';
 export * from './lib/dialogs/coding-scheme-dialog.component';
+export * from './lib/elements/register-elements';

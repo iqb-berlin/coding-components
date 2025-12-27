@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -105,7 +105,8 @@ import sampleVarList1 from '../../sample-data/var-list-1.json';
     SchemerComponent,
     SchemerStandaloneMenuComponent,
     MatTooltipModule
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppComponent {
   varList1 = sampleVarList1 as VariableInfo[];
