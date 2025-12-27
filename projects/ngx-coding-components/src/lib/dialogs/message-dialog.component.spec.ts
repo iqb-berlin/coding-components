@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { TranslateService } from '@ngx-translate/core';
 
 import { MessageDialogComponent, MessageDialogData, MessageType } from './message-dialog.component';
 
@@ -18,7 +19,23 @@ describe('MessageDialogComponent', () => {
 
     TestBed.configureTestingModule({
       imports: [MessageDialogComponent],
-      providers: [{ provide: MAT_DIALOG_DATA, useValue: full }]
+      providers: [
+        { provide: MAT_DIALOG_DATA, useValue: full },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (key: string) => {
+              const dict: Record<string, string> = {
+                close: 'Schließen',
+                'message-dialog.default-title.error': 'Achtung: Fehler',
+                'message-dialog.default-title.warning': 'Achtung: Warnung',
+                'message-dialog.default-title.info': 'Achtung: Info'
+              };
+              return dict[key] ?? key;
+            }
+          }
+        }
+      ]
     });
 
     fixture = TestBed.createComponent(MessageDialogComponent);
