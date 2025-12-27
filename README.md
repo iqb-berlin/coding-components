@@ -41,7 +41,7 @@ This repo provides two deliverables:
   - Floating menu used during development:
     - load variable list from JSON
     - load/save coding scheme JSON
-    - switch user role (read-only vs minimal vs maximal editing)
+    - switch user role (read-only vs. minimal vs. maximal editing)
 
 Additionally, this library exports multiple dialogs and helpers (see “Public API / Exports”).
 
@@ -282,6 +282,9 @@ Exports include:
   - `SimpleInputDialogComponent`
   - `CodingSchemeDialogComponent`
 
+- Custom Elements helper:
+  - `registerNgxCodingComponentsElements`
+
 ---
 
 # End-user guide (quick)
@@ -363,3 +366,85 @@ The steps to publish a new release of the schemer:
 - commit, push and create a GitHub release
   - attach the built HTML file as a release asset
 
+# Web Components / Custom Elements (framework-agnostic)
+
+This repository can also build the main UI components as **Web Components** using **Angular Elements**.
+
+- Angular Elements produces **Custom Elements** (part of the Web Components standards).
+- Custom Elements are **framework-agnostic**: you can use them from plain HTML/JS or from other frameworks (React, Vue, etc.).
+
+## Building the Elements bundle (this repository)
+
+```bash
+npm run build:elements
+```
+
+Output folder:
+
+- `dist/coding-components-elements/`
+
+## Serving locally
+
+```bash
+npm run serve:elements
+```
+
+Then open the served `index.html`. The bundle loads as:
+
+- `runtime.js`
+- `polyfills.js`
+- `main.js`
+- `styles.css`
+
+## Registering the custom elements (library API)
+
+The library exports a helper that registers all custom elements:
+
+- `registerNgxCodingComponentsElements(injector, options?)`
+
+Example:
+
+```ts
+import { createApplication } from '@angular/platform-browser';
+import { registerNgxCodingComponentsElements } from '@iqb/ngx-coding-components';
+
+const app = await createApplication({ providers: [] });
+registerNgxCodingComponentsElements(app.injector);
+```
+
+By default, tags are registered with prefix `ngx-` (example: `<ngx-schemer>`). You can override the prefix:
+
+```ts
+registerNgxCodingComponentsElements(app.injector, { prefix: 'iqb' });
+```
+
+## Using custom elements from plain HTML/JS
+
+Custom Elements receive their inputs as **DOM properties**, and outputs are emitted as **DOM events**.
+
+Example (simplified):
+
+```js
+const CODING_SCHEME_CHANGED_EVENT = 'codingSchemeChanged';
+
+function initializeSchemer(schemer, config) {
+  schemer.varList = config.varList;
+  schemer.codingScheme = config.codingScheme;
+  schemer.userRole = config.userRole;
+
+  schemer.addEventListener(CODING_SCHEME_CHANGED_EVENT, (event) => {
+    console.log(event.detail);
+  });
+}
+
+const schemerElement = document.querySelector('ngx-schemer');
+const schemerConfig = {
+  varList: [...],
+  codingScheme: ...,
+  userRole: 'RW_MAXIMAL'
+};
+
+initializeSchemer(schemerElement, schemerConfig);
+```
+
+---
