@@ -49,10 +49,6 @@ import {
   MessageType
 } from '../dialogs/message-dialog.component';
 import {
-  ResolveVarListDuplicatesDialogComponent,
-  ResolveVarListDuplicatesDialogResult
-} from '../dialogs/resolve-varlist-duplicates-dialog.component';
-import {
   SimpleInputDialogComponent,
   SimpleInputDialogData
 } from '../dialogs/simple-input-dialog.component';
@@ -61,6 +57,8 @@ import {
   EditSourceParametersDialog,
   EditSourceParametersDialogData
 } from '../var-coding/dialogs/edit-source-parameters-dialog.component';
+import { SchemerFacadeService } from '../services/schemer-facade.service';
+import { parseVarListInput } from '../services/schemer-varlist-utils';
 
 @Component({
   selector: 'iqb-schemer',
@@ -111,11 +109,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   set varList(value: any) {
     this.schemerService.setVarList([]);
     if (value) {
-      if (typeof value === 'string') {
-        this.schemerService.setVarList(value ? JSON.parse(value) : []);
-      } else {
-        this.schemerService.setVarList(value);
-      }
+      this.schemerService.setVarList(parseVarListInput(value));
       this.selectVarScheme();
       this.updateVariableLists();
     }
@@ -125,129 +119,18 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     return this.schemerService.varList;
   }
 
-  private tryResolveVarListDuplicates(): boolean {
-    if (this.resolvingVarListDuplicates) {
-      return false;
-    }
-
-    const varList = this.schemerService.varList || [];
-    if (varList.length === 0) {
-      return false;
-    }
-
-    const signature = varList
-      .map(
-        v => `${(v.id || '').trim().toUpperCase()}|${(v.alias || v.id || '')
-          .trim()
-          .toUpperCase()}`
-      )
-      .join(';;');
-
-    if (this.dismissedVarListDuplicateSignature === signature) {
-      return false;
-    }
-
-    const idCounts = new Map<string, number>();
-    const aliasCounts = new Map<string, number>();
-
-    varList.forEach(v => {
-      const id = (v.id || '').trim();
-      const aliasOrId = (v.alias || v.id || '').trim();
-
-      if (id) {
-        const key = id.toUpperCase();
-        idCounts.set(key, (idCounts.get(key) || 0) + 1);
-      }
-      if (aliasOrId) {
-        const key = aliasOrId.toUpperCase();
-        aliasCounts.set(key, (aliasCounts.get(key) || 0) + 1);
-      }
-    });
-
-    const hasDuplicateId = Array.from(idCounts.values()).some(c => c > 1);
-    const hasDuplicateAlias = Array.from(aliasCounts.values()).some(
-      c => c > 1
-    );
-
-    if (!hasDuplicateId && !hasDuplicateAlias) {
-      return false;
-    }
-
-    this.resolvingVarListDuplicates = true;
-
-    const reservedIds = this.schemerService.codingScheme?.variableCodings ?
-      this.schemerService.codingScheme.variableCodings.map(c => c.id) :
-      [];
-
-    const dialogRef = this.messageDialog.open(
-      ResolveVarListDuplicatesDialogComponent,
-      {
-        width: '850px',
-        disableClose: true,
-        data: {
-          varList: this.schemerService.varList,
-          reservedIds
-        }
-      }
-    );
-
-    dialogRef.afterClosed().subscribe(dialogResult => {
-      this.resolvingVarListDuplicates = false;
-
-      if (!dialogResult) {
-        this.dismissedVarListDuplicateSignature = signature;
-        return;
-      }
-
-      const result = dialogResult as ResolveVarListDuplicatesDialogResult;
-      this.dismissedVarListDuplicateSignature = null;
-
-      this.schemerService.setVarList((result.varList || []).map(v => ({
-        ...v
-      })));
-
-      if (this.schemerService.codingScheme?.variableCodings) {
-        const renameMap = result.idRenameMap || {};
-
-        this.schemerService.codingScheme.variableCodings.forEach(vc => {
-          const newId = renameMap[vc.id];
-          if (newId) {
-            vc.id = newId;
-          }
-          if (vc.deriveSources && vc.deriveSources.length > 0) {
-            vc.deriveSources = vc.deriveSources.map(
-              ds => renameMap[ds] || ds
-            );
-          }
-        });
-
-        const selected = this.selectedCoding$.getValue();
-        if (selected && renameMap[selected.id]) {
-          selected.id = renameMap[selected.id];
-        }
-
-        this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-      }
-
-      this.updateVariableLists();
-    });
-
-    return true;
-  }
-
   basicVariables: VariableCodingData[] = [];
   derivedVariables: VariableCodingData[] = [];
   codingStatus: { [id: string]: string } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
   problems: CodingSchemeProblem[] = [];
   varCodingChangedSubscription: Subscription | null = null;
-
-  private resolvingVarListDuplicates = false;
-  private dismissedVarListDuplicateSignature: string | null = null;
+  varListDuplicatesResolvedSubscription: Subscription | null = null;
 
   constructor(
     private translateService: TranslateService,
     public schemerService: SchemerService,
+    private schemerFacade: SchemerFacadeService,
     private messageDialog: MatDialog,
     private showCodingProblemsDialog: MatDialog,
     private showCodingSchemeDialog: MatDialog,
@@ -283,10 +166,21 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
           this.codingSchemeChanged.emit(this.schemerService.codingScheme);
         });
     }
+
+    this.varListDuplicatesResolvedSubscription =
+      this.schemerFacade.varListDuplicatesResolved$.subscribe(result => {
+        const renameMap = result.idRenameMap || {};
+        const selected = this.selectedCoding$.getValue();
+        if (selected && renameMap[selected.id]) {
+          selected.id = renameMap[selected.id];
+        }
+        this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+        this.updateVariableLists();
+      });
   }
 
   updateVariableLists() {
-    if (this.tryResolveVarListDuplicates()) {
+    if (this.schemerFacade.tryResolveVarListDuplicates()) {
       return;
     }
 
@@ -899,5 +793,6 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
+    if (this.varListDuplicatesResolvedSubscription !== null) this.varListDuplicatesResolvedSubscription.unsubscribe();
   }
 }
