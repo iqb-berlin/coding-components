@@ -93,7 +93,7 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: CodingScheme | null) {
-    this.schemerService.codingScheme = value;
+    this.schemerService.setCodingScheme(value);
     this.updateVariableLists();
   }
 
@@ -103,18 +103,18 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   @Input()
   set userRole(value: UserRoleType) {
-    this.schemerService.userRole = value;
+    this.schemerService.setUserRole(value);
   }
 
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varList(value: any) {
-    this.schemerService.varList = [];
+    this.schemerService.setVarList([]);
     if (value) {
       if (typeof value === 'string') {
-        this.schemerService.varList = value ? JSON.parse(value) : [];
+        this.schemerService.setVarList(value ? JSON.parse(value) : []);
       } else {
-        this.schemerService.varList = value;
+        this.schemerService.setVarList(value);
       }
       this.selectVarScheme();
       this.updateVariableLists();
@@ -202,9 +202,9 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       const result = dialogResult as ResolveVarListDuplicatesDialogResult;
       this.dismissedVarListDuplicateSignature = null;
 
-      this.schemerService.varList = (result.varList || []).map(v => ({
+      this.schemerService.setVarList((result.varList || []).map(v => ({
         ...v
-      }));
+      })));
 
       if (this.schemerService.codingScheme?.variableCodings) {
         const renameMap = result.idRenameMap || {};
@@ -395,10 +395,16 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
       this.schemerService.codingScheme &&
       this.schemerService.codingScheme.variableCodings
     ) {
-      this.problems = CodingSchemeFactory.validate(
-        this.schemerService.varList,
-        this.schemerService.codingScheme.variableCodings
-      );
+      try {
+        this.problems = CodingSchemeFactory.validate(
+          this.schemerService.varList,
+          this.schemerService.codingScheme.variableCodings
+        );
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('CodingSchemeFactory.validate failed', e);
+        this.problems = [];
+      }
       this.schemerService.codingScheme.variableCodings.forEach(v => {
         this.codingStatus[v.id] = 'OK';
         const breakingProblem = this.problems.find(

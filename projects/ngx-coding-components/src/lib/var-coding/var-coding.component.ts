@@ -214,8 +214,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (typeof dialogResult === 'string') {
-          this.schemerService.codingToTextMode =
-            dialogResult as CodingToTextMode;
+          this.schemerService.setCodingToTextMode(
+            dialogResult as CodingToTextMode
+          );
         }
       });
     }
@@ -247,13 +248,13 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
                 this.schemerService.codingScheme.variableCodings.filter(
                   c => c.id !== this.varCoding?.id
                 );
-              this.varCoding = CodingFactory.createNoValueCodingVariable(
+              const noValueVarCoding = CodingFactory.createNoValueCodingVariable(
                 this.varCoding.id
               );
               this.schemerService.codingScheme.variableCodings.push(
-                this.varCoding
+                noValueVarCoding
               );
-              this.varCodingChanged.emit(this.varCoding);
+              this.varCodingChanged.emit(noValueVarCoding);
               this.varCoding = null;
             }
           }

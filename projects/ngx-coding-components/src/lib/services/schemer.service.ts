@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { CodingToTextMode } from '@iqb/responses';
 import {
   CodeData,
   CodeType,
-  VariableCodingData,
-  RuleSet
+  VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import {
   CodingScheme,
@@ -15,6 +14,15 @@ import {
   VariableInfo,
   VariableValue
 } from '@iqbspecs/variable-info/variable-info.interface';
+import {
+  addCode as addCodeOp,
+  canPasteSingleCodeInto as canPasteSingleCodeIntoOp,
+  copySingleCode as copySingleCodeOp,
+  deleteCode as deleteCodeOp,
+  duplicateCode as duplicateCodeOp,
+  pasteSingleCode as pasteSingleCodeOp,
+  sortCodes as sortCodesOp
+} from './schemer-code-ops';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
@@ -23,17 +31,13 @@ export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
   providedIn: 'root'
 })
 export class SchemerService {
-  codingScheme: CodingScheme | null = null;
-  varList: VariableInfo[] = [];
+  private readonly _codingScheme = signal<CodingScheme | null>(null);
+  private readonly _varList = signal<VariableInfo[]>([]);
   allVariableIds: string[] = [];
   ruleMethodParameterCount = RuleMethodParameterCount;
-  userRole: UserRoleType = 'RW_MAXIMAL';
-  copiedCode: CodeData | null = null;
-  private static readonly residualTypes: CodeType[] = [
-    'RESIDUAL',
-    'RESIDUAL_AUTO',
-    'INTENDED_INCOMPLETE'
-  ];
+  private readonly _userRole = signal<UserRoleType>('RW_MAXIMAL');
+  private readonly _copiedCode = signal<CodeData | null>(null);
+  private readonly _codingToTextMode = signal<CodingToTextMode>('EXTENDED');
 
   orderOfCodeTypes: CodeType[] = [
     'FULL_CREDIT',
@@ -46,7 +50,45 @@ export class SchemerService {
     'RESIDUAL_AUTO'
   ];
 
-  codingToTextMode: CodingToTextMode = 'EXTENDED';
+  get codingScheme(): CodingScheme | null {
+    return this._codingScheme();
+  }
+
+  setCodingScheme(value: CodingScheme | null): void {
+    this._codingScheme.set(value);
+  }
+
+  get varList(): VariableInfo[] {
+    return this._varList();
+  }
+
+  setVarList(value: VariableInfo[]): void {
+    this._varList.set(value || []);
+  }
+
+  get userRole(): UserRoleType {
+    return this._userRole();
+  }
+
+  setUserRole(value: UserRoleType): void {
+    this._userRole.set(value);
+  }
+
+  get copiedCode(): CodeData | null {
+    return this._copiedCode();
+  }
+
+  setCopiedCode(value: CodeData | null): void {
+    this._copiedCode.set(value);
+  }
+
+  get codingToTextMode(): CodingToTextMode {
+    return this._codingToTextMode();
+  }
+
+  setCodingToTextMode(value: CodingToTextMode): void {
+    this._codingToTextMode.set(value);
+  }
 
   getVarInfoByCoding(varCoding: VariableCodingData): VariableInfo | undefined {
     if (varCoding.sourceType === 'BASE') {
@@ -138,255 +180,39 @@ export class SchemerService {
   }
 
   copySingleCode(code: CodeData): boolean {
-    if (!code) return false;
-    // deep clone to avoid mutating the source code when editing/pasting
-    this.copiedCode = JSON.parse(JSON.stringify(code)) as CodeData;
+    const copied = copySingleCodeOp(code);
+    if (!copied) return false;
+    this.setCopiedCode(copied);
     return true;
   }
 
   canPasteSingleCodeInto(codeList: CodeData[]): boolean {
-    if (!this.copiedCode) return false;
-    if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return false;
-    if (!this.copiedCode) return false;
-    const typeToPaste = this.copiedCode.type as CodeType | undefined;
-    if (typeToPaste && SchemerService.residualTypes.includes(typeToPaste)) {
-      const firstResidualOrIntendedIncomplete = codeList.find(
-        c => c.type && SchemerService.residualTypes.includes(c.type)
-      );
-      if (firstResidualOrIntendedIncomplete) return false;
-    }
-    return true;
+    return canPasteSingleCodeIntoOp(this.copiedCode, codeList, this.userRole);
   }
 
   pasteSingleCode(codeList: CodeData[]): CodeData | string {
-    if (!this.copiedCode) return 'code.error-message.nothing-to-paste';
-    if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return 'code.error-message.no-access';
-    if (!codeList) return 'code.error-message.fatal-error';
-
-    const typeToPaste = this.copiedCode.type as CodeType | undefined;
-
-    // For these types, the target may only contain one of {RESIDUAL, RESIDUAL_AUTO, INTENDED_INCOMPLETE}
-    if (typeToPaste && SchemerService.residualTypes.includes(typeToPaste)) {
-      const firstResidualOrIntendedIncomplete = codeList.find(
-        c => c.type && SchemerService.residualTypes.includes(c.type as CodeType)
-      );
-      if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
-    }
-
-    const addResult = typeToPaste ?
-      this.addCode(codeList, typeToPaste) :
-      'code.error-message.fatal-error';
-    if (typeof addResult === 'string') return addResult;
-
-    const created = addResult as CodeData;
-    const payload = JSON.parse(JSON.stringify(this.copiedCode)) as CodeData;
-
-    // Keep generated id/type (must behave like newly created code of this type)
-    const { id, type } = created;
-    Object.assign(created, payload);
-    created.id = id;
-    created.type = type;
-
-    return created;
+    return pasteSingleCodeOp(
+      this.copiedCode,
+      codeList,
+      this.userRole,
+      this.orderOfCodeTypes
+    );
   }
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
-    if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
-      const maxCode =
-        codeList.length > 0 ?
-          Math.max(
-            ...codeList
-              .filter(c => typeof c.id === 'number')
-              .map(c => Number(c.id) || 0)
-          ) :
-          0;
-      const hasNullCode =
-        codeList.length > 0 ? !!codeList.find(c => c.id === 0) : false;
-      if (['RESIDUAL', 'RESIDUAL_AUTO'].includes(codeType)) {
-        const firstResidualOrIntendedIncomplete = codeList.find(
-          c => c.type && SchemerService.residualTypes.includes(c.type as CodeType)
-        );
-        if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
-        const newCode = {
-          id: hasNullCode ? maxCode + 1 : 0,
-          type: codeType,
-          label: '',
-          score: 0,
-          ruleSetOperatorAnd: true,
-          ruleSets: [],
-          manualInstruction:
-            codeType === 'RESIDUAL_AUTO' ?
-              '' :
-              '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
-        };
-        codeList.push(newCode);
-        return newCode;
-      }
-      if (codeType === 'INTENDED_INCOMPLETE') {
-        const firstResidualOrIntendedIncomplete = codeList.find(
-          c => c.type && SchemerService.residualTypes.includes(c.type as CodeType)
-        );
-        if (firstResidualOrIntendedIncomplete) return 'code.error-message.residual-exists';
-        const newCode = {
-          id: 0,
-          type: codeType,
-          label: '',
-          score: 0,
-          ruleSetOperatorAnd: true,
-          ruleSets: [],
-          manualInstruction: ''
-        };
-        codeList.push(newCode);
-        return newCode;
-      }
-
-      if (
-        [
-          'FULL_CREDIT',
-          'PARTIAL_CREDIT',
-          'NO_CREDIT',
-          'UNSET',
-          'TO_CHECK'
-        ].includes(codeType)
-      ) {
-        let newCodeId = -1;
-        codeList
-          .filter(c => typeof c.id === 'number')
-          .forEach(c => {
-            if (c.type === codeType && c.id && Number(c.id) > newCodeId) newCodeId = Number(c.id);
-          });
-        if (newCodeId < 0) {
-          newCodeId = this.orderOfCodeTypes.indexOf(codeType) + 1;
-          const alreadyUsed = codeList.find(c => c.id === newCodeId);
-          if (alreadyUsed) newCodeId = maxCode + 1;
-        } else {
-          const newCodeFound = codeList.find(c => c.id === newCodeId + 1);
-          newCodeId = newCodeFound ? maxCode + 1 : newCodeId + 1;
-        }
-        const newCode = {
-          id: newCodeId,
-          type: codeType,
-          label: '',
-          score: codeType === 'FULL_CREDIT' ? 1 : 0,
-          ruleSetOperatorAnd: true,
-          ruleSets: [
-            <RuleSet>{
-              ruleOperatorAnd: false,
-              rules: [
-                {
-                  method: 'MATCH',
-                  parameters: ['']
-                }
-              ]
-            }
-          ],
-          manualInstruction: ''
-        };
-        const firstFollowerCode =
-          codeList.length > 0 ?
-            codeList.findIndex(
-              c => this.orderOfCodeTypes.indexOf(c.type as CodeType) >
-                  this.orderOfCodeTypes.indexOf(codeType)
-            ) :
-            -1;
-        if (firstFollowerCode < 0) {
-          codeList.push(newCode);
-        } else {
-          codeList.splice(firstFollowerCode, 0, newCode);
-        }
-        return newCode;
-      }
-      return 'code.error-message.type-not-supported';
-    }
-    return 'code.error-message.no-access';
+    return addCodeOp(codeList, codeType, this.userRole, this.orderOfCodeTypes);
   }
 
   deleteCode(codeList: CodeData[], codeIndex: number): boolean {
-    if (['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) {
-      if (codeIndex < codeList.length) {
-        codeList.splice(codeIndex, 1);
-        return true;
-      }
-    }
-    return false;
+    return deleteCodeOp(codeList, codeIndex, this.userRole);
   }
 
   duplicateCode(codeList: CodeData[], codeIndex: number): CodeData | string {
-    if (!['RW_MINIMAL', 'RW_MAXIMAL'].includes(this.userRole)) return 'code.error-message.no-access';
-    if (codeIndex < 0 || codeIndex >= codeList.length) return 'code.error-message.invalid-index';
-
-    const sourceCode = codeList[codeIndex];
-    if (
-      ['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(
-        sourceCode.type as CodeType
-      )
-    ) {
-      return 'code.error-message.type-not-supported';
-    }
-
-    const maxCode =
-      codeList.length > 0 ?
-        Math.max(
-          ...codeList
-            .filter(c => typeof c.id === 'number')
-            .map(c => Number(c.id) || 0)
-        ) :
-        0;
-
-    const duplicated: CodeData = JSON.parse(JSON.stringify(sourceCode));
-    duplicated.id = maxCode + 1;
-
-    codeList.splice(codeIndex + 1, 0, duplicated);
-    return duplicated;
+    return duplicateCodeOp(codeList, codeIndex, this.userRole);
   }
 
   sortCodes(codeList: CodeData[], normaliseCodeIds = false) {
-    if (codeList.length > 1) {
-      if (normaliseCodeIds) {
-        this.orderOfCodeTypes.forEach((type, typeIndex) => {
-          const allCodesOfType = codeList.filter(code => code.type === type);
-
-          if (allCodesOfType.length > 1) {
-            const startValueBase =
-              (typeIndex + 1) * (allCodesOfType.length > 9 ? 100 : 10);
-            const startValue = startValueBase + 1;
-
-            allCodesOfType.forEach((code: CodeData, index: number) => {
-              if (code.id !== null) {
-                code.id = startValue + index;
-              }
-            });
-          }
-        });
-
-        this.orderOfCodeTypes.forEach(t => {
-          if (
-            !['RESIDUAL', 'RESIDUAL_AUTO', 'INTENDED_INCOMPLETE'].includes(t)
-          ) {
-            const allCodesOfType = codeList.filter(c => c.type === t);
-            if (allCodesOfType.length === 1) allCodesOfType[0].id = this.orderOfCodeTypes.indexOf(t) + 1;
-          } else {
-            const allResidualCodes = codeList.filter(c => ['RESIDUAL', 'RESIDUAL_AUTO'].includes(c.type as CodeType)
-            );
-            if (allResidualCodes.length === 1) allResidualCodes[0].id = 0;
-          }
-        });
-      }
-      codeList.sort((a: CodeData, b: CodeData) => {
-        const getTypeOrder = (type: CodeType): number => this.orderOfCodeTypes.indexOf(type);
-
-        if (a.type === b.type) {
-          if (a.id === b.id) return 0; // Both IDs are the same
-          if (a.id === null) return -1; // `null` ID comes first
-          if (b.id === null) return 1; // `null` ID comes last
-          return a.id < b.id ? -1 : 1; // Sort IDs in ascending order
-        }
-
-        return (
-          getTypeOrder(a.type as CodeType) - getTypeOrder(b.type as CodeType)
-        );
-      });
-    }
+    sortCodesOp(codeList, this.orderOfCodeTypes, normaliseCodeIds);
   }
 
   getVariableAliasById(varId: string): string {

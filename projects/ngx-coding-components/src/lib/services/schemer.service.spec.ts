@@ -14,19 +14,19 @@ describe('SchemerService', () => {
 
   describe('checkRenamedVarAliasOk', () => {
     it('should return false when alias or codingScheme is missing', () => {
-      service.codingScheme = null;
+      service.setCodingScheme(null);
       expect(service.checkRenamedVarAliasOk('A')).toBeFalse();
-      service.codingScheme = { variableCodings: [] } as unknown as never;
+      service.setCodingScheme({ variableCodings: [] } as unknown as never);
       expect(service.checkRenamedVarAliasOk('')).toBeFalse();
     });
 
     it('should detect duplicates case-insensitively and allow same variable id', () => {
-      service.codingScheme = {
+      service.setCodingScheme({
         variableCodings: [
           { id: 'v1', alias: 'ABC', sourceType: 'BASE' } as unknown as VariableCodingData,
           { id: 'v2', alias: 'DEF', sourceType: 'BASE' } as unknown as VariableCodingData
         ]
-      } as unknown as never;
+      } as unknown as never);
 
       expect(service.checkRenamedVarAliasOk('abc')).toBeFalse();
       expect(service.checkRenamedVarAliasOk('abc', 'v1')).toBeTrue();
@@ -36,7 +36,7 @@ describe('SchemerService', () => {
 
   describe('addCode', () => {
     it('should block adding a residual type if a residual or intended incomplete already exists', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [
         {
           id: 0,
@@ -52,7 +52,7 @@ describe('SchemerService', () => {
     });
 
     it('should assign id 0 to the first residual code if no 0 code exists', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [];
 
       const created = service.addCode(codeList, 'RESIDUAL') as CodeData;
@@ -63,7 +63,7 @@ describe('SchemerService', () => {
     });
 
     it('should return no-access if role is read-only', () => {
-      service.userRole = 'RO';
+      service.setUserRole('RO');
       const codeList: CodeData[] = [];
 
       const result = service.addCode(codeList, 'FULL_CREDIT');
@@ -89,7 +89,7 @@ describe('SchemerService', () => {
     });
 
     it('canPasteSingleCodeInto should block when nothing copied or user is RO', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       expect(service.canPasteSingleCodeInto([])).toBeFalse();
 
       service.copySingleCode({
@@ -98,12 +98,12 @@ describe('SchemerService', () => {
         label: 'x',
         score: 1
       } as unknown as CodeData);
-      service.userRole = 'RO';
+      service.setUserRole('RO');
       expect(service.canPasteSingleCodeInto([])).toBeFalse();
     });
 
     it('canPasteSingleCodeInto should block pasting residual if target already contains a residual type', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const existing: CodeData[] = [
         {
           id: 0,
@@ -123,7 +123,7 @@ describe('SchemerService', () => {
     });
 
     it('pasteSingleCode should return localized error strings for common error paths', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       expect(service.pasteSingleCode([])).toBe('code.error-message.nothing-to-paste');
 
       service.copySingleCode({
@@ -132,15 +132,15 @@ describe('SchemerService', () => {
         label: 'x',
         score: 1
       } as unknown as CodeData);
-      service.userRole = 'RO';
+      service.setUserRole('RO');
       expect(service.pasteSingleCode([])).toBe('code.error-message.no-access');
 
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       expect(service.pasteSingleCode(null as unknown as never)).toBe('code.error-message.fatal-error');
     });
 
     it('pasteSingleCode should keep generated id/type and copy payload', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [];
 
       service.copySingleCode({
@@ -162,7 +162,7 @@ describe('SchemerService', () => {
     });
 
     it('pasteSingleCode should reject residual payloads when list already contains residual type', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [
         {
           id: 0,
@@ -188,10 +188,10 @@ describe('SchemerService', () => {
 
   describe('duplicateCode', () => {
     it('should return no-access and invalid-index errors', () => {
-      service.userRole = 'RO';
+      service.setUserRole('RO');
       expect(service.duplicateCode([], 0)).toBe('code.error-message.no-access');
 
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       expect(service.duplicateCode([], 0)).toBe('code.error-message.invalid-index');
       expect(service.duplicateCode([{
         id: 1,
@@ -202,7 +202,7 @@ describe('SchemerService', () => {
     });
 
     it('should reject duplicating residual types', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [
         {
           id: 0,
@@ -217,7 +217,7 @@ describe('SchemerService', () => {
     });
 
     it('should duplicate a normal code and assign maxId + 1', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [
         {
           id: 1,
@@ -243,12 +243,12 @@ describe('SchemerService', () => {
 
   describe('getVariableAliasById / getVariableAliasByIdListString', () => {
     beforeEach(() => {
-      service.codingScheme = {
+      service.setCodingScheme({
         variableCodings: [
           { id: 'v1', alias: 'A', sourceType: 'BASE' } as unknown as VariableCodingData,
           { id: 'v2', alias: '', sourceType: 'BASE' } as unknown as VariableCodingData
         ]
-      } as unknown as never;
+      } as unknown as never);
     });
 
     it('getVariableAliasById should return alias, id, or "?" for missing', () => {
@@ -261,22 +261,22 @@ describe('SchemerService', () => {
     it('getVariableAliasByIdListString should join aliases and append ellipsis if maxEntries < length', () => {
       expect(service.getVariableAliasByIdListString(['v1', 'v2'], 0)).toBe('A, v2');
       expect(service.getVariableAliasByIdListString(['v1', 'v2'], 1)).toBe('A, ...');
-      service.codingScheme = null;
+      service.setCodingScheme(null);
       expect(service.getVariableAliasByIdListString(['v1'], 1)).toBe('');
     });
   });
 
   describe('getBaseVarsList', () => {
     it('should return empty list when no scheme and filter BASE types otherwise', () => {
-      service.codingScheme = null;
+      service.setCodingScheme(null);
       expect(service.getBaseVarsList()).toEqual([]);
 
-      service.codingScheme = {
+      service.setCodingScheme({
         variableCodings: [
           { id: 'v1', alias: 'A', sourceType: 'BASE' } as unknown as VariableCodingData,
           { id: 'v2', alias: 'B', sourceType: 'DERIVE' } as unknown as VariableCodingData
         ]
-      } as unknown as never;
+      } as unknown as never);
 
       const base = service.getBaseVarsList();
       expect(base.length).toBe(1);
@@ -286,7 +286,7 @@ describe('SchemerService', () => {
 
   describe('getVarInfoByCoding', () => {
     beforeEach(() => {
-      service.varList = [
+      service.setVarList([
         {
           id: 'base1',
           alias: 'B1',
@@ -299,8 +299,8 @@ describe('SchemerService', () => {
           valuesComplete: true,
           page: ''
         } as unknown as never
-      ];
-      service.codingScheme = {
+      ]);
+      service.setCodingScheme({
         variableCodings: [
           {
             id: 'src1',
@@ -324,7 +324,7 @@ describe('SchemerService', () => {
             }]
           } as unknown as VariableCodingData
         ]
-      } as unknown as never;
+      } as unknown as never);
     });
 
     it('should return variable info from varList for BASE source type', () => {
@@ -367,7 +367,7 @@ describe('SchemerService', () => {
         label: '',
         score: 1
       })) as unknown as CodeData[];
-      service.codingScheme = {
+      service.setCodingScheme({
         variableCodings: [
           {
             id: 'srcMany',
@@ -376,7 +376,7 @@ describe('SchemerService', () => {
             codes: manyCodes
           } as unknown as VariableCodingData
         ]
-      } as unknown as never;
+      } as unknown as never);
 
       const info = service.getVarInfoByCoding({
         id: 'cc2',
@@ -417,11 +417,11 @@ describe('SchemerService', () => {
         } as unknown as CodeData
       ];
 
-      service.userRole = 'RO';
+      service.setUserRole('RO');
       expect(service.deleteCode(codeList, 0)).toBeFalse();
       expect(codeList.length).toBe(1);
 
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       expect(service.deleteCode(codeList, 99)).toBeFalse();
       expect(service.deleteCode(codeList, 0)).toBeTrue();
       expect(codeList.length).toBe(0);
@@ -430,7 +430,7 @@ describe('SchemerService', () => {
 
   describe('addCode - additional branches', () => {
     it('should allocate new id based on type order and keep list sorted by type', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [
         {
           id: 4, type: 'NO_CREDIT', label: 'b', score: 0
@@ -444,7 +444,7 @@ describe('SchemerService', () => {
     });
 
     it('should pick maxCode+1 if suggested id is already used', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [
         {
           id: 1, type: 'FULL_CREDIT', label: 'a', score: 1
@@ -460,12 +460,12 @@ describe('SchemerService', () => {
     });
 
     it('should return type-not-supported for unknown code types', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       expect(service.addCode([], 'INVALID' as unknown as CodeType)).toBe('code.error-message.type-not-supported');
     });
 
     it('should create intended incomplete code with id 0 and empty manualInstruction', () => {
-      service.userRole = 'RW_MAXIMAL';
+      service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [];
 
       const created = service.addCode(codeList, 'INTENDED_INCOMPLETE') as CodeData;
