@@ -248,8 +248,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
                 this.schemerService.codingScheme.variableCodings.filter(
                   c => c.id !== this.varCoding?.id
                 );
-              const noValueVarCoding = CodingFactory.createNoValueCodingVariable(
-                this.varCoding.id
+              const noValueVarCoding = CodingFactory.createBaseCodingVariable(
+                this.varCoding.id,
+                'BASE_NO_VALUE'
               );
               this.schemerService.codingScheme.variableCodings.push(
                 noValueVarCoding

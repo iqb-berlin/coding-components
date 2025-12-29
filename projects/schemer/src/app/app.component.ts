@@ -117,7 +117,7 @@ export class AppComponent implements OnInit, OnDestroy {
             codingForBaseVariable.alias = vi.alias || vi.id;
           } else if (this.codings) {
             if (vi.type === 'no-value') {
-              const newNoValueBaseVar = CodingFactory.createNoValueCodingVariable(vi.id);
+              const newNoValueBaseVar = CodingFactory.createBaseCodingVariable(vi.id, 'BASE_NO_VALUE');
               if (vi.alias) newNoValueBaseVar.alias = vi.alias;
               this.codings.variableCodings.push(newNoValueBaseVar);
             } else {

@@ -357,8 +357,8 @@ describe('VarCodingComponent', () => {
 
   it('deactivateBaseVar should replace BASE var with no-value coding when confirmed', () => {
     const emitSpy = spyOn(component.varCodingChanged, 'emit');
-    const noValue = { id: 'b1', sourceType: 'NO_VALUE', codes: [] } as unknown as VariableCodingData;
-    const createSpy = spyOn(CodingFactory, 'createNoValueCodingVariable').and.returnValue(noValue as never);
+    const noValue = { id: 'b1', sourceType: 'BASE_NO_VALUE', codes: [] } as unknown as VariableCodingData;
+    const createSpy = spyOn(CodingFactory, 'createBaseCodingVariable').and.returnValue(noValue as never);
 
     component.varCoding = {
       id: 'b1',
@@ -383,17 +383,17 @@ describe('VarCodingComponent', () => {
 
     const scheme = (schemerService as unknown as
       { codingScheme: { variableCodings: VariableCodingData[] } }).codingScheme;
-    expect(createSpy).toHaveBeenCalledWith('b1');
+    expect(createSpy).toHaveBeenCalledWith('b1', 'BASE_NO_VALUE');
     expect(scheme.variableCodings.some(v => v.id === 'b1' && v.sourceType === 'BASE')).toBeFalse();
     expect(scheme.variableCodings.some(v => v.id === 'b1' &&
-      (v as unknown as { sourceType: string }).sourceType !== 'BASE')).toBeTrue();
+      (v as unknown as { sourceType: string }).sourceType === 'BASE_NO_VALUE')).toBeTrue();
     expect(emitSpy).toHaveBeenCalledWith(noValue);
     expect(component.varCoding).toBeNull();
   });
 
   it('deactivateBaseVar should do nothing when confirm dialog is cancelled', () => {
     const emitSpy = spyOn(component.varCodingChanged, 'emit');
-    const createSpy = spyOn(CodingFactory, 'createNoValueCodingVariable');
+    const createSpy = spyOn(CodingFactory, 'createBaseCodingVariable');
 
     component.varCoding = {
       id: 'b1',
