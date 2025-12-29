@@ -87,19 +87,14 @@
   },
   "derive-header": "Details für Ableitung",
   "derive-sources": {
+    "label": "Quell-Variablen",
     "prompt": "Quell-Variable(n)",
-    "error": "Keine Quelle definiert.",
-    "label": "Quell-Variablen"
+    "error": "Keine Quelle definiert."
   },
   "derive-method": {
+    "label": "Ableitungsmethode",
     "prompt": "Ableitungsmethode",
-    "BASE": "Basisvariable",
-    "COPY_VALUE": "Wert kopieren",
-    "CONCAT_CODE": "Codes aneinanderhängen",
-    "SUM_CODE": "Codes summieren",
-    "SUM_SCORE": "Bewertung summieren",
-    "MANUAL": "Manuell",
-    "label": "Ableitungsmethode"
+    "BASE": "Basisvariable"
   },
   "processing": {
     "prompt": "Verarbeitung",

@@ -219,10 +219,12 @@
     "max-score": "Maximale Bewertung"
   },
   "derive-sources": {
+    "label": "Quell-Variable(n)",
     "prompt": "Quell-Variable(n)",
     "error": "Keine Quelle definiert."
   },
   "derive-method": {
+    "label": "Ableitungsmethode",
     "prompt": "Ableitungsmethode",
     "BASE": "Basisvariable",
     "COPY_VALUE": "Wert kopieren",
