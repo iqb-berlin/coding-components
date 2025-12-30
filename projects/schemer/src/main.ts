@@ -1,5 +1,6 @@
 import { enableProdMode, importProvidersFrom } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
 import { createCustomElement } from '@angular/elements';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -16,6 +17,8 @@ if (environment.production) {
   const app = await createApplication({
     providers: [
       provideAnimations(),
+      provideHttpClient(),
+      TranslateService,
       importProvidersFrom(
         TranslateModule.forRoot({
           defaultLanguage: 'de',

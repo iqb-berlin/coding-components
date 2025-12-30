@@ -1,5 +1,6 @@
 import { importProvidersFrom } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { createCustomElement } from '@angular/elements';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -22,6 +23,8 @@ import 'zone.js';
   const app = await createApplication({
     providers: [
       provideAnimations(),
+      provideHttpClient(),
+      TranslateService,
       importProvidersFrom(
         TranslateModule.forRoot({
           defaultLanguage: 'de',
