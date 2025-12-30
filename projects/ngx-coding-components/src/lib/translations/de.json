@@ -207,6 +207,7 @@
   "code-model": {
     "prompt": "Anzeige Code",
     "NONE": "Regeln und Instruktionen",
+    "MANUAL_AND_RULES": "Regeln und Instruktionen",
     "RULES_ONLY": "Nur Regeln",
     "MANUAL_ONLY": "Nur Instruktionen"
   },

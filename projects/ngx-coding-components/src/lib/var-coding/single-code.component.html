@@ -85,7 +85,7 @@
   </mat-menu>
   <div
     class="fx-column-start-stretch"
-    [style.width.%]="(codeModel ?? 'NONE') === 'NONE' ? 60 : 100"
+    [style.width.%]="(codeModel ?? 'NONE') === 'NONE' || codeModel === 'MANUAL_AND_RULES' ? 60 : 100"
   >
     <div class="code-main-data fx-row-start-center fx-gap-5">
       @if (code.id === 'INVALID') {
@@ -194,7 +194,7 @@
     </code-instruction>
     }
   </div>
-  @if ((codeModel ?? 'NONE') === 'NONE') { @if (code.type && (code.type ===
+  @if ((codeModel ?? 'NONE') === 'NONE' || codeModel === 'MANUAL_AND_RULES') { @if (code.type && (code.type ===
   'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE') &&
   !code.manualInstruction) {
   <div class="fx-flex-fill"></div>
