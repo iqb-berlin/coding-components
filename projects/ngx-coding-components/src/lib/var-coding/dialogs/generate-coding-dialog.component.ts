@@ -298,8 +298,11 @@ export class GenerateCodingDialogComponent {
 
   // eslint-disable-next-line class-methods-use-this
   drop(event: CdkDragDrop<OptionData[]>): void {
+    GenerateCodingDialogComponent.drop(event);
+  }
+
+  static drop(event: CdkDragDrop<OptionData[]>): void {
     if (!event) {
-      console.error('Invalid drag and drop event');
       return;
     }
 
@@ -475,7 +478,7 @@ export class GenerateCodingDialogComponent {
         // eslint-disable-next-line eqeqeq
         this.options
           .filter(
-            o => this.selectedOptions[0] && o.value == this.selectedOptions[0]
+            o => this.selectedOptions[0] && o.value === this.selectedOptions[0]
           )
           .forEach(o => {
             const newCode = this.schemerService.addCode(
@@ -500,7 +503,7 @@ export class GenerateCodingDialogComponent {
         // eslint-disable-next-line eqeqeq
         this.options
           .filter(
-            o => !(this.selectedOptions[0] && o.value == this.selectedOptions[0])
+            o => !(this.selectedOptions[0] && o.value === this.selectedOptions[0])
           )
           .forEach(o => {
             const newCode = this.schemerService.addCode(

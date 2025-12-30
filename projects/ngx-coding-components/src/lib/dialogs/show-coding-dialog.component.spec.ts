@@ -8,7 +8,7 @@ describe('ShowCodingDialogComponent', () => {
     spyOn(ToTextFactory, 'sourceAsText').and.returnValue('SRC');
     spyOn(ToTextFactory, 'processingAsText').and.returnValue('PROC');
     spyOn(ToTextFactory, 'codeAsText').and.callFake((code: unknown, mode: unknown) => ({
-      id: (code as { id: number }).id,
+      id: (code as { id: number }).id.toString(),
       score: (code as { score: number }).score,
       label: (code as { label: string }).label,
       ruleSetDescriptions: [`mode:${mode}`],

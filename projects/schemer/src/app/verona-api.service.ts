@@ -43,7 +43,8 @@ export class VeronaAPIService {
       this.sessionID = messageData.sessionId;
       this._vosStartCommand.next(messageData as VosStartCommand);
     } else if (['webpackOk', 'webpackClose'].indexOf(messageData.type) < 0) {
-      console.warn('schemer: got message of unknown type', messageData);
+      // eslint-disable-next-line no-console
+      console.warn('Unknown message type:', messageData.type);
     }
   }
 
@@ -52,7 +53,8 @@ export class VeronaAPIService {
     if (!this.isStandalone()) {
       window.parent.postMessage(message, '*');
     } else {
-      console.log('schemer: send ', message);
+      // eslint-disable-next-line no-console
+      console.log('PostMessage to parent ignored (standalone mode):', message);
     }
   }
 

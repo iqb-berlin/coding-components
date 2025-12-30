@@ -117,8 +117,9 @@ export class AppComponent {
   userRole: UserRoleType = 'RW_MAXIMAL';
   title = 'coding-components';
 
+  // eslint-disable-next-line class-methods-use-this
   updateCodingScheme() {
-    console.log(this.codings1);
+    // ignore
   }
 
   setNewVarlist(varList: VariableInfo[] | null) {

@@ -3,7 +3,7 @@
     <div class="fx-row-start-stretch fx-gap-10">
       @if (ruleSet) {
         <div class="fx-column-start-stretch fx-flex-fill">
-          @for (rule of ruleSet.rules; track rule; let ruleIndex = $index) {
+          @for (rule of ruleSet.rules; track ruleIndex; let ruleIndex = $index) {
             <div class="fx-row-start-center fx-flex-fill fx-gap-10"
                  (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
               <div class="fx-column-start-stretch fx-flex-fill">

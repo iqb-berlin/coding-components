@@ -23,25 +23,29 @@ import {
   SelectCodeRuleReferenceDialogData
 } from '../../dialogs/select-code-rule-reference-dialog.component';
 
-const MATCH_WORD_SVG = `
-  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#006064">
-    // eslint-disable-next-line max-len
-    <path d="M40-199v-200h80v120h720v-120h80v200H40Zm342-161v-34h-3q-13 20-35 31.5T294-351q-49 0-77-25.5T189-446q0-42 32.5-68.5T305-541q23 0 42.5 3.5T381-526v-14q0-27-18.5-43T312-599q-21 0-39.5 9T241-564l-43-32q19-27 48-41t67-14q62 0 95 29.5t33 85.5v176h-59Zm-66-134q-32 0-49 12.5T250-446q0 20 15 32.5t39 12.5q32 0 54.5-22.5T381-478q-14-8-32-12t-33-4Zm185 134v-401h62v113l-3 40h3q3-5 24-25.5t66-20.5q64 0 101 46t37 106q0 60-36.5 105.5T653-351q-41 0-62.5-18T563-397h-3v37h-59Zm143-238q-40 0-62 29.5T560-503q0 37 22 66t62 29q40 0 62.5-29t22.5-66q0-37-22.5-66T644-598Z"/>
-  </svg>
-`;
+const MATCH_WORD_SVG =
+  'M40-199v-200h80v120h720v-120h80v200H40Zm342-161v-34h-3q-13 20-35 31.5T294-351' +
+  'q-49 0-77-25.5T189-446q0-42 32.5-68.5T305-541q23 0 42.5 3.5T381-526v-14q0-27' +
+  '-18.5-43T312-599q-21 0-39.5 9T241-564l-43-32q19-27 48-41t67-14q62 0 95 29.5' +
+  't33 85.5v176h-59Zm-66-134q-32 0-49 12.5T250-446q0 20 15 32.5t39 12.5q32 0 ' +
+  '54.5 -22.5T381-478q-14-8-32-12t-33-4Zm185 134v-401h62v113l-3 40h3q3-5 24-25.5' +
+  't66-20.5q64 0 101 46t37 106q0 60-36.5 105.5T653-351q-41 0-62.5-18T563-397h-3' +
+  'v37h-59Zm143-238q-40 0-62 29.5T560-503q0 37 22 66t62 29q40 0 62.5-29t22.5-66' +
+  'q0-37-22.5-66T644-598Z';
 
-const REGULAR_EXPRESSION_SVG = `
-  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#006064">
-    // eslint-disable-next-line max-len
-    <path d="M197-199q-56-57-86.5-130T80-482q0-80 30-153t87-130l57 57q-46 45-70 103.5T160-482q0 64 24.5 122.5T254-256l-57 57Zm183-41q-25 0-42.5-17.5T320-300q0-25 17.5-42.5T380-360q25 0 42.5 17.5T440-300q0 25-17.5 42.5T380-240Zm139-200v-71l-61 36-40-70 61-35-61-35 40-70 61 36v-71h80v71l61-36 40 70-61 35 61 35-40 70-61-36v71h-80Zm244 241-57-57q46-45 70-103.5T800-482q0-64-24.5-122.5T706-708l57-57q56 57 86.5 130T880-482q0 80-30 153t-87 130Z"/>
-  </svg>
-`;
+const REGULAR_EXPRESSION_SVG =
+  'M197-199q-56-57-86.5-130T80-482q0-80 30-153t87-130l57 57q-46 45-70 103.5' +
+  'T160-482q0 64 24.5 122.5T254-256l-57 57Zm183-41q-25 0-42.5-17.5T320-300q0-25' +
+  ' 17.5 -42.5T380-360q25 0 42.5 17.5T440-300q0 25-17.5 42.5T380-240Zm139-200v-71' +
+  'l-61 36-40-70 61-35-61-35 40-70 61 36v-71h80v71l61-36 40 70-61 35 61 35-40 70' +
+  '-61-36v71h-80Zm244 241-57-57q46-45 70-103.5T800-482q0-64-24.5-122.5T706-708' +
+  'l57-57q56 57 86.5 130T880-482q0 80-30 153t-87 130Z';
 
-const ARROW_RANGE_SVG = `
-  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#006064">
-    <path d="M280-280 80-480l200-200 56 56-103 104h494L624-624l56-56 200 200-200 200-56-56 103-104H233l103 104-56 56Z"/>
-  </svg>
-`;
+const ARROW_RANGE_SVG =
+  'M280-280 80-480l200-200 56 56-103 104h494L624-624l56-56 200 200-200 200-56-56 103-104H233l103 104-56 56Z';
+
+const asSvg = (pathData: string):
+string => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="${pathData}"/></svg>`;
 
 @Component({
   selector: 'code-rule-list',
@@ -81,9 +85,9 @@ export class CodeRuleListComponent {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer);
     const icons = [
-      { name: 'match-word', svg: MATCH_WORD_SVG },
-      { name: 'regular-expression', svg: REGULAR_EXPRESSION_SVG },
-      { name: 'arrow-range', svg: ARROW_RANGE_SVG }
+      { name: 'match-word', svg: asSvg(MATCH_WORD_SVG) },
+      { name: 'regular-expression', svg: asSvg(REGULAR_EXPRESSION_SVG) },
+      { name: 'arrow-range', svg: asSvg(ARROW_RANGE_SVG) }
     ];
 
     icons.forEach(icon => {

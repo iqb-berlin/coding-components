@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabGroup } from '@angular/material/tabs';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import {
   MatButtonToggleGroup,

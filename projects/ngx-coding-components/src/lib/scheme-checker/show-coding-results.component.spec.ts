@@ -1,8 +1,6 @@
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Response } from '@iqbspecs/response/response.interface';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { CodingFactory } from '@iqb/responses';
-
 import { ShowCodingResultsComponent } from './show-coding-results.component';
 
 describe('ShowCodingResultsComponent', () => {
@@ -10,8 +8,8 @@ describe('ShowCodingResultsComponent', () => {
 
   const baseData = {
     responses: [
-      { id: 'v1', value: 'a', status: 'VALUE_CHANGED' } as unknown as Response,
-      { id: 'v2', value: ['x', 'y'], status: 'DISPLAYED' } as unknown as Response
+      { id: 'v1', value: 'a', status: 'VALUE_CHANGED' } as Response,
+      { id: 'v2', value: ['x', 'y'], status: 'DISPLAYED' } as Response
     ],
     varsWithCodes: ['v1'],
     variableCodings: [
@@ -97,10 +95,8 @@ describe('ShowCodingResultsComponent', () => {
   });
 
   it('should return transformed error object when CodingFactory.transformValue throws', () => {
-    const transformSpy = spyOn(
-      CodingFactory as unknown as { transformValue: () => unknown },
-      'transformValue'
-    ).and.throwError('boom');
+    const transformSpy = spyOn(component as unknown as { transformValue: () => unknown }, 'transformValue')
+      .and.throwError('boom');
 
     component.toggleChange({
       source: { name: 'transformedValueView' }

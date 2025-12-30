@@ -23,6 +23,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   SourceProcessingType,
   SourceType,
+  VariableCodingData,
   VariableSourceParameters
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import {
@@ -106,7 +107,7 @@ export class EditSourceParametersDialog {
     if (!codingScheme) return;
 
     const validCodings = codingScheme.variableCodings.filter(
-      (variableCoding: any) => {
+      (variableCoding: VariableCodingData) => {
         const aliasOrId = variableCoding.alias || variableCoding.id;
         return (
           aliasOrId !== this.data.selfAlias &&

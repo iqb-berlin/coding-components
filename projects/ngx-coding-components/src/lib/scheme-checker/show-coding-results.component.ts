@@ -33,7 +33,7 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatInput } from '@angular/material/input';
 import { Response } from '@iqbspecs/response/response.interface';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { CodingFactory } from '@iqb/responses';
+import { transformValue } from '@iqb/responses/value-transform';
 
 type Data = {
   responses: Response[];
@@ -236,21 +236,21 @@ export class ShowCodingResultsComponent implements OnInit {
     const fragmenting = vc.fragmenting || '';
 
     try {
-      // transformValue is declared private in typings, but exists in the shipped JS.
-      return (
-        CodingFactory as unknown as {
-          transformValue: (
-            value: unknown,
-            fragmenting: string,
-            sortArray: boolean
-          ) => unknown;
-        }
-      ).transformValue(r.value as unknown, fragmenting, sortArray);
+      return this.transformValue(r.value, fragmenting, sortArray);
     } catch (e) {
       return {
         error: e instanceof Error ? e.message : String(e)
       };
     }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  protected transformValue(
+    value: Response['value'],
+    fragmenting: string,
+    sortArray: boolean
+  ): unknown {
+    return transformValue(value, fragmenting, sortArray);
   }
 
   applyFilter(event: Event): void {
