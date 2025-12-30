@@ -5,7 +5,12 @@
     "outDir": "../../out-tsc/spec",
     "types": [
       "jasmine"
-    ]
+    ],
+    "paths": {
+      "@angular/*": ["../../node_modules/@angular/*"],
+      "@ngx-translate/core": ["../../node_modules/@ngx-translate/core"],
+      "@ngx-translate/core/*": ["../../node_modules/@ngx-translate/core/*"]
+    }
   },
   "include": [
     "**/*.spec.ts",
