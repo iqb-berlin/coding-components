@@ -59,6 +59,7 @@ import {
 } from '../var-coding/dialogs/edit-source-parameters-dialog.component';
 import { SchemerFacadeService } from '../services/schemer-facade.service';
 import { parseVarListInput } from '../services/schemer-varlist-utils';
+import { SchemerInfoDialogComponent } from '../dialogs/schemer-info-dialog.component';
 
 @Component({
   selector: 'iqb-schemer',
@@ -147,13 +148,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   }
 
   showSchemerInfo(): void {
-    this.messageDialog.open(MessageDialogComponent, {
-      width: '650px',
-      data: <MessageDialogData>{
-        title: this.tr('schemer.info.title'),
-        content: this.tr('schemer.info.content'),
-        type: MessageType.info
-      }
+    this.messageDialog.open(SchemerInfoDialogComponent, {
+      width: '650px'
     });
   }
 
