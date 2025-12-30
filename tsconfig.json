@@ -14,6 +14,15 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
+      "@angular/*": [
+        "./node_modules/@angular/*"
+      ],
+      "@ngx-translate/core": [
+        "./node_modules/@ngx-translate/core"
+      ],
+      "@ngx-translate/core/*": [
+        "./node_modules/@ngx-translate/core/*"
+      ],
       "@ngx-coding-components/*": [
         "projects/ngx-coding-components/src/lib/*"
       ]

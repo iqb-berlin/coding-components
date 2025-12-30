@@ -155,7 +155,7 @@ type Data = {
   ]
 })
 export class ShowCodingResultsComponent implements OnInit {
-  dataSource = new MatTableDataSource();
+  dataSource: MatTableDataSource<Record<string, unknown>> = new MatTableDataSource<Record<string, unknown>>();
   displayedColumns = ['id', 'value', 'status', 'code', 'score'];
   isLoading = false;
   codedVariablesOnly = true;
