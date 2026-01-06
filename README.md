@@ -9,12 +9,12 @@ The underlying data specifications are maintained in:
 - **Variable info spec**: `@iqbspecs/variable-info`
 - **Coding engine / helpers**: `@iqb/responses`
 
-https://github.com/iqb-specifications/
+[IQB Specifications on GitHub](https://github.com/iqb-specifications/)
 
-This repo provides two deliverables:
+This repo provides two main deliverables:
 
 - **Angular library**: `@iqb/ngx-coding-components`
-- **Verona module**: a packaged *Schemer* UI (HTML bundle) for hosts implementing the Verona interfaces
+- **Verona module**: A packaged *Schemer* UI (HTML bundle) for hosts implementing the Verona interfaces.
 
 ---
 
@@ -45,20 +45,37 @@ This repo provides two deliverables:
 
 Additionally, this library exports multiple dialogs and helpers (see “Public API / Exports”).
 
+## Key Features
+
+- **Rich Editor**: Full coding scheme editor with support for codes, rule sets, and manual instructions.
+- **Validation**: Real-time validation of coding schemes (circular dependencies, missing references, etc.).
+- **Rich Text Support**: Integrated TipTap editor for manual instructions.
+- **Testing Utility**: Built-in "Scheme Checker" to simulate response coding.
+- **Framework Agnostic**: Exported as Angular Elements (Web Components).
+
 ---
 
 # Installation (Angular)
 
 ## Prerequisites
 
-This library is built for modern Angular and uses:
+This library is built for modern Angular and requires:
 
-- Angular (see `projects/ngx-coding-components/package.json` peer deps)
-- Angular Material
-- `@ngx-translate/core`
-- TipTap / ngx-tiptap (used for rich text editing)
+- **Angular Material**: Used for all UI components.
+- **@ngx-translate/core**: Used for internationalization.
+- **TipTap**: Used for rich text editing.
 
-Install the package:
+### Peer Dependencies
+
+Install the required peer dependencies if not already present:
+
+```bash
+npm i @angular/material @angular/cdk @ngx-translate/core
+npm i @tiptap/core @tiptap/extension-bold @tiptap/extension-italic @tiptap/extension-bullet-list ... (see package.json for full list)
+npm i ngx-tiptap
+```
+
+### Install the library
 
 ```bash
 npm i @iqb/ngx-coding-components
@@ -90,115 +107,112 @@ External consumers should use the npm package name `@iqb/ngx-coding-components`.
 
 ---
 
-# Internationalization (ngx-translate)
+# Quick Start
 
-The UI strings are wired through `@ngx-translate/core`. This library ships at least German translations.
-
-## Minimal setup
-
-In your app’s providers, configure `TranslateModule.forRoot(...)` and choose a loader.
-
-This library exports a `TranslateLoader` implementation:
-
-- `NgxCodingComponentsTranslateLoader` (currently always returns German translations)
-
-Example:
+To use the `SchemerComponent` in your standalone Angular component:
 
 ```ts
-import { importProvidersFrom } from '@angular/core';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { NgxCodingComponentsTranslateLoader } from '@iqb/ngx-coding-components';
+import { Component } from '@angular/core';
+import { SchemerComponent, CodingScheme } from '@iqb/ngx-coding-components';
+import { VariableInfo } from '@iqbspecs/variable-info';
 
-export const APP_PROVIDERS = [
-  importProvidersFrom(
-    TranslateModule.forRoot({
-      defaultLanguage: 'de',
-      loader: {
-        provide: TranslateLoader,
-        useClass: NgxCodingComponentsTranslateLoader
-      }
-    })
-  )
-];
+@Component({
+  selector: 'my-app',
+  standalone: true,
+  imports: [SchemerComponent],
+  template: `
+    <iqb-schemer
+      [varList]="myVariables"
+      [codingScheme]="myScheme"
+      [userRole]="'RW_MAXIMAL'"
+      (codingSchemeChanged)="onSchemeChanged($event)">
+    </iqb-schemer>
+  `
+})
+export class MyAppComponent {
+  myVariables: VariableInfo[] = [/* ... */];
+  myScheme: CodingScheme = new CodingScheme([/* ... */]);
+
+  onSchemeChanged(newScheme: CodingScheme | null) {
+    console.log('Scheme updated:', newScheme);
+  }
+}
 ```
 
-If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
+---
+
+# User Roles
+
+The `userRole` input controls the editing capabilities:
+
+- **`RO` (Read-only)**: Users can view the scheme but cannot change anything.
+- **`RW_MINIMAL` (Restricted Edit)**: Users can edit manual instructions and basic code properties but cannot add/remove codes or change complex rules.
+- **`RW_MAXIMAL` (Full Edit)**: Full access to all editing features (adding variables, codes, rules, etc.).
 
 ---
 
-# Angular Material & styling
+# Data Structures (Examples)
 
-These components use Angular Material. Your host app must:
+### VariableInfo (`@iqbspecs/variable-info`)
+Describes the input variables from the assessment.
 
-- Include a Material theme (prebuilt or custom)
-- Include Material icons (if you want the icons to display)
+```json
+{
+  "id": "VAR_01",
+  "type": "string",
+  "multiple": false,
+  "values": [
+    { "value": "A", "label": "Option A" },
+    { "value": "B", "label": "Option B" }
+  ]
+}
+```
 
-In this repo’s demo app, the theme + icons are included via `angular.json` styles.
+### CodingScheme (`@iqbspecs/coding-scheme`)
+Defines how values are transformed into codes/scores.
+
+```json
+{
+  "variableCodings": [
+    {
+      "id": "VAR_01",
+      "sourceType": "BASE",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "score": 1,
+          "ruleSets": [{
+            "rules": [{ "method": "MATCH", "parameters": ["A"] }]
+          }]
+        }
+      ]
+    }
+  ]
+}
+```
 
 ---
 
-# Core data types
-
-This library works with the IQB specs types:
-
-## `CodingScheme`
-
-From `@iqbspecs/coding-scheme`.
-
-- Contains `variableCodings`.
-- Each variable coding can be `BASE` or derived and may define codes and rules.
-
-## `VariableInfo[]`
-
-From `@iqbspecs/variable-info`.
-
-- Describes variables shown/edited in the UI.
-- Used by the Schemer to provide labels, types, allowed values, etc.
-
-## `Response[]`
-
-From `@iqbspecs/response`.
-
-- Used by the coding engine (`@iqb/responses`) and by the Scheme Checker.
-
----
-
-# Component documentation
+# Component Reference
 
 ## `SchemerComponent` (`<iqb-schemer>`)
 
-**Purpose**
+Main editor UI.
 
-- Displays base and derived variables.
-- Lets users edit a `CodingScheme`.
-- Provides validation feedback.
+| Input | Type | Description |
+| :--- | :--- | :--- |
+| `codingScheme` | `CodingScheme \| null` | The scheme to edit. |
+| `varList` | `VariableInfo[]` | List of available variables. |
+| `userRole` | `'RO' \| 'RW_MINIMAL' \| 'RW_MAXIMAL'` | Editing permissions. |
 
-**Selector**
-
-- `iqb-schemer`
-
-**Inputs**
-
-- `codingScheme: CodingScheme | null`
-- `varList: VariableInfo[]`
-- `userRole: 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL'`
-
-**Outputs**
-
-- `codingSchemeChanged: EventEmitter<CodingScheme | null>`
-
-**Typical usage**
-
-```html
-<iqb-schemer
-  [varList]="varList"
-  [userRole]="userRole"
-  [codingScheme]="codingScheme"
-  (codingSchemeChanged)="onCodingSchemeChanged($event)"
-></iqb-schemer>
-```
+| Output | Type | Description |
+| :--- | :--- | :--- |
+| `codingSchemeChanged` | `CodingScheme \| null` | Emitted whenever the scheme is modified. |
 
 ## `SchemeCheckerComponent` (`<scheme-checker>`)
+
+Utility to test the coding scheme with dummy values.
 
 **Purpose**
 
@@ -259,6 +273,47 @@ From `@iqbspecs/response`.
 
 ---
 
+# Dialogs API
+
+The library exports several MatDialog-ready components:
+
+- **`ConfirmDialogComponent`**: Standard yes/no confirmation.
+- **`MessageDialogComponent`**: Informational alert.
+- **`SimpleInputDialogComponent`**: Single-field text input.
+- **`ShowCodingProblemsDialogComponent`**: Displays validation errors/warnings from the coding scheme.
+- **`SelectVariableDialogComponent`**: Picker for variables from the `varList`.
+- **`CodingSchemeDialogComponent`**: Wrapper to show a read-only view of a scheme.
+
+---
+
+# Internationalization (ngx-translate)
+
+The library ships with German (`de`) translations. Use the `NgxCodingComponentsTranslateLoader` to integrate them.
+
+```ts
+import { NgxCodingComponentsTranslateLoader } from '@iqb/ngx-coding-components';
+
+// In your app providers:
+TranslateModule.forRoot({
+  loader: {
+    provide: TranslateLoader,
+    useClass: NgxCodingComponentsTranslateLoader
+  }
+})
+```
+
+If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
+
+---
+
+# Styling
+
+1.  **Material Theme**: Ensure a Material theme is loaded in your application.
+2.  **Material Icons**: Include the Material Icons font in your `index.html`.
+3.  **CSS**: The components use standard flexbox layouts. Ensure the parent container has a defined height.
+
+---
+
 # Public API / Exports
 
 The library entry point is `projects/ngx-coding-components/src/public-api.ts`.
@@ -304,23 +359,21 @@ Exports include:
 
 ---
 
-# Development in this repository
+# Development
 
-## Demo / manual testing
+## Scripts
 
-During development, use the application in `/src`.
+| Command | Description |
+| :--- | :--- |
+| `npm start` | Run the demo application. |
+| `npm run build_cc` | Build the library (`ngx-coding-components`). |
+| `npm run test:cc` | Run library unit tests. |
+| `npm run lint` | Run ESLint across the project. |
+| `npm run build:elements` | Build the Web Components bundle. |
+| `npm run buildAndPack_sc` | Build and package the Verona Schemer. |
 
-- Start the demo app:
-  - use the script `start` in `package.json`
-- If you changed the component library:
-  - run `build_cc` first to build into `dist`
-
-## Running tests
-
-Use the scripts in the root `package.json`:
-
-- `test:cc` / `test:cc:watch`
-- `test:schemer` / `test:schemer:watch`
+## Demo App
+The folder `/src` contains a demo application that showcases all components. Use `npm start` to run it locally.
 
 ---
 
@@ -341,110 +394,29 @@ The steps to publish a new release of the library:
 
 The `schemer` UI is also published as a [Verona](https://verona-interfaces.github.io) module.
 
-This allows embedding the Schemer in any host application that supports the Verona specification.
+- **Download**: [Latest releases](https://github.com/iqb-berlin/coding-components/releases/latest)
+- **Integration**: Simply add the `.html` bundle to your Verona-compatible host.
 
-Get the latest HTML bundle from the GitHub releases:
+---
 
-- https://github.com/iqb-berlin/coding-components/releases/latest
-
-The project `projects/schemer` is a wrapper around the Schemer component.
-
-## Publishing the Verona schemer
-
-The steps to publish a new release of the schemer:
-
-- edit `projects/schemer/src/html_wrapper/index.html`:
-  - increase the version
-  - check/update the description
-- update the version in the repo root `package.json`:
-  - path `config.schemer_version`
-- build:
-  - use the script `build_sc`
-- pack:
-  - use the script `pack_sc`
-  - output: `dist/iqb-schemer@<version>.html`
-- commit, push and create a GitHub release
-  - attach the built HTML file as a release asset
-
-# Web Components / Custom Elements (framework-agnostic)
+# Web Components (Angular Elements)
 
 This repository can also build the main UI components as **Web Components** using **Angular Elements**.
 
-- Angular Elements produces **Custom Elements** (part of the Web Components standards).
-- Custom Elements are **framework-agnostic**: you can use them from plain HTML/JS or from other frameworks (React, Vue, etc.).
-
-## Building the Elements bundle (this repository)
+Build the framework-agnostic bundle:
 
 ```bash
 npm run build:elements
 ```
 
-Output folder:
-
-- `dist/coding-components-elements/`
-
-## Serving locally
-
-```bash
-npm run serve:elements
-```
-
-Then open the served `index.html`. The bundle loads as:
-
-- `runtime.js`
-- `polyfills.js`
-- `main.js`
-- `styles.css`
-
-## Registering the custom elements (library API)
-
-The library exports a helper that registers all custom elements:
-
-- `registerNgxCodingComponentsElements(injector, options?)`
-
-Example:
+Register the elements in your JS application:
 
 ```ts
-import { createApplication } from '@angular/platform-browser';
 import { registerNgxCodingComponentsElements } from '@iqb/ngx-coding-components';
-
-const app = await createApplication({ providers: [] });
-registerNgxCodingComponentsElements(app.injector);
+// ... obtain injector
+registerNgxCodingComponentsElements(injector, { prefix: 'ngx' });
 ```
 
-By default, tags are registered with prefix `ngx-` (example: `<ngx-schemer>`). You can override the prefix:
-
-```ts
-registerNgxCodingComponentsElements(app.injector, { prefix: 'iqb' });
-```
-
-## Using custom elements from plain HTML/JS
-
-Custom Elements receive their inputs as **DOM properties**, and outputs are emitted as **DOM events**.
-
-Example (simplified):
-
-```js
-const CODING_SCHEME_CHANGED_EVENT = 'codingSchemeChanged';
-
-function initializeSchemer(schemer, config) {
-  schemer.varList = config.varList;
-  schemer.codingScheme = config.codingScheme;
-  schemer.userRole = config.userRole;
-
-  schemer.addEventListener(CODING_SCHEME_CHANGED_EVENT, (event) => {
-    console.log(event.detail);
-  });
-}
-
-const schemerElement = document.querySelector('ngx-schemer');
-const schemerConfig = {
-  varList: [...],
-  codingScheme: ...,
-  userRole: 'RW_MAXIMAL'
-};
-
-initializeSchemer(schemerElement, schemerConfig);
-```
+This will register tags like `<ngx-schemer>` and `<ngx-scheme-checker>`.
 
 ---
