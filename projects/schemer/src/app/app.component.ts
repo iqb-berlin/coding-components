@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Subject, takeUntil } from 'rxjs';
 
 import { CodingFactory } from '@iqb/responses/coding-factory';
@@ -57,7 +56,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
     `
   ],
   standalone: true,
-  imports: [BrowserAnimationsModule, SchemerComponent, SchemerStandaloneMenuComponent, MatTooltipModule]
+  imports: [SchemerComponent, SchemerStandaloneMenuComponent, MatTooltipModule]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();

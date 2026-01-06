@@ -1,13 +1,14 @@
+import 'zone.js';
 import { enableProdMode, importProvidersFrom } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { createCustomElement } from '@angular/elements';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { MatDialogModule } from '@angular/material/dialog';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SchemerTranslateLoader } from '@ngx-coding-components/translations/schemer-translate-loader';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
-import 'zone.js';
 
 if (environment.production) {
   enableProdMode();
@@ -18,8 +19,8 @@ if (environment.production) {
     providers: [
       provideAnimations(),
       provideHttpClient(),
-      TranslateService,
       importProvidersFrom(
+        MatDialogModule,
         TranslateModule.forRoot({
           defaultLanguage: 'de',
           loader: {

@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, Output, inject
+  Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatIcon, MatIconRegistry } from '@angular/material/icon';
@@ -78,12 +78,11 @@ export class CodeRuleListComponent {
   blankRules: RuleMethod[] = ['IS_EMPTY', 'IS_NULL'];
 
   constructor(
-
     public schemerService: SchemerService,
-    public editRuleReferenceDialog: MatDialog
+    public editRuleReferenceDialog: MatDialog,
+    private iconRegistry: MatIconRegistry,
+    private sanitizer: DomSanitizer
   ) {
-    const iconRegistry = inject(MatIconRegistry);
-    const sanitizer = inject(DomSanitizer);
     const icons = [
       { name: 'match-word', svg: asSvg(MATCH_WORD_SVG) },
       { name: 'regular-expression', svg: asSvg(REGULAR_EXPRESSION_SVG) },
