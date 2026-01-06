@@ -1,4 +1,4 @@
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -17,11 +17,11 @@ import { CodeRuleListComponent } from '@ngx-coding-components/var-coding/code-ru
 import { RichTextEditorComponent } from '@ngx-coding-components/rich-text-editor/rich-text-editor.component';
 import { ComboButtonComponent } from '@ngx-coding-components/rich-text-editor/combo-button.component';
 import { AppComponent } from './app/app.component';
-import 'zone.js';
 
 (async () => {
   const app = await createApplication({
     providers: [
+      provideZonelessChangeDetection(),
       provideAnimations(),
       provideHttpClient(),
       TranslateService,

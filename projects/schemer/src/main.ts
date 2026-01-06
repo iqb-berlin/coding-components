@@ -1,5 +1,4 @@
-import 'zone.js';
-import { enableProdMode, importProvidersFrom } from '@angular/core';
+import { enableProdMode, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { createCustomElement } from '@angular/elements';
@@ -17,6 +16,7 @@ if (environment.production) {
 (async () => {
   const app = await createApplication({
     providers: [
+      provideZonelessChangeDetection(),
       provideAnimations(),
       provideHttpClient(),
       importProvidersFrom(

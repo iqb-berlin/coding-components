@@ -138,8 +138,21 @@ function replaceScriptTags(htmlString) {
   return htmlString.replace(regexJS, (a, b) => {
     console.log('Replacing Script Tag: ', a);
     const regexSRC = /src="(.*?)"/ig; // Attention, global declaration is wrong, because of pointer
-    const filename = regexSRC.exec(a)[1];
-    let fileContent = readFileSync(folder + filename, 'utf8').toString();
+    const srcMatch = regexSRC.exec(a);
+    if (!srcMatch) {
+      logDebug('No src attribute found in script tag, skipping.');
+      return a;
+    }
+    const filename = srcMatch[1];
+    const filePath = folder + filename;
+    
+    // Check if file exists before trying to read it
+    if (!existsSync(filePath)) {
+      logDebug(`Script file ${filePath} not found. Skipping replacement.`);
+      return ''; // Remove the script tag if file doesn't exist
+    }
+    
+    let fileContent = readFileSync(filePath, 'utf8').toString();
     fileContent = replaceUrlInCss(fileContent); // first because works with url-pattern
     fileContent = replaceLinkedAssetsInJS(fileContent);
     const isModule = a.includes('type="module"');
