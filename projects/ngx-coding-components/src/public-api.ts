@@ -12,3 +12,8 @@ export * from './lib/dialogs/show-coding-dialog.component';
 export * from './lib/dialogs/simple-input-dialog.component';
 export * from './lib/dialogs/coding-scheme-dialog.component';
 export * from './lib/elements/register-elements';
+export * from './lib/codebook-export/codebook-export.component';
+export * from './lib/models/codebook.interfaces';
+export * from './lib/codebook-generator/codebook-generator.class';
+export * from './lib/codebook-generator/codebook-docx-generator.class';
+
