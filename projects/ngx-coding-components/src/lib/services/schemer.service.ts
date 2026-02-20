@@ -55,6 +55,32 @@ export class SchemerService {
   }
 
   setCodingScheme(value: CodingScheme | null): void {
+    if (value && value.variableCodings) {
+      value.variableCodings.forEach(vc => {
+        vc.codes?.forEach(c => {
+          c.ruleSets?.forEach(rs => {
+            if (rs.valueArrayPos === null) {
+              delete rs.valueArrayPos;
+            }
+            rs.rules?.forEach(r => {
+              const paramCount = this.ruleMethodParameterCount[r.method];
+              if (paramCount !== 0) {
+                if (!r.parameters || r.parameters.length === 0) {
+                  r.parameters = [''];
+                  if (paramCount && paramCount > 1) r.parameters.push('');
+                } else if (paramCount !== -1 && r.parameters.length < paramCount) {
+                  while (r.parameters.length < paramCount) {
+                    r.parameters.push('');
+                  }
+                }
+              } else if (r.parameters && r.parameters.length > 0) {
+                r.parameters = [];
+              }
+            });
+          });
+        });
+      });
+    }
     this._codingScheme.set(value);
   }
 
