@@ -29,7 +29,7 @@
           "options": {
             "karmaConfig": "projects/ngx-coding-components/karma.conf.js",
             "tsConfig": "projects/ngx-coding-components/tsconfig.spec.json",
-            "polyfills": []
+            "main": "projects/ngx-coding-components/src/test.ts"
           }
         }
       }

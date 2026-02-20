@@ -12,6 +12,9 @@
       "@ngx-translate/core/*": ["../../node_modules/@ngx-translate/core/*"]
     }
   },
+  "files": [
+    "src/test.ts"
+  ],
   "include": [
     "**/*.spec.ts",
     "**/*.d.ts"
