@@ -52,7 +52,8 @@
     "ngx-build-plus": "^20.0.0",
     "prosemirror-state": "^1.4.4",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
   },
   "peerDependencies": {
     "@tiptap/core": "^2.23.1",
