@@ -33,6 +33,7 @@ export interface FormulaEditDialogData {
   template: `
     <h1 mat-dialog-title>{{ data.title }}</h1>
     <mat-dialog-content class="dialog-content">
+      <!--suppress HtmlUnknownTag -->
       <math-field #mathField (input)="onMathInput($event)"></math-field>
       @if (renderedFormula) {
       <div class="preview" [innerHTML]="renderedFormula"></div>
