@@ -244,6 +244,10 @@
         <button mat-button (click)="insertSpecialChar('&hearts;')">&hearts;</button>
         <button mat-button (click)="insertSpecialChar('&diams;')">&diams;</button>
       </mat-menu>
+      <button mat-icon-button matTooltip="Formel einfügen" [matTooltipShowDelay]="300"
+              (click)="insertFormula()">
+        <mat-icon>functions</mat-icon>
+      </button>
       <button mat-icon-button matTooltip="Zitat" [matTooltipShowDelay]="300"
               [class.active]="editor.isActive('blockquote')"
               (click)="toggleBlockquote()">
@@ -254,9 +258,9 @@
 </div>
 <div class="editor-wrapper"
      [style.height.px]="editorHeightPx">
-  <tiptap-editor [editor]="editor" [ngModel]="content"
+  <tiptap-editor [editor]="editor" [ngModel]="editorContent"
                  [outputFormat]="clozeMode ? 'json' : 'html'"
                  [style.font-size.px]="defaultFontSize"
-                 (ngModelChange)="contentChange.emit($event)">
+                 (ngModelChange)="onContentChanged($event)">
   </tiptap-editor>
 </div>

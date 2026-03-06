@@ -1,4 +1,6 @@
 import { Editor } from '@tiptap/core';
+import { of } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { RichTextEditorComponent } from './rich-text-editor.component';
 import { FileService } from '../services/file.service';
 
@@ -33,6 +35,7 @@ describe('RichTextEditorComponent', () => {
     setTextAlign: jasmine.Spy;
     toggleBulletList: jasmine.Spy;
     toggleOrderedList: jasmine.Spy;
+    insertIqbMathFormula: jasmine.Spy;
     insertContent: jasmine.Spy;
     focus: jasmine.Spy;
     run: jasmine.Spy;
@@ -48,7 +51,13 @@ describe('RichTextEditorComponent', () => {
   const createComponentWithFakeEditor = (options?: {
     active?: Record<string, boolean>;
   }) => {
-    const component = new RichTextEditorComponent();
+    const dialogRef = {
+      afterClosed: () => of(false)
+    };
+    const matDialog = {
+      open: jasmine.createSpy('open').and.returnValue(dialogRef)
+    } as unknown as MatDialog;
+    const component = new RichTextEditorComponent(matDialog);
 
     const commandSpyHost: CommandSpyHost = {
       focus: jasmine.createSpy('focus'),
@@ -83,6 +92,7 @@ describe('RichTextEditorComponent', () => {
       setTextAlign: jasmine.createSpy('setTextAlign').and.callFake(() => chain),
       toggleBulletList: jasmine.createSpy('toggleBulletList').and.callFake(() => chain),
       toggleOrderedList: jasmine.createSpy('toggleOrderedList').and.callFake(() => chain),
+      insertIqbMathFormula: jasmine.createSpy('insertIqbMathFormula').and.callFake(() => chain),
       insertContent: jasmine.createSpy('insertContent').and.callFake(() => chain),
       focus: jasmine.createSpy('focus').and.callFake(() => chain),
       run: chainRunSpy
@@ -98,7 +108,12 @@ describe('RichTextEditorComponent', () => {
     };
 
     component.editor = fakeEditor as unknown as Editor;
-    return { component, chain, commands: commandSpyHost };
+    return {
+      component,
+      chain,
+      commands: commandSpyHost,
+      matDialog
+    };
   };
 
   it('ngAfterViewInit should focus the editor', () => {
@@ -238,5 +253,18 @@ describe('RichTextEditorComponent', () => {
     component.toggleBlockquote();
 
     expect(commands.toggleBlockquote).toHaveBeenCalled();
+  });
+
+  it('insertFormula should insert markup when dialog returns latex', () => {
+    const { component, chain, matDialog } = createComponentWithFakeEditor();
+    (matDialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => of('\\frac{1}{2}')
+    });
+
+    component.insertFormula();
+
+    expect(matDialog.open).toHaveBeenCalled();
+    expect(chain.insertIqbMathFormula).toHaveBeenCalledWith('\\frac{1}{2}');
+    expect(chain.run).toHaveBeenCalled();
   });
 });

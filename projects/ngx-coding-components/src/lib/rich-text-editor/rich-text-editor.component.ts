@@ -1,6 +1,6 @@
 import {
   Component, EventEmitter, Input, Output,
-  AfterViewInit
+  AfterViewInit, OnChanges, SimpleChanges
 } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import { Underline } from '@tiptap/extension-underline';
@@ -29,6 +29,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { AnchorId } from './extensions/anchorId';
 import { Indent } from './extensions/indent';
 import { HangingIndent } from './extensions/hanging-indent';
@@ -39,6 +40,9 @@ import { OrderedListExtension } from './extensions/ordered-list';
 import { BlockImage } from './extensions/block-image';
 import { FileService } from '../services/file.service';
 import { ComboButtonComponent } from './combo-button.component';
+import { FormulaEditDialogComponent } from './formula-edit-dialog.component';
+import IqbMathFormula from './extensions/iqb-math-formula';
+import { renderManualInstructionMath } from './manual-instruction-math';
 
 @Component({
   selector: 'aspect-rich-text-editor',
@@ -51,7 +55,7 @@ import { ComboButtonComponent } from './combo-button.component';
     MatMenuTrigger, MatMenu, MatButton, TiptapEditorDirective
   ]
 })
-export class RichTextEditorComponent implements AfterViewInit {
+export class RichTextEditorComponent implements AfterViewInit, OnChanges {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Input() content!: string | Record<string, any>;
   @Input() defaultFontSize!: number;
@@ -59,6 +63,8 @@ export class RichTextEditorComponent implements AfterViewInit {
   @Input() clozeMode: boolean = false;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Output() contentChange = new EventEmitter<string | Record<string, any>>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  editorContent!: string | Record<string, any>;
 
   selectedFontColor = 'lightgrey';
   selectedHighlightColor = 'lightgrey';
@@ -93,15 +99,30 @@ export class RichTextEditorComponent implements AfterViewInit {
     OrderedListExtension,
     HangingIndent,
     BlockImage,
-    Blockquote
+    Blockquote,
+    IqbMathFormula.configure({
+      onFormulaClick: (latex: string, position: number) => this.editFormulaAtPosition(latex, position)
+    })
   ];
 
   editor: Editor = new Editor({
     extensions: this.defaultExtensions
   });
 
+  constructor(private editFormulaDialog: MatDialog) {}
+
   ngAfterViewInit(): void {
     this.editor.commands.focus();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['content']) {
+      if (typeof this.content === 'string') {
+        this.editorContent = renderManualInstructionMath(this.content);
+      } else {
+        this.editorContent = this.content;
+      }
+    }
   }
 
   toggleBold(): void {
@@ -226,5 +247,50 @@ export class RichTextEditorComponent implements AfterViewInit {
 
   toggleBlockquote(): void {
     this.editor.commands.toggleBlockquote();
+  }
+
+  insertFormula(): void {
+    const dialogRef = this.editFormulaDialog.open(FormulaEditDialogComponent, {
+      width: '700px',
+      data: {
+        title: 'Formel einfügen',
+        latex: ''
+      },
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (typeof dialogResult === 'string' && dialogResult.trim()) {
+        this.editor.chain()
+          .insertIqbMathFormula(dialogResult.trim())
+          .focus()
+          .run();
+      }
+    });
+  }
+
+  onContentChanged(value: string | Record<string, unknown>): void {
+    this.editorContent = value;
+    this.contentChange.emit(value);
+  }
+
+  private editFormulaAtPosition(latex: string, position: number): void {
+    const dialogRef = this.editFormulaDialog.open(FormulaEditDialogComponent, {
+      width: '700px',
+      data: {
+        title: 'Formel bearbeiten',
+        latex
+      },
+      autoFocus: false
+    });
+
+    dialogRef.afterClosed().subscribe(dialogResult => {
+      if (typeof dialogResult === 'string' && dialogResult.trim()) {
+        const transaction = this.editor.state.tr.setNodeMarkup(position, null, {
+          latex: dialogResult.trim()
+        });
+        this.editor.view.dispatch(transaction);
+      }
+    });
   }
 }
