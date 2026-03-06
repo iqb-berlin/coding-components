@@ -50,6 +50,7 @@ import {
   ShowCodingDialogComponent
 } from '../dialogs/show-coding-dialog.component';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
+import { renderManualInstructionMath } from '../rich-text-editor/manual-instruction-math';
 import { CodesTitleComponent } from './codes-title.component';
 
 import {
@@ -165,7 +166,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   getSanitizedText(text: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(text);
+    return this.sanitizer.bypassSecurityTrustHtml(
+      renderManualInstructionMath(text)
+    );
   }
 
   editTextDialog_manualInstruction(): void {

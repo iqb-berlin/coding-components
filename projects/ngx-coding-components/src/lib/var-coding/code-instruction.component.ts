@@ -15,6 +15,7 @@ import {
 import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { UserRoleType } from '../services/schemer.service';
+import { renderManualInstructionMath } from '../rich-text-editor/manual-instruction-math';
 
 @Component({
   selector: 'code-instruction',
@@ -146,6 +147,8 @@ export class CodeInstructionComponent {
   }
 
   getSanitizedText(text: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(text);
+    return this.sanitizer.bypassSecurityTrustHtml(
+      renderManualInstructionMath(text)
+    );
   }
 }
