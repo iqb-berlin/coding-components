@@ -1,6 +1,6 @@
 import katex from 'katex';
 
-const FORMULA_TOKEN_REGEX = /\[\[iqb-math:([\s\S]*?)\]\]/g;
+const FORMULA_TOKEN_REGEX = /\[\[iqb-math:([\s\S]*?)]]/g;
 
 const renderFormula = (latex: string): string => {
   const formula = latex.trim();
