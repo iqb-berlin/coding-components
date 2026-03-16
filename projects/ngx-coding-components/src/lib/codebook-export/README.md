@@ -9,6 +9,7 @@ The codebook export component provides a comprehensive UI for generating and exp
 - **Missings Profiles**: Select from available missings profiles
 - **Export Formats**: Export as JSON or DOCX
 - **Search & Filter**: Quickly find units with built-in search
+- **Background Jobs**: Optional async export with progress and downloads
 
 ## Installation
 
@@ -65,6 +66,74 @@ export class MyComponent {
 }
 ```
 
+### Provider-Based Example (recommended)
+
+Use a provider so the component can load data, manage export jobs, and download files.
+
+```typescript
+import { Injectable, Component } from '@angular/core';
+import { map, Observable } from 'rxjs';
+import {
+  CodebookExportComponent,
+  CodebookExportProvider,
+  CodebookExportExecution,
+  CodebookExportConfig,
+  UnitSelectionItem,
+  MissingsProfile,
+  CODEBOOK_EXPORT_PROVIDER
+} from '@iqb/ngx-coding-components';
+
+@Injectable()
+export class MyCodebookProvider implements CodebookExportProvider {
+  loadUnits(): Observable<UnitSelectionItem[]> {
+    return this.backend.loadUnits();
+  }
+
+  loadMissingsProfiles(): Observable<MissingsProfile[]> {
+    return this.backend.loadMissingsProfiles();
+  }
+
+  startExport(config: CodebookExportConfig): Observable<CodebookExportExecution> {
+    return this.backend.exportCodebook(config).pipe(
+      map(blob => ({
+        type: 'direct',
+        blob,
+        fileName: `codebook_${Date.now()}.${config.contentOptions.exportFormat}`
+      }))
+    );
+  }
+}
+
+@Component({
+  selector: 'app-my-component',
+  template: `<ngx-codebook-export></ngx-codebook-export>`,
+  standalone: true,
+  imports: [CodebookExportComponent],
+  providers: [{ provide: CODEBOOK_EXPORT_PROVIDER, useClass: MyCodebookProvider }]
+})
+export class MyComponent {}
+```
+
+### Provider-Based Example (job + polling)
+
+```typescript
+class MyCodebookProvider implements CodebookExportProvider {
+  startExport(config: CodebookExportConfig): Observable<CodebookExportExecution> {
+    return this.backend.startCodebookJob(config).pipe(
+      map(response => ({ type: 'job', jobId: response.jobId }))
+    );
+  }
+
+  getJobStatus(jobId: string): Observable<CodebookExportJobStatus> {
+    return this.backend.getCodebookJobStatus(jobId);
+  }
+
+  download(jobId: string): Observable<Blob> {
+    return this.backend.downloadCodebook(jobId);
+  }
+}
+```
+
 ### With Dialog
 
 ```typescript
@@ -100,37 +169,39 @@ Use the `CodebookGenerator` class to generate codebooks from the export configur
 ```typescript
 import { CodebookGenerator, CodebookExportConfig, UnitPropertiesForCodebook } from '@iqb/ngx-coding-components';
 
-async generateCodebook(config: CodebookExportConfig) {
-  // Fetch unit data with schemes
-  const units: UnitPropertiesForCodebook[] = await this.fetchUnits(config.selectedUnits);
-  
-  // Fetch missings
-  const missings = await this.fetchMissings(config.missingsProfileId);
+class MyComponent {
+  async generateCodebook(config: CodebookExportConfig) {
+    // Fetch unit data with schemes
+    const units: UnitPropertiesForCodebook[] = await this.fetchUnits(config.selectedUnits);
+    
+    // Fetch missings
+    const missings = await this.fetchMissings(config.missingsProfileId);
 
-  // Generate codebook
-  const buffer = await CodebookGenerator.generateCodebook(
-    units,
-    config.contentOptions,
-    missings
-  );
+    // Generate codebook
+    const buffer = await CodebookGenerator.generateCodebook(
+      units,
+      config.contentOptions,
+      missings
+    );
 
-  // Download the file
-  this.downloadFile(buffer, config.contentOptions.exportFormat);
-}
+    // Download the file
+    this.downloadFile(buffer, config.contentOptions.exportFormat);
+  }
 
-private downloadFile(buffer: Buffer, format: string) {
-  const blob = new Blob([buffer], { 
-    type: format === 'docx' 
-      ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      : 'application/json'
-  });
-  
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `codebook_${Date.now()}.${format}`;
-  a.click();
-  window.URL.revokeObjectURL(url);
+  private downloadFile(buffer: Buffer, format: string) {
+    const blob = new Blob([buffer], { 
+      type: format === 'docx' 
+        ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        : 'application/json'
+    });
+    
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `codebook_${Date.now()}.${format}`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 }
 ```
 
@@ -145,12 +216,13 @@ private downloadFile(buffer: Buffer, format: string) {
 | `isLoading` | `boolean` | `false` | Loading state for units |
 | `workspaceChanges` | `boolean` | `false` | Whether workspace has unsaved changes |
 | `defaultContentOptions` | `Partial<CodeBookContentSetting>` | - | Default content options |
+| `provider` | `CodebookExportProvider` | - | Optional provider for loading data and running exports |
 
 ### Component Outputs
 
 | Output | Type | Description |
 |--------|------|-------------|
-| `export` | `EventEmitter<CodebookExportConfig>` | Emitted when export is triggered |
+| `export` | `EventEmitter<CodebookExportConfig>` | Emitted when export is triggered and no provider is configured |
 | `cancel` | `EventEmitter<void>` | Emitted when component is cancelled |
 
 ### Interfaces
@@ -162,6 +234,38 @@ interface CodebookExportConfig {
   selectedUnits: number[];
   contentOptions: CodeBookContentSetting;
   missingsProfileId: number;
+}
+```
+
+#### `CodebookExportProvider`
+
+```typescript
+interface CodebookExportProvider {
+  loadUnits?(): Observable<UnitSelectionItem[]>;
+  loadMissingsProfiles?(): Observable<MissingsProfile[]>;
+  startExport(config: CodebookExportConfig): Observable<CodebookExportExecution>;
+  getJobStatus?(jobId: string): Observable<CodebookExportJobStatus>;
+  download?(jobId: string): Observable<Blob>;
+}
+```
+
+#### `CodebookExportExecution`
+
+```typescript
+type CodebookExportExecution =
+  | { type: 'direct'; blob: Blob; fileName?: string; mimeType?: string }
+  | { type: 'job'; jobId: string };
+```
+
+#### `CodebookExportJobStatus`
+
+```typescript
+interface CodebookExportJobStatus {
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress?: number;
+  error?: string;
+  fileName?: string;
+  exportFormat?: string;
 }
 ```
 
@@ -241,6 +345,8 @@ The component uses `@ngx-translate/core` for internationalization. Make sure to 
 - `coding.has-closed-vars`
 - `coding.show-score`
 - `coding.code-label-to-upper`
+- `coding.codebook-generating`
+- `coding.codebook-completed`
 - `workspace.coding-missing-profiles`
 - `workspace.select-missings-profile`
 - `coding.export-format`
