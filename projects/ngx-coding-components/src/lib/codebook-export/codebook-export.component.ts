@@ -230,7 +230,7 @@ export class CodebookExportComponent implements OnInit, OnDestroy, OnChanges {
   private configureDataSource(): void {
     this.dataSource.data = this.availableUnits;
     this.dataSource.filterPredicate = (data, filter: string) => {
-      const formattedName = CodebookExportComponent.formatUnitName(data.unitName).toLowerCase();
+      const formattedName = this.formatUnitName(data.unitName).toLowerCase();
       return formattedName.includes(filter);
     };
   }
@@ -312,7 +312,9 @@ export class CodebookExportComponent implements OnInit, OnDestroy, OnChanges {
     return this.unitList.includes(unitId);
   }
 
-  private static formatUnitName(unitName: string): string {
+  // Used by the template.
+  // eslint-disable-next-line class-methods-use-this
+  formatUnitName(unitName: string): string {
     if (unitName && unitName.toLowerCase().endsWith('.vocs')) {
       return unitName.substring(0, unitName.length - 5);
     }

@@ -25,7 +25,9 @@ export class CodebookGenerator {
     if (units.length === 0) {
       return Promise.resolve(Buffer.from('[]', 'utf-8'));
     }
-    const codebook: CodebookUnitDto[] = units.map((unit: UnitPropertiesForCodebook) => this.getCodeBookDataForUnit(unit, contentSetting, missings));
+    const codebook: CodebookUnitDto[] = units.map(
+      (unit: UnitPropertiesForCodebook) => this.getCodeBookDataForUnit(unit, contentSetting, missings)
+    );
 
     if (contentSetting.exportFormat === 'docx') {
       return CodebookDocxGenerator.generateDocx(codebook, contentSetting);
@@ -83,8 +85,11 @@ export class CodebookGenerator {
     variableCoding: VariableCodingData,
     contentSetting: CodeBookContentSetting
   ): BookVariable | null {
-    const codes: CodeInfo[] = this.getCodes(variableCoding.codes, contentSetting);
-    const isDerived: boolean = (variableCoding.sourceType !== 'BASE' && variableCoding.sourceType !== 'BASE_NO_VALUE');
+    const rawCodes = variableCoding.codes ?? [];
+    const codes: CodeInfo[] = this.getCodes(rawCodes, contentSetting);
+    const isDerived: boolean = (
+      variableCoding.sourceType !== 'BASE' && variableCoding.sourceType !== 'BASE_NO_VALUE'
+    );
     if (!isDerived || contentSetting.hasDerivedVars) {
       return this.getManualOrClosedCodedBookVariable(contentSetting, codes, variableCoding);
     }
@@ -114,31 +119,41 @@ export class CodebookGenerator {
     }
     return {
       id: variableCoding.alias || variableCoding.id,
-      label: variableCoding.label,
+      label: variableCoding.label ?? '',
       sourceType: variableCoding.sourceType,
       generalInstruction: contentSetting.hasGeneralInstructions ?
-        variableCoding.manualInstruction :
+        (variableCoding.manualInstruction ?? '') :
         '',
       codes: codes
     };
   }
 
   private static isClosed(variableCoding: VariableCodingData): boolean {
-    return variableCoding.codes.some((codeData: CodeData) => codeData.type === 'RESIDUAL_AUTO' || codeData.type === 'INTENDED_INCOMPLETE');
+    const codes = variableCoding.codes ?? [];
+    return codes.some(
+      (codeData: CodeData) => codeData.type === 'RESIDUAL_AUTO' || codeData.type === 'INTENDED_INCOMPLETE'
+    );
   }
 
   private static isManual(variableCoding: VariableCodingData): boolean {
-    return variableCoding.codes.some((codeData: CodeData) => codeData.manualInstruction);
+    const codes = variableCoding.codes ?? [];
+    return codes.some((codeData: CodeData) => codeData.manualInstruction);
   }
 
   private static isManualWithoutClosed(variableCoding: VariableCodingData): boolean {
-    return variableCoding.codes.some((codeData: CodeData) => codeData.manualInstruction &&
-      (codeData.type !== 'RESIDUAL_AUTO' && codeData.type !== 'INTENDED_INCOMPLETE'));
+    const codes = variableCoding.codes ?? [];
+    return codes.some((codeData: CodeData) => codeData.manualInstruction &&
+      (codeData.type !== 'RESIDUAL_AUTO' && codeData.type !== 'INTENDED_INCOMPLETE')
+    );
   }
 
   private static isClosedWithoutManual(variableCoding: VariableCodingData): boolean {
-    return variableCoding.codes
-      .some((codeData: CodeData) => (codeData.type === 'RESIDUAL_AUTO' || codeData.type === 'INTENDED_INCOMPLETE') && !codeData.manualInstruction);
+    const codes = variableCoding.codes ?? [];
+    return codes
+      .some(
+        (codeData: CodeData) => (codeData.type === 'RESIDUAL_AUTO' || codeData.type === 'INTENDED_INCOMPLETE') &&
+          !codeData.manualInstruction
+      );
   }
 
   private static getCodes(codes: CodeData[], contentSetting: CodeBookContentSetting): CodeInfo[] {
@@ -174,7 +189,7 @@ export class CodebookGenerator {
     const codeInfo: CodeInfo = {
       id: `${code.id}`,
       label: contentSetting.codeLabelToUpper ? codeAsText.label.toUpperCase() : codeAsText.label,
-      description: `${rulesDescription}${code.manualInstruction}`
+      description: `${rulesDescription}${code.manualInstruction ?? ''}`
     };
     if (contentSetting.showScore) codeInfo.score = codeAsText.score.toString();
     return codeInfo;
@@ -186,7 +201,7 @@ export class CodebookGenerator {
       (ruleSetDescription: string) => {
         if (ruleSetDescription !== 'Keine Regeln definiert.') {
           rulesDescription += `<p>${ruleSetDescription}</p>`;
-        } else if (code.manualInstruction === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
+        } else if ((code.manualInstruction ?? '') === '') rulesDescription += `<p>${ruleSetDescription}</p>`;
       }
     );
     return rulesDescription;

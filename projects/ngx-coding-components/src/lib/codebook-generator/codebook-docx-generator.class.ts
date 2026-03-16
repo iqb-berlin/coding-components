@@ -548,7 +548,7 @@ export class CodebookDocxGenerator {
    * @param paragraphs List of paragraphs
    */
   private static processChildNodes(nodes: AnyNode[], paragraphs: Paragraph[]): void {
-    for (const node of nodes) {
+    nodes.forEach(node => {
       if (node.type === 'text') {
         if ('data' in node && node.data && node.data.trim()) {
           paragraphs.push(new Paragraph({ text: node.data.trim() }));
@@ -569,7 +569,7 @@ export class CodebookDocxGenerator {
           this.processChildNodes(element.children, paragraphs);
         }
       }
-    }
+    });
   }
 
   /**
@@ -578,7 +578,7 @@ export class CodebookDocxGenerator {
    * @param textRuns List of text runs
    */
   private static processInlineElements(nodes: AnyNode[], textRuns: TextRun[]): void {
-    for (const node of nodes) {
+    nodes.forEach(node => {
       if (node.type === 'text') {
         if ('data' in node && node.data && node.data.trim()) {
           textRuns.push(new TextRun({ text: node.data.trim() }));
@@ -589,25 +589,25 @@ export class CodebookDocxGenerator {
 
         if (tagName === 'strong' || tagName === 'b') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 textRuns.push(new TextRun({ text: child.data.trim(), bold: true }));
               }
-            }
+            });
           }
         } else if (tagName === 'em' || tagName === 'i') {
           if (element.children) {
-            for (const child of element.children) {
+            element.children.forEach(child => {
               if (child.type === 'text' && child.data) {
                 textRuns.push(new TextRun({ text: child.data.trim(), italics: true }));
               }
-            }
+            });
           }
         } else if (element.children && element.children.length > 0) {
           this.processInlineElements(element.children, textRuns);
         }
       }
-    }
+    });
   }
 
   /**
@@ -618,27 +618,29 @@ export class CodebookDocxGenerator {
    */
   private static processListElements(nodes: AnyNode[], paragraphs: Paragraph[], isOrdered: boolean): void {
     let index = 1;
-    for (const node of nodes) {
+    nodes.forEach(node => {
       if (node.type === 'tag') {
         const element = node as Element;
         if (element.name.toLowerCase() === 'li') {
           const textRuns: TextRun[] = [];
           this.processInlineElements(element.children, textRuns);
           if (textRuns.length > 0) {
+            const numbering = isOrdered ? {
+              reference: 'default-numbering',
+              level: 0,
+              instance: index
+            } : undefined;
+            if (isOrdered) index += 1;
             paragraphs.push(new Paragraph({
               children: textRuns,
               bullet: {
                 level: 0
               },
-              numbering: isOrdered ? {
-                reference: 'default-numbering',
-                level: 0,
-                instance: index += 1
-              } : undefined
+              numbering
             }));
           }
         }
       }
-    }
+    });
   }
 }
