@@ -220,6 +220,11 @@
     "VACANT": "Ohne Codes und nicht abgeleitet (Wert kopiert)",
     "RULE_PARAMETER_COUNT_MISMATCH": "Anzahl der Code-Parameter ungültig",
     "SOURCE_MISSING": "Quelle nicht gefunden (Basisvariable nicht in Definition oder Ableitung ohne Quelle)",
+    "INVALID_SOURCE": "Ungültige Quelle",
+    "RULE_REGEX_INVALID": "Ungültiger regulärer Ausdruck in der Regel",
+    "RULE_PARAMETER_INVALID": "Ungültiger Parameter in der Regel",
+    "RULE_NUMERIC_RANGE_INVALID": "Ungültiger numerischer Bereich in der Regel",
+    "RULESET_VALUE_ARRAY_POS_INVALID": "Ungültige Position im Werte-Array im Regelsatz",
     "ONLY_ONE_SOURCE": "Eine Ableitung sollte mehr als eine Quelle haben",
     "VALUE_COPY_NOT_FROM_BASE": "Es wurde ein Wert kopiert, aber nicht von einer Basisvariablen.",
     "MORE_THAN_ONE_SOURCE": "Es wurde ein Wert kopiert, aber es gibt mehr als eine Quelle."
