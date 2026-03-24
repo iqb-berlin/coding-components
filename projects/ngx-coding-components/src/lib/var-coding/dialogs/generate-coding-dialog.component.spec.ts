@@ -358,4 +358,58 @@ describe('GenerateCodingDialogComponent', () => {
     expect(component.numericRuleText).toContain('5');
     expect(component.numericRuleText).toContain('10');
   });
+
+  it('updateNumericRuleText should not show NUMERIC_MATCH when numericMatch is empty but min/max are set', () => {
+    const { component } = createComponent({
+      type: 'integer',
+      multiple: false
+    });
+
+    component.numericMatch = ''; // Empty string
+    component.numericMin = '5';
+    component.numericMax = '10';
+    component.updateNumericRuleText();
+
+    expect(component.numericRuleError).toBeFalse();
+    expect(component.numericRuleText).toContain('rule.NUMERIC_FULL_RANGE');
+    expect(component.numericRuleText).toContain('5');
+    expect(component.numericRuleText).toContain('10');
+    // Should NOT contain NUMERIC_MATCH text
+    expect(component.numericRuleText).not.toContain('rule.NUMERIC_MATCH');
+  });
+
+  it('generateButtonClick should generate NUMERIC_FULL_RANGE rule when numericMatch is empty but min/max are set', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'integer',
+      multiple: false
+    });
+
+    component.generationModel = 'integer';
+    component.numericMatch = ''; // Empty string
+    component.numericMin = '5';
+    component.numericMax = '10';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = { id: 1, type } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    expect(dialogRef.close).toHaveBeenCalled();
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as
+      { id: string; codes: unknown[] };
+    expect(closed.id).toBe('v1');
+    expect(closed.codes.length).toBeGreaterThan(0);
+
+    const fullCredit = (closed.codes as Array<
+    { type: string; ruleSets: Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
+      .find(c => c.type === 'FULL_CREDIT')!;
+    // Should NOT create NUMERIC_MATCH rule when numericMatch is empty
+    expect(fullCredit.ruleSets[0].rules[0].method).toBe('NUMERIC_FULL_RANGE');
+    expect(fullCredit.ruleSets[0].rules[0].parameters).toEqual(['5', '10']);
+    // Should not have NUMERIC_MATCH rule
+    expect(fullCredit.ruleSets[0].rules).not.toContain(jasmine.objectContaining({ method: 'NUMERIC_MATCH' }));
+  });
 });

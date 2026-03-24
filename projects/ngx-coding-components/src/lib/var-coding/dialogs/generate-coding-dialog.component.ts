@@ -226,7 +226,8 @@ export class GenerateCodingDialogComponent {
   updateNumericRuleText() {
     this.numericRuleError = false;
     const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-    if (matchValue) {
+    // Only show NUMERIC_MATCH text if numericMatch is not empty
+    if (matchValue && this.numericMatch !== '') {
       this.numericRuleText = `${this.translateService.instant(
         'rule.NUMERIC_MATCH'
       )}: ${matchValue}`;
@@ -387,7 +388,7 @@ export class GenerateCodingDialogComponent {
       ) {
         const numericRules: CodingRule[] = [];
         const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-        if (matchValue !== null) {
+        if (matchValue !== null && this.numericMatch !== '') {
           numericRules.push({
             method: 'NUMERIC_MATCH',
             parameters: [matchValue.toString(10)]
