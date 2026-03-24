@@ -73,7 +73,6 @@ export class CodeRulesComponent {
     }
 
     const newRuleSet: RuleSet = {
-      valueArrayPos: -1,
       ruleOperatorAnd: false,
       rules: [
         {

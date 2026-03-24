@@ -87,12 +87,10 @@ describe('CodeRulesComponent', () => {
       score: 1,
       ruleSets: [
         {
-          valueArrayPos: -1,
           ruleOperatorAnd: false,
           rules: [{ method: 'MATCH', parameters: ['a'] }]
         },
         {
-          valueArrayPos: -1,
           ruleOperatorAnd: false,
           rules: [{ method: 'MATCH', parameters: ['b'] }]
         }
@@ -122,7 +120,7 @@ describe('CodeRulesComponent', () => {
 
   it('editArrayReference should not change valueArrayPos when dialog returns false', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
-    const rs = { valueArrayPos: -1, ruleOperatorAnd: false, rules: [] } as unknown as never;
+    const rs = { ruleOperatorAnd: false, rules: [] } as unknown as never;
 
     dialogOpenSpy.and.returnValue({
       afterClosed: () => of(false)
@@ -131,13 +129,12 @@ describe('CodeRulesComponent', () => {
     component.editArrayReference(rs);
 
     expect(dialogOpenSpy).toHaveBeenCalled();
-    expect((rs as unknown as { valueArrayPos: number }).valueArrayPos).toBe(-1);
     expect(emitSpy).not.toHaveBeenCalled();
   });
 
   it('editArrayReference should update valueArrayPos and emit when dialog returns a value', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
-    const rs = { valueArrayPos: -1, ruleOperatorAnd: false, rules: [] } as unknown as never;
+    const rs = { ruleOperatorAnd: false, rules: [] } as unknown as never;
 
     dialogOpenSpy.and.returnValue({
       afterClosed: () => of(2)

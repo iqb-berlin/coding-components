@@ -86,7 +86,7 @@ describe('CodeRuleListComponent', () => {
 
   it('addRule should add a rule and set parameters based on paramCount', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
-    const rs: RuleSet = { valueArrayPos: -1, ruleOperatorAnd: false, rules: [] } as unknown as RuleSet;
+    const rs: RuleSet = { ruleOperatorAnd: false, rules: [] } as unknown as RuleSet;
 
     component.addRule(rs, 'MATCH');
     expect(rs.rules.length).toBe(1);
@@ -102,7 +102,6 @@ describe('CodeRuleListComponent', () => {
   it('changeRule should preserve parameters for compatible string/numeric_match transitions', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
     const rs: RuleSet = {
-      valueArrayPos: -1,
       ruleOperatorAnd: false,
       rules: [{ method: 'MATCH', parameters: ['abc'] } as unknown as never]
     } as unknown as RuleSet;
@@ -120,7 +119,6 @@ describe('CodeRuleListComponent', () => {
 
   it('changeRule should reset parameters when switching to unrelated rule types and clear for paramCount=0', () => {
     const rs: RuleSet = {
-      valueArrayPos: -1,
       ruleOperatorAnd: false,
       rules: [{ method: 'MATCH', parameters: ['abc'] } as unknown as never]
     } as unknown as RuleSet;
@@ -137,7 +135,6 @@ describe('CodeRuleListComponent', () => {
   it('deleteRule should guard against invalid input and delete valid entries', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
     const rs: RuleSet = {
-      valueArrayPos: -1,
       ruleOperatorAnd: false,
       rules: [
         { method: 'MATCH', parameters: ['a'] } as unknown as never,
