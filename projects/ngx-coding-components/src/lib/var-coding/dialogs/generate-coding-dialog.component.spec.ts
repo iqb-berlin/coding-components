@@ -311,4 +311,51 @@ describe('GenerateCodingDialogComponent', () => {
     expect(component.selectedDragOptions.length).toBe(0);
     expect(component.options.map(o => o.value)).toEqual(['A', 'B', 'C']);
   });
+
+  it('generateButtonClick should generate NUMERIC_FULL_RANGE rule for closed range [min, max]', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'integer',
+      multiple: false
+    });
+
+    component.generationModel = 'integer';
+    component.numericMin = '5';
+    component.numericMax = '10';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = { id: 1, type } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    expect(dialogRef.close).toHaveBeenCalled();
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as
+      { id: string; codes: unknown[] };
+    expect(closed.id).toBe('v1');
+    expect(closed.codes.length).toBeGreaterThan(0);
+
+    const fullCredit = (closed.codes as Array<
+    { type: string; ruleSets: Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
+      .find(c => c.type === 'FULL_CREDIT')!;
+    expect(fullCredit.ruleSets[0].rules[0].method).toBe('NUMERIC_FULL_RANGE');
+    expect(fullCredit.ruleSets[0].rules[0].parameters).toEqual(['5', '10']);
+  });
+
+  it('updateNumericRuleText should build NUMERIC_FULL_RANGE text for closed range [min, max]', () => {
+    const { component } = createComponent({
+      type: 'integer',
+      multiple: false
+    });
+
+    component.numericMin = '5';
+    component.numericMax = '10';
+    component.updateNumericRuleText();
+
+    expect(component.numericRuleError).toBeFalse();
+    expect(component.numericRuleText).toContain('rule.NUMERIC_FULL_RANGE');
+    expect(component.numericRuleText).toContain('5');
+    expect(component.numericRuleText).toContain('10');
+  });
 });

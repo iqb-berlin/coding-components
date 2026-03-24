@@ -256,10 +256,17 @@ export class GenerateCodingDialogComponent {
         const ruleTexts: string[] = [];
         const hasFullRange =
           moreThenValue && maxValue && moreThenValue < maxValue;
+        const hasClosedRange =
+          minValue && maxValue && minValue <= maxValue;
+
         if (hasFullRange) {
           this.numericRuleText = `${this.translateService.instant(
             'rule.NUMERIC_FULL_RANGE'
           )} ${moreThenValue} / ${maxValue}`;
+        } else if (hasClosedRange) {
+          this.numericRuleText = `${this.translateService.instant(
+            'rule.NUMERIC_FULL_RANGE'
+          )} ${minValue} / ${maxValue}`;
         } else {
           if (moreThenValue) {
             ruleTexts.push(
@@ -398,10 +405,18 @@ export class GenerateCodingDialogComponent {
           const hasRangeOverlap =
             moreThanValue && maxValue && moreThanValue < maxValue;
 
+          const hasClosedRange =
+            minValue && maxValue && minValue <= maxValue;
+
           if (hasRangeOverlap) {
             numericRules.push({
               method: 'NUMERIC_FULL_RANGE',
               parameters: [moreThanValue.toString(10), maxValue.toString(10)]
+            });
+          } else if (hasClosedRange) {
+            numericRules.push({
+              method: 'NUMERIC_FULL_RANGE',
+              parameters: [minValue.toString(10), maxValue.toString(10)]
             });
           } else {
             if (moreThanValue) {
