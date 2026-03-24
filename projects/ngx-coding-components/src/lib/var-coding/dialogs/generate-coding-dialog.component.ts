@@ -458,7 +458,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSets = [
             <RuleSet>{
               ruleOperatorAnd: false,
-              valueArrayPos: this.varInfo.multiple ? this.selectedArrayPos : -1,
+              ...(this.varInfo.multiple ? { valueArrayPos: this.selectedArrayPos } : {}),
               rules: numericRules
             }
           ];
@@ -476,7 +476,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSets = [
             <RuleSet>{
               ruleOperatorAnd: false,
-              valueArrayPos: this.varInfo.multiple ? this.selectedArrayPos : -1,
+              ...(this.varInfo.multiple ? { valueArrayPos: this.selectedArrayPos } : {}),
               rules: [
                 {
                   method: 'MATCH',
