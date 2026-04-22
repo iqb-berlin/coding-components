@@ -267,4 +267,16 @@ describe('RichTextEditorComponent', () => {
     expect(chain.insertIqbMathFormula).toHaveBeenCalledWith('\\frac{1}{2}');
     expect(chain.run).toHaveBeenCalled();
   });
+
+  it('insertFormula should normalize MathLive latex before insertion', () => {
+    const { component, chain, matDialog } = createComponentWithFakeEditor();
+    (matDialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => of('\\exponentialE + \\lim_{\\placeholder{}} x')
+    });
+
+    component.insertFormula();
+
+    expect(chain.insertIqbMathFormula).toHaveBeenCalledWith('\\mathrm{e} + \\lim x');
+    expect(chain.run).toHaveBeenCalled();
+  });
 });

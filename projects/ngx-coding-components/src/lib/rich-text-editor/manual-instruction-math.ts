@@ -1,9 +1,10 @@
 import katex from 'katex';
+import { normalizeFormulaLatex } from './formula-latex.utils';
 
 const FORMULA_TOKEN_REGEX = /\[\[iqb-math:([\s\S]*?)]]/g;
 
 const renderFormula = (latex: string): string => {
-  const formula = latex.trim();
+  const formula = normalizeFormulaLatex(latex);
   if (!formula) return '';
   return katex.renderToString(formula, {
     output: 'mathml',
@@ -26,7 +27,7 @@ export const renderManualInstructionMath = (html: string): string => {
   const withTokensRendered = html.replace(
     FORMULA_TOKEN_REGEX,
     (_, encodedFormula: string) => {
-      const latex = decodeTokenFormula(encodedFormula);
+      const latex = normalizeFormulaLatex(decodeTokenFormula(encodedFormula));
       const escapedLatex = latex.replace(/"/g, '&quot;');
       return `<span class="iqb-math-formula" data-latex="${escapedLatex}">${renderFormula(latex)}</span>`;
     }

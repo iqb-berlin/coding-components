@@ -42,6 +42,7 @@ import { FileService } from '../services/file.service';
 import { ComboButtonComponent } from './combo-button.component';
 import { FormulaEditDialogComponent } from './formula-edit-dialog.component';
 import IqbMathFormula from './extensions/iqb-math-formula';
+import { normalizeFormulaLatex } from './formula-latex.utils';
 import { renderManualInstructionMath } from './manual-instruction-math';
 
 @Component({
@@ -260,9 +261,9 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
     });
 
     dialogRef.afterClosed().subscribe(dialogResult => {
-      if (typeof dialogResult === 'string' && dialogResult.trim()) {
+      if (typeof dialogResult === 'string' && normalizeFormulaLatex(dialogResult)) {
         this.editor.chain()
-          .insertIqbMathFormula(dialogResult.trim())
+          .insertIqbMathFormula(normalizeFormulaLatex(dialogResult))
           .focus()
           .run();
       }
@@ -285,9 +286,9 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
     });
 
     dialogRef.afterClosed().subscribe(dialogResult => {
-      if (typeof dialogResult === 'string' && dialogResult.trim()) {
+      if (typeof dialogResult === 'string' && normalizeFormulaLatex(dialogResult)) {
         const transaction = this.editor.state.tr.setNodeMarkup(position, null, {
-          latex: dialogResult.trim()
+          latex: normalizeFormulaLatex(dialogResult)
         });
         this.editor.view.dispatch(transaction);
       }
