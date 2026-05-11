@@ -1,0 +1,329 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2733 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+14 TL
+(Meeting Prep: INVALID-Status vs. Partial Credit \(max. 60 min\)) Tj
+T*
+() Tj
+T*
+(Grobe Intro \(fr alle im Termin\)) Tj
+T*
+() Tj
+T*
+(Ziel des Termins: Wir wollen klren, warum Flle mit teilweise beantworteten Teilangaben) Tj
+T*
+(aktuell auf `INVALID` landen und dadurch fr Partial-Credit/IEA-Prozesse verloren gehen knnen) Tj
+T*
+( und wie wir das fachlich/technisch sauber lsen.) Tj
+T*
+() Tj
+T*
+(Kurz in einem Satz:) Tj
+T*
+(- **Problem:** Gemischte Teilstatus \(z. B. `CODING_COMPLETE` + `DISPLAYED`\) fhren bei) Tj
+T*
+(Ableitungen teils zu `INVALID`.) Tj
+T*
+(- **Auswirkung:** Partial-Credit-Flle werden nicht als `CODING_INCOMPLETE` behandelt und) Tj
+T*
+(knnen aus nachgelagerten Kodierwegen fallen.) Tj
+T*
+(- **Entscheidung im Termin:** Wann ist `INVALID` korrekt, wann muss stattdessen) Tj
+T*
+(`CODING_INCOMPLETE` gesetzt werden?) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(1\) Was wir im `coding-components` Repo verifiziert haben) Tj
+T*
+() Tj
+T*
+(1. Die UI/Prf-Komponente \(`SchemeChecker`\) ruft fr die eigentliche Kodierung nur) Tj
+T*
+(`CodingSchemeFactory.code\(...\)` auf.) Tj
+T*
+(2. `SchemeChecker` setzt beim Aufruf lediglich Input-Status:) Tj
+T*
+(- befllt -> `VALUE_CHANGED`) Tj
+T*
+(- leer bei BASE-Variable -> `DISPLAYED`) Tj
+T*
+(3. Damit liegt die entscheidende Status-Logik fr Ableitungen **nicht** im UI-Repo, sondern in) Tj
+T*
+(`@iqb/responses`.) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(2\) Integration von `@iqb/responses` in die Analyse \(entscheidend\)) Tj
+T*
+() Tj
+T*
+(2.1 Woher kommt `INVALID` bei gemischten Quellen?) Tj
+T*
+(Im Paket `@iqb/responses` \(hier installiert als `5.1.0`\) wird die Ableitungslogik in) Tj
+T*
+(`derive/derive-value.js` gesteuert.) Tj
+T*
+() Tj
+T*
+(Dort gibt es eine Status-Priorisierung fr Source-Responses. Relevanter Punkt:) Tj
+T*
+(- Wenn **mindestens eine** Quellvariable `INVALID` ist, wird die Ziel-Ableitung auf `INVALID`) Tj
+T*
+(gesetzt.) Tj
+T*
+() Tj
+T*
+(2.2 Wo kann `INVALID` vorher entstehen?) Tj
+T*
+(In `normalize/response-status.js` markiert `markEmptyValuesInvalidForBaseUnlessAllowed\(...\)`) Tj
+T*
+(leere Werte \(unter Bedingungen\) auf BASE-Ebene als `INVALID`.) Tj
+T*
+() Tj
+T*
+(Konsequenz:) Tj
+T*
+(- Wenn ein Teilfeld leer/gelscht in diesen Pfad fllt, kann schon auf BASE-Ebene `INVALID`) Tj
+T*
+(entstehen.) Tj
+T*
+(- Bei der anschlieenden Ableitung propagiert das in der Regel als `INVALID` weiter.) Tj
+T*
+() Tj
+T*
+(2.3 Warum das fr Partial Credit kritisch ist) Tj
+T*
+(Fr Flle wie 2 von 3 Teilangaben kodierbar ist fachlich hufig eher `CODING_INCOMPLETE`) Tj
+T*
+(sinnvoll.) Tj
+T*
+(Wenn aber frh `INVALID` gesetzt und dann strikt durchgereicht wird, wird der Fall nicht als) Tj
+T*
+(noch kodierbar behandelt.) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2666 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+14 TL
+(---) Tj
+T*
+() Tj
+T*
+(3\) Przise Problemformulierung fr den Termin) Tj
+T*
+() Tj
+T*
+(> Bei Aufgaben mit Teilangaben \(z. B. 01a/01b/01c\) fhrt eine gemischte Ausgangslage \(ein Teil) Tj
+T*
+(`DISPLAYED`/leer, andere `CODING_COMPLETE`\) aktuell zu `INVALID` auf der abgeleiteten Variable) Tj
+T*
+(\(01\) und ggf. auch auf `01_partial_credit`. Dadurch werden diese Flle nicht als unvollstndig) Tj
+T*
+(\(`CODING_INCOMPLETE`\) behandelt und laufen potenziell nicht in die gewnschte IEA-Kodierung.) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(4\) Fachliche Zielentscheidung \(Sollbild\)) Tj
+T*
+() Tj
+T*
+(Empfohlene Leitlinie:) Tj
+T*
+(- `INVALID` nur fr echte Ungltigkeit/Regelverletzung.) Tj
+T*
+(- `CODING_INCOMPLETE` fr teilweise beantwortete, prinzipiell kodierbare Flle.) Tj
+T*
+(- Fr `_partial_credit` ggf. explizite Sonderregel, falls fachlich gewnscht.) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(5\) Konkrete Entscheidungsfragen) Tj
+T*
+() Tj
+T*
+(1. **Semantik:** Welche Zustnde sollen zwingend `INVALID` bleiben?) Tj
+T*
+(2. **Partial-Credit-Policy:** Soll bei Mischfllen standardmig `CODING_INCOMPLETE` gelten?) Tj
+T*
+(3. **Einzigartigkeit \(MZB090/MZB033\):** Ist Versto gegen Uniqueness ein `INVALID`-Grund oder) Tj
+T*
+(zunchst `CODING_INCOMPLETE`?) Tj
+T*
+(4. **Technik-Ort:** Anpassung in `@iqb/responses` \(Derive/Normalize\) oder ergnzendes Mapping) Tj
+T*
+(nachgelagert?) Tj
+T*
+(5. **Downstream:** Welche Pipeline-Regel schliet heute `INVALID` von IEA-bergabe aus?) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(6\) 60-Minuten-Agenda \(umsetzungsorientiert\)) Tj
+T*
+() Tj
+T*
+(- **010 min**: Zielbild besttigen, 23 reale Flle anschauen.) Tj
+T*
+(- **1025 min**: Semantik finalisieren \(`INVALID` vs `CODING_INCOMPLETE`\).) Tj
+T*
+(- **2540 min**: Technische Lsung lokalisieren \(`@iqb/responses` Normalize/Derive\).) Tj
+T*
+(- **4050 min**: Akzeptanzkriterien + Testmatrix beschlieen.) Tj
+T*
+(- **5060 min**: Owner, Ticket-Schnitt, Timeline.) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(7\) Detaillierte Testmatrix fr euren Review) Tj
+T*
+() Tj
+T*
+(A. Teilantworten ohne Uniqueness) Tj
+T*
+(- A1: 3/3 kodierbar -> `CODING_COMPLETE`.) Tj
+T*
+(- A2: 2/3 kodierbar, 1 Teil leer/`DISPLAYED` -> **Soll: `CODING_INCOMPLETE`** \(Haupt +) Tj
+T*
+(Partial-Credit\).) Tj
+T*
+(- A3: 1/3 kodierbar, 2 Teile leer/`DISPLAYED` -> **Soll: `CODING_INCOMPLETE`**.) Tj
+T*
+(- A4: 0/3, alle `DISPLAYED` -> fachlich klren \(oft kein Coding-Fall\).) Tj
+T*
+() Tj
+T*
+(B. Uniqueness-Flle \(MZB090/MZB033\)) Tj
+T*
+(- B1: Teilweise korrekt + uniqueness offen/gebrochen -> Sollstatus festlegen.) Tj
+T*
+(- B2: Eindeutig ungltiger Zustand -> `INVALID`.) Tj
+T*
+() Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 9 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 935 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+14 TL
+(C. Prozess/Pipeline) Tj
+T*
+(- C1: `CODING_INCOMPLETE` Flle mssen in IEA-bergabe sichtbar sein.) Tj
+T*
+(- C2: Bestehende echte `INVALID`-Filterung darf nicht regressieren.) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(8\) Vorbereitung vor dem Meeting \(Checkliste\)) Tj
+T*
+() Tj
+T*
+(1. Drei reale Datenstze mit Ist-Status mitbringen \(inkl. MZB090/MZB033\).) Tj
+T*
+(2. Fr jeden Datensatz tabellarisch:) Tj
+T*
+(- Teilvariablenstatus,) Tj
+T*
+(- Hauptableitung,) Tj
+T*
+(- `_partial_credit`-Ableitung,) Tj
+T*
+(- IEA-Weitergabe ja/nein.) Tj
+T*
+(3. Vorab eine bevorzugte Fachentscheidung formulieren \(1 Seite\).) Tj
+T*
+() Tj
+T*
+(---) Tj
+T*
+() Tj
+T*
+(9\) Erwartetes Ergebnis nach dem Termin) Tj
+T*
+() Tj
+T*
+(- Dokumentierte Regel Wann `INVALID`, wann `CODING_INCOMPLETE`.) Tj
+T*
+(- Klarer Implementationsort \(vermutlich `@iqb/responses`\) + Ticket.) Tj
+T*
+(- Akzeptanztests und kurze Regression-Strategie.) Tj
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000253 00000 n 
+0000003038 00000 n 
+0000003164 00000 n 
+0000005882 00000 n 
+0000006008 00000 n 
+0000006994 00000 n 
+trailer
+<< /Size 10 /Root 1 0 R >>
+startxref
+7064
+%%EOF
