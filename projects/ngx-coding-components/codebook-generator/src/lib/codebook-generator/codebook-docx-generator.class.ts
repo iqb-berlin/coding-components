@@ -18,7 +18,7 @@ import {
 import * as cheerio from 'cheerio';
 import type { AnyNode, Element } from 'domhandler';
 import type {
-  BookVariable, CodeBookContentSetting, CodebookUnitDto, ItemMetadata
+  BookVariable, CodeBookContentSetting, CodebookUnitDto, ItemMetadata, Missing
 } from '@iqb/ngx-coding-components/codebook-models';
 
 /**
@@ -35,27 +35,23 @@ export class CodebookDocxGenerator {
     codingBookUnits: CodebookUnitDto[],
     contentSetting: CodeBookContentSetting
   ): Promise<Blob> {
-    if (codingBookUnits.length) {
-      const units: (Paragraph | Table)[] = [];
-      let missings: Paragraph[] = [];
-      codingBookUnits.forEach(variableCoding => {
-        missings = this.getMissings(variableCoding);
-        if (variableCoding.variables.length || !contentSetting.hasOnlyVarsWithCodes) {
-          units.push(...(this.createDocXForUnit(
-            variableCoding.items || [],
-            variableCoding.variables,
-            contentSetting,
-            this.getUnitHeader(variableCoding)
-          ) as (Paragraph | Table)[]));
-        }
-      });
-      return Packer.toBlob(
-        this.setDocXDocument(
-          units,
-          missings)
-      );
-    }
-    return new Blob([], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const units: (Paragraph | Table)[] = [];
+    const missings = this.getMissings(codingBookUnits);
+    codingBookUnits.forEach(variableCoding => {
+      if (variableCoding.variables.length || !contentSetting.hasOnlyVarsWithCodes) {
+        units.push(...(this.createDocXForUnit(
+          variableCoding.items || [],
+          variableCoding.variables,
+          contentSetting,
+          this.getUnitHeader(variableCoding)
+        ) as (Paragraph | Table)[]));
+      }
+    });
+    return Packer.toBlob(
+      this.setDocXDocument(
+        units,
+        missings)
+    );
   }
 
   /**
@@ -92,11 +88,11 @@ export class CodebookDocxGenerator {
    * @param variableCoding Codebook unit
    * @returns List of paragraphs with missings
    */
-  private static getMissings(variableCoding: CodebookUnitDto): Paragraph[] {
+  private static getMissings(codingBookUnits: CodebookUnitDto[]): Paragraph[] {
     const missings: Paragraph[] = [];
     try {
-      variableCoding.missings.forEach(missing => {
-        if (missing.code && missing.label && missing.description) {
+      this.getUniqueMissingDefinitions(codingBookUnits).forEach(missing => {
+        if (this.isValidMissing(missing)) {
           missings.push(new Paragraph({
             children: [new TextRun({ text: `${missing.code} ${missing.label}`, bold: true })],
             spacing: {
@@ -127,6 +123,25 @@ export class CodebookDocxGenerator {
       }));
     }
     return missings;
+  }
+
+  private static getUniqueMissingDefinitions(codingBookUnits: CodebookUnitDto[]): Missing[] {
+    const uniqueMissings = new Map<string, Missing>();
+    codingBookUnits.flatMap(unit => unit.missings || []).forEach(missing => {
+      uniqueMissings.set(
+        `${missing.code}\u0000${missing.label}\u0000${missing.description}`,
+        missing
+      );
+    });
+    return [...uniqueMissings.values()];
+  }
+
+  private static isValidMissing(missing: Missing): boolean {
+    return missing.code !== undefined &&
+      missing.code !== null &&
+      `${missing.code}` !== '' &&
+      !!missing.label &&
+      !!missing.description;
   }
 
   /**

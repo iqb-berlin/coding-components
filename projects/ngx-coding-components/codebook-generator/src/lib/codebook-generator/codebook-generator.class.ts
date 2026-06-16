@@ -22,9 +22,6 @@ export class CodebookGenerator {
     contentSetting: CodeBookContentSetting,
     missings: Missing[]
   ): Promise<Blob> {
-    if (units.length === 0) {
-      return Promise.resolve(new Blob(['[]'], { type: 'application/json' }));
-    }
     const codebook: CodebookUnitDto[] = units.map(
       (unit: UnitPropertiesForCodebook) => this.getCodeBookDataForUnit(unit, contentSetting, missings)
     );

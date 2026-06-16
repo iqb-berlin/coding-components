@@ -74,6 +74,93 @@ describe('CodebookGenerator', () => {
     expect(await blob.text()).toBe('[]');
   });
 
+  it('returns a valid DOCX Blob for empty DOCX exports', async () => {
+    const blob = await CodebookGenerator.generateCodebook(
+      [],
+      {
+        ...contentSetting,
+        exportFormat: 'docx'
+      },
+      []
+    );
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+    const documentXml = await zip.file('word/document.xml')?.async('string');
+
+    expect(blob).toEqual(jasmine.any(Blob));
+    expect(blob.size).toBeGreaterThan(0);
+    expect(documentXml).toContain('<w:document');
+  });
+
+  it('keeps numeric missing code 0 in DOCX exports', async () => {
+    const unit: CodebookUnitDto = {
+      key: 'UNIT1',
+      name: 'Unit 1',
+      variables: [],
+      missings: [
+        {
+          code: 0,
+          label: 'Nicht bearbeitet',
+          description: 'Keine Eingabe'
+        }
+      ]
+    };
+
+    const blob = await CodebookDocxGenerator.generateDocx([unit], {
+      ...contentSetting,
+      exportFormat: 'docx'
+    });
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+    const documentXml = await zip.file('word/document.xml')?.async('string');
+
+    expect(documentXml).toContain('0 Nicht bearbeitet');
+    expect(documentXml).toContain('Keine Eingabe');
+    expect(documentXml).not.toContain('kein valides Missing');
+  });
+
+  it('keeps unique missings from all units in DOCX exports', async () => {
+    const unitA: CodebookUnitDto = {
+      key: 'UNIT1',
+      name: 'Unit 1',
+      variables: [],
+      missings: [
+        {
+          code: 9,
+          label: 'Missing A',
+          description: 'Description A'
+        }
+      ]
+    };
+    const unitB: CodebookUnitDto = {
+      key: 'UNIT2',
+      name: 'Unit 2',
+      variables: [],
+      missings: [
+        {
+          code: 9,
+          label: 'Missing A',
+          description: 'Description A'
+        },
+        {
+          code: 99,
+          label: 'Missing B',
+          description: 'Description B'
+        }
+      ]
+    };
+
+    const blob = await CodebookDocxGenerator.generateDocx([unitA, unitB], {
+      ...contentSetting,
+      exportFormat: 'docx'
+    });
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+    const documentXml = await zip.file('word/document.xml')?.async('string') || '';
+
+    expect(documentXml.match(/9 Missing A/g)?.length).toBe(1);
+    expect(documentXml).toContain('Description A');
+    expect(documentXml).toContain('99 Missing B');
+    expect(documentXml).toContain('Description B');
+  });
+
   it('keeps all codes of an included variable to match Studio exports', async () => {
     const scheme = JSON.stringify({
       version: '1.5',
