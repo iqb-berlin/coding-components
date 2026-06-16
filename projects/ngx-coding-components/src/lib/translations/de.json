@@ -1,6 +1,12 @@
 {
   "close": "Schließen",
+  "export": "Exportieren",
   "filter-by": "Filtern nach...",
+  "search": "Suchen",
+  "search-units": "Einheiten suchen",
+  "loading-units": "Einheiten werden geladen...",
+  "no-units-matching": "Keine passenden Einheiten für",
+  "no-units-available": "Keine Einheiten verfügbar",
   "copied-to-clipboard": "In Zwischenablage kopiert",
   "varList": {
     "base": "Basisvariablen",
@@ -32,6 +38,13 @@
       "error": "Darstellung nicht möglich: Zirkelbezug",
       "no-sources": "(Keine Quellen)"
     }
+  },
+
+  "workspace": {
+    "export-coding-book": "Kodierhandbuch exportieren",
+    "coding-missing-profiles": "Missing-Profile",
+    "select-missings-profile": "Missing-Profil auswählen",
+    "no-missings-profile": "Keines"
   },
 
   "schemer": {
@@ -140,6 +153,32 @@
     "rule": "Regel",
     "vars-with-codes-only": "Nur Variablen mit Codes",
     "raw-responses": "Rohantworten anzeigen",
+    "select-units": "Einheiten auswählen",
+    "select-all-units": "Alle Einheiten auswählen",
+    "unit-name": "Einheit",
+    "codebook-content": "Inhalt des Kodierhandbuchs",
+    "has-only-vars-with-codes": "Nur Variablen mit Codes",
+    "has-general-instructions": "Allgemeine Instruktionen",
+    "hide-item-var-relation": "Item-Variablen-Beziehung ausblenden",
+    "has-derived-vars": "Abgeleitete Variablen",
+    "has-only-manual-coding": "Nur manuelle Kodierung",
+    "has-closed-vars": "Geschlossene Variablen",
+    "show-score": "Bewertung anzeigen",
+    "code-label-to-upper": "Code-Labels in Großbuchstaben",
+    "export-format": "Exportformat",
+    "error-save-changes": "Bitte speichern Sie Ihre Änderungen vor dem Export.",
+    "codebook-generating": "Kodierhandbuch wird erzeugt",
+    "codebook-completed": "Kodierhandbuch wurde erzeugt",
+    "tooltip": {
+      "has-only-vars-with-codes": "Variablen ohne Codes werden nicht exportiert.",
+      "has-general-instructions": "Allgemeine Kodierinstruktionen werden exportiert.",
+      "hide-item-var-relation": "Die Zuordnung zwischen Items und Variablen wird ausgeblendet.",
+      "has-derived-vars": "Abgeleitete Variablen werden exportiert.",
+      "has-only-manual-coding": "Nur Codes mit manueller Kodierinstruktion werden exportiert.",
+      "has-closed-vars": "Geschlossene automatisch kodierte Variablen werden exportiert.",
+      "show-score": "Bewertungen der Codes werden exportiert.",
+      "code-label-to-upper": "Code-Labels werden in Großbuchstaben ausgegeben."
+    },
     "instruction": "Instruktion",
     "variable": "Variable",
     "result": "Ergebnis",
