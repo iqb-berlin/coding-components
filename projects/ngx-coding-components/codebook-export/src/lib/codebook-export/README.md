@@ -17,7 +17,7 @@ The component is available through the `@iqb/ngx-coding-components/codebook-expo
 If you generate DOCX files in the browser instead of delegating export work to a provider, also install the generator peer dependencies:
 
 ```bash
-npm install docx cheerio @iqbspecs/coding-scheme @iqbspecs/variable-info
+npm install docx cheerio buffer @iqbspecs/coding-scheme @iqbspecs/variable-info
 ```
 
 ## Usage
