@@ -25,6 +25,9 @@
       ],
       "@ngx-coding-components/*": [
         "projects/ngx-coding-components/src/lib/*"
+      ],
+      "@iqb/ngx-coding-components/codebook-models": [
+        "projects/ngx-coding-components/codebook-models/src/public-api.ts"
       ]
     },
     "sourceMap": true,

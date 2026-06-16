@@ -9,7 +9,10 @@
     "paths": {
       "@angular/*": ["../../node_modules/@angular/*"],
       "@ngx-translate/core": ["../../node_modules/@ngx-translate/core"],
-      "@ngx-translate/core/*": ["../../node_modules/@ngx-translate/core/*"]
+      "@ngx-translate/core/*": ["../../node_modules/@ngx-translate/core/*"],
+      "@iqb/ngx-coding-components/codebook-models": [
+        "projects/ngx-coding-components/codebook-models/src/public-api.ts"
+      ]
     }
   },
   "include": [
