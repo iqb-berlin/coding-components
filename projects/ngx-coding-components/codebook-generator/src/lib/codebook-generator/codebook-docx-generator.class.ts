@@ -81,7 +81,7 @@ export class CodebookDocxGenerator {
         before: 400,
         after: 200
       },
-      text: variableCoding.name,
+      text: `${variableCoding.key}  ${variableCoding.name}`,
       heading: HeadingLevel.HEADING_1,
       alignment: AlignmentType.CENTER
     });
@@ -166,120 +166,65 @@ export class CodebookDocxGenerator {
    */
   private static getCodeRows(variable: BookVariable, contentSetting: CodeBookContentSetting): TableRow[] {
     const rows: TableRow[] = [];
+    const headerCells = [
+      this.createHeaderCell('Code', this.getColumnWidths(contentSetting)[0]),
+      this.createHeaderCell('Label', this.getColumnWidths(contentSetting)[1]),
+      ...(contentSetting.showScore ?
+        [this.createHeaderCell('Score', this.getColumnWidths(contentSetting)[2])] :
+        []),
+      this.createHeaderCell(
+        'Beschreibung',
+        this.getColumnWidths(contentSetting)[this.getColumnWidths(contentSetting).length - 1]
+      )
+    ];
     const headerRow = new TableRow({
       tableHeader: true,
-      children: [
-        new TableCell({
-          borders: this.TableBoarders,
-          width: {
-            size: this.getColumnWidths(contentSetting)[0],
-            type: WidthType.DXA
-          },
-          children: [new Paragraph({
-            children: [
-              new TextRun({
-                text: 'Code',
-                bold: true
-              })
-            ]
-          })]
-        }),
-        new TableCell({
-          borders: this.TableBoarders,
-          width: {
-            size: this.getColumnWidths(contentSetting)[1],
-            type: WidthType.DXA
-          },
-          children: [new Paragraph({
-            children: [
-              new TextRun({
-                text: 'Label',
-                bold: true
-              })
-            ]
-          })]
-        }),
-        new TableCell({
-          borders: this.TableBoarders,
-          width: {
-            size: this.getColumnWidths(contentSetting)[2],
-            type: WidthType.DXA
-          },
-          children: [new Paragraph({
-            children: [
-              new TextRun({
-                text: 'Beschreibung',
-                bold: true
-              })
-            ]
-          })]
-        })
-      ]
+      children: headerCells
     });
     rows.push(headerRow);
-    if (contentSetting.showScore) {
-      headerRow.addChildElement(
-        new TableCell({
-          borders: this.TableBoarders,
-          width: {
-            size: this.getColumnWidths(contentSetting)[3],
-            type: WidthType.DXA
-          },
-          children: [new Paragraph({
-            children: [
-              new TextRun({
-                text: 'Score',
-                bold: true
-              })
-            ]
-          })]
-        })
-      );
-    }
     variable.codes.forEach(code => {
+      const codeCells = [
+        this.createCodeCell([new Paragraph(code.id)], this.getColumnWidths(contentSetting)[0]),
+        this.createCodeCell([new Paragraph(code.label)], this.getColumnWidths(contentSetting)[1]),
+        ...(contentSetting.showScore ?
+          [this.createCodeCell([new Paragraph(code.score || '')], this.getColumnWidths(contentSetting)[2])] :
+          []),
+        this.createCodeCell(
+          this.htmlToDocx(code.description, contentSetting),
+          this.getColumnWidths(contentSetting)[this.getColumnWidths(contentSetting).length - 1]
+        )
+      ];
       const row = new TableRow({
-        children: [
-          new TableCell({
-            borders: this.TableBoarders,
-            width: {
-              size: this.getColumnWidths(contentSetting)[0],
-              type: WidthType.DXA
-            },
-            children: [new Paragraph(code.id)]
-          }),
-          new TableCell({
-            borders: this.TableBoarders,
-            width: {
-              size: this.getColumnWidths(contentSetting)[1],
-              type: WidthType.DXA
-            },
-            children: [new Paragraph(code.label)]
-          }),
-          new TableCell({
-            borders: this.TableBoarders,
-            width: {
-              size: this.getColumnWidths(contentSetting)[2],
-              type: WidthType.DXA
-            },
-            children: this.htmlToDocx(code.description, contentSetting)
-          })
-        ]
+        children: codeCells
       });
-      if (contentSetting.showScore) {
-        row.addChildElement(
-          new TableCell({
-            borders: this.TableBoarders,
-            width: {
-              size: this.getColumnWidths(contentSetting)[3],
-              type: WidthType.DXA
-            },
-            children: [new Paragraph(code.score || '')]
-          })
-        );
-      }
       rows.push(row);
     });
     return rows;
+  }
+
+  private static createHeaderCell(text: string, width: number): TableCell {
+    return this.createCodeCell(
+      [new Paragraph({
+        children: [
+          new TextRun({
+            text,
+            bold: true
+          })
+        ]
+      })],
+      width
+    );
+  }
+
+  private static createCodeCell(children: Paragraph[], width: number): TableCell {
+    return new TableCell({
+      borders: this.TableBoarders,
+      width: {
+        size: width,
+        type: WidthType.DXA
+      },
+      children
+    });
   }
 
   /**
@@ -288,7 +233,7 @@ export class CodebookDocxGenerator {
    * @returns List of column widths
    */
   private static getColumnWidths(contentSetting: CodeBookContentSetting): number[] {
-    return contentSetting.showScore ? [1000, 2000, 5000, 1000] : [1000, 2000, 6000];
+    return contentSetting.showScore ? [1000, 2000, 1000, 5000] : [1000, 2000, 6000];
   }
 
   /**
@@ -326,7 +271,7 @@ export class CodebookDocxGenerator {
    */
   private static getVariableHeader(variable: BookVariable): Paragraph {
     return new Paragraph({
-      text: variable.label,
+      text: `${variable.id}  ${variable.label}`,
       heading: HeadingLevel.HEADING_2,
       spacing: {
         before: 400,
@@ -343,27 +288,30 @@ export class CodebookDocxGenerator {
    */
   private static getVariableItems(variable: BookVariable, varItems: ItemMetadata[]): Paragraph[] {
     const paragraphs: Paragraph[] = [];
-    const items = varItems.filter(item => {
-      const variableId = variable.id.replace(/\./g, '_');
-      return item[variableId] !== undefined;
-    });
+    const items = varItems.filter(item => this.isItemRelatedToVariable(item, variable.id));
     if (items.length) {
       paragraphs.push(new Paragraph({
-        text: 'Items:',
+        text: `Item(s): ${items.map(item => this.getItemId(item)).join('   ')}`,
+        heading: HeadingLevel.HEADING_3,
         spacing: {
-          after: 100
+          before: 200,
+          after: 200
         }
       }));
-      items.forEach(item => {
-        paragraphs.push(new Paragraph({
-          text: `${item['key']} ${item['label']}`,
-          bullet: {
-            level: 0
-          }
-        }));
-      });
     }
     return paragraphs;
+  }
+
+  private static isItemRelatedToVariable(item: ItemMetadata, variableId: string): boolean {
+    const normalizedVariableId = variableId.replace(/\./g, '_');
+    return item['variableId'] === variableId ||
+      item[variableId] !== undefined ||
+      item[normalizedVariableId] !== undefined;
+  }
+
+  private static getItemId(item: ItemMetadata): string {
+    const itemId = item['id'] ?? item['key'] ?? item['label'] ?? '';
+    return `${itemId}`;
   }
 
   /**

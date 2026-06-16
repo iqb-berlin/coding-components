@@ -4,7 +4,11 @@ import {
   CodebookGenerator
 } from '../../../codebook-generator/src/lib/codebook-generator/codebook-generator.class';
 import {
-  CodeBookContentSetting
+  CodebookDocxGenerator
+} from '../../../codebook-generator/src/lib/codebook-generator/codebook-docx-generator.class';
+import {
+  CodeBookContentSetting,
+  CodebookUnitDto
 } from '../../../codebook-models/src/lib/codebook.interfaces';
 
 describe('CodebookGenerator', () => {
@@ -318,5 +322,71 @@ describe('CodebookGenerator', () => {
     expect(documentXml).toContain('Gamma Delta');
     expect(numberingXml).toContain('<w:abstractNum');
     expect(numberingXml).toContain('<w:lvlText w:val="%1."/>');
+  });
+
+  it('writes Studio-compatible DOCX headers, item relations and score column order', async () => {
+    const unit: CodebookUnitDto = {
+      key: 'UNIT1',
+      name: 'Unit 1',
+      missings: [],
+      items: [
+        {
+          id: 'ITEM1',
+          variableId: 'VAR1'
+        },
+        {
+          id: 'ITEM2',
+          VAR1: true
+        },
+        {
+          id: 'ITEM3',
+          variableId: 'OTHER'
+        }
+      ],
+      variables: [
+        {
+          id: 'VAR1',
+          label: 'Variable 1',
+          sourceType: 'BASE',
+          generalInstruction: '',
+          codes: [
+            {
+              id: 'C1',
+              label: 'Code 1',
+              score: '77',
+              description: '<p>Description text</p>'
+            }
+          ]
+        }
+      ]
+    };
+
+    const blob = await CodebookDocxGenerator.generateDocx(
+      [unit],
+      {
+        ...contentSetting,
+        exportFormat: 'docx',
+        hideItemVarRelation: false
+      }
+    );
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+    const documentXml = await zip.file('word/document.xml')?.async('string');
+
+    expect(documentXml).toContain('UNIT1  Unit 1');
+    expect(documentXml).toContain('VAR1  Variable 1');
+    expect(documentXml).toContain('Item(s): ITEM1   ITEM2');
+    expect(documentXml).not.toContain('ITEM3');
+
+    const scoreHeaderIndex = documentXml?.indexOf('Score') ?? -1;
+    const descriptionHeaderIndex = documentXml?.indexOf('Beschreibung') ?? -1;
+    const scoreValueIndex = documentXml?.indexOf('77') ?? -1;
+    const descriptionValueIndex = documentXml?.indexOf('Description text') ?? -1;
+
+    expect(scoreHeaderIndex).toBeGreaterThan(-1);
+    expect(descriptionHeaderIndex).toBeGreaterThan(-1);
+    expect(scoreHeaderIndex).toBeLessThan(descriptionHeaderIndex);
+    expect(scoreValueIndex).toBeGreaterThan(-1);
+    expect(descriptionValueIndex).toBeGreaterThan(-1);
+    expect(scoreValueIndex).toBeLessThan(descriptionValueIndex);
   });
 });
