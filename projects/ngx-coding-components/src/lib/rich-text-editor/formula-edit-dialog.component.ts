@@ -18,9 +18,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
 import '@iqb/mathlive';
 import katex from 'katex';
+import { normalizeFormulaLatex } from './formula-latex.utils';
 
 type MathfieldElementLike = HTMLElement & {
   value: string;
+  getValue?: (format?: 'latex') => string;
   focus: () => void;
 };
 
@@ -94,7 +96,7 @@ export class FormulaEditDialogComponent implements AfterViewInit {
     @Inject(MAT_DIALOG_DATA) public data: FormulaEditDialogData,
     private sanitizer: DomSanitizer
   ) {
-    this.latex = data.latex || '';
+    this.latex = normalizeFormulaLatex(data.latex || '');
     this.updatePreview();
   }
 
@@ -107,18 +109,21 @@ export class FormulaEditDialogComponent implements AfterViewInit {
 
   onMathInput(event: Event): void {
     const source = event.target as MathfieldElementLike;
-    this.latex = source.value || '';
+    const rawLatex = source.getValue?.('latex') ?? source.value ?? '';
+    this.latex = normalizeFormulaLatex(rawLatex);
     this.updatePreview();
   }
 
   private updatePreview(): void {
-    if (!this.latex.trim()) {
+    const normalizedLatex = normalizeFormulaLatex(this.latex);
+
+    if (!normalizedLatex) {
       this.renderedFormula = null;
       return;
     }
 
     this.renderedFormula = this.sanitizer.bypassSecurityTrustHtml(
-      katex.renderToString(this.latex, {
+      katex.renderToString(normalizedLatex, {
         output: 'mathml',
         throwOnError: false,
         strict: 'ignore'

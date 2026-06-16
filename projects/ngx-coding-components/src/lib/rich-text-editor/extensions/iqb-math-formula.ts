@@ -1,6 +1,7 @@
 import { mergeAttributes, Node } from '@tiptap/core';
 import { Plugin } from '@tiptap/pm/state';
 import katex from 'katex';
+import { normalizeFormulaLatex } from '../formula-latex.utils';
 
 const renderFormula = (latex: string): string => katex.renderToString(latex, {
   output: 'mathml',
@@ -43,7 +44,7 @@ const IqbMathFormula = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const latex = (HTMLAttributes['latex'] || '').toString();
+    const latex = normalizeFormulaLatex((HTMLAttributes['latex'] || '').toString());
     const attributesWithoutLatex = { ...HTMLAttributes };
     delete attributesWithoutLatex['latex'];
     const content = document.createElement('span');
@@ -62,7 +63,7 @@ const IqbMathFormula = Node.create({
       insertIqbMathFormula: latex => ({ commands }) => commands.insertContent({
         type: this.name,
         attrs: {
-          latex: latex.trim()
+          latex: normalizeFormulaLatex(latex)
         }
       })
     };
