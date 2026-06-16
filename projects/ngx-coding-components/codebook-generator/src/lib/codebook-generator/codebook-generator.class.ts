@@ -99,16 +99,26 @@ export class CodebookGenerator {
     codes: CodeInfo[],
     variableCoding: VariableCodingData
   ): BookVariable | null {
-    if (
-      codes.length === 0 &&
-      (
-        contentSetting.hasOnlyVarsWithCodes ||
-        contentSetting.hasOnlyManualCoding ||
-        !contentSetting.hasClosedVars
-      )
-    ) {
-      return null;
+    const isClosed = this.isClosed(variableCoding);
+    const isManual = this.isManual(variableCoding);
+
+    const filterManual = contentSetting.hasOnlyManualCoding;
+    const filterClosed = contentSetting.hasClosedVars;
+
+    let manualMatches = isManual;
+    const closedMatches = isClosed;
+
+    if (filterManual && !filterClosed) {
+      manualMatches = isManual && !isClosed;
     }
+
+    if (filterManual || filterClosed) {
+      const matches = (filterManual && manualMatches) || (filterClosed && closedMatches);
+      if (!matches) return null;
+    } else if (contentSetting.hasOnlyVarsWithCodes) {
+      if (!isManual && !isClosed) return null;
+    }
+
     return {
       id: variableCoding.alias || variableCoding.id,
       label: variableCoding.label ?? '',
@@ -120,23 +130,19 @@ export class CodebookGenerator {
     };
   }
 
-  private static isClosedCode(codeData: CodeData): boolean {
-    return codeData.type === 'RESIDUAL_AUTO' || codeData.type === 'INTENDED_INCOMPLETE';
+  private static isClosed(variableCodingData: VariableCodingData): boolean {
+    return (variableCodingData.codes ?? []).some(
+      codeData => codeData.type === 'RESIDUAL_AUTO' || codeData.type === 'INTENDED_INCOMPLETE'
+    );
   }
 
-  private static shouldIncludeCode(codeData: CodeData, contentSetting: CodeBookContentSetting): boolean {
-    if (!contentSetting.hasClosedVars && this.isClosedCode(codeData)) {
-      return false;
-    }
-    if (contentSetting.hasOnlyManualCoding && !codeData.manualInstruction) {
-      return false;
-    }
-    return true;
+  private static isManual(variableCodingData: VariableCodingData): boolean {
+    return (variableCodingData.codes ?? []).some(codeData => !!codeData.manualInstruction);
   }
 
   private static getCodes(codes: CodeData[], contentSetting: CodeBookContentSetting): CodeInfo[] {
     return codes.reduce((codeInfos: CodeInfo[], code) => {
-      if (code.id !== undefined && code.id !== null && this.shouldIncludeCode(code, contentSetting)) {
+      if (code.id !== undefined && code.id !== null) {
         try {
           const codeInfo = this.getCodeInfoFromCodeAsText(code, contentSetting);
           codeInfos.push(codeInfo);

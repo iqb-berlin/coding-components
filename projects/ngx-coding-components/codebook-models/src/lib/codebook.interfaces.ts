@@ -38,7 +38,7 @@ export interface CodeBookContentSetting {
  */
 export interface Missing {
   /** Missing code */
-  code: string;
+  code: string | number;
   /** Missing label */
   label: string;
   /** Missing description */

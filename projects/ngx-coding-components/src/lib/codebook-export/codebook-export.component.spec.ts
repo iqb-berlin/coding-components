@@ -68,6 +68,8 @@ describe('CodebookExportComponent', () => {
 
   it('emits export config when no provider is set', () => {
     component.availableUnits = [{ unitId: 1, unitName: 'Unit 1.vocs', unitAlias: null }];
+    component.missingsProfiles = [{ id: 0, label: 'None' }, { id: 2, label: 'Standard' }];
+    component.selectedMissingsProfile = 2;
     component.unitList = [1];
     const emitSpy = spyOn(component.export, 'emit');
 
@@ -82,7 +84,8 @@ describe('CodebookExportComponent', () => {
       throw new Error('Expected export config to be emitted.');
     }
     expect(config.selectedUnits).toEqual([1]);
-    expect(config.missingsProfileId).toBe(0);
+    expect(config.missingsProfileId).toBe(2);
+    expect(config.contentOptions.missingsProfile).toBe('Standard');
     expect(config.contentOptions.exportFormat).toBe('docx');
 
     component.unitList.push(2);
@@ -111,6 +114,21 @@ describe('CodebookExportComponent', () => {
     expect(dialogComponent.contentOptions.exportFormat).toBe('json');
 
     dialogComponent.ngOnDestroy();
+  });
+
+  it('disables and blocks export while the workspace has unsaved changes', () => {
+    component.availableUnits = [{ unitId: 1, unitName: 'Unit 1.vocs', unitAlias: null }];
+    component.unitList = [1];
+    component.workspaceChanges = true;
+    const emitSpy = spyOn(component.export, 'emit');
+
+    fixture.detectChanges();
+
+    expect(component.exportDisabled).toBeTrue();
+
+    component.exportCodingBook();
+
+    expect(emitSpy).not.toHaveBeenCalled();
   });
 
   it('runs direct export via provider and downloads the file', () => {

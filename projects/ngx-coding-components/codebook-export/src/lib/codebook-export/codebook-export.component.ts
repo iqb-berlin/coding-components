@@ -188,6 +188,7 @@ export class CodebookExportComponent implements OnInit, OnDestroy, OnChanges {
   get exportDisabled(): boolean {
     return (
       this.unitList.length === 0 ||
+      this.workspaceChanges ||
       this.codebookJobStatus === 'pending' ||
       this.codebookJobStatus === 'processing'
     );
@@ -374,13 +375,14 @@ export class CodebookExportComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   exportCodingBook(): void {
-    if (this.unitList.length === 0) {
+    if (this.exportDisabled) {
       return;
     }
 
+    const selectedProfile = this.missingsProfiles.find(profile => profile.id === this.selectedMissingsProfile);
     const contentOptions: CodeBookContentSetting = {
       ...this.contentOptions,
-      missingsProfile: this.selectedMissingsProfile.toString()
+      missingsProfile: selectedProfile && selectedProfile.id !== 0 ? selectedProfile.label : ''
     };
 
     const config: CodebookExportConfig = {
