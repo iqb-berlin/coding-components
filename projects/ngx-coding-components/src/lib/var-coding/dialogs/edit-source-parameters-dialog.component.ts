@@ -7,11 +7,13 @@ import {
   MatDialogClose
 } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
 import {
   MatOption,
   MatSelect,
@@ -117,6 +119,37 @@ const SOLVER_VARIABLE_PREFIX = '$';
       height: 16px;
       width: 16px;
     }
+
+    .solver-source-menu__item {
+      justify-content: flex-start;
+    }
+
+    .solver-source-menu__reference {
+      color: rgb(0 0 0 / 60%);
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .solver-source-warning {
+      align-items: flex-start;
+      background: #fff8e1;
+      border-left: 4px solid #ff8f00;
+      border-radius: 4px;
+      color: #5f3f00;
+      display: flex;
+      gap: 8px;
+      margin: -8px 0 12px;
+      max-width: 640px;
+      padding: 10px 14px;
+    }
+
+    .solver-source-warning mat-icon {
+      color: #f57c00;
+      flex: 0 0 auto;
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+    }
   `,
   `
     .solver-test-area {
@@ -171,6 +204,7 @@ const SOLVER_VARIABLE_PREFIX = '$';
     MatDialogContent,
     MatDialogActions,
     MatButton,
+    MatIconButton,
     MatDialogClose,
     TranslateModule,
     FormsModule,
@@ -180,6 +214,11 @@ const SOLVER_VARIABLE_PREFIX = '$';
     MatLabel,
     MatSelect,
     MatOption,
+    MatSuffix,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    MatTooltip,
     KeyValuePipe,
     NgForOf,
     ReactiveFormsModule,
@@ -210,6 +249,8 @@ export class EditSourceParametersDialog {
       descriptionKey: 'derive-processing.solver-help.examples.condition'
     }
   ];
+
+  readonly solverVariablePrefix = SOLVER_VARIABLE_PREFIX;
 
   sourceTypeList: SourceType[] = [
     'COPY_VALUE',
@@ -257,6 +298,17 @@ export class EditSourceParametersDialog {
       id: sourceId,
       label: this.possibleNewSources.get(sourceId) || sourceId
     }));
+  }
+
+  get solverSourceWarning(): string | null {
+    const missingSourceLabels = this.getMissingSolverSourceIds()
+      .map(sourceId => this.getSourceLabel(sourceId));
+
+    if (missingSourceLabels.length < 1) return null;
+
+    return `${this.tr(
+      'derive-processing.solver-source-warning.unselected-sources'
+    )}: ${missingSourceLabels.join(', ')}`;
   }
 
   updatePossibleNewSources(): void {
@@ -333,6 +385,35 @@ export class EditSourceParametersDialog {
     this.updateDeriveSources();
   }
 
+  insertSolverSourceReference(
+    source: { id: string; label: string },
+    input: HTMLInputElement
+  ): void {
+    const reference = this.getSolverVariableReference(
+      source.label || source.id
+    );
+    const expression = this.data.sourceParameters.solverExpression || '';
+    const selectionStart = input.selectionStart ?? expression.length;
+    const selectionEnd = input.selectionEnd ?? selectionStart;
+
+    this.data.sourceParameters.solverExpression =
+      `${expression.slice(0, selectionStart)}${reference}${
+        expression.slice(selectionEnd)
+      }`;
+
+    this.clearSolverTestResult();
+
+    const cursorPosition = selectionStart + reference.length;
+    window.setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(cursorPosition, cursorPosition);
+    });
+  }
+
+  getSolverSourceReference(source: { id: string; label: string }): string {
+    return this.getSolverVariableReference(source.label || source.id);
+  }
+
   clearSolverTestResult(): void {
     this.solverTestResult = null;
   }
@@ -360,9 +441,7 @@ export class EditSourceParametersDialog {
       expression,
       variableCodings
     );
-    const missingSources = referencedVariables.filter(
-      variableId => !this.data.deriveSources.includes(variableId)
-    );
+    const missingSources = this.getMissingSolverSourceIds(referencedVariables);
 
     if (missingSources.length > 0) {
       this.solverTestResult = {
@@ -465,6 +544,23 @@ export class EditSourceParametersDialog {
     }));
   }
 
+  private getMissingSolverSourceIds(referencedVariables?: string[]): string[] {
+    if (this.data.sourceType !== 'SOLVER') return [];
+
+    const expression = this.data.sourceParameters.solverExpression || '';
+    if (!expression.trim()) return [];
+
+    const solverReferences = referencedVariables ||
+      EditSourceParametersDialog.getReferencedSolverVariables(
+        expression,
+        this.getVariableCodingsForSolverTest()
+      );
+
+    return solverReferences.filter(
+      variableId => !this.data.deriveSources.includes(variableId)
+    );
+  }
+
   private static getReferencedSolverVariables(
     expression: string,
     variableCodings: VariableCodingData[]
@@ -491,6 +587,10 @@ export class EditSourceParametersDialog {
   private static formatSolverTestValue(value: unknown): string {
     if (typeof value === 'string') return value;
     return JSON.stringify(value) || '';
+  }
+
+  private getSolverVariableReference(variableName: string): string {
+    return `${this.solverVariablePrefix}{${variableName}}`;
   }
 
   private setSolverTestError(translationKey: string): void {

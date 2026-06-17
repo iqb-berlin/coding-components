@@ -253,6 +253,12 @@
     "TAKE_EMPTY_AS_VALID": "Leerer Antwortwert ist gültig",
     "SORT": "Sortiere Werte",
     "SOLVER_EXPRESSION": "Ausdruck für Solver",
+    "solver-source-warning": {
+      "unselected-sources": "Warnung: Im Solver-Ausdruck referenzierte Variable(n) sind nicht als Quell-Variable(n) ausgewählt"
+    },
+    "solver-insert-source": {
+      "label": "Quellvariable einfügen"
+    },
     "solver-test": {
       "title": "Solver-Test",
       "action": "Testen",
