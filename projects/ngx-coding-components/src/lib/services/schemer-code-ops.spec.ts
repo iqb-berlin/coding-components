@@ -1,5 +1,6 @@
 import { CodeData, CodeType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import {
+  DEFAULT_RESIDUAL_MANUAL_INSTRUCTION,
   addCode,
   canEdit,
   canPasteSingleCodeInto,
@@ -123,7 +124,16 @@ describe('schemer-code-ops', () => {
       const list: CodeData[] = [];
       const created = addCode(list, 'RESIDUAL', 'RW_MAXIMAL', orderOfCodeTypes) as CodeData;
       expect(created.id).toBe(0);
+      expect(created.manualInstruction).toBe(DEFAULT_RESIDUAL_MANUAL_INSTRUCTION);
       expect(list.length).toBe(1);
+    });
+
+    it('should create RESIDUAL_AUTO with default manualInstruction', () => {
+      const list: CodeData[] = [];
+      const created = addCode(list, 'RESIDUAL_AUTO', 'RW_MAXIMAL', orderOfCodeTypes) as CodeData;
+
+      expect(created.type).toBe('RESIDUAL_AUTO');
+      expect(created.manualInstruction).toBe(DEFAULT_RESIDUAL_MANUAL_INSTRUCTION);
     });
 
     it('should create INTENDED_INCOMPLETE with id 0 and empty manualInstruction', () => {

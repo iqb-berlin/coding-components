@@ -274,7 +274,7 @@
       "title": "Instruktionen für manuelles Kodieren",
       "prompt-edit": "Instruktionen für manuelles Kodieren ändern",
       "wipe": "Instruktionen komplett löschen",
-      "error-residual-auto": "Wenn ein automatischer Code für 'Alle anderen Antworten' definiert ist, werden manuelle Instruktionen nie genutzt.",
+      "error-residual-auto": "Im normalen automatischen Fall für 'Alle anderen Antworten' werden manuelle Instruktionen nicht genutzt.",
       "error-intended-incomplete": "Wenn ein automatischer Code für 'Absichtlich unvollständig' definiert ist, werden manuelle Instruktionen nie genutzt."
     },
     "coding": {

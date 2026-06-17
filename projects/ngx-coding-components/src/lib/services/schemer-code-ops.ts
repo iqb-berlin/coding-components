@@ -14,6 +14,15 @@ const residualTypes: CodeType[] = [
   'INTENDED_INCOMPLETE'
 ];
 
+export const DEFAULT_RESIDUAL_MANUAL_INSTRUCTION =
+  '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>';
+
+export const ensureResidualAutoManualInstruction = (code: CodeData): boolean => {
+  if (code.type !== 'RESIDUAL_AUTO' || code.manualInstruction) return false;
+  code.manualInstruction = DEFAULT_RESIDUAL_MANUAL_INSTRUCTION;
+  return true;
+};
+
 export const canEdit = (userRole: UserRoleType): boolean => ['RW_MINIMAL', 'RW_MAXIMAL'].includes(userRole);
 
 export const copySingleCode = (code: CodeData | null | undefined): CodeData | null => {
@@ -72,10 +81,7 @@ export const addCode = (
       score: 0,
       ruleSetOperatorAnd: true,
       ruleSets: [],
-      manualInstruction:
-        codeType === 'RESIDUAL_AUTO' ?
-          '' :
-          '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>'
+      manualInstruction: DEFAULT_RESIDUAL_MANUAL_INSTRUCTION
     };
 
     codeList.push(newCode);
