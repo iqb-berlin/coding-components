@@ -365,8 +365,20 @@ describe('SchemerComponent', () => {
     await component.exportVariable();
 
     expect(saveSpy).toHaveBeenCalled();
-    const args0 = saveSpy.calls.mostRecent().args[0] as string;
-    expect(args0).toContain('iqb-variable-export');
+    const [fileContent, filename] = saveSpy.calls.mostRecent().args;
+    const payload = JSON.parse(fileContent);
+    expect(payload).toEqual({
+      type: 'iqb-variable-export',
+      version: 1,
+      variableId: 'v1',
+      variableCoding: {
+        id: 'v1',
+        alias: 'A',
+        sourceType: 'BASE',
+        codes: []
+      }
+    });
+    expect(filename).toBe('v1.variable.json');
   });
 
   it('importVariable should return early for RO', async () => {

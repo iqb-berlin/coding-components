@@ -29,7 +29,7 @@ describe('FileService', () => {
       href: string;
     };
 
-    expect(anchor.download).toBe('export.json');
+    expect(anchor.download).toBe('my.json');
     expect(anchor.href).toBe('blob:mock');
     expect(clickSpy).toHaveBeenCalled();
   });
