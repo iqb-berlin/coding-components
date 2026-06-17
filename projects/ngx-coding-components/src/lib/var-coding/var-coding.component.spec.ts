@@ -18,6 +18,8 @@ describe('VarCodingComponent', () => {
   let schemerService: SchemerService;
   let addCodeSpy: jasmine.Spy;
   let canPasteSpy: jasmine.Spy;
+  let getPasteWarningsSpy: jasmine.Spy;
+  let getCodingProblemsSpy: jasmine.Spy;
   let pasteSpy: jasmine.Spy;
   let sortCodesSpy: jasmine.Spy;
   let getAliasSpy: jasmine.Spy;
@@ -30,6 +32,8 @@ describe('VarCodingComponent', () => {
 
     addCodeSpy = jasmine.createSpy('addCode');
     canPasteSpy = jasmine.createSpy('canPasteSingleCodeInto');
+    getPasteWarningsSpy = jasmine.createSpy('getPasteSingleCodeWarningKeys').and.returnValue([]);
+    getCodingProblemsSpy = jasmine.createSpy('getCodingProblemsForVarCoding').and.returnValue([]);
     pasteSpy = jasmine.createSpy('pasteSingleCode');
     sortCodesSpy = jasmine.createSpy('sortCodes');
     getAliasSpy = jasmine.createSpy('getVariableAliasById').and.callFake((id: string) => `${id}_ALIAS`);
@@ -60,6 +64,8 @@ describe('VarCodingComponent', () => {
             codingToTextMode: 'EXTENDED',
             addCode: addCodeSpy,
             canPasteSingleCodeInto: canPasteSpy,
+            getPasteSingleCodeWarningKeys: getPasteWarningsSpy,
+            getCodingProblemsForVarCoding: getCodingProblemsSpy,
             pasteSingleCode: pasteSpy,
             sortCodes: sortCodesSpy,
             getVariableAliasById: getAliasSpy,
@@ -260,6 +266,103 @@ describe('VarCodingComponent', () => {
     component.pasteSingleCode();
     expect(dialogOpenSpy).not.toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  it('pasteSingleCode should ask for confirmation before pasting incompatible copied codes', () => {
+    component.varCoding = {
+      id: 'v1',
+      alias: 'A',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+    getPasteWarningsSpy.and.returnValue(['code.paste-warning.numeric-rule']);
+
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(false) });
+    component.pasteSingleCode();
+    expect(dialogOpenSpy).toHaveBeenCalled();
+    expect(pasteSpy).not.toHaveBeenCalled();
+
+    dialogOpenSpy.calls.reset();
+    pasteSpy.calls.reset();
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(undefined) });
+    component.pasteSingleCode();
+    expect(dialogOpenSpy).toHaveBeenCalled();
+    expect(pasteSpy).not.toHaveBeenCalled();
+
+    dialogOpenSpy.calls.reset();
+    pasteSpy.calls.reset();
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(true) });
+    pasteSpy.and.callFake((codeList: unknown[]) => {
+      codeList.push({
+        id: 1, type: 'FULL_CREDIT', label: '', score: 1
+      });
+      return codeList[0];
+    });
+
+    component.pasteSingleCode();
+    expect(dialogOpenSpy).toHaveBeenCalled();
+    expect(pasteSpy).toHaveBeenCalledWith(component.varCoding.codes);
+  });
+
+  it('pasteSingleCode should show validation warning when paste creates new coding problems', () => {
+    const emitSpy = spyOn(component.varCodingChanged, 'emit');
+    component.varCoding = {
+      id: 'v1',
+      alias: 'A',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+    getCodingProblemsSpy.and.returnValues(
+      [],
+      [{
+        variableId: 'A',
+        variableLabel: 'A',
+        type: 'RULE_PARAMETER_INVALID',
+        breaking: true,
+        code: '1'
+      }]
+    );
+    pasteSpy.and.callFake((codeList: unknown[]) => {
+      codeList.push({
+        id: 1, type: 'FULL_CREDIT', label: '', score: 1
+      });
+      return codeList[0];
+    });
+
+    component.pasteSingleCode();
+
+    expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+    expect(dialogOpenSpy).toHaveBeenCalled();
+    expect(dialogOpenSpy.calls.mostRecent().args[1].data.content).toContain(
+      'coding-problem.RULE_PARAMETER_INVALID'
+    );
+  });
+
+  it('pasteSingleCode should not show validation warning for unchanged existing coding problems', () => {
+    component.varCoding = {
+      id: 'v1',
+      alias: 'A',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+    const existingProblem = {
+      variableId: 'A',
+      variableLabel: 'A',
+      type: 'RULE_PARAMETER_INVALID',
+      breaking: true,
+      code: '1'
+    };
+    getCodingProblemsSpy.and.returnValues([existingProblem], [existingProblem]);
+    pasteSpy.and.callFake((codeList: unknown[]) => {
+      codeList.push({
+        id: 1, type: 'FULL_CREDIT', label: '', score: 1
+      });
+      return codeList[0];
+    });
+
+    component.pasteSingleCode();
+
+    expect(dialogOpenSpy).not.toHaveBeenCalled();
   });
 
   it('smartSchemer ctrlKey should infer code types from labels, sort codes and emit', () => {
