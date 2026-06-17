@@ -94,7 +94,38 @@
   "derive-method": {
     "label": "Ableitungsmethode",
     "prompt": "Ableitungsmethode",
-    "BASE": "Basisvariable"
+    "BASE": "Basisvariable",
+    "COPY_VALUE": "Wert kopieren",
+    "CONCAT_CODE": "Codes aneinanderhängen",
+    "SUM_CODE": "Codes summieren",
+    "SUM_SCORE": "Bewertung summieren",
+    "UNIQUE_VALUES": "Auf Einzigartigkeit prüfen",
+    "SOLVER": "Mathematischer Ausdruck (Solver)",
+    "MANUAL": "Manuell"
+  },
+  "derive-processing": {
+    "prompt": "Basis-/Ableitungsparameter",
+    "TO_LOWER_CASE": "In Kleinbuchstaben umwandeln",
+    "TO_NUMBER": "In Zahl umwandeln",
+    "REMOVE_ALL_SPACES": "Alle Leerzeichen entfernen",
+    "REMOVE_DISPENSABLE_SPACES": "Überflüssige Leerzeichen entfernen",
+    "TAKE_DISPLAYED_AS_VALUE_CHANGED": "Angezeigt = Wert geändert",
+    "TAKE_NOT_REACHED_AS_VALUE_CHANGED": "Nicht erreicht = Wert geändert",
+    "TAKE_EMPTY_AS_VALID": "Leerer Antwortwert ist gültig",
+    "SORT": "Sortiere Werte",
+    "SOLVER_EXPRESSION": "Ausdruck für Solver",
+    "solver-help": {
+      "title": "Syntaxhilfe für Solver-Ausdrücke",
+      "description": "Solver-Ausdrücke werden mit math.js ausgewertet. Verwenden Sie Zahlen, Rechenzeichen und math.js-Funktionen; Quellvariablen referenzieren Sie mit ${Variablenname} oder ${VariablenID}.",
+      "examples-title": "Beispiele:",
+      "examples": {
+        "arithmetic": "einfache Rechenoperationen",
+        "variables": "Werte aus zwei Quellvariablen addieren",
+        "function": "Prozentwert berechnen und runden",
+        "condition": "Bedingung: Ergebnis ist 1, wenn Punkte mindestens 5 sind, sonst 0"
+      },
+      "docs-link": "math.js-Syntax öffnen"
+    }
   },
   "processing": {
     "prompt": "Verarbeitung",

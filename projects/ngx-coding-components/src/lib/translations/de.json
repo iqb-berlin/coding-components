@@ -263,6 +263,18 @@
       "error-unselected-source": "Der Ausdruck verweist auf nicht ausgewählte Quelle(n)",
       "error-invalid-value": "Bitte numerischen Testwert prüfen",
       "error-evaluation": "Der Ausdruck konnte nicht ausgewertet werden. Bitte Syntax, Variablennamen und numerische Testwerte prüfen."
+    },
+    "solver-help": {
+      "title": "Syntaxhilfe für Solver-Ausdrücke",
+      "description": "Solver-Ausdrücke werden mit math.js ausgewertet. Verwenden Sie Zahlen, Rechenzeichen und math.js-Funktionen; Quellvariablen referenzieren Sie mit ${Variablenname} oder ${VariablenID}.",
+      "examples-title": "Beispiele:",
+      "examples": {
+        "arithmetic": "einfache Rechenoperationen",
+        "variables": "Werte aus zwei Quellvariablen addieren",
+        "function": "Prozentwert berechnen und runden",
+        "condition": "Bedingung: Ergebnis ist 1, wenn Punkte mindestens 5 sind, sonst 0"
+      },
+      "docs-link": "math.js-Syntax öffnen"
     }
   },
   "processing": {

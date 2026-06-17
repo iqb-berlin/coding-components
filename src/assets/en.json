@@ -7,11 +7,37 @@
     "CONCAT_CODE": "Concatenate codes",
     "SUM_CODE": "Sum codes",
     "SUM_SCORE": "Sum scores",
+    "UNIQUE_VALUES": "Check uniqueness",
+    "SOLVER": "Mathematical expression (solver)",
     "MANUAL": "Manual"
   },
   "derive-sources": {
     "label": "Source variables",
     "prompt": "Source variable(s)",
     "error": "No source defined"
+  },
+  "derive-processing": {
+    "prompt": "Base/derivation parameters",
+    "TO_LOWER_CASE": "Convert to lower case",
+    "TO_NUMBER": "Convert to number",
+    "REMOVE_ALL_SPACES": "Remove all spaces",
+    "REMOVE_DISPENSABLE_SPACES": "Remove dispensable spaces",
+    "TAKE_DISPLAYED_AS_VALUE_CHANGED": "Displayed = value changed",
+    "TAKE_NOT_REACHED_AS_VALUE_CHANGED": "Not reached = value changed",
+    "TAKE_EMPTY_AS_VALID": "Empty response value is valid",
+    "SORT": "Sort values",
+    "SOLVER_EXPRESSION": "Expression for solver",
+    "solver-help": {
+      "title": "Syntax help for solver expressions",
+      "description": "Solver expressions are evaluated with math.js. Use numbers, operators and math.js functions; refer to source variables with ${VariableName} or ${VariableID}.",
+      "examples-title": "Examples:",
+      "examples": {
+        "arithmetic": "simple arithmetic",
+        "variables": "add values from two source variables",
+        "function": "calculate and round a percentage",
+        "condition": "condition: result is 1 when points are at least 5, otherwise 0"
+      },
+      "docs-link": "Open math.js syntax"
+    }
   }
 }

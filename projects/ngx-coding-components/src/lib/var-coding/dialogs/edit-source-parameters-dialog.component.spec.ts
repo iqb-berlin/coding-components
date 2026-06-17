@@ -238,4 +238,21 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.solverTestValues).toEqual({ v2: '' });
     expect(dialog.solverTestResult).toBeNull();
   });
+
+  it('should provide solver expression help examples and docs link', () => {
+    const dialog = createDialog({ sourceType: 'SOLVER' });
+    const expressions = dialog.solverExpressionExamples.map(
+      example => example.expression
+    );
+
+    expect(dialog.solverExpressionDocsUrl).toBe(
+      'https://mathjs.org/docs/expressions/syntax.html'
+    );
+    expect(expressions).toContain('1 + 2 * 3');
+    expect(expressions.some(expression => expression.includes('${'))).toBeTrue();
+    expect(expressions.some(expression => expression.includes('round('))).toBeTrue();
+    expect(expressions.some(
+      expression => expression.includes('?') && expression.includes(':')
+    )).toBeTrue();
+  });
 });
