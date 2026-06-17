@@ -34,7 +34,8 @@ import {
 import {
   debounceTime,
   distinctUntilChanged,
-  switchMap,
+  exhaustMap,
+  take,
   takeUntil
 } from 'rxjs/operators';
 import {
@@ -471,7 +472,7 @@ export class CodebookExportComponent implements OnInit, OnDestroy, OnChanges {
     this.codebookPollingSubscription = interval(1500)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(() => provider.getJobStatus!(jobId))
+        exhaustMap(() => provider.getJobStatus!(jobId).pipe(take(1)))
       )
       .subscribe({
         next: (status: CodebookExportJobStatus) => {

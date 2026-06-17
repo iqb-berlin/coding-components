@@ -1,5 +1,4 @@
 export * from './lib/codebook-generator/codebook-generator.class';
-export * from './lib/codebook-generator/codebook-docx-generator.class';
 export type {
   BookVariable,
   CodeBookContentSetting,

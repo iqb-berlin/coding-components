@@ -11,13 +11,12 @@ import type {
   Missing,
   UnitPropertiesForCodebook
 } from '@iqb/ngx-coding-components/codebook-models';
-import { CodebookDocxGenerator } from './codebook-docx-generator.class';
 
 /**
  * Class for generating codebooks
  */
 export class CodebookGenerator {
-  static generateCodebook(
+  static async generateCodebook(
     units: UnitPropertiesForCodebook[],
     contentSetting: CodeBookContentSetting,
     missings: Missing[]
@@ -27,6 +26,7 @@ export class CodebookGenerator {
     );
 
     if (contentSetting.exportFormat === 'docx') {
+      const { CodebookDocxGenerator } = await import('./codebook-docx-generator.class');
       return CodebookDocxGenerator.generateDocx(codebook, contentSetting);
     }
 
@@ -37,7 +37,7 @@ export class CodebookGenerator {
       missings: unit.missings
     }));
     const data = JSON.stringify(noItemsCodebook);
-    return Promise.resolve(new Blob([data], { type: 'application/json' }));
+    return new Blob([data], { type: 'application/json' });
   }
 
   private static getCodeBookDataForUnit(
