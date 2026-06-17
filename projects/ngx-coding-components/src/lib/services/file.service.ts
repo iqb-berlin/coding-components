@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 export class FileService {
   static saveToFile(fileContent: string, filename: string): void {
     const anchor = document.createElement('a');
-    anchor.download = 'export.json';
+    anchor.download = filename;
     anchor.href = window.URL.createObjectURL(new File([fileContent], filename));
     anchor.click();
   }
