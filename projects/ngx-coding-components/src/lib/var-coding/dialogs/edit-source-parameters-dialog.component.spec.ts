@@ -1,6 +1,7 @@
 import { SourceType, VariableSourceParameters, SourceProcessingType } from
   '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateService } from '@ngx-translate/core';
+import { fakeAsync, tick } from '@angular/core/testing';
 import { EditSourceParametersDialog, EditSourceParametersDialogData } from './edit-source-parameters-dialog.component';
 import { SchemerService } from '../../services/schemer.service';
 
@@ -13,7 +14,9 @@ describe('EditSourceParametersDialog', () => {
     'derive-processing.solver-test.error-sources-missing': 'Bitte mindestens eine Quellvariable auswählen.',
     'derive-processing.solver-test.error-unselected-source': 'Der Ausdruck verweist auf nicht ausgewählte Quelle(n)',
     'derive-processing.solver-test.error-invalid-value': 'Bitte numerischen Testwert prüfen',
-    'derive-processing.solver-test.error-evaluation': 'Der Ausdruck konnte nicht ausgewertet werden.'
+    'derive-processing.solver-test.error-evaluation': 'Der Ausdruck konnte nicht ausgewertet werden.',
+    'derive-processing.solver-source-warning.unselected-sources':
+      'Warnung: Im Solver-Ausdruck referenzierte Variable(n) sind nicht als Quell-Variable(n) ausgewählt'
   };
 
   const createDialog = (options: {
@@ -185,6 +188,98 @@ describe('EditSourceParametersDialog', () => {
       'Der Ausdruck verweist auf nicht ausgewählte Quelle(n)'
     );
     expect(dialog.solverTestResult?.message).toContain('V2');
+  });
+
+  it('solverSourceWarning should show referenced variables that are not selected as sources', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression: `${solverRef('V1')} + ${solverRef('V2')}`
+      },
+      deriveSources: ['v1']
+    });
+
+    expect(dialog.solverSourceWarning).toContain(
+      'Warnung: Im Solver-Ausdruck referenzierte Variable(n)'
+    );
+    expect(dialog.solverSourceWarning).toContain('V2');
+  });
+
+  it('solverSourceWarning should update when expression or source selection changes', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: `${solverRef('V2')}` },
+      deriveSources: ['v1']
+    });
+
+    expect(dialog.solverSourceWarning).toContain('V2');
+
+    dialog.selectedSources.setValue(['v1', 'v2']);
+    dialog.updateDeriveSources();
+    expect(dialog.solverSourceWarning).toBeNull();
+
+    dialog.data.sourceParameters.solverExpression = `${solverRef('V1')}`;
+    dialog.selectedSources.setValue(['v2']);
+    dialog.updateDeriveSources();
+    expect(dialog.solverSourceWarning).toContain('V1');
+
+    dialog.data.sourceParameters.solverExpression = '';
+    expect(dialog.solverSourceWarning).toBeNull();
+  });
+
+  it('insertSolverSourceReference should insert the selected source at the cursor', fakeAsync(() => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: 'round( + 1)' },
+      deriveSources: ['v1']
+    });
+    const input = document.createElement('input');
+    input.value = dialog.data.sourceParameters.solverExpression || '';
+    input.setSelectionRange(6, 6);
+
+    dialog.insertSolverSourceReference({ id: 'v1', label: 'V1' }, input);
+    tick();
+
+    expect(dialog.data.sourceParameters.solverExpression).toBe(
+      `round(${solverRef('V1')} + 1)`
+    );
+    expect(input.selectionStart).toBe(11);
+    expect(input.selectionEnd).toBe(11);
+  }));
+
+  it('insertSolverSourceReference should replace the selected expression range', fakeAsync(() => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: '1 + placeholder' },
+      deriveSources: ['v2']
+    });
+    const input = document.createElement('input');
+    input.value = dialog.data.sourceParameters.solverExpression || '';
+    input.setSelectionRange(4, 15);
+
+    dialog.insertSolverSourceReference({ id: 'v2', label: 'V2' }, input);
+    tick();
+
+    expect(dialog.data.sourceParameters.solverExpression).toBe(
+      `1 + ${solverRef('V2')}`
+    );
+    expect(dialog.solverTestResult).toBeNull();
+  }));
+
+  it('getSolverSourceReference should expose the inserted reference syntax', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      deriveSources: ['v1']
+    });
+
+    expect(dialog.getSolverSourceReference({ id: 'v1', label: 'V1' })).toBe(
+      solverRef('V1')
+    );
   });
 
   it('runSolverTest should report non-numeric test values', () => {

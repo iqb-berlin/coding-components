@@ -12,7 +12,8 @@
 
     @if (data.sourceType !== 'BASE') {
       <mat-form-field>
-        <mat-select  placeholder="Quell-Variablen" [formControl]="selectedSources" multiple (closed)="updateDeriveSources()">
+        <mat-select  placeholder="Quell-Variablen" [formControl]="selectedSources" multiple
+                     (selectionChange)="updateDeriveSources()" (closed)="updateDeriveSources()">
           <button (click)="toggleAllSelection()" style="margin: 10px" mat-stroked-button>Alle auswählen</button>
           <mat-select-trigger>
             Quell-Variablen
@@ -46,36 +47,38 @@
     @if (data.sourceType === 'SOLVER') {
       <mat-form-field class="solver-expression-field">
         <mat-label>{{ 'derive-processing.SOLVER_EXPRESSION' | translate }}</mat-label>
-        <input matInput [(ngModel)]="data.sourceParameters.solverExpression"
+        <input #solverExpressionInput matInput [(ngModel)]="data.sourceParameters.solverExpression"
                (ngModelChange)="clearSolverTestResult()">
+        <button mat-icon-button matSuffix type="button"
+                [matMenuTriggerFor]="solverSourceMenu"
+                [disabled]="selectedSolverSources.length < 1"
+                [attr.aria-label]="'derive-processing.solver-insert-source.label' | translate"
+                [matTooltip]="'derive-processing.solver-insert-source.label' | translate">
+          <mat-icon>data_object</mat-icon>
+        </button>
       </mat-form-field>
 
-      <div class="solver-expression-help" role="note" aria-labelledby="solver-expression-help-title">
-        <div class="solver-expression-help__header">
-          <mat-icon class="solver-expression-help__icon" aria-hidden="true">info</mat-icon>
-          <span id="solver-expression-help-title">
-            {{ 'derive-processing.solver-help.title' | translate }}
-          </span>
+      <mat-menu #solverSourceMenu="matMenu">
+        @for (source of selectedSolverSources; track source.id) {
+          <button class="solver-source-menu__item"
+                  mat-menu-item
+                  type="button"
+                  (click)="insertSolverSourceReference(source, solverExpressionInput)">
+            <mat-icon>input</mat-icon>
+            <span>{{ source.label }}</span>
+            <code class="solver-source-menu__reference">
+              {{ getSolverSourceReference(source) }}
+            </code>
+          </button>
+        }
+      </mat-menu>
+
+      @if (solverSourceWarning; as warning) {
+        <div class="solver-source-warning" role="alert">
+          <mat-icon aria-hidden="true">warning</mat-icon>
+          <span>{{ warning }}</span>
         </div>
-        <p>{{ 'derive-processing.solver-help.description' | translate }}</p>
-        <div>{{ 'derive-processing.solver-help.examples-title' | translate }}</div>
-        <ul>
-          @for (example of solverExpressionExamples; track example.expression) {
-            <li>
-              <code>{{ example.expression }}</code>
-              -
-              {{ example.descriptionKey | translate }}
-            </li>
-          }
-        </ul>
-        <a class="solver-expression-help__link"
-           [href]="solverExpressionDocsUrl"
-           target="_blank"
-           rel="noopener noreferrer">
-          {{ 'derive-processing.solver-help.docs-link' | translate }}
-          <mat-icon aria-hidden="true">open_in_new</mat-icon>
-        </a>
-      </div>
+      }
 
       <section class="solver-test-area">
         <div class="solver-test-header">
@@ -112,6 +115,33 @@
           </div>
         }
       </section>
+
+      <div class="solver-expression-help" role="note" aria-labelledby="solver-expression-help-title">
+        <div class="solver-expression-help__header">
+          <mat-icon class="solver-expression-help__icon" aria-hidden="true">info</mat-icon>
+          <span id="solver-expression-help-title">
+            {{ 'derive-processing.solver-help.title' | translate }}
+          </span>
+        </div>
+        <p>{{ 'derive-processing.solver-help.description' | translate }}</p>
+        <div>{{ 'derive-processing.solver-help.examples-title' | translate }}</div>
+        <ul>
+          @for (example of solverExpressionExamples; track example.expression) {
+            <li>
+              <code>{{ example.expression }}</code>
+              -
+              {{ example.descriptionKey | translate }}
+            </li>
+          }
+        </ul>
+        <a class="solver-expression-help__link"
+           [href]="solverExpressionDocsUrl"
+           target="_blank"
+           rel="noopener noreferrer">
+          {{ 'derive-processing.solver-help.docs-link' | translate }}
+          <mat-icon aria-hidden="true">open_in_new</mat-icon>
+        </a>
+      </div>
     }
   </div>
 </mat-dialog-content>

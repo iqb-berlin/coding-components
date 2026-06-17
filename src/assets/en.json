@@ -27,6 +27,12 @@
     "TAKE_EMPTY_AS_VALID": "Empty response value is valid",
     "SORT": "Sort values",
     "SOLVER_EXPRESSION": "Expression for solver",
+    "solver-source-warning": {
+      "unselected-sources": "Warning: Variables referenced in the solver expression are not selected as source variables"
+    },
+    "solver-insert-source": {
+      "label": "Insert source variable"
+    },
     "solver-help": {
       "title": "Syntax help for solver expressions",
       "description": "Solver expressions are evaluated with math.js. Use numbers, operators and math.js functions; refer to source variables with ${VariableName} or ${VariableID}.",
