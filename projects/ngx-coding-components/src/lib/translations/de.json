@@ -252,7 +252,18 @@
     "TAKE_NOT_REACHED_AS_VALUE_CHANGED": "Nicht erreicht = Wert geändert",
     "TAKE_EMPTY_AS_VALID": "Leerer Antwortwert ist gültig",
     "SORT": "Sortiere Werte",
-    "SOLVER_EXPRESSION": "Ausdruck für Solver"
+    "SOLVER_EXPRESSION": "Ausdruck für Solver",
+    "solver-test": {
+      "title": "Solver-Test",
+      "action": "Testen",
+      "result": "Ergebnis",
+      "no-sources": "Keine Quellvariable ausgewählt.",
+      "error-expression-missing": "Bitte einen Solver-Ausdruck eingeben.",
+      "error-sources-missing": "Bitte mindestens eine Quellvariable auswählen.",
+      "error-unselected-source": "Der Ausdruck verweist auf nicht ausgewählte Quelle(n)",
+      "error-invalid-value": "Bitte numerischen Testwert prüfen",
+      "error-evaluation": "Der Ausdruck konnte nicht ausgewertet werden. Bitte Syntax, Variablennamen und numerische Testwerte prüfen."
+    }
   },
   "processing": {
     "label": "Allgemeine Parameter für die Verarbeitung der Antwort",
