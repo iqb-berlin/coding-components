@@ -46,7 +46,7 @@
           codeType === 'RESIDUAL') &&
         (hasResidualAutoCode || hasIntendedIncompleteAutoCode)
       "
-      (click)="code.type = codeType; setCodeChanged()"
+      (click)="setCodeType(codeType)"
     >
       @if (codeType === 'FULL_CREDIT') {
       <mat-icon style="color: limegreen">done_all</mat-icon>
@@ -182,32 +182,32 @@
       (codeRulesChanged)="setCodeChanged()"
     >
     </code-rules>
-    } @else if (codeModel === 'MANUAL_ONLY' && (code.type !== 'RESIDUAL_AUTO' &&
-    code.type !== 'INTENDED_INCOMPLETE')) {
+    } @else if (codeModel === 'MANUAL_ONLY' && showManualOnlyInstruction()) {
     <code-instruction
       [code]="code"
       (codeDataChanged)="setCodeChanged()"
       [userRole]="schemerService.userRole"
       [hasResidualAutoCode]="hasResidualAutoCode"
       [hasIntendedIncompleteCode]="hasIntendedIncompleteAutoCode"
+      [suppressResidualAutoWarning]="suppressResidualAutoWarning()"
     >
     </code-instruction>
     }
   </div>
-  @if ((codeModel ?? 'NONE') === 'NONE' || codeModel === 'MANUAL_AND_RULES') { @if (code.type && (code.type ===
-  'RESIDUAL_AUTO' || code.type === 'INTENDED_INCOMPLETE') &&
-  !code.manualInstruction) {
-  <div class="fx-flex-fill"></div>
-  } @else {
+  @if ((codeModel ?? 'NONE') === 'NONE' || codeModel === 'MANUAL_AND_RULES') {
+  @if (showSideInstruction()) {
   <code-instruction
     [code]="code"
     (codeDataChanged)="setCodeChanged()"
     [userRole]="schemerService.userRole"
     [hasResidualAutoCode]="hasResidualAutoCode"
     [hasIntendedIncompleteCode]="hasIntendedIncompleteAutoCode"
+    [suppressResidualAutoWarning]="suppressResidualAutoWarning()"
     class="fx-flex-fill"
   >
   </code-instruction>
+  } @else {
+  <div class="fx-flex-fill"></div>
   } }
   <button
     mat-icon-button

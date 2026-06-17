@@ -12,10 +12,13 @@ import { MatDivider } from '@angular/material/divider';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import {
   CodeData,
-  CodeModelType
+  CodeModelType,
+  CodeType,
+  VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from '../services/schemer.service';
+import { ensureResidualAutoManualInstruction } from '../services/schemer-code-ops';
 import { CodeRulesComponent } from './code-rules/code-rules.component';
 import { CodeInstructionComponent } from './code-instruction.component';
 
@@ -74,6 +77,7 @@ export class SingleCodeComponent {
   @Input() fragmentMode: boolean | undefined;
   @Input() codeIndex: number | undefined;
   @Input() codeModel: CodeModelType | undefined;
+  @Input() sourceType: VariableCodingData['sourceType'] | undefined;
   @Input() hasResidualAutoCode = false;
   @Input() hasIntendedIncompleteAutoCode = false;
 
@@ -119,6 +123,35 @@ export class SingleCodeComponent {
 
   setCodeChanged() {
     this.codeDataChanged.emit(this.code);
+  }
+
+  setCodeType(codeType: CodeType) {
+    if (this.code) {
+      this.code.type = codeType;
+      ensureResidualAutoManualInstruction(this.code);
+      this.setCodeChanged();
+    }
+  }
+
+  showResidualAutoManualInstruction(): boolean {
+    return this.sourceType === 'SOLVER';
+  }
+
+  showManualOnlyInstruction(): boolean {
+    if (!this.code) return false;
+    if (this.code.type === 'RESIDUAL_AUTO') return this.showResidualAutoManualInstruction();
+    return this.code.type !== 'INTENDED_INCOMPLETE';
+  }
+
+  showSideInstruction(): boolean {
+    if (!this.code) return false;
+    if (this.code.type === 'RESIDUAL_AUTO') return this.showResidualAutoManualInstruction();
+    if (this.code.type === 'INTENDED_INCOMPLETE') return !!this.code.manualInstruction;
+    return true;
+  }
+
+  suppressResidualAutoWarning(): boolean {
+    return this.code?.type === 'RESIDUAL_AUTO' && this.showResidualAutoManualInstruction();
   }
 
   setCodeInvalid() {

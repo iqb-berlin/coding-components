@@ -36,7 +36,11 @@ import { renderManualInstructionMath } from '../rich-text-editor/manual-instruct
             >
               <mat-icon> edit </mat-icon>
             </button>
-            @if ((hasResidualAutoCode) && code.manualInstruction) {
+            @if (
+              (hasResidualAutoCode) &&
+              !suppressResidualAutoWarning &&
+              code.manualInstruction
+            ) {
             <mat-icon
               [style.color]="'red'"
               [matTooltip]="
@@ -107,6 +111,7 @@ export class CodeInstructionComponent {
   @Input() userRole: UserRoleType = 'RO';
   @Input() hasIntendedIncompleteCode = false;
   @Input() hasResidualAutoCode = false;
+  @Input() suppressResidualAutoWarning = false;
 
   constructor(
     private sanitizer: DomSanitizer,

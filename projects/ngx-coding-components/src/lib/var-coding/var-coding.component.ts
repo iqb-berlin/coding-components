@@ -41,6 +41,7 @@ import {
   ConfirmDialogData
 } from '../dialogs/confirm-dialog.component';
 import { SchemerService } from '../services/schemer.service';
+import { ensureResidualAutoManualInstruction } from '../services/schemer-code-ops';
 import {
   GenerateCodingDialogComponent,
   GeneratedCodingData
@@ -102,6 +103,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varCoding(value: VariableCodingData | null) {
     this._varCoding = value;
+    this.applySolverResidualAutoInstructionDefault();
     this.updateHasResidualAutoCode();
     this.updateHasIntendedIncompleteAutoCode();
   }
@@ -163,6 +165,12 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         c => c.type === 'INTENDED_INCOMPLETE'
       ) :
       false;
+  }
+
+  applySolverResidualAutoInstructionDefault() {
+    if (this.varCoding?.sourceType === 'SOLVER') {
+      (this.varCoding.codes || []).forEach(ensureResidualAutoManualInstruction);
+    }
   }
 
   getSanitizedText(text: string): SafeHtml {
@@ -312,6 +320,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
               codes: newCoding.codes
             });
 
+            this.applySolverResidualAutoInstructionDefault();
             this.updateHasResidualAutoCode();
             this.updateHasIntendedIncompleteAutoCode();
             this.varCodingChanged.emit(this.varCoding);
@@ -337,6 +346,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         });
       } else {
+        this.applySolverResidualAutoInstructionDefault();
         this.updateHasResidualAutoCode();
         this.updateHasIntendedIncompleteAutoCode();
         this.varCodingChanged.emit(this.varCoding);
@@ -368,6 +378,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         }
       });
     } else {
+      this.applySolverResidualAutoInstructionDefault();
       this.updateHasResidualAutoCode();
       this.updateHasIntendedIncompleteAutoCode();
       this.varCodingChanged.emit(this.varCoding);
@@ -408,6 +419,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             deriveSources
           });
 
+          this.applySolverResidualAutoInstructionDefault();
           this.varCodingChanged.emit(this.varCoding);
         }
       });

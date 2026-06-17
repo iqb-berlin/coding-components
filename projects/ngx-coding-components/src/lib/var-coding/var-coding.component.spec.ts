@@ -9,6 +9,7 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 
 import { VarCodingComponent } from './var-coding.component';
 import { SchemerService } from '../services/schemer.service';
+import { DEFAULT_RESIDUAL_MANUAL_INSTRUCTION } from '../services/schemer-code-ops';
 
 describe('VarCodingComponent', () => {
   let component: VarCodingComponent;
@@ -91,6 +92,27 @@ describe('VarCodingComponent', () => {
 
     expect(component.varCoding?.manualInstruction).toBe('');
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  it('varCoding setter should add default manualInstruction to SOLVER RESIDUAL_AUTO codes', () => {
+    component.varCoding = {
+      id: 'v1',
+      alias: 'A',
+      sourceType: 'SOLVER',
+      codes: [
+        {
+          id: 0,
+          type: 'RESIDUAL_AUTO',
+          label: '',
+          score: 0,
+          manualInstruction: ''
+        }
+      ]
+    } as unknown as VariableCodingData;
+
+    expect(component.varCoding?.codes?.[0].manualInstruction).toBe(
+      DEFAULT_RESIDUAL_MANUAL_INSTRUCTION
+    );
   });
 
   it('smartSchemer without ctrlKey should ignore false/null/undefined dialog results', () => {

@@ -143,7 +143,7 @@
     "has-rule-warning": {
       "autocode": "Dieser Code enthält Regeln für das automatische Kodieren.",
       "manual": "Dieser Code enthält Instruktionen für das manuelle Kodieren.",
-      "manual-else": "Dieser Code enthält Instruktionen für das manuelle Kodieren. Durch die Regel 'Alle anderen Antworten' werden aber alle Fälle automatisch abschließend kodiert."
+      "manual-else": "Dieser Code enthält Instruktionen für das manuelle Kodieren. Im normalen automatischen Fall für 'Alle anderen Antworten' werden sie nicht genutzt."
     }
   },
   "rule-set": {
