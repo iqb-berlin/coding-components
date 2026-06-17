@@ -47,8 +47,123 @@ type SolverTestResult = {
   message: string;
 };
 
+interface SolverExpressionExample {
+  expression: string;
+  descriptionKey: string;
+}
+
+const SOLVER_VARIABLE_PREFIX = '$';
+
 @Component({
   templateUrl: 'edit-source-parameters-dialog.component.html',
+  styles: [`
+    .solver-expression-field {
+      width: 100%;
+    }
+
+    .solver-expression-help {
+      background: #f5f7ff;
+      border-left: 4px solid #3f51b5;
+      border-radius: 4px;
+      color: rgb(0 0 0 / 82%);
+      margin: -8px 0 8px;
+      max-width: 640px;
+      padding: 12px 14px;
+    }
+
+    .solver-expression-help__header {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .solver-expression-help__icon {
+      color: #3f51b5;
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+    }
+
+    .solver-expression-help p {
+      margin: 8px 0;
+    }
+
+    .solver-expression-help ul {
+      margin: 6px 0 10px;
+      padding-left: 20px;
+    }
+
+    .solver-expression-help li {
+      margin-bottom: 4px;
+    }
+
+    .solver-expression-help code {
+      background: rgb(0 0 0 / 6%);
+      border-radius: 3px;
+      overflow-wrap: anywhere;
+      padding: 1px 4px;
+      white-space: normal;
+    }
+
+    .solver-expression-help__link {
+      align-items: center;
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .solver-expression-help__link mat-icon {
+      font-size: 16px;
+      height: 16px;
+      width: 16px;
+    }
+  `,
+  `
+    .solver-test-area {
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+      margin-top: 8px;
+      padding-top: 16px;
+    }
+
+    .solver-test-header {
+      align-items: center;
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .solver-test-title {
+      font-weight: 600;
+    }
+
+    .solver-test-values {
+      display: grid;
+      gap: 8px 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .solver-test-result {
+      border-radius: 4px;
+      margin-top: 8px;
+      padding: 8px 12px;
+    }
+
+    .solver-test-result-ok {
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+
+    .solver-test-result-error {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .solver-test-hint {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 8px;
+    }
+  `],
   standalone: true,
   imports: [
     MatSelectTrigger,
@@ -58,7 +173,6 @@ type SolverTestResult = {
     MatButton,
     MatDialogClose,
     TranslateModule,
-    MatIcon,
     FormsModule,
     MatFormField,
     MatInput,
@@ -69,58 +183,34 @@ type SolverTestResult = {
     KeyValuePipe,
     NgForOf,
     ReactiveFormsModule,
-    NgIf
-  ],
-  styles: [
-    `
-      .solver-test-area {
-        border-top: 1px solid rgba(0, 0, 0, 0.12);
-        margin-top: 8px;
-        padding-top: 16px;
-      }
-
-      .solver-test-header {
-        align-items: center;
-        display: flex;
-        gap: 16px;
-        justify-content: space-between;
-        margin-bottom: 12px;
-      }
-
-      .solver-test-title {
-        font-weight: 600;
-      }
-
-      .solver-test-values {
-        display: grid;
-        gap: 8px 12px;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      }
-
-      .solver-test-result {
-        border-radius: 4px;
-        margin-top: 8px;
-        padding: 8px 12px;
-      }
-
-      .solver-test-result-ok {
-        background: #e8f5e9;
-        color: #1b5e20;
-      }
-
-      .solver-test-result-error {
-        background: #ffebee;
-        color: #b71c1c;
-      }
-
-      .solver-test-hint {
-        color: rgba(0, 0, 0, 0.6);
-        margin-bottom: 8px;
-      }
-    `
+    NgIf,
+    MatIcon
   ]
 })
 export class EditSourceParametersDialog {
+  readonly solverExpressionDocsUrl =
+    'https://mathjs.org/docs/expressions/syntax.html';
+
+  readonly solverExpressionExamples: SolverExpressionExample[] = [
+    {
+      expression: '1 + 2 * 3',
+      descriptionKey: 'derive-processing.solver-help.examples.arithmetic'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{Punkte} + ${SOLVER_VARIABLE_PREFIX}{Bonus}`,
+      descriptionKey: 'derive-processing.solver-help.examples.variables'
+    },
+    {
+      expression: `round(${SOLVER_VARIABLE_PREFIX}{Punkte} / ` +
+        `${SOLVER_VARIABLE_PREFIX}{MaxPunkte} * 100, 1)`,
+      descriptionKey: 'derive-processing.solver-help.examples.function'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{Punkte} >= 5 ? 1 : 0`,
+      descriptionKey: 'derive-processing.solver-help.examples.condition'
+    }
+  ];
+
   sourceTypeList: SourceType[] = [
     'COPY_VALUE',
     'CONCAT_CODE',

@@ -44,11 +44,38 @@
       }
     }
     @if (data.sourceType === 'SOLVER') {
-      <mat-form-field>
+      <mat-form-field class="solver-expression-field">
         <mat-label>{{ 'derive-processing.SOLVER_EXPRESSION' | translate }}</mat-label>
         <input matInput [(ngModel)]="data.sourceParameters.solverExpression"
                (ngModelChange)="clearSolverTestResult()">
       </mat-form-field>
+
+      <div class="solver-expression-help" role="note" aria-labelledby="solver-expression-help-title">
+        <div class="solver-expression-help__header">
+          <mat-icon class="solver-expression-help__icon" aria-hidden="true">info</mat-icon>
+          <span id="solver-expression-help-title">
+            {{ 'derive-processing.solver-help.title' | translate }}
+          </span>
+        </div>
+        <p>{{ 'derive-processing.solver-help.description' | translate }}</p>
+        <div>{{ 'derive-processing.solver-help.examples-title' | translate }}</div>
+        <ul>
+          @for (example of solverExpressionExamples; track example.expression) {
+            <li>
+              <code>{{ example.expression }}</code>
+              -
+              {{ example.descriptionKey | translate }}
+            </li>
+          }
+        </ul>
+        <a class="solver-expression-help__link"
+           [href]="solverExpressionDocsUrl"
+           target="_blank"
+           rel="noopener noreferrer">
+          {{ 'derive-processing.solver-help.docs-link' | translate }}
+          <mat-icon aria-hidden="true">open_in_new</mat-icon>
+        </a>
+      </div>
 
       <section class="solver-test-area">
         <div class="solver-test-header">
