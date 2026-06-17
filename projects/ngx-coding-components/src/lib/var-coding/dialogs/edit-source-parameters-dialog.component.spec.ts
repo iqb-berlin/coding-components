@@ -1,9 +1,21 @@
 import { SourceType, VariableSourceParameters, SourceProcessingType } from
   '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { TranslateService } from '@ngx-translate/core';
 import { EditSourceParametersDialog, EditSourceParametersDialogData } from './edit-source-parameters-dialog.component';
 import { SchemerService } from '../../services/schemer.service';
 
 describe('EditSourceParametersDialog', () => {
+  const solverRef = (variableName: string): string => `\${${variableName}}`;
+
+  const translations: Record<string, string> = {
+    'derive-processing.solver-test.result': 'Ergebnis',
+    'derive-processing.solver-test.error-expression-missing': 'Bitte einen Solver-Ausdruck eingeben.',
+    'derive-processing.solver-test.error-sources-missing': 'Bitte mindestens eine Quellvariable auswählen.',
+    'derive-processing.solver-test.error-unselected-source': 'Der Ausdruck verweist auf nicht ausgewählte Quelle(n)',
+    'derive-processing.solver-test.error-invalid-value': 'Bitte numerischen Testwert prüfen',
+    'derive-processing.solver-test.error-evaluation': 'Der Ausdruck konnte nicht ausgewertet werden.'
+  };
+
   const createDialog = (options: {
     selfId?: string;
     selfAlias?: string;
@@ -21,7 +33,7 @@ describe('EditSourceParametersDialog', () => {
     }
 
     const data: EditSourceParametersDialogData = {
-      selfId: options.selfId ?? 'v1',
+      selfId: options.selfId ?? 'd1',
       selfAlias: options.selfAlias ?? 'V1',
       sourceType: (options.sourceType as SourceType) ?? 'COPY_VALUE',
       sourceParameters: baseSourceParameters as VariableSourceParameters,
@@ -29,19 +41,34 @@ describe('EditSourceParametersDialog', () => {
     };
 
     const hasCodingSchemeOverride = Object.prototype.hasOwnProperty.call(options, 'codingScheme');
+    const codingScheme = hasCodingSchemeOverride ?
+      options.codingScheme :
+      {
+        variableCodings: [
+          { id: 'v1', alias: 'V1', sourceType: 'BASE' },
+          { id: 'v2', alias: 'V2', sourceType: 'DERIVE' },
+          { id: 'v3', alias: 'V3', sourceType: 'BASE_NO_VALUE' }
+        ]
+      };
     const schemerService = {
-      codingScheme: hasCodingSchemeOverride ?
-        options.codingScheme :
-        {
-          variableCodings: [
-            { id: 'v1', alias: 'V1', sourceType: 'BASE' },
-            { id: 'v2', alias: 'V2', sourceType: 'DERIVE' },
-            { id: 'v3', alias: 'V3', sourceType: 'BASE_NO_VALUE' }
-          ]
-        }
+      codingScheme,
+      getVariableAliasById: (varId: string) => {
+        const variableCoding = codingScheme?.variableCodings.find(
+          variable => (variable as { id: string }).id === varId
+        ) as { id: string; alias?: string } | undefined;
+        return variableCoding?.alias || variableCoding?.id || '?';
+      }
     } as unknown as SchemerService;
 
-    return new EditSourceParametersDialog(data, schemerService);
+    const translateService = {
+      instant: (key: string) => translations[key] || key
+    } as unknown as TranslateService;
+
+    return new EditSourceParametersDialog(
+      data,
+      schemerService,
+      translateService
+    );
   };
 
   it('should set newVariableMode when selfId is missing', () => {
@@ -117,5 +144,98 @@ describe('EditSourceParametersDialog', () => {
     dialog.toggleAllSelection();
 
     expect(dialog.selectedSources.value).toEqual(['v2']);
+    expect(dialog.data.deriveSources).toEqual(['v2']);
+  });
+
+  it('runSolverTest should evaluate the current expression with test values', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression: `${solverRef('V1')} + ${solverRef('V2')}`
+      },
+      deriveSources: ['v1', 'v2']
+    });
+
+    dialog.solverTestValues['v1'] = '2';
+    dialog.solverTestValues['v2'] = '3';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'success',
+      message: 'Ergebnis: 5'
+    });
+  });
+
+  it('runSolverTest should show missing selected sources for referenced variables', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression: `${solverRef('V1')} + ${solverRef('V2')}`
+      },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = '2';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult?.type).toBe('error');
+    expect(dialog.solverTestResult?.message).toContain(
+      'Der Ausdruck verweist auf nicht ausgewählte Quelle(n)'
+    );
+    expect(dialog.solverTestResult?.message).toContain('V2');
+  });
+
+  it('runSolverTest should report non-numeric test values', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: `${solverRef('V1')} + 1` },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = 'abc';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult?.type).toBe('error');
+    expect(dialog.solverTestResult?.message).toContain(
+      'Bitte numerischen Testwert prüfen'
+    );
+    expect(dialog.solverTestResult?.message).toContain('V1');
+  });
+
+  it('runSolverTest should report syntax and evaluation errors', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: `${solverRef('V1')} +` },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = '2';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'error',
+      message: 'Der Ausdruck konnte nicht ausgewertet werden.'
+    });
+  });
+
+  it('updateDeriveSources should keep solver test values aligned with selected sources', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = '4';
+    dialog.solverTestResult = { type: 'success', message: 'Ergebnis: 4' };
+    dialog.selectedSources.setValue(['v2']);
+    dialog.updateDeriveSources();
+
+    expect(dialog.data.deriveSources).toEqual(['v2']);
+    expect(dialog.solverTestValues).toEqual({ v2: '' });
+    expect(dialog.solverTestResult).toBeNull();
   });
 });

@@ -46,8 +46,45 @@
     @if (data.sourceType === 'SOLVER') {
       <mat-form-field>
         <mat-label>{{ 'derive-processing.SOLVER_EXPRESSION' | translate }}</mat-label>
-        <input matInput [(ngModel)]="data.sourceParameters.solverExpression">
+        <input matInput [(ngModel)]="data.sourceParameters.solverExpression"
+               (ngModelChange)="clearSolverTestResult()">
       </mat-form-field>
+
+      <section class="solver-test-area">
+        <div class="solver-test-header">
+          <div class="solver-test-title">{{ 'derive-processing.solver-test.title' | translate }}</div>
+          <button mat-stroked-button color="primary" type="button"
+                  [disabled]="data.deriveSources.length < 1"
+                  (click)="runSolverTest()">
+            <mat-icon>calculate</mat-icon>
+            {{ 'derive-processing.solver-test.action' | translate }}
+          </button>
+        </div>
+
+        @if (selectedSolverSources.length > 0) {
+          <div class="solver-test-values">
+            @for (source of selectedSolverSources; track source.id) {
+              <mat-form-field>
+                <mat-label>{{ source.label }}</mat-label>
+                <input matInput [(ngModel)]="solverTestValues[source.id]"
+                       (ngModelChange)="clearSolverTestResult()">
+              </mat-form-field>
+            }
+          </div>
+        } @else {
+          <div class="solver-test-hint">
+            {{ 'derive-processing.solver-test.no-sources' | translate }}
+          </div>
+        }
+
+        @if (solverTestResult) {
+          <div class="solver-test-result"
+               [class.solver-test-result-ok]="solverTestResult.type === 'success'"
+               [class.solver-test-result-error]="solverTestResult.type === 'error'">
+            {{ solverTestResult.message }}
+          </div>
+        }
+      </section>
     }
   </div>
 </mat-dialog-content>
