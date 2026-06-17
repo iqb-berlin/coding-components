@@ -369,8 +369,13 @@ Exports include:
 | `npm run build_cc` | Build the library (`ngx-coding-components`). |
 | `npm run test:cc` | Run library unit tests. |
 | `npm run lint` | Run ESLint across the project. |
+| `npm run audit:prod` | Audit production dependencies. |
 | `npm run build:elements` | Build the Web Components bundle. |
 | `npm run buildAndPack_sc` | Build and package the Verona Schemer. |
+
+## CI gates
+
+Pull requests and pushes run GitHub Actions checks for production dependency security, linting, and coverage tests. The `security-audit` job runs `npm audit --omit=dev --audit-level=high`; high or critical production dependency findings must be resolved before merging.
 
 ## Demo App
 The folder `/src` contains a demo application that showcases all components. Use `npm start` to run it locally.
