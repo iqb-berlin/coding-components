@@ -317,13 +317,11 @@ export class EditSourceParametersDialog {
     if (!codingScheme) return;
 
     const validCodings = codingScheme.variableCodings.filter(
-      (variableCoding: VariableCodingData) => {
-        const aliasOrId = variableCoding.alias || variableCoding.id;
-        return (
-          aliasOrId !== this.data.selfAlias &&
-          variableCoding.sourceType !== 'BASE_NO_VALUE'
-        );
-      }
+      (variableCoding: VariableCodingData) => (
+        !this.isOwnVariable(variableCoding) &&
+        variableCoding.sourceType !== 'BASE_NO_VALUE' &&
+        !this.isDerivedFromSelf(variableCoding, codingScheme.variableCodings)
+      )
     );
 
     this.possibleNewSources = new Map(
@@ -333,6 +331,10 @@ export class EditSourceParametersDialog {
       ])
     );
 
+    const possibleSourceIds = new Set(this.possibleNewSources.keys());
+    this.data.deriveSources = this.data.deriveSources.filter(
+      sourceId => possibleSourceIds.has(sourceId)
+    );
     this.selectedSources.setValue(this.data.deriveSources);
     this.syncSolverTestValues();
   }
@@ -582,6 +584,79 @@ export class EditSourceParametersDialog {
     const sourceAlias = this.schemerService.getVariableAliasById(sourceId);
     return this.possibleNewSources.get(sourceId) ||
       (sourceAlias === '?' ? sourceId : sourceAlias);
+  }
+
+  private isOwnVariable(variableCoding: VariableCodingData): boolean {
+    return this.getSelfReferenceKeys([variableCoding]).some(
+      selfReference => (
+        variableCoding.id === selfReference ||
+        variableCoding.alias === selfReference
+      )
+    );
+  }
+
+  private isDerivedFromSelf(
+    variableCoding: VariableCodingData,
+    variableCodings: VariableCodingData[]
+  ): boolean {
+    const selfReferenceKeys = new Set(this.getSelfReferenceKeys(variableCodings));
+    if (selfReferenceKeys.size < 1) return false;
+
+    const codingsByReference = new Map<string, VariableCodingData>();
+    variableCodings.forEach(coding => {
+      codingsByReference.set(coding.id, coding);
+      if (coding.alias) codingsByReference.set(coding.alias, coding);
+    });
+
+    const visited = new Set<string>();
+    const sourcesToCheck = [...(variableCoding.deriveSources || [])];
+
+    while (sourcesToCheck.length > 0) {
+      const sourceReference = sourcesToCheck.pop();
+      if (sourceReference) {
+        if (selfReferenceKeys.has(sourceReference)) return true;
+
+        const sourceCoding = codingsByReference.get(sourceReference);
+        if (sourceCoding && !visited.has(sourceCoding.id)) {
+          if (
+            selfReferenceKeys.has(sourceCoding.id) ||
+            (sourceCoding.alias && selfReferenceKeys.has(sourceCoding.alias))
+          ) {
+            return true;
+          }
+
+          visited.add(sourceCoding.id);
+          sourcesToCheck.push(...(sourceCoding.deriveSources || []));
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private getSelfReferenceKeys(
+    variableCodings: VariableCodingData[]
+  ): string[] {
+    const selfReferences = new Set<string>();
+    if (this.data.selfId) selfReferences.add(this.data.selfId);
+    if (this.data.selfAlias) selfReferences.add(this.data.selfAlias);
+
+    const selfCoding = variableCodings.find(
+      coding => (
+        (this.data.selfId && coding.id === this.data.selfId) ||
+        (this.data.selfAlias && (
+          coding.id === this.data.selfAlias ||
+          coding.alias === this.data.selfAlias
+        ))
+      )
+    );
+
+    if (selfCoding) {
+      selfReferences.add(selfCoding.id);
+      if (selfCoding.alias) selfReferences.add(selfCoding.alias);
+    }
+
+    return Array.from(selfReferences);
   }
 
   private static formatSolverTestValue(value: unknown): string {

@@ -102,6 +102,89 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.selectedSources.value).toEqual(['v2']);
   });
 
+  it('updatePossibleNewSources should exclude direct descendants of the current variable', () => {
+    const dialog = createDialog({
+      selfId: 'd1',
+      selfAlias: 'D1',
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'base1', alias: 'BASE1', sourceType: 'BASE'
+          },
+          {
+            id: 'd1', alias: 'D1', sourceType: 'DERIVE', deriveSources: ['base1']
+          },
+          {
+            id: 'd2', alias: 'D2', sourceType: 'DERIVE', deriveSources: ['d1']
+          },
+          {
+            id: 'd3', alias: 'D3', sourceType: 'DERIVE', deriveSources: ['base1']
+          }
+        ]
+      }
+    });
+
+    expect(Array.from(dialog.possibleNewSources.keys()).sort()).toEqual([
+      'base1',
+      'd3'
+    ]);
+  });
+
+  it('updatePossibleNewSources should exclude indirect descendants of the current variable', () => {
+    const dialog = createDialog({
+      selfId: 'd1',
+      selfAlias: 'D1',
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'base1', alias: 'BASE1', sourceType: 'BASE'
+          },
+          {
+            id: 'd1', alias: 'D1', sourceType: 'DERIVE', deriveSources: ['base1']
+          },
+          {
+            id: 'd2', alias: 'D2', sourceType: 'DERIVE', deriveSources: ['d1']
+          },
+          {
+            id: 'd3', alias: 'D3', sourceType: 'DERIVE', deriveSources: ['d2']
+          },
+          {
+            id: 'd4', alias: 'D4', sourceType: 'DERIVE', deriveSources: ['base1']
+          }
+        ]
+      }
+    });
+
+    expect(Array.from(dialog.possibleNewSources.keys()).sort()).toEqual([
+      'base1',
+      'd4'
+    ]);
+  });
+
+  it('updatePossibleNewSources should prune selected sources that would create a cycle', () => {
+    const dialog = createDialog({
+      selfId: 'd1',
+      selfAlias: 'D1',
+      deriveSources: ['base1', 'd2'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'base1', alias: 'BASE1', sourceType: 'BASE'
+          },
+          {
+            id: 'd1', alias: 'D1', sourceType: 'DERIVE', deriveSources: ['base1']
+          },
+          {
+            id: 'd2', alias: 'D2', sourceType: 'DERIVE', deriveSources: ['d1']
+          }
+        ]
+      }
+    });
+
+    expect(dialog.data.deriveSources).toEqual(['base1']);
+    expect(dialog.selectedSources.value).toEqual(['base1']);
+  });
+
   it('updatePossibleNewSources should return early when codingScheme is missing', () => {
     const dialog = createDialog({ codingScheme: null });
     dialog.possibleNewSources = new Map([['x', 'X']]);
