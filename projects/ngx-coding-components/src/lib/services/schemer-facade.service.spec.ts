@@ -36,6 +36,40 @@ describe('SchemerFacadeService', () => {
     afterClosed$.complete();
   });
 
+  it('tryResolveVarListDuplicates should stop blocking while resolving if the current varList becomes valid', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: 'A', alias: 'A' } as never,
+      { id: 'A', alias: 'B' } as never
+    ]);
+
+    const afterClosed$ = new Subject<unknown>();
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => afterClosed$.asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+
+    schemerService.setVarList([
+      { id: 'AA', alias: 'AA' } as never,
+      { id: 'BB', alias: 'BB' } as never
+    ]);
+
+    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+
+    afterClosed$.next(null);
+    afterClosed$.complete();
+
+    schemerService.setVarList([
+      { id: 'A', alias: 'A' } as never,
+      { id: 'A', alias: 'B' } as never
+    ]);
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalledTimes(2);
+  });
+
   it('tryResolveVarListDuplicates should return false for an empty varList', () => {
     const service = createService();
 

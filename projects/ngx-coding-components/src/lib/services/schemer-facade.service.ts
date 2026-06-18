@@ -22,12 +22,9 @@ export class SchemerFacadeService {
   }
 
   tryResolveVarListDuplicates(): boolean {
-    if (this.resolvingVarListDuplicates) {
-      return true;
-    }
-
     const varList = this.schemerService.varList || [];
     if (varList.length === 0) {
+      this.dismissedVarListDuplicateSignature = null;
       return false;
     }
 
@@ -36,6 +33,10 @@ export class SchemerFacadeService {
     if (!analysis.hasProblems) {
       this.dismissedVarListDuplicateSignature = null;
       return false;
+    }
+
+    if (this.resolvingVarListDuplicates) {
+      return true;
     }
 
     if (this.dismissedVarListDuplicateSignature === analysis.signature) {
@@ -57,7 +58,14 @@ export class SchemerFacadeService {
 
     dialogRef.afterClosed().subscribe(() => {
       this.resolvingVarListDuplicates = false;
-      this.dismissedVarListDuplicateSignature = analysis.signature;
+      const currentAnalysis = getVarListConflictAnalysis(
+        this.schemerService.varList || []
+      );
+      this.dismissedVarListDuplicateSignature =
+        currentAnalysis.hasProblems &&
+        currentAnalysis.signature === analysis.signature ?
+          analysis.signature :
+          null;
     });
 
     return true;
