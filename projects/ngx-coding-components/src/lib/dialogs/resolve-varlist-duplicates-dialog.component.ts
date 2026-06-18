@@ -10,7 +10,8 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { MatButton } from '@angular/material/button';
 import {
   getVarListConflictAnalysis,
-  isInvalidVarListName
+  isInvalidVarListAlias,
+  isInvalidVarListId
 } from '../services/schemer-varlist-validation';
 
 export interface ResolveVarListDuplicatesDialogData {
@@ -19,11 +20,11 @@ export interface ResolveVarListDuplicatesDialogData {
 
 @Component({
   template: `
-    <h1 mat-dialog-title>Doppelte Variablen-IDs/Aliase</h1>
+    <h1 mat-dialog-title>Problematische Variablen-IDs/Aliase</h1>
 
     <mat-dialog-content>
       <div style="margin-bottom: 10px;">
-        Die Variablenliste enthält doppelte oder ungültige IDs/Aliase.
+        Die Variablenliste enthält doppelte, ungültige oder kollidierende IDs/Aliase.
         Bitte korrigiere die Variablenliste und lade den Schemer neu.
       </div>
 
@@ -40,6 +41,8 @@ export interface ResolveVarListDuplicatesDialogData {
         <div><b>Doppelte IDs:</b> {{ duplicateIdValues.join(', ') }}</div>
         } @if (duplicateAliasValues.length > 0) {
         <div><b>Doppelte Aliase:</b> {{ duplicateAliasValues.join(', ') }}</div>
+        } @if (aliasIdCollisionValues.length > 0) {
+        <div><b>Alias entspricht anderer ID:</b> {{ aliasIdCollisionValues.join(', ') }}</div>
         } @if (invalidIdCount > 0) {
         <div><b>Ungültige IDs:</b> {{ invalidIdCount }}</div>
         } @if (invalidAliasCount > 0) {
@@ -53,6 +56,7 @@ export interface ResolveVarListDuplicatesDialogData {
         <div
           style="flex: 1;"
           [class.duplicate-field]="isDuplicateId(v.id)"
+          [class.alias-id-field]="isAliasIdCollisionId(v.id)"
           [class.invalid-field]="isInvalidId(v.id)"
         >
           <b>ID:</b> {{ v.id || '-' }}
@@ -60,6 +64,7 @@ export interface ResolveVarListDuplicatesDialogData {
         <div
           style="flex: 1;"
           [class.duplicate-field]="isDuplicateAlias(v.alias || v.id)"
+          [class.alias-id-field]="isAliasIdCollisionAlias(v.alias || v.id)"
           [class.invalid-field]="isInvalidAlias(v.alias || v.id)"
         >
           <b>Alias:</b> {{ v.alias || v.id || '-' }}
@@ -80,6 +85,7 @@ export interface ResolveVarListDuplicatesDialogData {
   `,
   styles: [
     '.duplicate-field { outline: 2px solid #b00020; outline-offset: 2px; border-radius: 3px; padding: 4px; }',
+    '.alias-id-field { outline: 2px solid #c2185b; outline-offset: 2px; border-radius: 3px; padding: 4px; }',
     '.invalid-field { outline: 2px solid #ff6f00; outline-offset: 2px; border-radius: 3px; padding: 4px; }'
   ],
   standalone: true,
@@ -98,9 +104,12 @@ export class ResolveVarListDuplicatesDialogComponent {
 
   private duplicateIds = new Set<string>();
   private duplicateAliases = new Set<string>();
+  private aliasIdCollisionAliases = new Set<string>();
+  private aliasIdCollisionIds = new Set<string>();
 
   duplicateIdValues: string[] = [];
   duplicateAliasValues: string[] = [];
+  aliasIdCollisionValues: string[] = [];
   invalidIdCount = 0;
   invalidAliasCount = 0;
 
@@ -117,8 +126,11 @@ export class ResolveVarListDuplicatesDialogComponent {
 
     this.duplicateIds = analysis.duplicateIds;
     this.duplicateAliases = analysis.duplicateAliases;
+    this.aliasIdCollisionAliases = analysis.aliasIdCollisionAliases;
+    this.aliasIdCollisionIds = analysis.aliasIdCollisionIds;
     this.duplicateIdValues = analysis.duplicateIdValues;
     this.duplicateAliasValues = analysis.duplicateAliasValues;
+    this.aliasIdCollisionValues = analysis.aliasIdCollisionValues;
     this.invalidIdCount = analysis.invalidIdCount;
     this.invalidAliasCount = analysis.invalidAliasCount;
     this.hasProblems = analysis.hasProblems;
@@ -126,13 +138,16 @@ export class ResolveVarListDuplicatesDialogComponent {
     if (this.hasProblems) {
       const problems: string[] = [];
       if (analysis.hasInvalid) {
-        problems.push('Ungültige ID/Alias (nur [a-zA-Z0-9_], min. 2 Zeichen)');
+        problems.push('Ungültige ID/Alias');
       }
       if (analysis.hasDuplicateId) {
         problems.push('Doppelte IDs');
       }
       if (analysis.hasDuplicateAlias) {
         problems.push('Doppelte Aliase');
+      }
+      if (analysis.hasAliasIdCollision) {
+        problems.push('Alias entspricht anderer ID');
       }
       this.statusText = problems.join(' | ');
     } else {
@@ -150,11 +165,18 @@ export class ResolveVarListDuplicatesDialogComponent {
     return !!key && this.duplicateAliases.has(key);
   }
 
-  isInvalidId = isInvalidVarListName;
-
-  isInvalidAlias(value: string | null | undefined): boolean {
-    return this.isInvalidId(value);
+  isAliasIdCollisionId(value: string | null | undefined): boolean {
+    const key = (value || '').trim().toUpperCase();
+    return !!key && this.aliasIdCollisionIds.has(key);
   }
+
+  isAliasIdCollisionAlias(value: string | null | undefined): boolean {
+    const key = (value || '').trim().toUpperCase();
+    return !!key && this.aliasIdCollisionAliases.has(key);
+  }
+
+  isInvalidId = isInvalidVarListId;
+  isInvalidAlias = isInvalidVarListAlias;
 
   close(): void {
     this.dialogRef.close();

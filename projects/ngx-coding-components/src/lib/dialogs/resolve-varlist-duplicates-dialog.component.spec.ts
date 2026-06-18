@@ -50,6 +50,33 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
     expect(component.invalidAliasCount).toBeGreaterThan(0);
   });
 
+  it('should allow generated ids and aliases with hyphens', () => {
+    const { component } = createComponent({
+      varList: [
+        { id: 'likert-row_4', alias: 'Item-01' },
+        { id: 'likert-row_5', alias: 'Item-02' }
+      ]
+    });
+
+    expect(component.hasProblems).toBeFalse();
+    expect(component.invalidIdCount).toBe(0);
+    expect(component.invalidAliasCount).toBe(0);
+  });
+
+  it('should mark alias/id collisions', () => {
+    const { component } = createComponent({
+      varList: [
+        { id: 'likert-row_4', alias: '01a' },
+        { id: '01a', alias: '05a' }
+      ]
+    });
+
+    expect(component.hasProblems).toBeTrue();
+    expect(component.aliasIdCollisionValues).toEqual(['01A']);
+    expect(component.isAliasIdCollisionAlias('01a')).toBeTrue();
+    expect(component.isAliasIdCollisionId('01a')).toBeTrue();
+  });
+
   it('should not mutate the input varList', () => {
     const original = [
       { id: 'AA', alias: 'AA' },
