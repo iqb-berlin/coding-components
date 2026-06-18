@@ -1,11 +1,13 @@
 /* eslint-disable max-classes-per-file */
+import { fakeAsync, tick } from '@angular/core/testing';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 import { FileService } from '../services/file.service';
+import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SchemerComponent } from './schemer.component';
 
 class FakeTranslateService {
@@ -40,7 +42,6 @@ describe('SchemerComponent', () => {
 
   let schemerFacade: {
     tryResolveVarListDuplicates: jasmine.Spy;
-    varListDuplicatesResolved$: { subscribe: () => { unsubscribe: () => void } };
   };
 
   let dialog: FakeMatDialog;
@@ -75,8 +76,7 @@ describe('SchemerComponent', () => {
     };
 
     schemerFacade = {
-      tryResolveVarListDuplicates: jasmine.createSpy('tryResolveVarListDuplicates').and.returnValue(false),
-      varListDuplicatesResolved$: { subscribe: () => ({ unsubscribe: () => undefined }) }
+      tryResolveVarListDuplicates: jasmine.createSpy('tryResolveVarListDuplicates').and.returnValue(false)
     };
 
     component = new SchemerComponent(
@@ -107,7 +107,84 @@ describe('SchemerComponent', () => {
     component.updateVariableLists();
 
     expect(validateSpy).not.toHaveBeenCalled();
+    expect(component.hasVarListDuplicateConflict).toBeTrue();
+    expect(component.basicVariables).toEqual([]);
+    expect(component.selectedCoding$.getValue()).toBeNull();
   });
+
+  it('updateVariableLists should not mutate codingScheme while varList duplicate conflict is active', () => {
+    schemerFacade.tryResolveVarListDuplicates.and.returnValue(true);
+
+    const orphanEmptyBase: VariableCodingData = {
+      id: 'orphan',
+      alias: 'orphan',
+      sourceType: 'BASE',
+      label: 'orphan',
+      codeModel: 'MANUAL_AND_RULES',
+      manualInstruction: '',
+      codes: [],
+      processing: []
+    } as unknown as VariableCodingData;
+    const existingBase: VariableCodingData = {
+      id: 'existing',
+      alias: 'existing',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+
+    schemerService.setVarList([
+      {
+        id: 'existing',
+        alias: 'existing',
+        type: 'string',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo,
+      {
+        id: 'missing',
+        alias: 'missing',
+        type: 'string',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo
+    ]);
+    schemerService.setCodingScheme({
+      variableCodings: [orphanEmptyBase, existingBase]
+    } as unknown as never);
+
+    const createSpy = spyOn(CodingFactory, 'createCodingVariable');
+
+    component.updateVariableLists();
+
+    const ids = (schemerService.codingScheme?.variableCodings || []).map(v => v.id);
+    expect(ids).toEqual(['orphan', 'existing']);
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it('varCodingElement setter should subscribe when var-coding appears after conflict recovery', fakeAsync(() => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+    const changes$ = new Subject<VariableCodingData | null>();
+
+    schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
+    schemerFacade.tryResolveVarListDuplicates.and.returnValue(false);
+
+    component.varCodingElement = {
+      varCodingChanged: changes$.asObservable()
+    } as unknown as VarCodingComponent;
+
+    changes$.next(null);
+    tick(300);
+
+    expect(schemerFacade.tryResolveVarListDuplicates).toHaveBeenCalled();
+    expect(emitSpy).toHaveBeenCalledWith(schemerService.codingScheme);
+    changes$.complete();
+  }));
 
   it('updateVariableLists should remove orphan empty BASE variables not in varList', () => {
     const orphanEmptyBase: VariableCodingData = {

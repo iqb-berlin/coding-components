@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { Observable, Subject } from 'rxjs';
 import { SchemerService } from './schemer.service';
-import {
-  ResolveVarListDuplicatesDialogComponent,
-  ResolveVarListDuplicatesDialogResult
-} from '../dialogs/resolve-varlist-duplicates-dialog.component';
+import { ResolveVarListDuplicatesDialogComponent } from '../dialogs/resolve-varlist-duplicates-dialog.component';
+import { getVarListConflictAnalysis } from './schemer-varlist-validation';
 
 @Injectable({
   providedIn: 'root'
@@ -14,13 +11,6 @@ import {
 export class SchemerFacadeService {
   private resolvingVarListDuplicates = false;
   private dismissedVarListDuplicateSignature: string | null = null;
-
-  private readonly _varListDuplicatesResolved =
-    new Subject<ResolveVarListDuplicatesDialogResult>();
-
-  get varListDuplicatesResolved$(): Observable<ResolveVarListDuplicatesDialogResult> {
-    return this._varListDuplicatesResolved.asObservable();
-  }
 
   constructor(
     private schemerService: SchemerService,
@@ -32,56 +22,28 @@ export class SchemerFacadeService {
   }
 
   tryResolveVarListDuplicates(): boolean {
-    if (this.resolvingVarListDuplicates) {
-      return false;
-    }
-
     const varList = this.schemerService.varList || [];
     if (varList.length === 0) {
+      this.dismissedVarListDuplicateSignature = null;
       return false;
     }
 
-    const signature = varList
-      .map(
-        v => `${(v.id || '').trim().toUpperCase()}|${(v.alias || v.id || '')
-          .trim()
-          .toUpperCase()}`
-      )
-      .join(';;');
+    const analysis = getVarListConflictAnalysis(varList);
 
-    if (this.dismissedVarListDuplicateSignature === signature) {
+    if (!analysis.hasProblems) {
+      this.dismissedVarListDuplicateSignature = null;
       return false;
     }
 
-    const idCounts = new Map<string, number>();
-    const aliasCounts = new Map<string, number>();
+    if (this.resolvingVarListDuplicates) {
+      return true;
+    }
 
-    varList.forEach(v => {
-      const id = (v.id || '').trim();
-      const aliasOrId = (v.alias || v.id || '').trim();
-
-      if (id) {
-        const key = id.toUpperCase();
-        idCounts.set(key, (idCounts.get(key) || 0) + 1);
-      }
-      if (aliasOrId) {
-        const key = aliasOrId.toUpperCase();
-        aliasCounts.set(key, (aliasCounts.get(key) || 0) + 1);
-      }
-    });
-
-    const hasDuplicateId = Array.from(idCounts.values()).some(c => c > 1);
-    const hasDuplicateAlias = Array.from(aliasCounts.values()).some(c => c > 1);
-
-    if (!hasDuplicateId && !hasDuplicateAlias) {
-      return false;
+    if (this.dismissedVarListDuplicateSignature === analysis.signature) {
+      return true;
     }
 
     this.resolvingVarListDuplicates = true;
-
-    const reservedIds = this.schemerService.codingScheme?.variableCodings ?
-      this.schemerService.codingScheme.variableCodings.map(c => c.id) :
-      [];
 
     const dialogRef = this.dialog.open(
       ResolveVarListDuplicatesDialogComponent,
@@ -89,42 +51,21 @@ export class SchemerFacadeService {
         width: '850px',
         disableClose: true,
         data: {
-          varList: this.schemerService.varList,
-          reservedIds
+          varList: this.schemerService.varList
         }
       }
     );
 
-    dialogRef.afterClosed().subscribe(dialogResult => {
+    dialogRef.afterClosed().subscribe(() => {
       this.resolvingVarListDuplicates = false;
-
-      if (!dialogResult) {
-        this.dismissedVarListDuplicateSignature = signature;
-        return;
-      }
-
-      const result = dialogResult as ResolveVarListDuplicatesDialogResult;
-      this.dismissedVarListDuplicateSignature = null;
-
-      this.schemerService.setVarList((result.varList || []).map(v => ({
-        ...v
-      })));
-
-      if (this.schemerService.codingScheme?.variableCodings) {
-        const renameMap = result.idRenameMap || {};
-
-        this.schemerService.codingScheme.variableCodings.forEach(vc => {
-          const newId = renameMap[vc.id];
-          if (newId) {
-            vc.id = newId;
-          }
-          if (vc.deriveSources && vc.deriveSources.length > 0) {
-            vc.deriveSources = vc.deriveSources.map(ds => renameMap[ds] || ds);
-          }
-        });
-      }
-
-      this._varListDuplicatesResolved.next(result);
+      const currentAnalysis = getVarListConflictAnalysis(
+        this.schemerService.varList || []
+      );
+      this.dismissedVarListDuplicateSignature =
+        currentAnalysis.hasProblems &&
+        currentAnalysis.signature === analysis.signature ?
+          analysis.signature :
+          null;
     });
 
     return true;

@@ -8,38 +8,23 @@ import {
 } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { MatButton } from '@angular/material/button';
-import { MatFormField } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { FormsModule } from '@angular/forms';
 import {
-  SchemerService,
-  VARIABLE_NAME_CHECK_PATTERN
-} from '../services/schemer.service';
+  getVarListConflictAnalysis,
+  isInvalidVarListName
+} from '../services/schemer-varlist-validation';
 
 export interface ResolveVarListDuplicatesDialogData {
   varList: VariableInfo[];
-  reservedIds: string[];
-}
-
-export interface ResolveVarListDuplicatesDialogResult {
-  varList: VariableInfo[];
-  idRenameMap: Record<string, string>;
 }
 
 @Component({
   template: `
-    <h1 mat-dialog-title>Doppelte Variablen-IDs/Aliase auflösen</h1>
+    <h1 mat-dialog-title>Doppelte Variablen-IDs/Aliase</h1>
 
     <mat-dialog-content>
       <div style="margin-bottom: 10px;">
-        Bitte korrigiere doppelte IDs oder Aliase in der Variablenliste.
-      </div>
-
-      <div style="display:flex; gap:10px; margin-bottom: 12px;">
-        <button mat-raised-button color="primary" (click)="autoFix()">
-          Auto-Fix
-        </button>
-        <button mat-raised-button (click)="reset()">Zurücksetzen</button>
+        Die Variablenliste enthält doppelte oder ungültige IDs/Aliase.
+        Bitte korrigiere die Variablenliste und lade den Schemer neu.
       </div>
 
       <div
@@ -61,38 +46,24 @@ export interface ResolveVarListDuplicatesDialogResult {
         <div><b>Ungültige Aliase:</b> {{ invalidAliasCount }}</div>
         }
       </div>
-      } @for (v of editedVarList; track $index) {
+      } @for (v of varList; track $index) {
       <div
-        style="display:flex; gap:12px; align-items:flex-start; margin-bottom: 10px;"
+        style="display:flex; gap:12px; align-items:flex-start; margin-bottom: 8px;"
       >
-        <mat-form-field
+        <div
           style="flex: 1;"
           [class.duplicate-field]="isDuplicateId(v.id)"
           [class.invalid-field]="isInvalidId(v.id)"
         >
-          <input
-            matInput
-            placeholder="ID"
-            [(ngModel)]="v.id"
-            (input)="recompute()"
-            (ngModelChange)="recompute()"
-            (blur)="recompute()"
-          />
-        </mat-form-field>
-        <mat-form-field
+          <b>ID:</b> {{ v.id || '-' }}
+        </div>
+        <div
           style="flex: 1;"
           [class.duplicate-field]="isDuplicateAlias(v.alias || v.id)"
           [class.invalid-field]="isInvalidAlias(v.alias || v.id)"
         >
-          <input
-            matInput
-            placeholder="Alias"
-            [(ngModel)]="v.alias"
-            (input)="recompute()"
-            (ngModelChange)="recompute()"
-            (blur)="recompute()"
-          />
-        </mat-form-field>
+          <b>Alias:</b> {{ v.alias || v.id || '-' }}
+        </div>
       </div>
       }
     </mat-dialog-content>
@@ -101,31 +72,26 @@ export interface ResolveVarListDuplicatesDialogResult {
       <button
         mat-raised-button
         color="primary"
-        [disabled]="hasProblems"
-        (click)="apply()"
+        (click)="close()"
       >
-        Übernehmen
+        Schließen
       </button>
     </mat-dialog-actions>
   `,
   styles: [
-    '.duplicate-field { outline: 2px solid #b00020; outline-offset: 2px; border-radius: 3px; }',
-    '.invalid-field { outline: 2px solid #ff6f00; outline-offset: 2px; border-radius: 3px; }'
+    '.duplicate-field { outline: 2px solid #b00020; outline-offset: 2px; border-radius: 3px; padding: 4px; }',
+    '.invalid-field { outline: 2px solid #ff6f00; outline-offset: 2px; border-radius: 3px; padding: 4px; }'
   ],
   standalone: true,
   imports: [
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatButton,
-    MatFormField,
-    MatInput,
-    FormsModule
+    MatButton
   ]
 })
 export class ResolveVarListDuplicatesDialogComponent {
-  private readonly originalVarList: VariableInfo[];
-  editedVarList: VariableInfo[];
+  varList: VariableInfo[];
 
   hasProblems = true;
   statusText = '';
@@ -140,124 +106,32 @@ export class ResolveVarListDuplicatesDialogComponent {
 
   constructor(
     private dialogRef: MatDialogRef<ResolveVarListDuplicatesDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ResolveVarListDuplicatesDialogData,
-    // kept for future extensions (e.g. using shared helpers)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    private _schemerService: SchemerService
+    @Inject(MAT_DIALOG_DATA) public data: ResolveVarListDuplicatesDialogData
   ) {
-    this.originalVarList = (data.varList || []).map(v => ({ ...v }));
-    this.editedVarList = (data.varList || []).map(v => ({ ...v }));
-    this.recompute();
-  }
-
-  reset(): void {
-    this.editedVarList = this.originalVarList.map(v => ({ ...v }));
-    this.recompute();
-  }
-
-  autoFix(): void {
-    const reserved = new Set(
-      (this.data.reservedIds || []).map(v => v.toUpperCase())
-    );
-
-    const makeUnique = (
-      base: string,
-      used: Set<string>,
-      reservedSet: Set<string>
-    ): string => {
-      const trimmed = (base || '').trim();
-      const start = ResolveVarListDuplicatesDialogComponent.sanitizeVarName(
-        trimmed || 'VAR'
-      );
-      let candidate = start;
-      let i = 1;
-      const isBlocked = (val: string) => used.has(val.toUpperCase()) || reservedSet.has(val.toUpperCase());
-      while (isBlocked(candidate)) {
-        candidate = `${start}_${i}`;
-        i += 1;
-      }
-      used.add(candidate.toUpperCase());
-      return candidate;
-    };
-
-    const usedIds = new Set<string>();
-    const usedAliases = new Set<string>();
-
-    this.editedVarList = this.editedVarList.map(v => {
-      const proposedId = (v.id || '').trim();
-      const newId = makeUnique(proposedId || 'VAR', usedIds, reserved);
-
-      const proposedAlias = (v.alias || '').trim();
-      const aliasBase = proposedAlias || newId;
-      const newAliasOrId = makeUnique(aliasBase, usedAliases, new Set());
-
-      return {
-        ...v,
-        id: newId,
-        alias: newAliasOrId
-      };
-    });
-
+    this.varList = (data.varList || []).map(v => ({ ...v }));
     this.recompute();
   }
 
   recompute(): void {
-    const idCounts = this.getCounts(
-      this.editedVarList.map(v => (v.id || '').trim())
-    );
-    const aliasCounts = this.getCounts(
-      this.editedVarList.map(v => (v.alias || v.id || '').trim())
-    );
+    const analysis = getVarListConflictAnalysis(this.varList);
 
-    this.duplicateIds = new Set(
-      Array.from(idCounts.entries())
-        .filter(([, c]) => c > 1)
-        .map(([k]) => k)
-    );
-    this.duplicateAliases = new Set(
-      Array.from(aliasCounts.entries())
-        .filter(([, c]) => c > 1)
-        .map(([k]) => k)
-    );
-
-    this.duplicateIdValues = Array.from(this.duplicateIds.values()).sort();
-    this.duplicateAliasValues = Array.from(
-      this.duplicateAliases.values()
-    ).sort();
-
-    this.invalidIdCount = this.editedVarList.filter(v => {
-      const id = (v.id || '').trim();
-      return !id || !VARIABLE_NAME_CHECK_PATTERN.test(id);
-    }).length;
-
-    this.invalidAliasCount = this.editedVarList.filter(v => {
-      const aliasOrId = (v.alias || v.id || '').trim();
-      return !aliasOrId || !VARIABLE_NAME_CHECK_PATTERN.test(aliasOrId);
-    }).length;
-
-    const hasInvalid = this.editedVarList.some(v => {
-      const id = (v.id || '').trim();
-      const aliasOrId = (v.alias || v.id || '').trim();
-      if (!id || !VARIABLE_NAME_CHECK_PATTERN.test(id)) {
-        return true;
-      }
-      return !aliasOrId || !VARIABLE_NAME_CHECK_PATTERN.test(aliasOrId);
-    });
-
-    const hasDupId = Array.from(idCounts.values()).some(c => c > 1);
-    const hasDupAlias = Array.from(aliasCounts.values()).some(c => c > 1);
-
-    this.hasProblems = hasInvalid || hasDupId || hasDupAlias;
+    this.duplicateIds = analysis.duplicateIds;
+    this.duplicateAliases = analysis.duplicateAliases;
+    this.duplicateIdValues = analysis.duplicateIdValues;
+    this.duplicateAliasValues = analysis.duplicateAliasValues;
+    this.invalidIdCount = analysis.invalidIdCount;
+    this.invalidAliasCount = analysis.invalidAliasCount;
+    this.hasProblems = analysis.hasProblems;
 
     if (this.hasProblems) {
       const problems: string[] = [];
-      if (hasInvalid) {
+      if (analysis.hasInvalid) {
         problems.push('Ungültige ID/Alias (nur [a-zA-Z0-9_], min. 2 Zeichen)');
       }
-      if (hasDupId) {
+      if (analysis.hasDuplicateId) {
         problems.push('Doppelte IDs');
       }
-      if (hasDupAlias) {
+      if (analysis.hasDuplicateAlias) {
         problems.push('Doppelte Aliase');
       }
       this.statusText = problems.join(' | ');
@@ -276,56 +150,13 @@ export class ResolveVarListDuplicatesDialogComponent {
     return !!key && this.duplicateAliases.has(key);
   }
 
-  private readonly variableNameCheckPattern = VARIABLE_NAME_CHECK_PATTERN;
-
-  isInvalidId = (value: string | null | undefined): boolean => {
-    const v = (value || '').trim();
-    return !v || !this.variableNameCheckPattern.test(v);
-  };
+  isInvalidId = isInvalidVarListName;
 
   isInvalidAlias(value: string | null | undefined): boolean {
     return this.isInvalidId(value);
   }
 
-  apply(): void {
-    const renameMap: Record<string, string> = {};
-    this.originalVarList.forEach((orig, idx) => {
-      const edited = this.editedVarList[idx];
-      if (edited && orig.id !== edited.id) {
-        renameMap[orig.id] = edited.id;
-      }
-    });
-
-    this.dialogRef.close({
-      varList: this.editedVarList.map(v => ({ ...v })),
-      idRenameMap: renameMap
-    });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private getCounts(values: string[]): Map<string, number> {
-    const m = new Map<string, number>();
-    values
-      .map(v => (v || '').trim())
-      .filter(v => !!v)
-      .forEach(v => {
-        const key = v.toUpperCase();
-        m.set(key, (m.get(key) || 0) + 1);
-      });
-    return m;
-  }
-
-  private static sanitizeVarName(raw: string): string {
-    const cleaned = (raw || '').trim().replace(/[^a-zA-Z0-9_]/g, '_');
-
-    if (cleaned.length >= 2) {
-      return cleaned;
-    }
-
-    if (cleaned.length === 1) {
-      return `${cleaned}_`;
-    }
-
-    return 'VAR';
+  close(): void {
+    this.dialogRef.close();
   }
 }

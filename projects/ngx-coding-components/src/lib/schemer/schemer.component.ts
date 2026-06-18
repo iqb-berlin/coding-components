@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   EventEmitter,
   Input,
@@ -82,10 +81,23 @@ import { SchemerInfoDialogComponent } from '../dialogs/schemer-info-dialog.compo
     MatDivider
   ]
 })
-export class SchemerComponent implements OnDestroy, AfterViewInit {
-  @ViewChild(VarCodingComponent) varCodingElement:
-  | VarCodingComponent
-  | undefined;
+export class SchemerComponent implements OnDestroy {
+  @ViewChild(VarCodingComponent)
+  set varCodingElement(value: VarCodingComponent | undefined) {
+    this.varCodingChangedSubscription?.unsubscribe();
+    this.varCodingChangedSubscription = null;
+
+    if (!value) return;
+
+    this.varCodingChangedSubscription = value.varCodingChanged
+      .pipe(debounceTime(300))
+      .subscribe(() => {
+        this.updateVariableLists();
+        if (!this.hasVarListDuplicateConflict) {
+          this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+        }
+      });
+  }
 
   @Output() codingSchemeChanged = new EventEmitter<CodingScheme | null>();
 
@@ -125,8 +137,8 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
   codingStatus: { [id: string]: string } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
   problems: CodingSchemeProblem[] = [];
+  hasVarListDuplicateConflict = false;
   varCodingChangedSubscription: Subscription | null = null;
-  varListDuplicatesResolvedSubscription: Subscription | null = null;
 
   constructor(
     private translateService: TranslateService,
@@ -153,32 +165,17 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit() {
-    if (this.varCodingElement) {
-      this.varCodingChangedSubscription = this.varCodingElement.varCodingChanged
-        .pipe(debounceTime(300))
-        .subscribe(() => {
-          this.updateVariableLists();
-          this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-        });
-    }
-
-    this.varListDuplicatesResolvedSubscription =
-      this.schemerFacade.varListDuplicatesResolved$.subscribe(result => {
-        const renameMap = result.idRenameMap || {};
-        const selected = this.selectedCoding$.getValue();
-        if (selected && renameMap[selected.id]) {
-          selected.id = renameMap[selected.id];
-        }
-        this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-        this.updateVariableLists();
-      });
-  }
-
   updateVariableLists() {
     if (this.schemerFacade.tryResolveVarListDuplicates()) {
+      this.hasVarListDuplicateConflict = true;
+      this.selectVarScheme();
+      this.basicVariables = [];
+      this.derivedVariables = [];
+      this.codingStatus = {};
+      this.problems = [];
       return;
     }
+    this.hasVarListDuplicateConflict = false;
 
     if (
       this.schemerService.varList &&
@@ -789,6 +786,5 @@ export class SchemerComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
-    if (this.varListDuplicatesResolvedSubscription !== null) this.varListDuplicatesResolvedSubscription.unsubscribe();
   }
 }
