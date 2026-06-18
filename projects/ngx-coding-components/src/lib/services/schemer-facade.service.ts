@@ -12,8 +12,7 @@ export class SchemerFacadeService {
   private resolvingVarListDuplicates = false;
   private dismissedVarListDuplicateSignature: string | null = null;
   private varListDuplicateResolutionGeneration = 0;
-  private varListDuplicateDialogRef:
-    MatDialogRef<ResolveVarListDuplicatesDialogComponent> | null = null;
+  private varListDuplicateDialogRef: MatDialogRef<ResolveVarListDuplicatesDialogComponent> | null = null;
 
   constructor(
     private schemerService: SchemerService,
