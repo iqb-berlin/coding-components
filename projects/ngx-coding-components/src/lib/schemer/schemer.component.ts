@@ -786,5 +786,6 @@ export class SchemerComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
+    this.schemerFacade.resetVarListDuplicateResolutionState();
   }
 }
