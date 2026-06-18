@@ -378,7 +378,8 @@ describe('GenerateCodingDialogComponent', () => {
     expect(component.numericRuleText).not.toContain('rule.NUMERIC_MATCH');
   });
 
-  it('generateButtonClick should generate NUMERIC_FULL_RANGE rule when numericMatch is empty but min/max are set', () => {
+  it('generateButtonClick should generate NUMERIC_FULL_RANGE rule when numericMatch is empty ' +
+    'but min/max are set', () => {
     const { component, dialogRef, schemerService } = createComponent({
       type: 'integer',
       multiple: false
