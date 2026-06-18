@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from './schemer.service';
 import { ResolveVarListDuplicatesDialogComponent } from '../dialogs/resolve-varlist-duplicates-dialog.component';
@@ -11,6 +11,9 @@ import { getVarListConflictAnalysis } from './schemer-varlist-validation';
 export class SchemerFacadeService {
   private resolvingVarListDuplicates = false;
   private dismissedVarListDuplicateSignature: string | null = null;
+  private varListDuplicateResolutionGeneration = 0;
+  private varListDuplicateDialogRef:
+    MatDialogRef<ResolveVarListDuplicatesDialogComponent> | null = null;
 
   constructor(
     private schemerService: SchemerService,
@@ -19,6 +22,15 @@ export class SchemerFacadeService {
 
   setVarList(value: VariableInfo[]): void {
     this.schemerService.setVarList(value);
+  }
+
+  resetVarListDuplicateResolutionState(): void {
+    this.varListDuplicateResolutionGeneration += 1;
+    this.resolvingVarListDuplicates = false;
+    this.dismissedVarListDuplicateSignature = null;
+    const dialogRef = this.varListDuplicateDialogRef;
+    this.varListDuplicateDialogRef = null;
+    dialogRef?.close?.();
   }
 
   tryResolveVarListDuplicates(): boolean {
@@ -45,6 +57,7 @@ export class SchemerFacadeService {
 
     this.resolvingVarListDuplicates = true;
 
+    const generation = this.varListDuplicateResolutionGeneration;
     const dialogRef = this.dialog.open(
       ResolveVarListDuplicatesDialogComponent,
       {
@@ -55,8 +68,12 @@ export class SchemerFacadeService {
         }
       }
     );
+    this.varListDuplicateDialogRef = dialogRef;
 
     dialogRef.afterClosed().subscribe(() => {
+      if (generation !== this.varListDuplicateResolutionGeneration) return;
+
+      this.varListDuplicateDialogRef = null;
       this.resolvingVarListDuplicates = false;
       const currentAnalysis = getVarListConflictAnalysis(
         this.schemerService.varList || []

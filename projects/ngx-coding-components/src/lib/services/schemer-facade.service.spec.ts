@@ -149,6 +149,86 @@ describe('SchemerFacadeService', () => {
     expect(dialog.open).toHaveBeenCalledTimes(1);
   });
 
+  it('resetVarListDuplicateResolutionState should allow the same dismissed conflict to open again', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: 'A', alias: 'A' } as never,
+      { id: 'A', alias: 'B' } as never
+    ]);
+
+    const afterClosed$ = new Subject<unknown>();
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => afterClosed$.asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    afterClosed$.next(null);
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+
+    service.resetVarListDuplicateResolutionState();
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalledTimes(2);
+  });
+
+  it('resetVarListDuplicateResolutionState should clear an in-progress dialog state', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: 'A', alias: 'A' } as never,
+      { id: 'A', alias: 'B' } as never
+    ]);
+
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => new Subject<unknown>().asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+
+    service.resetVarListDuplicateResolutionState();
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalledTimes(2);
+  });
+
+  it('resetVarListDuplicateResolutionState should ignore stale dialog close callbacks', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: 'A', alias: 'A' } as never,
+      { id: 'A', alias: 'B' } as never
+    ]);
+
+    const staleAfterClosed$ = new Subject<unknown>();
+    const nextAfterClosed$ = new Subject<unknown>();
+    const staleDialogRef = {
+      close: jasmine.createSpy('close'),
+      afterClosed: () => staleAfterClosed$.asObservable()
+    };
+    const nextDialogRef = {
+      close: jasmine.createSpy('close'),
+      afterClosed: () => nextAfterClosed$.asObservable()
+    };
+    (dialog.open as jasmine.Spy).and.returnValues(
+      staleDialogRef,
+      nextDialogRef
+    );
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+
+    service.resetVarListDuplicateResolutionState();
+    staleAfterClosed$.next(null);
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(staleDialogRef.close).toHaveBeenCalled();
+    expect(dialog.open).toHaveBeenCalledTimes(2);
+  });
+
   it('tryResolveVarListDuplicates should not mutate varList or codingScheme when dialog closes', () => {
     const service = createService();
 

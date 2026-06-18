@@ -42,6 +42,7 @@ describe('SchemerComponent', () => {
 
   let schemerFacade: {
     tryResolveVarListDuplicates: jasmine.Spy;
+    resetVarListDuplicateResolutionState: jasmine.Spy;
   };
 
   let dialog: FakeMatDialog;
@@ -76,7 +77,8 @@ describe('SchemerComponent', () => {
     };
 
     schemerFacade = {
-      tryResolveVarListDuplicates: jasmine.createSpy('tryResolveVarListDuplicates').and.returnValue(false)
+      tryResolveVarListDuplicates: jasmine.createSpy('tryResolveVarListDuplicates').and.returnValue(false),
+      resetVarListDuplicateResolutionState: jasmine.createSpy('resetVarListDuplicateResolutionState')
     };
 
     component = new SchemerComponent(
@@ -185,6 +187,13 @@ describe('SchemerComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(schemerService.codingScheme);
     changes$.complete();
   }));
+
+  it('ngOnDestroy should reset duplicate resolution state', () => {
+    component.ngOnDestroy();
+
+    expect(schemerFacade.resetVarListDuplicateResolutionState)
+      .toHaveBeenCalled();
+  });
 
   it('updateVariableLists should remove orphan empty BASE variables not in varList', () => {
     const orphanEmptyBase: VariableCodingData = {
