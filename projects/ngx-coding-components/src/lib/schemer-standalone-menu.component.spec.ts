@@ -75,6 +75,24 @@ describe('SchemerStandaloneMenuComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith(varList);
   });
 
+  it('loadVariables should reject invalid JSON without emitting changes', async () => {
+    spyOn(FileService, 'loadFile').and.returnValue(Promise.resolve('{invalid'));
+    const emitSpy = spyOn(component.varListChanged, 'emit');
+
+    await expectAsync(component.loadVariables()).toBeRejected();
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('loadVariables should propagate file loading errors without emitting changes', async () => {
+    spyOn(FileService, 'loadFile').and.returnValue(Promise.reject(new Error('load failed')));
+    const emitSpy = spyOn(component.varListChanged, 'emit');
+
+    await expectAsync(component.loadVariables()).toBeRejectedWithError('load failed');
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
   it('loadCodingScheme should handle payloads with variableCodings property', async () => {
     const variableCodings = [createVariableCoding('vc-1')];
     spyOn(FileService, 'loadFile').and.returnValue(
@@ -126,5 +144,25 @@ describe('SchemerStandaloneMenuComponent', () => {
     expect(component.codingScheme).toBeTruthy();
     expect(component.codingScheme?.variableCodings.length).toBe(0);
     expect(emitSpy).toHaveBeenCalledWith(component.codingScheme);
+  });
+
+  it('loadCodingScheme should reject invalid JSON without emitting changes', async () => {
+    spyOn(FileService, 'loadFile').and.returnValue(Promise.resolve('{invalid'));
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    await expectAsync(component.loadCodingScheme()).toBeRejected();
+
+    expect(component.codingScheme).toBeNull();
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('loadCodingScheme should propagate file loading errors without emitting changes', async () => {
+    spyOn(FileService, 'loadFile').and.returnValue(Promise.reject(new Error('load failed')));
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    await expectAsync(component.loadCodingScheme()).toBeRejectedWithError('load failed');
+
+    expect(component.codingScheme).toBeNull();
+    expect(emitSpy).not.toHaveBeenCalled();
   });
 });

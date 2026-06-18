@@ -366,6 +366,16 @@ describe('SchemerComponent', () => {
     expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
   });
 
+  it('renameVarScheme should open error dialog when no variable is selected', () => {
+    component.selectedCoding$.next(null);
+
+    component.renameVarScheme();
+
+    expect(messageDialog.open).toHaveBeenCalled();
+    expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
+    expect(inputDialog.open).not.toHaveBeenCalled();
+  });
+
   it('renameVarScheme should set alias and emit scheme change when dialog returns value and check passes', () => {
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
     schemerService.setCodingScheme({
@@ -379,15 +389,40 @@ describe('SchemerComponent', () => {
     component.selectedCoding$.next(selected);
 
     inputDialog.afterClosedValue = 'NewAlias';
+    const checkSpy = jasmine.createSpy('checkRenamedVarAliasOk').and.returnValue(true);
     (schemerService as unknown as { checkRenamedVarAliasOk: (a: string, id?: string) => boolean })
-      .checkRenamedVarAliasOk = () => true;
+      .checkRenamedVarAliasOk = checkSpy;
 
     spyOn(CodingSchemeFactory, 'validate').and.returnValue([] as unknown as CodingSchemeProblem[]);
 
     component.renameVarScheme();
 
     expect(selected.alias).toBe('NewAlias');
+    expect(checkSpy).toHaveBeenCalledWith('NewAlias', 'd1');
     expect(emitSpy).toHaveBeenCalled();
+  });
+
+  it('renameVarScheme should do nothing when dialog is cancelled', () => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'd1', alias: 'Old', sourceType: 'DERIVE', codes: []
+      } as unknown as VariableCodingData]
+    } as unknown as never);
+
+    const selected = (schemerService.codingScheme as unknown as
+      { variableCodings: VariableCodingData[] }).variableCodings[0];
+    component.selectedCoding$.next(selected);
+
+    inputDialog.afterClosedValue = false;
+    const updateSpy = spyOn(component, 'updateVariableLists');
+
+    component.renameVarScheme();
+
+    expect(selected.alias).toBe('Old');
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(emitSpy).not.toHaveBeenCalled();
+    expect(messageDialog.open).not.toHaveBeenCalled();
   });
 
   it('renameVarScheme should show error when alias duplicate', () => {
@@ -411,6 +446,13 @@ describe('SchemerComponent', () => {
   });
 
   it('exportVariable should show info dialog when no scheme', async () => {
+    schemerService.setCodingScheme(null);
+    await component.exportVariable();
+    expect(messageDialog.open).toHaveBeenCalled();
+    expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
+  });
+
+  it('exportVariable should show info dialog when scheme has no variables', async () => {
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
     await component.exportVariable();
     expect(messageDialog.open).toHaveBeenCalled();
@@ -426,6 +468,32 @@ describe('SchemerComponent', () => {
     } as unknown as never);
 
     selectVariableDialog.afterClosedValue = [];
+    await component.exportVariable();
+    expect(FileService.saveToFile).not.toHaveBeenCalled();
+  });
+
+  it('exportVariable should not save when selection dialog returns a non-array value', async () => {
+    spyOn(FileService, 'saveToFile');
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'v1', alias: 'A', sourceType: 'BASE', codes: []
+      } as unknown as VariableCodingData]
+    } as unknown as never);
+
+    selectVariableDialog.afterClosedValue = 'A';
+    await component.exportVariable();
+    expect(FileService.saveToFile).not.toHaveBeenCalled();
+  });
+
+  it('exportVariable should not save when selected alias is unknown', async () => {
+    spyOn(FileService, 'saveToFile');
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'v1', alias: 'A', sourceType: 'BASE', codes: []
+      } as unknown as VariableCodingData]
+    } as unknown as never);
+
+    selectVariableDialog.afterClosedValue = ['Unknown'];
     await component.exportVariable();
     expect(FileService.saveToFile).not.toHaveBeenCalled();
   });
@@ -483,6 +551,33 @@ describe('SchemerComponent', () => {
     expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
   });
 
+  it('importVariable should show error when imported variable id is missing', async () => {
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
+    spyOn(FileService, 'loadFile').and.resolveTo(JSON.stringify({
+      type: 'iqb-variable-export',
+      version: 1,
+      variableCoding: { alias: 'NO_ID', sourceType: 'BASE', codes: [] }
+    }));
+
+    await component.importVariable();
+
+    expect(messageDialog.open).toHaveBeenCalled();
+    expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
+  });
+
+  it('importVariable should show unknown error text for non-Error rejections', async () => {
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
+    const nonErrorRejection = 'boom' as unknown as Error;
+    spyOn(FileService, 'loadFile').and.returnValue(Promise.reject(nonErrorRejection));
+
+    await component.importVariable();
+
+    const [, config] = messageDialog.open.calls.mostRecent().args;
+    expect(config.data.content).toBe('schemer.import.error.unknown');
+  });
+
   it('importVariable should overwrite existing var only when confirmed', async () => {
     schemerService.userRole = 'RW_MAXIMAL';
     schemerService.setCodingScheme({
@@ -502,9 +597,11 @@ describe('SchemerComponent', () => {
 
     // cancel overwrite
     messageDialog.afterClosedValue = false;
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
     await component.importVariable();
     expect((schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] })
       .variableCodings[0].alias).toBe('A');
+    expect(emitSpy).not.toHaveBeenCalled();
 
     // confirm replacement
     messageDialog.afterClosedValue = true;
@@ -512,6 +609,7 @@ describe('SchemerComponent', () => {
     await component.importVariable();
     expect((schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] })
       .variableCodings[0].alias).toBe('A2');
+    expect(emitSpy).toHaveBeenCalled();
   });
 
   it('addVarScheme should show error when alias duplicate', () => {
