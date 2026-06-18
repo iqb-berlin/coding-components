@@ -1,4 +1,21 @@
 <div class="scheme-body fx-row-space-between-stretch">
+  @if (hasVarListDuplicateConflict) {
+  <div style="margin: 20px">
+    <div style="margin-bottom: 12px;">
+      Bitte korrigiere die Variablenliste und lade den Schemer neu.
+    </div>
+    <div class="fx-row-start-center fx-gap-10">
+      <button mat-button (click)="showSchemerInfo()">
+        <mat-icon>info</mat-icon>
+        {{ "varList.info" | translate }}
+      </button>
+      <button mat-button (click)="showCodingScheme()">
+        <mat-icon>reorder</mat-icon>
+        {{ "varList.show" | translate }}
+      </button>
+    </div>
+  </div>
+  } @else {
   @if (basicVariables && basicVariables.length !== 0) {
   <div class="navi-bar fx-column-space-between-stretch">
     <div class="var-scheme-list fx-flex">
@@ -160,4 +177,5 @@
     [varCoding]="selectedCoding$ | async"
     class="var-coding-container fx-flex-row-100"
   ></var-coding>
+  }
 </div>

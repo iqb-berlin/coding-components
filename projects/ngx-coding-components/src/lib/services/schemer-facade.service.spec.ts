@@ -1,6 +1,5 @@
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom, Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { ResolveVarListDuplicatesDialogComponent } from '../dialogs/resolve-varlist-duplicates-dialog.component';
 import { SchemerFacadeService } from './schemer-facade.service';
 import { SchemerService } from './schemer.service';
@@ -18,7 +17,7 @@ describe('SchemerFacadeService', () => {
 
   const createService = () => new SchemerFacadeService(schemerService, dialog);
 
-  it('tryResolveVarListDuplicates should return false if already resolving', () => {
+  it('tryResolveVarListDuplicates should keep blocking while already resolving', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -32,7 +31,7 @@ describe('SchemerFacadeService', () => {
     });
 
     expect(service.tryResolveVarListDuplicates()).toBeTrue();
-    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
 
     afterClosed$.complete();
   });
@@ -49,12 +48,31 @@ describe('SchemerFacadeService', () => {
     const service = createService();
 
     schemerService.setVarList([
-      { id: 'A', alias: 'A' } as never,
-      { id: 'B', alias: 'B' } as never
+      { id: 'AA', alias: 'AA' } as never,
+      { id: 'BB', alias: 'BB' } as never
     ]);
 
     expect(service.tryResolveVarListDuplicates()).toBeFalse();
     expect(dialog.open).not.toHaveBeenCalled();
+  });
+
+  it('tryResolveVarListDuplicates should open dialog when invalid ids or aliases exist', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: 'A', alias: 'AA' } as never,
+      { id: 'BB', alias: 'x' } as never
+    ]);
+
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => new Subject<unknown>().asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalled();
+    expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(
+      ResolveVarListDuplicatesDialogComponent
+    );
   });
 
   it('tryResolveVarListDuplicates should open dialog when duplicates exist', () => {
@@ -76,7 +94,7 @@ describe('SchemerFacadeService', () => {
     );
   });
 
-  it('tryResolveVarListDuplicates should remember dismissed signature and not reopen dialog for same list', () => {
+  it('tryResolveVarListDuplicates should keep blocking a dismissed duplicate signature', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -93,11 +111,11 @@ describe('SchemerFacadeService', () => {
     afterClosed$.next(null);
     afterClosed$.complete();
 
-    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(1);
   });
 
-  it('tryResolveVarListDuplicates should apply rename map to codingScheme and emit result', async () => {
+  it('tryResolveVarListDuplicates should not mutate varList or codingScheme when dialog closes', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -114,8 +132,6 @@ describe('SchemerFacadeService', () => {
       ]
     } as never);
 
-    const emitted = firstValueFrom(service.varListDuplicatesResolved$.pipe(take(1)));
-
     const afterClosed$ = new Subject<unknown>();
     (dialog.open as jasmine.Spy).and.returnValue({
       afterClosed: () => afterClosed$.asObservable()
@@ -123,28 +139,15 @@ describe('SchemerFacadeService', () => {
 
     expect(service.tryResolveVarListDuplicates()).toBeTrue();
 
-    const dialogResult = {
-      varList: [
-        { id: 'A_1', alias: 'A_1' },
-        { id: 'A_2', alias: 'B' }
-      ],
-      idRenameMap: {
-        A: 'A_1'
-      }
-    };
-
-    afterClosed$.next(dialogResult);
+    afterClosed$.next(null);
     afterClosed$.complete();
 
-    const resolved = await emitted;
-    expect(resolved.idRenameMap['A']).toBe('A_1');
-
-    expect(schemerService.varList.map(v => v.id)).toEqual(['A_1', 'A_2']);
+    expect(schemerService.varList.map(v => v.id)).toEqual(['A', 'A']);
 
     const vcIds = (schemerService.codingScheme?.variableCodings || []).map(v => v.id);
-    expect(vcIds).toEqual(['A_1', 'X']);
+    expect(vcIds).toEqual(['A', 'X']);
 
     const derivedSources = (schemerService.codingScheme?.variableCodings || [])[1].deriveSources;
-    expect(derivedSources).toEqual(['A_1']);
+    expect(derivedSources).toEqual(['A']);
   });
 });
