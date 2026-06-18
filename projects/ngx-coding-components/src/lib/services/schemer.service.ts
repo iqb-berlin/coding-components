@@ -244,4 +244,9 @@ export class SchemerService {
     }
     return [];
   }
+
+  isProtectedBaseVariable(varCoding: VariableCodingData | null | undefined): boolean {
+    if (!varCoding || varCoding.sourceType !== 'BASE') return false;
+    return this.varList.some(v => v.id === varCoding.id && v.type !== 'no-value');
+  }
 }

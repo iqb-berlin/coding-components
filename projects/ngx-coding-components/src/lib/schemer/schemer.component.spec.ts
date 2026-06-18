@@ -38,6 +38,7 @@ describe('SchemerComponent', () => {
     setVarList: (v: unknown) => void;
     setUserRole: (v: unknown) => void;
     checkRenamedVarAliasOk: (alias: string, id?: string) => boolean;
+    isProtectedBaseVariable: (varCoding: VariableCodingData | null | undefined) => boolean;
   };
 
   let schemerFacade: {
@@ -73,7 +74,12 @@ describe('SchemerComponent', () => {
       setUserRole: (v: unknown) => {
         schemerService.userRole = v as unknown as never;
       },
-      checkRenamedVarAliasOk: () => true
+      checkRenamedVarAliasOk: () => true,
+      isProtectedBaseVariable: (varCoding: VariableCodingData | null | undefined) => (
+        !!varCoding &&
+        varCoding.sourceType === 'BASE' &&
+        schemerService.varList.some(v => v.id === varCoding.id && v.type !== 'no-value')
+      )
     };
 
     schemerFacade = {
@@ -818,6 +824,47 @@ describe('SchemerComponent', () => {
     expect(emitSpy).toHaveBeenCalled();
   });
 
+  it('deleteVarScheme should not offer or remove protected external BASE variables', () => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+    const updateSpy = spyOn(component, 'updateVariableLists');
+
+    schemerService.setVarList([
+      {
+        id: 'v1',
+        alias: 'A',
+        type: 'integer',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo
+    ]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'v1', alias: 'A', sourceType: 'BASE', codes: []
+        } as unknown as VariableCodingData,
+        {
+          id: 'd1', alias: 'D', sourceType: 'DERIVE', codes: []
+        } as unknown as VariableCodingData
+      ]
+    } as unknown as never);
+
+    selectVariableDialog.afterClosedValue = ['A'];
+
+    component.deleteVarScheme();
+
+    const dialogData = selectVariableDialog.open.calls.mostRecent().args[1]
+      .data as { variables: VariableCodingData[] };
+    expect(dialogData.variables.map(v => v.alias)).toEqual(['D']);
+
+    const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
+    expect(scheme.variableCodings.some(v => v.id === 'v1')).toBeTrue();
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
   it('copyVarScheme should clone selected coding into target variable and emit', () => {
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
     const updateSpy = spyOn(component, 'updateVariableLists');
@@ -874,6 +921,42 @@ describe('SchemerComponent', () => {
     const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
     expect(scheme.variableCodings.find(v => v.id === 'n1')?.sourceType).toBe('BASE');
     expect(schemerService.varList.some(v => v.id === 'n1')).toBeTrue();
+    expect(updateSpy).toHaveBeenCalled();
+    expect(emitSpy).toHaveBeenCalled();
+  });
+
+  it('activateBaseNoValueVars should not duplicate an existing varList entry', () => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+    const updateSpy = spyOn(component, 'updateVariableLists');
+
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'radio_1', alias: '01', sourceType: 'BASE_NO_VALUE', codes: []
+        } as unknown as VariableCodingData
+      ]
+    } as unknown as never);
+    schemerService.setVarList([
+      {
+        id: 'radio_1',
+        alias: '01',
+        type: 'integer',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo
+    ]);
+
+    selectVariableDialog.afterClosedValue = ['01'];
+    spyOn(CodingSchemeFactory, 'validate').and.returnValue([] as unknown as CodingSchemeProblem[]);
+
+    component.activateBaseNoValueVars();
+
+    const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
+    expect(scheme.variableCodings.find(v => v.id === 'radio_1')?.sourceType).toBe('BASE');
+    expect(schemerService.varList.filter(v => v.id === 'radio_1').length).toBe(1);
     expect(updateSpy).toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalled();
   });

@@ -532,7 +532,8 @@ export class SchemerComponent implements OnDestroy {
         title: this.tr('schemer.delete.title'),
         prompt: this.tr('schemer.delete.prompt'),
         variables: this.schemerService.codingScheme.variableCodings.filter(
-          c => c.sourceType !== 'BASE_NO_VALUE'
+          c => c.sourceType !== 'BASE_NO_VALUE' &&
+            !this.schemerService.isProtectedBaseVariable(c)
         ),
         selectedVariable: this.selectedCoding$.getValue(),
         codingStatus: this.codingStatus,
@@ -549,14 +550,16 @@ export class SchemerComponent implements OnDestroy {
         let changed = false;
         if (variables && variables.length > 0) {
           if (this.schemerService && this.schemerService.codingScheme) {
+            const oldLength =
+              this.schemerService.codingScheme.variableCodings.length;
             this.schemerService.codingScheme.variableCodings =
               this.schemerService.codingScheme.variableCodings.filter(
-                c => !variables.includes(c.alias || c.id)
+                c => this.schemerService.isProtectedBaseVariable(c) ||
+                  !variables.includes(c.alias || c.id)
               );
-            changed = true;
-            this.selectedCoding$.next(null);
-            this.updateVariableLists();
-            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+            changed =
+              this.schemerService.codingScheme.variableCodings.length !==
+              oldLength;
           }
           if (changed) {
             this.updateVariableLists();
@@ -657,16 +660,20 @@ export class SchemerComponent implements OnDestroy {
                 this.schemerService.codingScheme.variableCodings.push(
                   targetCoding
                 );
-                this.schemerService.varList.push({
-                  id: targetCoding.id,
-                  alias: targetCoding.alias || targetCoding.id,
-                  type: 'string',
-                  format: '',
-                  multiple: true,
-                  nullable: true,
-                  values: [],
-                  valuePositionLabels: []
-                });
+                if (!this.schemerService.varList.some(
+                  vi => vi.id === targetCoding.id
+                )) {
+                  this.schemerService.varList.push({
+                    id: targetCoding.id,
+                    alias: targetCoding.alias || targetCoding.id,
+                    type: 'string',
+                    format: '',
+                    multiple: true,
+                    nullable: true,
+                    values: [],
+                    valuePositionLabels: []
+                  });
+                }
                 changed = true;
               }
             }

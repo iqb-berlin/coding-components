@@ -22,6 +22,7 @@ describe('VarCodingComponent', () => {
   let sortCodesSpy: jasmine.Spy;
   let getAliasSpy: jasmine.Spy;
   let setCodingToTextModeSpy: jasmine.Spy;
+  let isProtectedBaseVariableSpy: jasmine.Spy;
 
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
@@ -34,6 +35,7 @@ describe('VarCodingComponent', () => {
     sortCodesSpy = jasmine.createSpy('sortCodes');
     getAliasSpy = jasmine.createSpy('getVariableAliasById').and.callFake((id: string) => `${id}_ALIAS`);
     setCodingToTextModeSpy = jasmine.createSpy('setCodingToTextMode');
+    isProtectedBaseVariableSpy = jasmine.createSpy('isProtectedBaseVariable').and.returnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -63,7 +65,8 @@ describe('VarCodingComponent', () => {
             pasteSingleCode: pasteSpy,
             sortCodes: sortCodesSpy,
             getVariableAliasById: getAliasSpy,
-            setCodingToTextMode: setCodingToTextModeSpy
+            setCodingToTextMode: setCodingToTextModeSpy,
+            isProtectedBaseVariable: isProtectedBaseVariableSpy
           }
         }
       ]
@@ -375,6 +378,44 @@ describe('VarCodingComponent', () => {
     };
     component.deactivateBaseVar();
     expect(dialogOpenSpy).not.toHaveBeenCalled();
+  });
+
+  it('deactivateBaseVar should allow protected external BASE variables to become no-value', () => {
+    const emitSpy = spyOn(component.varCodingChanged, 'emit');
+    const noValue = { id: 'b1', sourceType: 'BASE_NO_VALUE', codes: [] } as unknown as VariableCodingData;
+    const createSpy = spyOn(CodingFactory, 'createBaseCodingVariable').and.returnValue(noValue as never);
+
+    component.varCoding = {
+      id: 'b1',
+      alias: 'B1',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+
+    (schemerService as unknown as { codingScheme: { variableCodings: VariableCodingData[] } }).codingScheme = {
+      variableCodings: [
+        component.varCoding,
+        {
+          id: 'b2', alias: 'B2', sourceType: 'BASE', codes: []
+        } as unknown as VariableCodingData
+      ]
+    };
+
+    isProtectedBaseVariableSpy.and.returnValue(true);
+    dialogOpenSpy.calls.reset();
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(true) });
+
+    component.deactivateBaseVar();
+
+    const scheme = (schemerService as unknown as
+      { codingScheme: { variableCodings: VariableCodingData[] } }).codingScheme;
+    expect(dialogOpenSpy).toHaveBeenCalled();
+    expect(createSpy).toHaveBeenCalledWith('b1', 'BASE_NO_VALUE');
+    expect(scheme.variableCodings.some(v => v.id === 'b1' && v.sourceType === 'BASE')).toBeFalse();
+    expect(scheme.variableCodings.some(v => v.id === 'b1' &&
+      (v as unknown as { sourceType: string }).sourceType === 'BASE_NO_VALUE')).toBeTrue();
+    expect(emitSpy).toHaveBeenCalledWith(noValue);
+    expect(component.varCoding).toBeNull();
   });
 
   it('deactivateBaseVar should replace BASE var with no-value coding when confirmed', () => {
