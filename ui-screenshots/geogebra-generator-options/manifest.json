@@ -1,0 +1,263 @@
+[
+  {
+    "name": "01-zahl",
+    "title": "GeoGebra Option Zahl",
+    "id": "GGB_01_NUMBER",
+    "mode": "numeric",
+    "generatorPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/01-zahl-generator.png",
+    "resultPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/01-zahl-result.png",
+    "dialogSummary": {
+      "geogebraExtractValue": true,
+      "geogebraCodingMode": "numeric",
+      "numericMatch": "429979.167",
+      "geogebraPointX": "",
+      "geogebraPointY": "",
+      "geogebraBooleanValue": "true",
+      "selectedOption": "",
+      "canGenerate": true
+    },
+    "resultSummary": {
+      "id": "GGB_01_NUMBER",
+      "codeModel": "MANUAL_AND_RULES",
+      "fragmenting": "^\\s*GGB_01_NUMBER\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*$",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "NUMERIC_MATCH",
+                  "parameters": [
+                    "429979.167"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "02-winkel",
+    "title": "GeoGebra Option Winkel",
+    "id": "GGB_02_ANGLE",
+    "mode": "angle",
+    "generatorPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/02-winkel-generator.png",
+    "resultPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/02-winkel-result.png",
+    "dialogSummary": {
+      "geogebraExtractValue": true,
+      "geogebraCodingMode": "angle",
+      "numericMatch": "-42.14159",
+      "geogebraPointX": "",
+      "geogebraPointY": "",
+      "geogebraBooleanValue": "true",
+      "selectedOption": "",
+      "canGenerate": true
+    },
+    "resultSummary": {
+      "id": "GGB_02_ANGLE",
+      "codeModel": "MANUAL_AND_RULES",
+      "fragmenting": "^\\s*GGB_02_ANGLE\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*°?\\s*$",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "NUMERIC_MATCH",
+                  "parameters": [
+                    "-42.14159"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "03-punkt",
+    "title": "GeoGebra Option Punkt",
+    "id": "GGB_03_POINT",
+    "mode": "point",
+    "generatorPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/03-punkt-generator.png",
+    "resultPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/03-punkt-result.png",
+    "dialogSummary": {
+      "geogebraExtractValue": true,
+      "geogebraCodingMode": "point",
+      "numericMatch": "",
+      "geogebraPointX": "-1.3",
+      "geogebraPointY": "2.4",
+      "geogebraBooleanValue": "true",
+      "selectedOption": "",
+      "canGenerate": true
+    },
+    "resultSummary": {
+      "id": "GGB_03_POINT",
+      "codeModel": "MANUAL_AND_RULES",
+      "fragmenting": "^\\s*GGB_03_POINT\\s*=\\s*\\(\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*,\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*\\)\\s*$",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": true,
+              "rules": [
+                {
+                  "method": "NUMERIC_MATCH",
+                  "parameters": [
+                    "-1.3"
+                  ],
+                  "fragment": 0
+                },
+                {
+                  "method": "NUMERIC_MATCH",
+                  "parameters": [
+                    "2.4"
+                  ],
+                  "fragment": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "04-wahr-falsch",
+    "title": "GeoGebra Option Wahr/Falsch",
+    "id": "GGB_04_BOOLEAN",
+    "mode": "boolean",
+    "generatorPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/04-wahr-falsch-generator.png",
+    "resultPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/04-wahr-falsch-result.png",
+    "dialogSummary": {
+      "geogebraExtractValue": true,
+      "geogebraCodingMode": "boolean",
+      "numericMatch": "",
+      "geogebraPointX": "",
+      "geogebraPointY": "",
+      "geogebraBooleanValue": "false",
+      "selectedOption": "",
+      "canGenerate": true
+    },
+    "resultSummary": {
+      "id": "GGB_04_BOOLEAN",
+      "codeModel": "MANUAL_AND_RULES",
+      "fragmenting": "^\\s*GGB_04_BOOLEAN\\s*=\\s*(true|false)\\s*$",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "IS_FALSE",
+                  "parameters": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "05-text",
+    "title": "GeoGebra Option Text",
+    "id": "GGB_05_TEXT",
+    "mode": "text",
+    "generatorPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/05-text-generator.png",
+    "resultPath": "/Users/julian/iqb-dev/coding-components/ui-screenshots/geogebra-generator-options/05-text-result.png",
+    "dialogSummary": {
+      "geogebraExtractValue": true,
+      "geogebraCodingMode": "text",
+      "numericMatch": "",
+      "geogebraPointX": "",
+      "geogebraPointY": "",
+      "geogebraBooleanValue": "true",
+      "selectedOption": "Textantwort",
+      "canGenerate": true
+    },
+    "resultSummary": {
+      "id": "GGB_05_TEXT",
+      "codeModel": "MANUAL_AND_RULES",
+      "fragmenting": "^\\s*GGB_05_TEXT\\s*=\\s*(.*?)\\s*$",
+      "codes": [
+        {
+          "id": 1,
+          "type": "FULL_CREDIT",
+          "score": 1,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": [
+            {
+              "ruleOperatorAnd": false,
+              "rules": [
+                {
+                  "method": "MATCH",
+                  "parameters": [
+                    "Textantwort"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 0,
+          "type": "RESIDUAL_AUTO",
+          "score": 0,
+          "ruleSetOperatorAnd": true,
+          "ruleSets": []
+        }
+      ]
+    }
+  }
+]
