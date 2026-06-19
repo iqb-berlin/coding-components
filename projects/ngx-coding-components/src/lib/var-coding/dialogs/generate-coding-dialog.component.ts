@@ -48,6 +48,11 @@ import {
   MATH_TABLE_MANUAL_CODE_INSTRUCTIONS,
   normaliseMathTableExpectedResult
 } from './math-table-coding-generator';
+import {
+  createGeoGebraValueFragmenting,
+  GeoGebraCodingMode,
+  isGeoGebraVariableInfo
+} from './geogebra-variable-coding-generator';
 
 export interface GeneratedCodingData {
   id: string;
@@ -121,6 +126,7 @@ export class GenerateCodingDialogComponent {
   | 'integer'
   | 'simple-input'
   | 'boolean-multi'
+  | 'geogebra-boolean'
   | 'math-table';
 
   protected readonly ToTextFactory = ToTextFactory;
@@ -145,6 +151,12 @@ export class GenerateCodingDialogComponent {
   elseMethod: 'none' | 'auto' | 'instruction' = 'none';
   mathTableMode: MathTableGenerationMode = 'result-auto';
   mathTableExpectedResult = '';
+  isGeoGebraVariable = false;
+  geogebraExtractValue = false;
+  geogebraCodingMode: GeoGebraCodingMode = 'numeric';
+  geogebraPointX = '';
+  geogebraPointY = '';
+  geogebraBooleanValue: 'true' | 'false' = 'true';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -162,6 +174,9 @@ export class GenerateCodingDialogComponent {
       this.elseMethod = 'auto';
       return;
     }
+
+    this.isGeoGebraVariable = isGeoGebraVariableInfo(varInfo);
+    this.geogebraExtractValue = this.isGeoGebraVariable;
 
     if (varInfo.values?.length > 0) {
       this.elseMethod = varInfo.valuesComplete ? 'auto' : 'instruction';
@@ -209,8 +224,21 @@ export class GenerateCodingDialogComponent {
         case 'integer':
           this.generationModel = 'integer';
           break;
+        case 'number':
+          if (this.isGeoGebraVariable) {
+            this.generationModel = 'integer';
+          }
+          break;
         case 'string':
+          if (this.isGeoGebraVariable) {
+            this.textAsNumeric = true;
+          }
           this.generationModel = 'simple-input';
+          break;
+        case 'boolean':
+          if (this.isGeoGebraVariable) {
+            this.generationModel = 'geogebra-boolean';
+          }
           break;
         default:
           break;
@@ -218,6 +246,44 @@ export class GenerateCodingDialogComponent {
     }
 
     this.updateNumericRuleText();
+  }
+
+  setGeoGebraCodingMode(mode: GeoGebraCodingMode): void {
+    this.geogebraCodingMode = mode;
+    this.textAsNumeric = ['numeric', 'angle', 'point'].includes(mode);
+    if (mode === 'point') {
+      this.geogebraExtractValue = true;
+    }
+    if (this.textAsNumeric) {
+      this.updateNumericRuleText();
+    }
+  }
+
+  isGeoGebraBooleanMode(): boolean {
+    return this.generationModel === 'geogebra-boolean' ||
+      (this.isGeoGebraVariable &&
+        this.generationModel === 'simple-input' &&
+        this.geogebraCodingMode === 'boolean');
+  }
+
+  isGeoGebraPointMode(): boolean {
+    return this.isGeoGebraVariable &&
+      this.generationModel === 'simple-input' &&
+      this.geogebraCodingMode === 'point';
+  }
+
+  isNumericCodingMode(): boolean {
+    return this.generationModel === 'integer' ||
+      (this.generationModel === 'simple-input' &&
+        this.textAsNumeric &&
+        !this.isGeoGebraBooleanMode() &&
+        !this.isGeoGebraPointMode());
+  }
+
+  isTextInputCodingMode(): boolean {
+    return this.generationModel === 'simple-input' &&
+      !this.textAsNumeric &&
+      !this.isGeoGebraBooleanMode();
   }
 
   resetOptions(): void {
@@ -382,6 +448,10 @@ export class GenerateCodingDialogComponent {
       return normaliseMathTableExpectedResult(this.mathTableExpectedResult).length > 0;
     }
 
+    if (this.isGeoGebraPointMode()) {
+      return this.createGeoGebraPointRules() !== null;
+    }
+
     return true;
   }
 
@@ -443,6 +513,33 @@ export class GenerateCodingDialogComponent {
     });
   }
 
+  private createGeoGebraPointRules(): CodingRule[] | null {
+    const xValue = CodingFactory.getValueAsNumber(this.geogebraPointX);
+    const yValue = CodingFactory.getValueAsNumber(this.geogebraPointY);
+
+    if (
+      xValue === null ||
+      yValue === null ||
+      this.geogebraPointX === '' ||
+      this.geogebraPointY === ''
+    ) {
+      return null;
+    }
+
+    return [
+      {
+        method: 'NUMERIC_MATCH',
+        parameters: [xValue.toString(10)],
+        fragment: 0
+      },
+      {
+        method: 'NUMERIC_MATCH',
+        parameters: [yValue.toString(10)],
+        fragment: 1
+      }
+    ];
+  }
+
   private generateMathTableCoding(newVardata: VariableCodingData): void {
     if (this.mathTableMode === 'manual') {
       newVardata.codeModel = 'MANUAL_ONLY';
@@ -491,6 +588,14 @@ export class GenerateCodingDialogComponent {
         codeModel: 'MANUAL_AND_RULES',
         codes: []
       };
+      if (this.isGeoGebraVariable && (this.geogebraExtractValue || this.isGeoGebraPointMode())) {
+        newVardata.fragmenting = createGeoGebraValueFragmenting(
+          this.varInfo,
+          this.generationModel === 'geogebra-boolean' ?
+            'boolean' :
+            this.geogebraCodingMode
+        );
+      }
       if (this.generationModel === 'math-table') {
         this.generateMathTableCoding(newVardata);
         return;
@@ -509,10 +614,47 @@ export class GenerateCodingDialogComponent {
           newResidualCode.id = 'INVALID';
         }
       }
-      if (
-        this.generationModel === 'integer' ||
-        (this.textAsNumeric && this.generationModel === 'simple-input')
-      ) {
+      if (this.isGeoGebraPointMode()) {
+        const pointRules = this.createGeoGebraPointRules();
+        const newCode = this.schemerService.addCode(
+          newVardata.codes || [],
+          'FULL_CREDIT'
+        );
+        if (typeof newCode !== 'string' && pointRules) {
+          newCode.ruleSetOperatorAnd = true;
+          newCode.ruleSets = [
+            <RuleSet>{
+              ruleOperatorAnd: true,
+              rules: pointRules
+            }
+          ];
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else if (this.isGeoGebraBooleanMode()) {
+        const newCode = this.schemerService.addCode(
+          newVardata.codes || [],
+          'FULL_CREDIT'
+        );
+        if (typeof newCode !== 'string') {
+          newCode.ruleSetOperatorAnd = true;
+          newCode.ruleSets = [
+            <RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [
+                {
+                  method: this.geogebraBooleanValue === 'true' ? 'IS_TRUE' : 'IS_FALSE',
+                  parameters: []
+                }
+              ]
+            }
+          ];
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else if (this.isNumericCodingMode()) {
         const numericRules: CodingRule[] = [];
         const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
         if (matchValue !== null && this.numericMatch !== '') {
