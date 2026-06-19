@@ -961,6 +961,48 @@ describe('SchemerComponent', () => {
     expect(emitSpy).toHaveBeenCalled();
   });
 
+  it('activateBaseNoValueVars should convert an existing no-value varList entry', () => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'radio_1', alias: '01', sourceType: 'BASE_NO_VALUE', codes: []
+        } as unknown as VariableCodingData
+      ]
+    } as unknown as never);
+    schemerService.setVarList([
+      {
+        id: 'radio_1',
+        alias: '01',
+        type: 'no-value',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo
+    ]);
+
+    selectVariableDialog.afterClosedValue = ['01'];
+
+    component.activateBaseNoValueVars();
+
+    const scheme = schemerService.codingScheme as unknown as {
+      variableCodings: VariableCodingData[];
+    };
+    const variableInfo = schemerService.varList.find(v => v.id === 'radio_1');
+    expect(scheme.variableCodings.find(v => v.id === 'radio_1')?.sourceType)
+      .toBe('BASE');
+    expect(variableInfo?.type).toBe('string');
+    expect(variableInfo?.multiple).toBeTrue();
+    expect(variableInfo?.nullable).toBeTrue();
+    expect(schemerService.varList.filter(v => v.id === 'radio_1').length)
+      .toBe(1);
+    expect(component.problems.some(p => p.type === 'INVALID_SOURCE')).toBeFalse();
+    expect(emitSpy).toHaveBeenCalled();
+  });
+
   it('showCodingScheme should do nothing when codingScheme is null', () => {
     schemerService.setCodingScheme(null);
     component.showCodingScheme();

@@ -660,9 +660,19 @@ export class SchemerComponent implements OnDestroy {
                 this.schemerService.codingScheme.variableCodings.push(
                   targetCoding
                 );
-                if (!this.schemerService.varList.some(
+                const existingVariableInfo = this.schemerService.varList.find(
                   vi => vi.id === targetCoding.id
-                )) {
+                );
+                if (existingVariableInfo?.type === 'no-value') {
+                  existingVariableInfo.alias =
+                    targetCoding.alias || targetCoding.id;
+                  existingVariableInfo.type = 'string';
+                  existingVariableInfo.format = '';
+                  existingVariableInfo.multiple = true;
+                  existingVariableInfo.nullable = true;
+                  existingVariableInfo.values = [];
+                  existingVariableInfo.valuePositionLabels = [];
+                } else if (!existingVariableInfo) {
                   this.schemerService.varList.push({
                     id: targetCoding.id,
                     alias: targetCoding.alias || targetCoding.id,
