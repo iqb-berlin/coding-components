@@ -205,6 +205,7 @@
         }}</mat-label>
         <mat-checkbox
           [(ngModel)]="geogebraExtractValue"
+          [disabled]="isGeoGebraPointMode()"
           [style.margin.px]="8"
         ></mat-checkbox>
       </div>
@@ -218,6 +219,12 @@
       >
         <mat-radio-button [value]="'numeric'">{{
           "coding.generate.geogebra.mode-numeric" | translate
+        }}</mat-radio-button>
+        <mat-radio-button [value]="'angle'">{{
+          "coding.generate.geogebra.mode-angle" | translate
+        }}</mat-radio-button>
+        <mat-radio-button [value]="'point'">{{
+          "coding.generate.geogebra.mode-point" | translate
         }}</mat-radio-button>
         <mat-radio-button [value]="'boolean'">{{
           "coding.generate.geogebra.mode-boolean" | translate
@@ -261,6 +268,31 @@
           "rule.IS_FALSE" | translate
         }}</mat-radio-button>
       </mat-radio-group>
+    </div>
+    } @if (isGeoGebraPointMode()) {
+    <div class="fx-column-start-start">
+      <div class="fx-row-start-center">
+        <div [style.width.px]="200">
+          {{ "coding.generate.geogebra.point-x" | translate }}
+        </div>
+        <mat-form-field>
+          <mat-label>{{
+            "coding.generate.geogebra.point-x" | translate
+          }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointX" />
+        </mat-form-field>
+      </div>
+      <div class="fx-row-start-center">
+        <div [style.width.px]="200">
+          {{ "coding.generate.geogebra.point-y" | translate }}
+        </div>
+        <mat-form-field>
+          <mat-label>{{
+            "coding.generate.geogebra.point-y" | translate
+          }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointY" />
+        </mat-form-field>
+      </div>
     </div>
     } @if (isNumericCodingMode()) {
     <div class="fx-column-start-start">

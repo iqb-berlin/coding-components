@@ -175,9 +175,13 @@
         "extract-value": "GeoGebra-Wert hinter '=' kodieren",
         "mode-prompt": "Wie soll der GeoGebra-Wert kodiert werden?",
         "mode-numeric": "Zahl",
+        "mode-angle": "Winkel",
+        "mode-point": "Punkt",
         "mode-boolean": "Wahr/Falsch",
         "mode-text": "Text",
-        "boolean-prompt": "Welcher Wert ist richtig?"
+        "boolean-prompt": "Welcher Wert ist richtig?",
+        "point-x": "x-Koordinate",
+        "point-y": "y-Koordinate"
       },
       "math-table": {
         "mode-prompt": "Welche Kodierstruktur soll erzeugt werden?",

@@ -1,4 +1,5 @@
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { transformValue } from '@iqb/responses/value-transform';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -365,7 +366,9 @@ describe('GenerateCodingDialogComponent', () => {
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
     const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
 
-    expect(closed.fragmenting).toBe('^\\s*ggb_490000\\s*=\\s*(.*?)\\s*$');
+    expect(closed.fragmenting).toBe(
+      '^\\s*ggb_490000\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*$'
+    );
     expect(fullCredit.ruleSets?.[0].rules[0]).toEqual({
       method: 'NUMERIC_MATCH',
       parameters: ['429979.167']
@@ -380,6 +383,151 @@ describe('GenerateCodingDialogComponent', () => {
       closed
     );
 
+    expect(coded.code).toBe(1);
+    expect(coded.score).toBe(1);
+  });
+
+  it('generateButtonClick should fragment GeoGebra angle values without the degree symbol', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'α',
+      alias: 'Winkel',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('angle');
+    component.numericMatch = '-42.14159';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : 1,
+        type,
+        score: type === 'FULL_CREDIT' ? 1 : 0
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+
+    expect(closed.fragmenting).toBe(
+      '^\\s*α\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*°?\\s*$'
+    );
+    expect(transformValue('α = -42.14159°', closed.fragmenting || '', false)).toEqual(['-42.14159']);
+  });
+
+  it('generateButtonClick should generate GeoGebra point rules for both coordinates', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      alias: 'Punkt A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointX = '-1.3';
+    component.geogebraPointY = '2.4';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : 1,
+        type,
+        score: type === 'FULL_CREDIT' ? 1 : 0
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(closed.fragmenting).toBe(
+      '^\\s*A\\s*=\\s*\\(\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*,\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*\\)\\s*$'
+    );
+    expect(transformValue('A = (-1.3, 2.4)', closed.fragmenting || '', false)).toEqual(['-1.3', '2.4']);
+    expect(fullCredit.ruleSets?.[0]).toEqual({
+      ruleOperatorAnd: true,
+      rules: [
+        {
+          method: 'NUMERIC_MATCH',
+          parameters: ['-1.3'],
+          fragment: 0
+        },
+        {
+          method: 'NUMERIC_MATCH',
+          parameters: ['2.4'],
+          fragment: 1
+        }
+      ]
+    });
+
+    const correct = CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (-1.3, 2.4)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+    const wrongY = CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (-1.3, 999)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(correct.code).toBe(1);
+    expect(correct.score).toBe(1);
+    expect(wrongY.code).not.toBe(1);
+    expect(wrongY.score).toBe(0);
+  });
+
+  it('generateButtonClick should force GeoGebra fragmenting for point rules', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      alias: 'Punkt A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.geogebraExtractValue = false;
+    component.setGeoGebraCodingMode('point');
+    expect(component.geogebraExtractValue).toBeTrue();
+    component.geogebraExtractValue = false;
+    component.geogebraPointX = '-1.3';
+    component.geogebraPointY = '2.4';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : 1,
+        type,
+        score: type === 'FULL_CREDIT' ? 1 : 0
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const coded = CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (-1.3, 2.4)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(closed.fragmenting).toBe(
+      '^\\s*A\\s*=\\s*\\(\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*,\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*\\)\\s*$'
+    );
     expect(coded.code).toBe(1);
     expect(coded.score).toBe(1);
   });
@@ -412,7 +560,7 @@ describe('GenerateCodingDialogComponent', () => {
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
     const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
 
-    expect(closed.fragmenting).toBe('^\\s*ggb_PunktRichtig\\s*=\\s*(.*?)\\s*$');
+    expect(closed.fragmenting).toBe('^\\s*ggb_PunktRichtig\\s*=\\s*(true|false)\\s*$');
     expect(fullCredit.ruleSets?.[0].rules[0]).toEqual({
       method: 'IS_TRUE',
       parameters: []
