@@ -167,7 +167,15 @@
         "integer": "Ein Code wird erzeugt für numerische Regeln.",
         "simple-input": "Ein Code wird erzeugt für einen Textinput.",
         "simple-input-not-numeric": "Text input wird als Text interpretiert (ggf. auch mehrere Zeilen, eine Zeile pro Wert).",
-        "simple-input-numeric": "Soll der Textinput als Zahl interpretiert werden? (eine Zeile für einen Wert, neue Zeile für weiteren Wert):"
+        "simple-input-numeric": "Soll der Textinput als Zahl interpretiert werden? (eine Zeile für einen Wert, neue Zeile für weiteren Wert):",
+        "math-table": "Rechenkästchen: Es wird eine Kodierstruktur für das strukturierte Antwortformat erzeugt."
+      },
+      "math-table": {
+        "mode-prompt": "Welche Kodierstruktur soll erzeugt werden?",
+        "mode-result-auto": "Ergebniszeile automatisch prüfen",
+        "mode-manual": "Rechenweg manuell prüfen",
+        "expected-result": "Erwartetes Ergebnis",
+        "expected-result-hint": "Der Wert wird mit der Ergebniszeile des Rechenkästchens verglichen."
       },
       "else-method": {
         "prompt": "Methode für Abschluss",
