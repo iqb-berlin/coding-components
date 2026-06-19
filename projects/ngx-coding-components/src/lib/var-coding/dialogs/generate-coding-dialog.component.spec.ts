@@ -2,7 +2,11 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { CodeData, CodeType } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  CodeData,
+  CodeType,
+  VariableCodingData
+} from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { SchemerService } from '../../services/schemer.service';
 import { GenerateCodingDialogComponent } from './generate-coding-dialog.component';
 
@@ -322,6 +326,7 @@ describe('GenerateCodingDialogComponent', () => {
     component.generateButtonClick();
 
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as { codes: unknown[] };
+    expect((closed as { fragmenting?: string }).fragmenting).toBe('');
     const fullCredit = (closed.codes as Array<{ type: string; ruleSets:
     Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
       .find(c => c.type === 'FULL_CREDIT')!;
@@ -329,6 +334,101 @@ describe('GenerateCodingDialogComponent', () => {
       method: 'MATCH',
       parameters: ['abc']
     });
+  });
+
+  it('generateButtonClick should fragment GeoGebra numeric values before numeric rules', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'ggb_490000',
+      alias: 'GGB',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    expect(component.generationModel).toBe('simple-input');
+    expect(component.textAsNumeric).toBeTrue();
+    expect(component.geogebraExtractValue).toBeTrue();
+
+    component.numericMatch = '429979.167';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : 1,
+        type,
+        score: type === 'FULL_CREDIT' ? 1 : 0
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(closed.fragmenting).toBe('^\\s*ggb_490000\\s*=\\s*(.*?)\\s*$');
+    expect(fullCredit.ruleSets?.[0].rules[0]).toEqual({
+      method: 'NUMERIC_MATCH',
+      parameters: ['429979.167']
+    });
+
+    const coded = CodingFactory.code(
+      {
+        id: 'ggb_490000',
+        value: 'ggb_490000 = 429979.167',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(coded.code).toBe(1);
+    expect(coded.score).toBe(1);
+  });
+
+  it('generateButtonClick should generate GeoGebra boolean rules for extracted true values', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'ggb_PunktRichtig',
+      alias: 'GGB Boolean',
+      type: 'boolean',
+      format: 'ggb-variable'
+    });
+
+    expect(component.generationModel).toBe('geogebra-boolean');
+    expect(component.geogebraExtractValue).toBeTrue();
+
+    component.geogebraBooleanValue = 'true';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : 1,
+        type,
+        score: type === 'FULL_CREDIT' ? 1 : 0
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(closed.fragmenting).toBe('^\\s*ggb_PunktRichtig\\s*=\\s*(.*?)\\s*$');
+    expect(fullCredit.ruleSets?.[0].rules[0]).toEqual({
+      method: 'IS_TRUE',
+      parameters: []
+    });
+
+    const coded = CodingFactory.code(
+      {
+        id: 'ggb_PunktRichtig',
+        value: 'ggb_PunktRichtig = true',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(coded.code).toBe(1);
+    expect(coded.score).toBe(1);
   });
 
   it('generateButtonClick should create multi-choice order-dependent ruleSets and close', () => {

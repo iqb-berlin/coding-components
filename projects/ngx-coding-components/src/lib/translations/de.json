@@ -168,7 +168,16 @@
         "simple-input": "Ein Code wird erzeugt für einen Textinput.",
         "simple-input-not-numeric": "Text input wird als Text interpretiert (ggf. auch mehrere Zeilen, eine Zeile pro Wert).",
         "simple-input-numeric": "Soll der Textinput als Zahl interpretiert werden? (eine Zeile für einen Wert, neue Zeile für weiteren Wert):",
+        "geogebra-boolean": "GeoGebra-Wert wird als Wahr/Falsch-Wert kodiert.",
         "math-table": "Rechenkästchen: Es wird eine Kodierstruktur für das strukturierte Antwortformat erzeugt."
+      },
+      "geogebra": {
+        "extract-value": "GeoGebra-Wert hinter '=' kodieren",
+        "mode-prompt": "Wie soll der GeoGebra-Wert kodiert werden?",
+        "mode-numeric": "Zahl",
+        "mode-boolean": "Wahr/Falsch",
+        "mode-text": "Text",
+        "boolean-prompt": "Welcher Wert ist richtig?"
       },
       "math-table": {
         "mode-prompt": "Welche Kodierstruktur soll erzeugt werden?",

@@ -48,6 +48,10 @@ import {
   MATH_TABLE_MANUAL_CODE_INSTRUCTIONS,
   normaliseMathTableExpectedResult
 } from './math-table-coding-generator';
+import {
+  createGeoGebraValueFragmenting,
+  isGeoGebraVariableInfo
+} from './geogebra-variable-coding-generator';
 
 export interface GeneratedCodingData {
   id: string;
@@ -121,6 +125,7 @@ export class GenerateCodingDialogComponent {
   | 'integer'
   | 'simple-input'
   | 'boolean-multi'
+  | 'geogebra-boolean'
   | 'math-table';
 
   protected readonly ToTextFactory = ToTextFactory;
@@ -145,6 +150,10 @@ export class GenerateCodingDialogComponent {
   elseMethod: 'none' | 'auto' | 'instruction' = 'none';
   mathTableMode: MathTableGenerationMode = 'result-auto';
   mathTableExpectedResult = '';
+  isGeoGebraVariable = false;
+  geogebraExtractValue = false;
+  geogebraCodingMode: 'numeric' | 'boolean' | 'text' = 'numeric';
+  geogebraBooleanValue: 'true' | 'false' = 'true';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -162,6 +171,9 @@ export class GenerateCodingDialogComponent {
       this.elseMethod = 'auto';
       return;
     }
+
+    this.isGeoGebraVariable = isGeoGebraVariableInfo(varInfo);
+    this.geogebraExtractValue = this.isGeoGebraVariable;
 
     if (varInfo.values?.length > 0) {
       this.elseMethod = varInfo.valuesComplete ? 'auto' : 'instruction';
@@ -209,8 +221,21 @@ export class GenerateCodingDialogComponent {
         case 'integer':
           this.generationModel = 'integer';
           break;
+        case 'number':
+          if (this.isGeoGebraVariable) {
+            this.generationModel = 'integer';
+          }
+          break;
         case 'string':
+          if (this.isGeoGebraVariable) {
+            this.textAsNumeric = true;
+          }
           this.generationModel = 'simple-input';
+          break;
+        case 'boolean':
+          if (this.isGeoGebraVariable) {
+            this.generationModel = 'geogebra-boolean';
+          }
           break;
         default:
           break;
@@ -218,6 +243,34 @@ export class GenerateCodingDialogComponent {
     }
 
     this.updateNumericRuleText();
+  }
+
+  setGeoGebraCodingMode(mode: 'numeric' | 'boolean' | 'text'): void {
+    this.geogebraCodingMode = mode;
+    this.textAsNumeric = mode === 'numeric';
+    if (this.textAsNumeric) {
+      this.updateNumericRuleText();
+    }
+  }
+
+  isGeoGebraBooleanMode(): boolean {
+    return this.generationModel === 'geogebra-boolean' ||
+      (this.isGeoGebraVariable &&
+        this.generationModel === 'simple-input' &&
+        this.geogebraCodingMode === 'boolean');
+  }
+
+  isNumericCodingMode(): boolean {
+    return this.generationModel === 'integer' ||
+      (this.generationModel === 'simple-input' &&
+        this.textAsNumeric &&
+        !this.isGeoGebraBooleanMode());
+  }
+
+  isTextInputCodingMode(): boolean {
+    return this.generationModel === 'simple-input' &&
+      !this.textAsNumeric &&
+      !this.isGeoGebraBooleanMode();
   }
 
   resetOptions(): void {
@@ -491,6 +544,9 @@ export class GenerateCodingDialogComponent {
         codeModel: 'MANUAL_AND_RULES',
         codes: []
       };
+      if (this.isGeoGebraVariable && this.geogebraExtractValue) {
+        newVardata.fragmenting = createGeoGebraValueFragmenting(this.varInfo);
+      }
       if (this.generationModel === 'math-table') {
         this.generateMathTableCoding(newVardata);
         return;
@@ -509,10 +565,29 @@ export class GenerateCodingDialogComponent {
           newResidualCode.id = 'INVALID';
         }
       }
-      if (
-        this.generationModel === 'integer' ||
-        (this.textAsNumeric && this.generationModel === 'simple-input')
-      ) {
+      if (this.isGeoGebraBooleanMode()) {
+        const newCode = this.schemerService.addCode(
+          newVardata.codes || [],
+          'FULL_CREDIT'
+        );
+        if (typeof newCode !== 'string') {
+          newCode.ruleSetOperatorAnd = true;
+          newCode.ruleSets = [
+            <RuleSet>{
+              ruleOperatorAnd: false,
+              rules: [
+                {
+                  method: this.geogebraBooleanValue === 'true' ? 'IS_TRUE' : 'IS_FALSE',
+                  parameters: []
+                }
+              ]
+            }
+          ];
+          this.dialogRef.close(newVardata);
+        } else {
+          this.dialogRef.close(null);
+        }
+      } else if (this.isNumericCodingMode()) {
         const numericRules: CodingRule[] = [];
         const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
         if (matchValue !== null && this.numericMatch !== '') {

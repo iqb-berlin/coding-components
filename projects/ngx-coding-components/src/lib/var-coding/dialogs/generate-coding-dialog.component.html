@@ -197,6 +197,37 @@
       </mat-select>
     </mat-form-field>
     }
+    @if (isGeoGebraVariable) {
+    <div class="fx-column-start-stretch fx-gap-10">
+      <div class="fx-row-start-center">
+        <mat-label>{{
+          "coding.generate.geogebra.extract-value" | translate
+        }}</mat-label>
+        <mat-checkbox
+          [(ngModel)]="geogebraExtractValue"
+          [style.margin.px]="8"
+        ></mat-checkbox>
+      </div>
+      <mat-label>{{
+        "coding.generate.geogebra.mode-prompt" | translate
+      }}</mat-label>
+      <mat-radio-group
+        [(ngModel)]="geogebraCodingMode"
+        (ngModelChange)="setGeoGebraCodingMode($event)"
+        class="fx-gap-20"
+      >
+        <mat-radio-button [value]="'numeric'">{{
+          "coding.generate.geogebra.mode-numeric" | translate
+        }}</mat-radio-button>
+        <mat-radio-button [value]="'boolean'">{{
+          "coding.generate.geogebra.mode-boolean" | translate
+        }}</mat-radio-button>
+        <mat-radio-button [value]="'text'">{{
+          "coding.generate.geogebra.mode-text" | translate
+        }}</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    } @else {
     <div class="fx-row-start-center">
       <mat-label>{{
         "coding.generate.model.simple-input-numeric" | translate
@@ -206,8 +237,32 @@
         [style.margin.px]="8"
       ></mat-checkbox>
     </div>
-    } @if (generationModel === 'integer' || (textAsNumeric && generationModel
-    === 'simple-input')) {
+    }
+    } @if (isGeoGebraVariable && generationModel !== 'simple-input') {
+    <div class="fx-row-start-center">
+      <mat-label>{{
+        "coding.generate.geogebra.extract-value" | translate
+      }}</mat-label>
+      <mat-checkbox
+        [(ngModel)]="geogebraExtractValue"
+        [style.margin.px]="8"
+      ></mat-checkbox>
+    </div>
+    } @if (isGeoGebraBooleanMode()) {
+    <div class="fx-column-start-stretch">
+      <mat-label>{{
+        "coding.generate.geogebra.boolean-prompt" | translate
+      }}</mat-label>
+      <mat-radio-group [(ngModel)]="geogebraBooleanValue" class="fx-gap-20">
+        <mat-radio-button [value]="'true'">{{
+          "rule.IS_TRUE" | translate
+        }}</mat-radio-button>
+        <mat-radio-button [value]="'false'">{{
+          "rule.IS_FALSE" | translate
+        }}</mat-radio-button>
+      </mat-radio-group>
+    </div>
+    } @if (isNumericCodingMode()) {
     <div class="fx-column-start-start">
       <div class="fx-row-start-center">
         <div [style.width.px]="200">{{ "rule.NUMERIC_MATCH" | translate }}</div>
@@ -271,7 +326,7 @@
         </div>
       </div>
     </div>
-    } @if (generationModel === 'simple-input' && !textAsNumeric) {
+    } @if (isTextInputCodingMode()) {
     <div class="fx-row-start-start fx-gap-10">
       <mat-form-field>
         <textarea
@@ -286,8 +341,8 @@
         {{ "coding.generate.model.simple-input-not-numeric" | translate }}
       </div>
     </div>
-    } @if (generationModel === 'simple-input' || generationModel === 'integer')
-    {
+    } @if (generationModel === 'simple-input' || generationModel === 'integer'
+    || generationModel === 'geogebra-boolean') {
     <div class="fx-column-start-stretch">
       <mat-label>{{
         "coding.generate.else-method.prompt" | translate
