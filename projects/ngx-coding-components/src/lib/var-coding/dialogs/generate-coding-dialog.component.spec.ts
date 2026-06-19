@@ -228,6 +228,35 @@ describe('GenerateCodingDialogComponent', () => {
     expect(residualAuto).toBeDefined();
   });
 
+  it('generateButtonClick should keep manual math-table residual instructions editable', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'json',
+      format: 'math-table'
+    });
+
+    component.mathTableExpectedResult = '579';
+    component.elseMethod = 'instruction';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL' ? 0 : codes.length + 1,
+        type
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as
+      { codeModel: string; codes: CodeData[] };
+    const residual = closed.codes.find(c => c.type === 'RESIDUAL');
+
+    expect(closed.codeModel).toBe('MANUAL_AND_RULES');
+    expect(residual).toBeDefined();
+    expect(closed.codes.find(c => c.type === 'RESIDUAL_AUTO')).toBeUndefined();
+  });
+
   it('generateButtonClick should generate manual math-table code structure without rules', () => {
     const { component, dialogRef, schemerService } = createComponent({
       type: 'json',

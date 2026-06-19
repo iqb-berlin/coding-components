@@ -554,7 +554,9 @@ export class GenerateCodingDialogComponent {
       return;
     }
 
-    newVardata.codeModel = 'RULES_ONLY';
+    newVardata.codeModel = this.elseMethod === 'instruction' ?
+      'MANUAL_AND_RULES' :
+      'RULES_ONLY';
     newVardata.manualInstruction = '';
 
     if (
