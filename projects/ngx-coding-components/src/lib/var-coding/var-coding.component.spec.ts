@@ -496,6 +496,7 @@ describe('VarCodingComponent', () => {
       afterClosed: () => of({
         processing: ['SORT_ARRAY'],
         fragmenting: 'x',
+        manualInstruction: '<p>generated</p>',
         codeModel: 'SOME',
         codes: [{
           id: 0, type: 'RESIDUAL_AUTO', label: '', score: 0
@@ -506,6 +507,7 @@ describe('VarCodingComponent', () => {
     component.smartSchemer({ ctrlKey: false } as unknown as MouseEvent);
 
     expect(component.varCoding?.processing).toEqual(['SORT_ARRAY']);
+    expect(component.varCoding?.manualInstruction).toBe('<p>generated</p>');
     expect(component.hasResidualAutoCode).toBeTrue();
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
   });

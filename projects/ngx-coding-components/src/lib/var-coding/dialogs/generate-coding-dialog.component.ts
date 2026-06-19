@@ -30,6 +30,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatLabel, MatFormField } from '@angular/material/form-field';
 import {
   CodeData,
+  CodeType,
   CodeModelType,
   CodingRule,
   ProcessingParameterType,
@@ -39,12 +40,21 @@ import {
 import { ToTextFactory } from '@iqb/responses';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from '../../services/schemer.service';
+import {
+  createMathTableResultRule,
+  isMathTableVariableInfo,
+  MathTableGenerationMode,
+  MATH_TABLE_GENERAL_MANUAL_INSTRUCTION,
+  MATH_TABLE_MANUAL_CODE_INSTRUCTIONS,
+  normaliseMathTableExpectedResult
+} from './math-table-coding-generator';
 
 export interface GeneratedCodingData {
   id: string;
   alias: string;
   processing: ProcessingParameterType[];
   fragmenting: string;
+  manualInstruction?: string;
   codeModel: CodeModelType;
   codes: CodeData[];
 }
@@ -110,7 +120,8 @@ export class GenerateCodingDialogComponent {
   | 'multi-choice'
   | 'integer'
   | 'simple-input'
-  | 'boolean-multi';
+  | 'boolean-multi'
+  | 'math-table';
 
   protected readonly ToTextFactory = ToTextFactory;
   selectedOption: string = '';
@@ -132,6 +143,8 @@ export class GenerateCodingDialogComponent {
   numericRuleText = '';
   numericRuleError = false;
   elseMethod: 'none' | 'auto' | 'instruction' = 'none';
+  mathTableMode: MathTableGenerationMode = 'result-auto';
+  mathTableExpectedResult = '';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public varInfo: VariableInfo,
@@ -141,6 +154,12 @@ export class GenerateCodingDialogComponent {
   ) {
     this.generationModel = 'none';
     if (!varInfo) {
+      return;
+    }
+
+    if (isMathTableVariableInfo(varInfo)) {
+      this.generationModel = 'math-table';
+      this.elseMethod = 'auto';
       return;
     }
 
@@ -349,8 +368,111 @@ export class GenerateCodingDialogComponent {
     }
   }
 
-  generateButtonClick() {
+  requiresMathTableExpectedResult(): boolean {
+    return this.generationModel === 'math-table' &&
+      this.mathTableMode === 'result-auto';
+  }
+
+  canGenerate(): boolean {
     if (this.generationModel === 'none') {
+      return false;
+    }
+
+    if (this.requiresMathTableExpectedResult()) {
+      return normaliseMathTableExpectedResult(this.mathTableExpectedResult).length > 0;
+    }
+
+    return true;
+  }
+
+  private addCodeToVariable(
+    newVardata: VariableCodingData,
+    codeType: CodeType
+  ): CodeData | null {
+    const newCode = this.schemerService.addCode(
+      newVardata.codes || [],
+      codeType
+    );
+
+    return typeof newCode === 'string' ? null : newCode;
+  }
+
+  private addMathTableResultAutoCode(newVardata: VariableCodingData): boolean {
+    const newCode = this.addCodeToVariable(newVardata, 'FULL_CREDIT');
+    if (!newCode) return false;
+
+    newCode.ruleSetOperatorAnd = true;
+    newCode.ruleSets = [
+      <RuleSet>{
+        ruleOperatorAnd: false,
+        rules: [
+          createMathTableResultRule(this.mathTableExpectedResult)
+        ]
+      }
+    ];
+    return true;
+  }
+
+  private addMathTableResidualCode(newVardata: VariableCodingData): boolean {
+    if (!['auto', 'instruction'].includes(this.elseMethod)) return true;
+
+    const newResidualCode = this.addCodeToVariable(
+      newVardata,
+      this.elseMethod === 'instruction' ? 'RESIDUAL' : 'RESIDUAL_AUTO'
+    );
+
+    return !!newResidualCode;
+  }
+
+  private addMathTableManualCodes(newVardata: VariableCodingData): boolean {
+    return ([
+      'FULL_CREDIT',
+      'PARTIAL_CREDIT',
+      'NO_CREDIT',
+      'TO_CHECK'
+    ] as CodeType[]).every(codeType => {
+      const newCode = this.addCodeToVariable(newVardata, codeType);
+      if (!newCode) return false;
+
+      newCode.ruleSetOperatorAnd = true;
+      newCode.ruleSets = [];
+      newCode.manualInstruction =
+        MATH_TABLE_MANUAL_CODE_INSTRUCTIONS[codeType] || '';
+
+      return true;
+    });
+  }
+
+  private generateMathTableCoding(newVardata: VariableCodingData): void {
+    if (this.mathTableMode === 'manual') {
+      newVardata.codeModel = 'MANUAL_ONLY';
+      newVardata.manualInstruction = MATH_TABLE_GENERAL_MANUAL_INSTRUCTION;
+
+      if (!this.addMathTableManualCodes(newVardata)) {
+        this.dialogRef.close(null);
+        return;
+      }
+
+      this.dialogRef.close(newVardata);
+      return;
+    }
+
+    newVardata.codeModel = 'RULES_ONLY';
+    newVardata.manualInstruction = '';
+
+    if (
+      !this.addMathTableResultAutoCode(newVardata) ||
+      !this.addMathTableResidualCode(newVardata)
+    ) {
+      this.dialogRef.close(null);
+      return;
+    }
+
+    this.dialogRef.close(newVardata);
+  }
+
+  generateButtonClick() {
+    if (!this.canGenerate()) {
       this.dialogRef.close(null);
     } else {
       const newVardata: VariableCodingData = {
@@ -369,6 +491,11 @@ export class GenerateCodingDialogComponent {
         codeModel: 'MANUAL_AND_RULES',
         codes: []
       };
+      if (this.generationModel === 'math-table') {
+        this.generateMathTableCoding(newVardata);
+        return;
+      }
+
       if (['auto', 'instruction'].includes(this.elseMethod)) {
         const newResidualCode = this.schemerService.addCode(
           newVardata.codes || [],

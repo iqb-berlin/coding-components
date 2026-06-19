@@ -316,6 +316,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             Object.assign(this.varCoding, {
               processing: newCoding.processing,
               fragmenting: newCoding.fragmenting,
+              manualInstruction: newCoding.manualInstruction || '',
               codeModel: newCoding.codeModel,
               codes: newCoding.codes
             });

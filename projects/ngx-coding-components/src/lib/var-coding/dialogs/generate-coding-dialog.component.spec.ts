@@ -166,6 +166,98 @@ describe('GenerateCodingDialogComponent', () => {
     expect(dialogRef.close).toHaveBeenCalledWith(null);
   });
 
+  it('constructor should detect math-table variables and require an expected result for auto mode', () => {
+    const { component } = createComponent({
+      type: 'json',
+      format: 'math-table'
+    });
+
+    expect(component.generationModel).toBe('math-table');
+    expect(component.elseMethod).toBe('auto');
+    expect(component.canGenerate()).toBeFalse();
+
+    component.mathTableExpectedResult = '579';
+
+    expect(component.canGenerate()).toBeTrue();
+  });
+
+  it('generateButtonClick should not generate math-table result coding without expected result', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'json',
+      format: 'math-table'
+    });
+
+    component.generateButtonClick();
+
+    expect(dialogRef.close).toHaveBeenCalledWith(null);
+    expect(schemerService.addCode).not.toHaveBeenCalled();
+  });
+
+  it('generateButtonClick should generate math-table result MATCH_REGEX and residual auto code', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'json',
+      format: 'math-table'
+    });
+
+    component.mathTableExpectedResult = '579';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : codes.length + 1,
+        type
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as
+      { codeModel: string; codes: CodeData[] };
+    const fullCredit = closed.codes.find(c => c.type === 'FULL_CREDIT')!;
+    const residualAuto = closed.codes.find(c => c.type === 'RESIDUAL_AUTO');
+
+    expect(closed.codeModel).toBe('RULES_ONLY');
+    expect(fullCredit.ruleSets?.[0].rules[0].method).toBe('MATCH_REGEX');
+    expect(fullCredit.ruleSets?.[0].rules[0].parameters?.[0]).toContain('"rowType"');
+    expect(residualAuto).toBeDefined();
+  });
+
+  it('generateButtonClick should generate manual math-table code structure without rules', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'json',
+      format: 'math-table'
+    });
+
+    component.mathTableMode = 'manual';
+
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: codes.length + 1,
+        type,
+        ruleSets: [{ ruleOperatorAnd: false, rules: [] }]
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as
+      { codeModel: string; manualInstruction: string; codes: CodeData[] };
+
+    expect(closed.codeModel).toBe('MANUAL_ONLY');
+    expect(closed.manualInstruction).toContain('Rechenweg');
+    const codeTypes: string[] = closed.codes.map(c => c.type || '').sort();
+    expect(codeTypes).toEqual([
+      'FULL_CREDIT',
+      'NO_CREDIT',
+      'PARTIAL_CREDIT',
+      'TO_CHECK'
+    ].sort());
+    expect(closed.codes.every(c => (c.ruleSets || []).length === 0)).toBeTrue();
+  });
+
   it('generateButtonClick should generate numeric MATCH rule for integer model and close var data', () => {
     const { component, dialogRef, schemerService } = createComponent({
       type: 'integer',
