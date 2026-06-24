@@ -1,8 +1,11 @@
 import {
   CodeData,
   CodeType,
+  RuleMethod,
+  VariableCodingData,
   RuleSet
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
 
@@ -13,6 +16,18 @@ const residualTypes: CodeType[] = [
   'RESIDUAL_AUTO',
   'INTENDED_INCOMPLETE'
 ];
+
+const numericRuleMethods: RuleMethod[] = [
+  'NUMERIC_MATCH',
+  'NUMERIC_RANGE',
+  'NUMERIC_FULL_RANGE',
+  'NUMERIC_MIN',
+  'NUMERIC_MORE_THAN',
+  'NUMERIC_LESS_THAN',
+  'NUMERIC_MAX'
+];
+
+const booleanRuleMethods: RuleMethod[] = ['IS_TRUE', 'IS_FALSE'];
 
 export const DEFAULT_RESIDUAL_MANUAL_INSTRUCTION =
   '<p style="padding-left: 0; text-indent: 0; margin-bottom: 0; margin-top: 0">Alle anderen Antworten</p>';
@@ -47,6 +62,46 @@ export const canPasteSingleCodeInto = (
   }
 
   return true;
+};
+
+export const getPasteSingleCodeWarningKeys = (
+  copiedCode: CodeData | null,
+  targetCoding?: VariableCodingData | null,
+  targetVarInfo?: VariableInfo
+): string[] => {
+  if (!copiedCode) return [];
+
+  const warningKeys = new Set<string>();
+  const ruleSets = copiedCode.ruleSets || [];
+  const rules = ruleSets.flatMap(ruleSet => ruleSet.rules || []);
+
+  const hasArrayReference = ruleSets.some(
+    ruleSet => typeof ruleSet.valueArrayPos !== 'undefined'
+  );
+  if (hasArrayReference && targetVarInfo && !targetVarInfo.multiple) {
+    warningKeys.add('code.paste-warning.array-reference');
+  }
+
+  const hasFragmentReference = rules.some(rule => typeof rule.fragment !== 'undefined');
+  if (hasFragmentReference && targetCoding && !targetCoding.fragmenting) {
+    warningKeys.add('code.paste-warning.fragment-reference');
+  }
+
+  const hasNumericRule = rules.some(rule => numericRuleMethods.includes(rule.method));
+  if (
+    hasNumericRule &&
+    targetVarInfo &&
+    !['integer', 'number'].includes(targetVarInfo.type)
+  ) {
+    warningKeys.add('code.paste-warning.numeric-rule');
+  }
+
+  const hasBooleanRule = rules.some(rule => booleanRuleMethods.includes(rule.method));
+  if (hasBooleanRule && targetVarInfo && targetVarInfo.type !== 'boolean') {
+    warningKeys.add('code.paste-warning.boolean-rule');
+  }
+
+  return Array.from(warningKeys);
 };
 
 export const addCode = (

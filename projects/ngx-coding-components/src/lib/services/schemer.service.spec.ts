@@ -3,13 +3,20 @@ import {
   CodeType,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import { SchemerService } from './schemer.service';
 
 describe('SchemerService', () => {
   let service: SchemerService;
+  const copiedCodeStorageKey = 'iqb-schemer-copied-code';
 
   beforeEach(() => {
+    sessionStorage.removeItem(copiedCodeStorageKey);
     service = new SchemerService();
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(copiedCodeStorageKey);
   });
 
   describe('checkRenamedVarAliasOk', () => {
@@ -86,6 +93,22 @@ describe('SchemerService', () => {
 
       (src as unknown as { label: string }).label = 'mutated';
       expect(service.copiedCode?.label).toBe('a');
+    });
+
+    it('should restore copied code from session storage in a fresh service instance', () => {
+      service.setUserRole('RW_MAXIMAL');
+      expect(service.copySingleCode({
+        id: 1,
+        type: 'FULL_CREDIT',
+        label: 'from-storage',
+        score: 1,
+        ruleSets: []
+      } as unknown as CodeData)).toBeTrue();
+
+      const freshService = new SchemerService();
+
+      expect(freshService.copiedCode?.label).toBe('from-storage');
+      expect(freshService.canPasteSingleCodeInto([])).toBeTrue();
     });
 
     it('canPasteSingleCodeInto should block when nothing copied or user is RO', () => {
@@ -281,6 +304,62 @@ describe('SchemerService', () => {
       const base = service.getBaseVarsList();
       expect(base.length).toBe(1);
       expect(base[0].id).toBe('v1');
+    });
+  });
+
+  describe('getCodingProblemsForVarCoding', () => {
+    it('should return validation problems for the variable id or alias', () => {
+      service.setVarList([]);
+      service.setCodingScheme({
+        variableCodings: [
+          { id: 'v1', alias: 'A', sourceType: 'BASE' } as unknown as VariableCodingData,
+          { id: 'v2', alias: 'B', sourceType: 'BASE' } as unknown as VariableCodingData
+        ]
+      } as unknown as never);
+      spyOn(CodingSchemeFactory, 'validate').and.returnValue([
+        {
+          variableId: 'A',
+          variableLabel: 'A',
+          type: 'RULE_PARAMETER_INVALID',
+          breaking: true,
+          code: '1'
+        },
+        {
+          variableId: 'v1',
+          variableLabel: 'A',
+          type: 'RULE_REGEX_INVALID',
+          breaking: true,
+          code: '2'
+        },
+        {
+          variableId: 'B',
+          variableLabel: 'B',
+          type: 'VACANT',
+          breaking: false
+        }
+      ] as CodingSchemeProblem[]);
+
+      const problems = service.getCodingProblemsForVarCoding(
+        { id: 'v1', alias: 'A', sourceType: 'BASE' } as unknown as VariableCodingData
+      );
+
+      expect(problems.map(problem => problem.type)).toEqual([
+        'RULE_PARAMETER_INVALID',
+        'RULE_REGEX_INVALID'
+      ]);
+    });
+
+    it('should return an empty list when validation fails', () => {
+      service.setCodingScheme({
+        variableCodings: [
+          { id: 'v1', alias: 'A', sourceType: 'BASE' } as unknown as VariableCodingData
+        ]
+      } as unknown as never);
+      spyOn(CodingSchemeFactory, 'validate').and.throwError('boom');
+
+      expect(service.getCodingProblemsForVarCoding(
+        { id: 'v1', alias: 'A', sourceType: 'BASE' } as unknown as VariableCodingData
+      )).toEqual([]);
     });
   });
 
