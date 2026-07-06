@@ -196,4 +196,45 @@ describe('SchemeCheckerComponent', () => {
 
     expect(byId('d1')).toBeUndefined();
   });
+
+  it('startEvaluation should code derived aliases that shadow their base source id', () => {
+    const code = {
+      id: 1,
+      type: 'FULL_CREDIT',
+      label: 'x',
+      score: 1,
+      ruleSets: []
+    };
+    const variableCodings: VariableCodingData[] = [
+      {
+        id: 'BASE_ID',
+        alias: 'INPUT',
+        sourceType: 'BASE',
+        codes: [code]
+      } as unknown as VariableCodingData,
+      {
+        id: 'DERIVED_ID',
+        alias: 'BASE_ID',
+        sourceType: 'COPY_VALUE',
+        deriveSources: ['BASE_ID'],
+        codes: [code]
+      } as unknown as VariableCodingData
+    ];
+
+    component.codingScheme = {
+      variableCodings
+    } as unknown as never;
+    component.values['INPUT'] = 'abc';
+
+    component.startEvaluation();
+
+    expect(dialogOpenSpy).toHaveBeenCalled();
+    const config = dialogOpenSpy.calls.mostRecent().args[1] as { data: { responses: Response[] } };
+    expect(config.data.responses.length).toBe(1);
+    expect(config.data.responses[0]).toEqual(jasmine.objectContaining({
+      id: 'BASE_ID',
+      value: 'abc',
+      status: 'CODING_INCOMPLETE'
+    }));
+  });
 });
