@@ -488,6 +488,7 @@
     "RULESET_VALUE_ARRAY_POS_INVALID": "Ungültige Position im Werte-Array im Regelsatz.",
     "ONLY_ONE_SOURCE": "Eine Ableitung sollte mehr als eine Quelle haben.",
     "VALUE_COPY_NOT_FROM_BASE": "Es wurde ein Wert kopiert, aber nicht von einer Basisvariablen.",
-    "MORE_THAN_ONE_SOURCE": "Es wurde ein Wert kopiert, aber es gibt mehr als eine Quelle."
+    "MORE_THAN_ONE_SOURCE": "Es wurde ein Wert kopiert, aber es gibt mehr als eine Quelle.",
+    "CYCLIC_DERIVATION": "Zyklische Ableitung: Diese Variable ist Teil eines Ableitungszyklus."
   }
 }

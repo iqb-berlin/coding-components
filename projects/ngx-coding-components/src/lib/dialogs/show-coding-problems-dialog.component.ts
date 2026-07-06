@@ -2,9 +2,9 @@ import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose
 } from '@angular/material/dialog';
-import { CodingSchemeProblem } from '@iqb/responses';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButton } from '@angular/material/button';
+import { CodingSchemeValidationProblem } from '../services/coding-scheme-validation';
 
 @Component({
   template: `
@@ -46,9 +46,11 @@ import { MatButton } from '@angular/material/button';
   imports: [MatDialogTitle, MatDialogContent, MatDialogActions, MatButton, MatDialogClose, TranslateModule]
 })
 export class ShowCodingProblemsDialogComponent {
-  codingProblemsGrouped: { [ key: string]: CodingSchemeProblem[] } = {};
+  codingProblemsGrouped: { [ key: string]: CodingSchemeValidationProblem[] } = {};
   allVariables: string[];
-  constructor(@Inject(MAT_DIALOG_DATA) private codingProblems: CodingSchemeProblem[]) {
+  constructor(
+    @Inject(MAT_DIALOG_DATA) private codingProblems: CodingSchemeValidationProblem[]
+  ) {
     const allVariables: string[] = [];
     codingProblems.forEach(p => {
       if (allVariables.indexOf(p.variableId) < 0) allVariables.push(p.variableId);
