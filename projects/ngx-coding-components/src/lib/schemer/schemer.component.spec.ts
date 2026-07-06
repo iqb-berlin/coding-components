@@ -298,6 +298,120 @@ describe('SchemerComponent', () => {
     expect(b.alias).toBe('b');
   });
 
+  it('updateVariableLists should allow a derived variable to shadow its base source id as alias', () => {
+    const code = {
+      id: 1,
+      type: 'FULL_CREDIT',
+      label: 'x',
+      score: 1,
+      ruleSets: []
+    };
+
+    schemerService.setVarList([
+      {
+        id: 'BASE_ID',
+        alias: 'INPUT',
+        type: 'string',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo
+    ]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'BASE_ID',
+          alias: 'INPUT',
+          sourceType: 'BASE',
+          codes: [code]
+        } as unknown as VariableCodingData,
+        {
+          id: 'DERIVED_ID',
+          alias: 'BASE_ID',
+          sourceType: 'COPY_VALUE',
+          deriveSources: ['BASE_ID'],
+          codes: [code]
+        } as unknown as VariableCodingData
+      ]
+    } as unknown as never);
+
+    component.updateVariableLists();
+
+    expect(component.problems).toEqual([]);
+    expect(component.codingStatus['BASE_ID']).toBe('OK');
+    expect(component.codingStatus['DERIVED_ID']).toBe('OK');
+  });
+
+  it('updateVariableLists should keep reporting real alias/id collisions', () => {
+    const code = {
+      id: 1,
+      type: 'FULL_CREDIT',
+      label: 'x',
+      score: 1,
+      ruleSets: []
+    };
+
+    schemerService.setVarList([
+      {
+        id: 'BASE_ID',
+        alias: 'INPUT',
+        type: 'string',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo,
+      {
+        id: 'OTHER_ID',
+        alias: 'OTHER',
+        type: 'string',
+        format: '',
+        multiple: false,
+        nullable: false,
+        values: [],
+        valuePositionLabels: []
+      } as unknown as VariableInfo
+    ]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'BASE_ID',
+          alias: 'INPUT',
+          sourceType: 'BASE',
+          codes: [code]
+        } as unknown as VariableCodingData,
+        {
+          id: 'OTHER_ID',
+          alias: 'OTHER',
+          sourceType: 'BASE',
+          codes: [code]
+        } as unknown as VariableCodingData,
+        {
+          id: 'DERIVED_ID',
+          alias: 'BASE_ID',
+          sourceType: 'COPY_VALUE',
+          deriveSources: ['OTHER_ID'],
+          codes: [code]
+        } as unknown as VariableCodingData
+      ]
+    } as unknown as never);
+
+    component.updateVariableLists();
+
+    expect(component.problems).toEqual(jasmine.arrayContaining([
+      jasmine.objectContaining({
+        type: 'INVALID_SOURCE',
+        breaking: true,
+        variableId: 'BASE_ID'
+      })
+    ]));
+    expect(component.codingStatus['BASE_ID']).toBe('OK');
+    expect(component.codingStatus['DERIVED_ID']).toBe('ERROR');
+  });
+
   it('updateVariableLists should compute codingStatus ERROR/WARNING based on validate() problems', () => {
     const schemeVars: VariableCodingData[] = [
       {
