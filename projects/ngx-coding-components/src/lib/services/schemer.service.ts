@@ -1,5 +1,9 @@
 import { Injectable, signal } from '@angular/core';
-import { CodingToTextMode } from '@iqb/responses';
+import {
+  CodingSchemeFactory,
+  CodingSchemeProblem,
+  CodingToTextMode
+} from '@iqb/responses';
 import {
   CodeData,
   CodeType,
@@ -20,12 +24,76 @@ import {
   copySingleCode as copySingleCodeOp,
   deleteCode as deleteCodeOp,
   duplicateCode as duplicateCodeOp,
+  getPasteSingleCodeWarningKeys as getPasteSingleCodeWarningKeysOp,
   pasteSingleCode as pasteSingleCodeOp,
   sortCodes as sortCodesOp
 } from './schemer-code-ops';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
 export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
+const COPIED_CODE_STORAGE_KEY = 'iqb-schemer-copied-code';
+const COPIED_CODE_STORAGE_TYPE = 'iqb-schemer-code-clipboard';
+const COPIED_CODE_STORAGE_VERSION = 1;
+
+interface StoredCopiedCode {
+  type: typeof COPIED_CODE_STORAGE_TYPE;
+  version: typeof COPIED_CODE_STORAGE_VERSION;
+  code: CodeData;
+}
+
+const getSessionStorage = (): Storage | null => {
+  try {
+    if (typeof globalThis === 'undefined' || !globalThis.sessionStorage) {
+      return null;
+    }
+    return globalThis.sessionStorage;
+  } catch {
+    return null;
+  }
+};
+
+const readCopiedCodeFromStorage = (): CodeData | null => {
+  const storage = getSessionStorage();
+  if (!storage) return null;
+
+  try {
+    const serialized = storage.getItem(COPIED_CODE_STORAGE_KEY);
+    if (!serialized) return null;
+    const stored = JSON.parse(serialized) as StoredCopiedCode;
+    if (
+      stored?.type !== COPIED_CODE_STORAGE_TYPE ||
+      stored?.version !== COPIED_CODE_STORAGE_VERSION ||
+      !stored?.code
+    ) {
+      return null;
+    }
+    return stored.code;
+  } catch {
+    return null;
+  }
+};
+
+const writeCopiedCodeToStorage = (code: CodeData | null): void => {
+  const storage = getSessionStorage();
+  if (!storage) return;
+
+  try {
+    if (!code) {
+      storage.removeItem(COPIED_CODE_STORAGE_KEY);
+      return;
+    }
+    storage.setItem(
+      COPIED_CODE_STORAGE_KEY,
+      JSON.stringify({
+        type: COPIED_CODE_STORAGE_TYPE,
+        version: COPIED_CODE_STORAGE_VERSION,
+        code
+      } satisfies StoredCopiedCode)
+    );
+  } catch {
+    // Ignore quota and privacy-mode failures; the in-memory clipboard still works.
+  }
+};
 
 @Injectable({
   providedIn: 'root'
@@ -75,11 +143,12 @@ export class SchemerService {
   }
 
   get copiedCode(): CodeData | null {
-    return this._copiedCode();
+    return this.getCopiedCode();
   }
 
   setCopiedCode(value: CodeData | null): void {
     this._copiedCode.set(value);
+    writeCopiedCodeToStorage(value);
   }
 
   get codingToTextMode(): CodingToTextMode {
@@ -187,16 +256,41 @@ export class SchemerService {
   }
 
   canPasteSingleCodeInto(codeList: CodeData[]): boolean {
-    return canPasteSingleCodeIntoOp(this.copiedCode, codeList, this.userRole);
+    return canPasteSingleCodeIntoOp(this.getCopiedCode(), codeList, this.userRole);
+  }
+
+  getPasteSingleCodeWarningKeys(
+    targetCoding?: VariableCodingData | null,
+    targetVarInfo?: VariableInfo
+  ): string[] {
+    return getPasteSingleCodeWarningKeysOp(
+      this.getCopiedCode(),
+      targetCoding,
+      targetVarInfo
+    );
   }
 
   pasteSingleCode(codeList: CodeData[]): CodeData | string {
     return pasteSingleCodeOp(
-      this.copiedCode,
+      this.getCopiedCode(),
       codeList,
       this.userRole,
       this.orderOfCodeTypes
     );
+  }
+
+  getCodingProblemsForVarCoding(varCoding: VariableCodingData | null | undefined): CodingSchemeProblem[] {
+    if (!varCoding || !this.codingScheme?.variableCodings) return [];
+
+    try {
+      const targetNames = [varCoding.id, varCoding.alias].filter(Boolean);
+      return CodingSchemeFactory.validate(
+        this.varList,
+        this.codingScheme.variableCodings
+      ).filter(problem => targetNames.includes(problem.variableId));
+    } catch {
+      return [];
+    }
   }
 
   addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
@@ -234,6 +328,15 @@ export class SchemerService {
     );
     if (maxEntries > 0 && maxEntries < varIds.length) returnValues.push('...');
     return returnValues.join(', ');
+  }
+
+  private getCopiedCode(): CodeData | null {
+    const copiedCode = this._copiedCode();
+    if (copiedCode) return copiedCode;
+
+    const storedCode = readCopiedCodeFromStorage();
+    if (storedCode) this._copiedCode.set(storedCode);
+    return storedCode;
   }
 
   getBaseVarsList() {

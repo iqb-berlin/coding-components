@@ -11,7 +11,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
-import { CodingToTextMode } from '@iqb/responses';
+import { CodingSchemeProblem, CodingToTextMode } from '@iqb/responses';
 import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
 import {
   MatCard,
@@ -366,6 +366,39 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     if (!this.varCoding || !this.varCoding.codes) {
       return;
     }
+    const warningKeys = this.schemerService.getPasteSingleCodeWarningKeys(
+      this.varCoding,
+      this.varInfo
+    );
+    if (warningKeys.length > 0) {
+      const warningContent = [
+        this.translateService.instant('code.paste-warning.content'),
+        ...warningKeys.map(key => this.translateService.instant(key))
+      ].join(' ');
+      const dialogRef = this.confirmDialog.open(ConfirmDialogComponent, {
+        width: '500px',
+        data: <ConfirmDialogData>{
+          title: this.translateService.instant('code.paste-warning.title'),
+          content: warningContent,
+          confirmButtonLabel: this.translateService.instant('code.paste-warning.confirm'),
+          showCancel: true
+        }
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        if (result === true) this.performPasteSingleCode();
+      });
+      return;
+    }
+    this.performPasteSingleCode();
+  }
+
+  private performPasteSingleCode() {
+    if (!this.varCoding || !this.varCoding.codes) {
+      return;
+    }
+    const problemsBeforePaste = this.schemerService.getCodingProblemsForVarCoding(
+      this.varCoding
+    );
     const pasteResult = this.schemerService.pasteSingleCode(
       this.varCoding.codes
     );
@@ -383,7 +416,54 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       this.updateHasResidualAutoCode();
       this.updateHasIntendedIncompleteAutoCode();
       this.varCodingChanged.emit(this.varCoding);
+      const newProblems = VarCodingComponent.getNewCodingProblems(
+        problemsBeforePaste,
+        this.schemerService.getCodingProblemsForVarCoding(this.varCoding)
+      );
+      if (newProblems.length > 0) this.showPasteValidationWarning(newProblems);
     }
+  }
+
+  private static getNewCodingProblems(
+    beforeProblems: CodingSchemeProblem[],
+    afterProblems: CodingSchemeProblem[]
+  ): CodingSchemeProblem[] {
+    const beforeProblemKeys = new Set(beforeProblems.map(problem => (
+      VarCodingComponent.getCodingProblemKey(problem)
+    )));
+    return afterProblems.filter(problem => (
+      !beforeProblemKeys.has(VarCodingComponent.getCodingProblemKey(problem))
+    ));
+  }
+
+  private static getCodingProblemKey(problem: CodingSchemeProblem): string {
+    return [
+      problem.variableId,
+      problem.type,
+      problem.breaking ? 'breaking' : 'warning',
+      problem.code || ''
+    ].join('|');
+  }
+
+  private showPasteValidationWarning(problems: CodingSchemeProblem[]): void {
+    const problemDescriptions = Array.from(
+      new Set(problems.map(problem => this.translateService.instant(
+        `coding-problem.${problem.type}`
+      )))
+    );
+    this.messageDialog.open(MessageDialogComponent, {
+      width: '500px',
+      data: <MessageDialogData>{
+        title: this.translateService.instant('code.post-paste-validation.title'),
+        content: [
+          this.translateService.instant('code.post-paste-validation.content'),
+          ...problemDescriptions
+        ].join(' '),
+        type: problems.some(problem => problem.breaking) ?
+          MessageType.error :
+          MessageType.warning
+      }
+    });
   }
 
   editSourceParameters() {

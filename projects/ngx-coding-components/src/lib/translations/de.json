@@ -369,6 +369,19 @@
       "type-not-supported": "Der Code-Typ wird nicht unterstützt.",
       "no-access": "Es fehlen für diese Aktion die Zugriffsrechte."
     },
+    "paste-warning": {
+      "title": "Code einfügen?",
+      "content": "Der kopierte Code passt möglicherweise nicht vollständig zur Zielvariable. Nach dem Einfügen sollte die Kodierung geprüft werden.",
+      "confirm": "Trotzdem einfügen",
+      "array-reference": "Der Code enthält Positionsbezüge für Mehrfachantworten.",
+      "fragment-reference": "Der Code enthält Fragmentbezüge.",
+      "numeric-rule": "Der Code enthält numerische Regeln.",
+      "boolean-rule": "Der Code enthält Wahr/Falsch-Regeln."
+    },
+    "post-paste-validation": {
+      "title": "Code eingefügt",
+      "content": "Der Code wurde eingefügt, die Zielkodierung enthält dadurch neue Validierungsprobleme:"
+    },
     "no-codes": "Derzeit sind keine Codes definiert.",
     "is-invalid": "Kein Code wird vergeben, sondern Status 'ungültig'/'INVALID'.",
     "make-invalid": "Schalte Wert ungültig",

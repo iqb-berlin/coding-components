@@ -7,6 +7,7 @@ import {
   copySingleCode,
   deleteCode,
   duplicateCode,
+  getPasteSingleCodeWarningKeys,
   pasteSingleCode,
   sortCodes
 } from './schemer-code-ops';
@@ -86,6 +87,109 @@ describe('schemer-code-ops', () => {
         id: 99, type: 'FULL_CREDIT', label: '', score: 1
       } as unknown as CodeData;
       expect(canPasteSingleCodeInto(copied, [], 'RW_MAXIMAL')).toBeTrue();
+    });
+  });
+
+  describe('getPasteSingleCodeWarningKeys', () => {
+    it('should warn when copied rules reference incompatible target structures', () => {
+      const copied: CodeData = {
+        id: 1,
+        type: 'FULL_CREDIT',
+        label: '',
+        score: 1,
+        ruleSets: [
+          {
+            valueArrayPos: 1,
+            ruleOperatorAnd: true,
+            rules: [
+              { method: 'MATCH', parameters: ['A'], fragment: 0 },
+              { method: 'NUMERIC_MATCH', parameters: ['1'] },
+              { method: 'IS_TRUE' }
+            ]
+          }
+        ]
+      } as unknown as CodeData;
+
+      expect(
+        getPasteSingleCodeWarningKeys(
+          copied,
+          { id: 'v1', sourceType: 'BASE', codes: [] } as unknown as never,
+          {
+            id: 'v1',
+            type: 'string',
+            multiple: false
+          } as unknown as never
+        )
+      ).toEqual([
+        'code.paste-warning.array-reference',
+        'code.paste-warning.fragment-reference',
+        'code.paste-warning.numeric-rule',
+        'code.paste-warning.boolean-rule'
+      ]);
+    });
+
+    it('should not warn when target supports copied rule references', () => {
+      const copied: CodeData = {
+        id: 1,
+        type: 'FULL_CREDIT',
+        label: '',
+        score: 1,
+        ruleSets: [
+          {
+            valueArrayPos: 0,
+            ruleOperatorAnd: true,
+            rules: [
+              { method: 'NUMERIC_MATCH', parameters: ['1'], fragment: 0 }
+            ]
+          }
+        ]
+      } as unknown as CodeData;
+
+      expect(
+        getPasteSingleCodeWarningKeys(
+          copied,
+          {
+            id: 'v1',
+            sourceType: 'BASE',
+            fragmenting: '(\\d+)',
+            codes: []
+          } as unknown as never,
+          {
+            id: 'v1',
+            type: 'integer',
+            multiple: true
+          } as unknown as never
+        )
+      ).toEqual([]);
+    });
+
+    it('should warn for NUMERIC_RANGE rules copied into non-numeric targets', () => {
+      const copied: CodeData = {
+        id: 1,
+        type: 'FULL_CREDIT',
+        label: '',
+        score: 1,
+        ruleSets: [
+          {
+            ruleOperatorAnd: true,
+            rules: [
+              { method: 'NUMERIC_RANGE', parameters: ['1', '3'] }
+            ]
+          }
+        ]
+      } as unknown as CodeData;
+
+      expect(
+        getPasteSingleCodeWarningKeys(
+          copied,
+          { id: 'v1', sourceType: 'BASE', codes: [] } as unknown as never,
+          {
+            id: 'v1',
+            type: 'string',
+            multiple: false
+          } as unknown as never
+        )
+      ).toEqual(['code.paste-warning.numeric-rule']);
     });
   });
 
