@@ -6,7 +6,6 @@ import {
   Output,
   ViewChild
 } from '@angular/core';
-import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import {
   BehaviorSubject,
   debounceTime,
@@ -59,6 +58,10 @@ import {
 import { SchemerFacadeService } from '../services/schemer-facade.service';
 import { parseVarListInput } from '../services/schemer-varlist-utils';
 import { SchemerInfoDialogComponent } from '../dialogs/schemer-info-dialog.component';
+import {
+  CodingSchemeValidationProblem,
+  validateCodingScheme
+} from '../services/coding-scheme-validation';
 
 @Component({
   selector: 'iqb-schemer',
@@ -136,7 +139,7 @@ export class SchemerComponent implements OnDestroy {
   derivedVariables: VariableCodingData[] = [];
   codingStatus: { [id: string]: string } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
-  problems: CodingSchemeProblem[] = [];
+  problems: CodingSchemeValidationProblem[] = [];
   hasVarListDuplicateConflict = false;
   varCodingChangedSubscription: Subscription | null = null;
 
@@ -283,13 +286,13 @@ export class SchemerComponent implements OnDestroy {
       this.schemerService.codingScheme.variableCodings
     ) {
       try {
-        this.problems = CodingSchemeFactory.validate(
+        this.problems = validateCodingScheme(
           this.schemerService.varList,
           this.schemerService.codingScheme.variableCodings
         );
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error('CodingSchemeFactory.validate failed', e);
+        console.error('validateCodingScheme failed', e);
         this.problems = [];
       }
       this.schemerService.codingScheme.variableCodings.forEach(v => {
