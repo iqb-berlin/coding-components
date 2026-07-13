@@ -4,7 +4,7 @@
   "exports": {
     "./lib/ngx-coding-components.module": "./lib/ngx-coding-components.module.d.ts"
   },
-  "version": "3.1.0",
+  "version": "3.1.2",
   "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
   "license": "MIT",
   "description": "Angular components for coding responses in assessments of IQB.",
@@ -70,6 +70,8 @@
     "typescript": "5.8.3"
   },
   "dependencies": {
+    "@iqb/mathlive": "^0.4.1",
+    "katex": "^0.16.11",
     "tslib": "^2.3.0"
   },
   "sideEffects": false
