@@ -90,6 +90,18 @@ describe('SchemerFacadeService', () => {
     expect(dialog.open).not.toHaveBeenCalled();
   });
 
+  it('tryResolveVarListDuplicates should allow unique aliases matching other ids', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: '04', alias: '02' } as never,
+      { id: '02', alias: '05' } as never
+    ]);
+
+    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(dialog.open).not.toHaveBeenCalled();
+  });
+
   it('tryResolveVarListDuplicates should open dialog when invalid ids or aliases exist', () => {
     const service = createService();
 

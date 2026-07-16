@@ -63,18 +63,16 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
     expect(component.invalidAliasCount).toBe(0);
   });
 
-  it('should mark alias/id collisions', () => {
+  it('should allow unique aliases matching other ids', () => {
     const { component } = createComponent({
       varList: [
-        { id: 'likert-row_4', alias: '01a' },
-        { id: '01a', alias: '05a' }
+        { id: '04', alias: '02' },
+        { id: '02', alias: '05' }
       ]
     });
 
-    expect(component.hasProblems).toBeTrue();
-    expect(component.aliasIdCollisionValues).toEqual(['01A']);
-    expect(component.isAliasIdCollisionAlias('01a')).toBeTrue();
-    expect(component.isAliasIdCollisionId('01a')).toBeTrue();
+    expect(component.hasProblems).toBeFalse();
+    expect(component.statusText).toBe('Keine Konflikte mehr.');
   });
 
   it('should not mutate the input varList', () => {
