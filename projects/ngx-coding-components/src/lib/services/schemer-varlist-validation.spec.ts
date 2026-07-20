@@ -52,17 +52,15 @@ describe('schemer-varlist-validation', () => {
     expect(analysis.invalidAliasCount).toBe(1);
   });
 
-  it('getVarListConflictAnalysis should detect alias/id collisions', () => {
+  it('getVarListConflictAnalysis should allow unique aliases matching other ids', () => {
     const analysis = getVarListConflictAnalysis([
-      { id: 'likert-row_4', alias: '01a' },
-      { id: '01a', alias: '05a' },
-      { id: 'likert-row_5', alias: '01b' },
-      { id: '01b', alias: '05b' }
+      { id: '04', alias: '02' },
+      { id: '02', alias: '05' }
     ] as VariableInfo[]);
 
-    expect(analysis.hasProblems).toBeTrue();
-    expect(analysis.hasAliasIdCollision).toBeTrue();
-    expect(analysis.aliasIdCollisionValues).toEqual(['01A', '01B']);
+    expect(analysis.hasProblems).toBeFalse();
+    expect(analysis.hasDuplicateId).toBeFalse();
+    expect(analysis.hasDuplicateAlias).toBeFalse();
     expect(analysis.invalidIdCount).toBe(0);
     expect(analysis.invalidAliasCount).toBe(0);
   });

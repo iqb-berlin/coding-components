@@ -344,7 +344,7 @@ describe('SchemerComponent', () => {
     expect(component.codingStatus['DERIVED_ID']).toBe('OK');
   });
 
-  it('updateVariableLists should keep reporting real alias/id collisions', () => {
+  it('updateVariableLists should allow unique aliases matching other ids', () => {
     const code = {
       id: 1,
       type: 'FULL_CREDIT',
@@ -401,15 +401,9 @@ describe('SchemerComponent', () => {
 
     component.updateVariableLists();
 
-    expect(component.problems).toEqual(jasmine.arrayContaining([
-      jasmine.objectContaining({
-        type: 'INVALID_SOURCE',
-        breaking: true,
-        variableId: 'BASE_ID'
-      })
-    ]));
+    expect(component.problems).toEqual([]);
     expect(component.codingStatus['BASE_ID']).toBe('OK');
-    expect(component.codingStatus['DERIVED_ID']).toBe('ERROR');
+    expect(component.codingStatus['DERIVED_ID']).toBe('OK');
   });
 
   it('updateVariableLists should compute codingStatus ERROR/WARNING based on validate() problems', () => {
