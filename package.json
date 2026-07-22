@@ -1,7 +1,7 @@
 {
   "name": "coding-components",
   "config": {
-    "schemer_version": "2.8.1"
+    "schemer_version": "2.8.2"
   },
   "scripts": {
     "ng": "ng",
@@ -44,7 +44,7 @@
     "@angular/platform-browser-dynamic": "^20.3.25",
     "@angular/router": "^20.3.25",
     "@iqb/mathlive": "^0.4.1",
-    "@iqb/responses": "^5.2.1",
+    "@iqb/responses": "^5.2.2",
     "@iqbspecs/coding-scheme": "^3.4.1",
     "@iqbspecs/response": "^2.0.0",
     "@iqbspecs/validate-json": "^0.4.0",
