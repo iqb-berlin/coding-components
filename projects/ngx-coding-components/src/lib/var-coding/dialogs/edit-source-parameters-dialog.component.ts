@@ -45,7 +45,7 @@ export interface EditSourceParametersDialogData {
 }
 
 type SolverTestResult = {
-  type: 'success' | 'error';
+  type: 'success' | 'incomplete' | 'error';
   message: string;
 };
 
@@ -194,6 +194,11 @@ const SOLVER_VARIABLE_REFERENCE_PATTERN =
     .solver-test-result-ok {
       background: #e8f5e9;
       color: #1b5e20;
+    }
+
+    .solver-test-result-incomplete {
+      background: #fff8e1;
+      color: #5f3f00;
     }
 
     .solver-test-result-error {
@@ -499,6 +504,16 @@ export class EditSourceParametersDialog {
           message: `${this.tr('derive-processing.solver-test.result')}: ${
             EditSourceParametersDialog.formatSolverTestValue(result.value)
           }`
+        };
+        return;
+      }
+
+      if (result.status === 'CODING_INCOMPLETE') {
+        this.solverTestResult = {
+          type: 'incomplete',
+          message: `${this.tr(
+            'derive-processing.solver-test.result'
+          )}: ${this.tr('status-label.CODING_INCOMPLETE')}`
         };
         return;
       }

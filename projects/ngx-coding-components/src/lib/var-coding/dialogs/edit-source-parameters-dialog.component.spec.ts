@@ -10,6 +10,7 @@ describe('EditSourceParametersDialog', () => {
 
   const translations: Record<string, string> = {
     'derive-processing.solver-test.result': 'Ergebnis',
+    'status-label.CODING_INCOMPLETE': 'Kodierung unvollständig',
     'derive-processing.solver-test.error-expression-missing': 'Bitte einen Solver-Ausdruck eingeben.',
     'derive-processing.solver-test.error-sources-missing': 'Bitte mindestens eine Quellvariable auswählen.',
     'derive-processing.solver-test.error-unselected-source': 'Der Ausdruck verweist auf nicht ausgewählte Quelle(n)',
@@ -440,6 +441,40 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.solverTestResult).toEqual({
       type: 'success',
       message: 'Ergebnis: 5'
+    });
+  });
+
+  it('runSolverTest should report an incomplete result for an empty-value INC policy', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: solverRef('V1:INC') },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = '';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'incomplete',
+      message: 'Ergebnis: Kodierung unvollständig'
+    });
+  });
+
+  it('runSolverTest should report an incomplete result for a non-numeric-value INC policy', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: solverRef('V1:ERROR:INC') },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = 'abc';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'incomplete',
+      message: 'Ergebnis: Kodierung unvollständig'
     });
   });
 

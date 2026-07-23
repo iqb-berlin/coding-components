@@ -110,6 +110,7 @@
         @if (solverTestResult) {
           <div class="solver-test-result"
                [class.solver-test-result-ok]="solverTestResult.type === 'success'"
+               [class.solver-test-result-incomplete]="solverTestResult.type === 'incomplete'"
                [class.solver-test-result-error]="solverTestResult.type === 'error'">
             {{ solverTestResult.message }}
           </div>
