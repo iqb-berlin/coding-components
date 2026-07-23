@@ -151,7 +151,7 @@ export class SingleCodeComponent {
   }
 
   suppressResidualAutoWarning(): boolean {
-    return this.code?.type === 'RESIDUAL_AUTO' && this.showResidualAutoManualInstruction();
+    return this.showResidualAutoManualInstruction();
   }
 
   setCodeInvalid() {
