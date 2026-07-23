@@ -64,4 +64,20 @@ describe('SingleCodeComponent', () => {
     expect(component.showSideInstruction()).toBeTrue();
     expect(component.suppressResidualAutoWarning()).toBeTrue();
   });
+
+  it('should suppress the RESIDUAL_AUTO warning for all codes in SOLVER codings', () => {
+    component.code = {
+      id: 1,
+      type: 'FULL_CREDIT',
+      label: '',
+      score: 1,
+      manualInstruction: '<p>instruction</p>'
+    } as unknown as CodeData;
+
+    component.sourceType = 'BASE';
+    expect(component.suppressResidualAutoWarning()).toBeFalse();
+
+    component.sourceType = 'SOLVER';
+    expect(component.suppressResidualAutoWarning()).toBeTrue();
+  });
 });
