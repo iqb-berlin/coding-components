@@ -36,12 +36,15 @@
     "solver-help": {
       "title": "Syntax help for solver expressions",
       "description": "Solver expressions are evaluated with math.js. Use numbers, operators and math.js functions; refer to source variables with ${VariableName} or ${VariableID}.",
+      "policy-description": "Optionally specify a fragment index and how empty or non-numeric values are handled. Available policies are INC, ERROR, or a numeric replacement value; ERROR is the default.",
       "examples-title": "Examples:",
       "examples": {
         "arithmetic": "simple arithmetic",
         "variables": "add values from two source variables",
         "function": "calculate and round a percentage",
-        "condition": "condition: result is 1 when points are at least 5, otherwise 0"
+        "condition": "condition: result is 1 when points are at least 5, otherwise 0",
+        "fragment": "use the numerator (fragment 0) of a fraction; mark empty values incomplete and non-numeric values as errors (equivalent to ${Bruch[0]:INC:ERROR})",
+        "policies": "use a summand; replace empty values with 0 and mark non-numeric values incomplete"
       },
       "docs-link": "Open math.js syntax"
     }

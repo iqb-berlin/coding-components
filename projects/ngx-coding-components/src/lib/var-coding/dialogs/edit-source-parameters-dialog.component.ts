@@ -244,6 +244,9 @@ export class EditSourceParametersDialog {
   readonly solverExpressionDocsUrl =
     'https://mathjs.org/docs/expressions/syntax.html';
 
+  readonly solverPolicySyntax =
+    `${SOLVER_VARIABLE_PREFIX}{VAR[i]:emptyPolicy:nonNumericPolicy}`;
+
   readonly solverExpressionExamples: SolverExpressionExample[] = [
     {
       expression: '1 + 2 * 3',
@@ -261,6 +264,14 @@ export class EditSourceParametersDialog {
     {
       expression: `${SOLVER_VARIABLE_PREFIX}{Punkte} >= 5 ? 1 : 0`,
       descriptionKey: 'derive-processing.solver-help.examples.condition'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{Bruch[0]:INC}`,
+      descriptionKey: 'derive-processing.solver-help.examples.fragment'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{Summand:0:INC}`,
+      descriptionKey: 'derive-processing.solver-help.examples.policies'
     }
   ];
 

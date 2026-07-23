@@ -125,6 +125,11 @@
           </span>
         </div>
         <p>{{ 'derive-processing.solver-help.description' | translate }}</p>
+        <p>
+          <code>{{ solverPolicySyntax }}</code>
+          -
+          {{ 'derive-processing.solver-help.policy-description' | translate }}
+        </p>
         <div>{{ 'derive-processing.solver-help.examples-title' | translate }}</div>
         <ul>
           @for (example of solverExpressionExamples; track example.expression) {
