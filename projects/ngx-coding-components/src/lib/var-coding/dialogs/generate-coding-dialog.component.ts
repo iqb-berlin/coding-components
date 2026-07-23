@@ -155,7 +155,15 @@ export class GenerateCodingDialogComponent {
   geogebraExtractValue = false;
   geogebraCodingMode: GeoGebraCodingMode = 'numeric';
   geogebraPointX = '';
+  geogebraPointXMoreThen = '';
+  geogebraPointXMin = '';
+  geogebraPointXLessThen = '';
+  geogebraPointXMax = '';
   geogebraPointY = '';
+  geogebraPointYMoreThen = '';
+  geogebraPointYMin = '';
+  geogebraPointYLessThen = '';
+  geogebraPointYMax = '';
   geogebraBooleanValue: 'true' | 'false' = 'true';
 
   constructor(
@@ -513,31 +521,116 @@ export class GenerateCodingDialogComponent {
     });
   }
 
-  private createGeoGebraPointRules(): CodingRule[] | null {
-    const xValue = CodingFactory.getValueAsNumber(this.geogebraPointX);
-    const yValue = CodingFactory.getValueAsNumber(this.geogebraPointY);
+  private static createGeoGebraCoordinateRules(
+    fragment: number,
+    match: string,
+    moreThan: string,
+    min: string,
+    lessThan: string,
+    max: string
+  ): CodingRule[] | null {
+    const hasValue = (value: string): boolean => value.trim() !== '';
+    const createRule = (
+      method: CodingRule['method'],
+      value: string
+    ): CodingRule | null => {
+      const numericValue = CodingFactory.getValueAsNumber(value);
+      return numericValue === null ?
+        null :
+        {
+          method,
+          parameters: [numericValue.toString(10)],
+          fragment
+        };
+    };
+
+    if (hasValue(match)) {
+      const matchRule = createRule('NUMERIC_MATCH', match);
+      return matchRule ? [matchRule] : null;
+    }
+
+    const hasMoreThan = hasValue(moreThan);
+    const hasMin = hasValue(min);
+    const hasLessThan = hasValue(lessThan);
+    const hasMax = hasValue(max);
+
+    if ((hasMoreThan && hasMin) || (hasLessThan && hasMax)) {
+      return null;
+    }
+
+    let lowerValue: number | null = null;
+    if (hasMoreThan) {
+      lowerValue = CodingFactory.getValueAsNumber(moreThan);
+    } else if (hasMin) {
+      lowerValue = CodingFactory.getValueAsNumber(min);
+    }
+
+    let upperValue: number | null = null;
+    if (hasLessThan) {
+      upperValue = CodingFactory.getValueAsNumber(lessThan);
+    } else if (hasMax) {
+      upperValue = CodingFactory.getValueAsNumber(max);
+    }
 
     if (
-      xValue === null ||
-      yValue === null ||
-      this.geogebraPointX === '' ||
-      this.geogebraPointY === ''
+      ((hasMoreThan || hasMin) && lowerValue === null) ||
+      ((hasLessThan || hasMax) && upperValue === null)
     ) {
       return null;
     }
 
-    return [
-      {
-        method: 'NUMERIC_MATCH',
-        parameters: [xValue.toString(10)],
-        fragment: 0
-      },
-      {
-        method: 'NUMERIC_MATCH',
-        parameters: [yValue.toString(10)],
-        fragment: 1
-      }
+    if (
+      lowerValue !== null &&
+      upperValue !== null &&
+      (
+        lowerValue > upperValue ||
+        (lowerValue === upperValue && (hasMoreThan || hasLessThan))
+      )
+    ) {
+      return null;
+    }
+
+    const ruleInputs: Array<[CodingRule['method'], string, boolean]> = [
+      ['NUMERIC_MORE_THAN', moreThan, hasMoreThan],
+      ['NUMERIC_MIN', min, hasMin],
+      ['NUMERIC_LESS_THAN', lessThan, hasLessThan],
+      ['NUMERIC_MAX', max, hasMax]
     ];
+    const rules = ruleInputs
+      .filter(([, , isPresent]) => isPresent)
+      .map(([method, value]) => createRule(method, value));
+
+    if (rules.some(rule => rule === null)) {
+      return null;
+    }
+
+    return rules.filter((rule): rule is CodingRule => rule !== null);
+  }
+
+  private createGeoGebraPointRules(): CodingRule[] | null {
+    const xRules = GenerateCodingDialogComponent.createGeoGebraCoordinateRules(
+      0,
+      this.geogebraPointX,
+      this.geogebraPointXMoreThen,
+      this.geogebraPointXMin,
+      this.geogebraPointXLessThen,
+      this.geogebraPointXMax
+    );
+    const yRules = GenerateCodingDialogComponent.createGeoGebraCoordinateRules(
+      1,
+      this.geogebraPointY,
+      this.geogebraPointYMoreThen,
+      this.geogebraPointYMin,
+      this.geogebraPointYLessThen,
+      this.geogebraPointYMax
+    );
+
+    if (xRules === null || yRules === null) {
+      return null;
+    }
+
+    const pointRules = [...xRules, ...yRules];
+    return pointRules.length > 0 ? pointRules : null;
   }
 
   private generateMathTableCoding(newVardata: VariableCodingData): void {
@@ -592,7 +685,6 @@ export class GenerateCodingDialogComponent {
       };
       if (this.isGeoGebraVariable && (this.geogebraExtractValue || this.isGeoGebraPointMode())) {
         newVardata.fragmenting = createGeoGebraValueFragmenting(
-          this.varInfo,
           this.generationModel === 'geogebra-boolean' ?
             'boolean' :
             this.geogebraCodingMode

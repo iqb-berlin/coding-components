@@ -271,26 +271,77 @@
     </div>
     } @if (isGeoGebraPointMode()) {
     <div class="fx-column-start-start">
+      <div [style.font-weight]="'bold'">
+        {{ "coding.generate.geogebra.point-x" | translate }}
+      </div>
       <div class="fx-row-start-center">
-        <div [style.width.px]="200">
-          {{ "coding.generate.geogebra.point-x" | translate }}
-        </div>
+        <div [style.width.px]="200">{{ "rule.NUMERIC_MATCH" | translate }}</div>
         <mat-form-field>
-          <mat-label>{{
-            "coding.generate.geogebra.point-x" | translate
-          }}</mat-label>
+          <mat-label>{{ "rule.NUMERIC_MATCH" | translate }}</mat-label>
           <input matInput [(ngModel)]="geogebraPointX" />
         </mat-form-field>
       </div>
       <div class="fx-row-start-center">
         <div [style.width.px]="200">
-          {{ "coding.generate.geogebra.point-y" | translate }}
+          {{ "coding.generate.lower-limit" | translate }}
         </div>
         <mat-form-field>
-          <mat-label>{{
-            "coding.generate.geogebra.point-y" | translate
-          }}</mat-label>
+          <mat-label>{{ "rule.NUMERIC_MORE_THAN" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointXMoreThen" />
+        </mat-form-field>
+        <mat-form-field [style.margin.px]="8">
+          <mat-label>{{ "rule.NUMERIC_MIN" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointXMin" />
+        </mat-form-field>
+      </div>
+      <div class="fx-row-start-center">
+        <div [style.width.px]="200">
+          {{ "coding.generate.upper-limit" | translate }}
+        </div>
+        <mat-form-field>
+          <mat-label>{{ "rule.NUMERIC_LESS_THAN" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointXLessThen" />
+        </mat-form-field>
+        <mat-form-field [style.margin.px]="8">
+          <mat-label>{{ "rule.NUMERIC_MAX" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointXMax" />
+        </mat-form-field>
+      </div>
+
+      <div [style.font-weight]="'bold'">
+        {{ "coding.generate.geogebra.point-y" | translate }}
+      </div>
+      <div class="fx-row-start-center">
+        <div [style.width.px]="200">{{ "rule.NUMERIC_MATCH" | translate }}</div>
+        <mat-form-field>
+          <mat-label>{{ "rule.NUMERIC_MATCH" | translate }}</mat-label>
           <input matInput [(ngModel)]="geogebraPointY" />
+        </mat-form-field>
+      </div>
+      <div class="fx-row-start-center">
+        <div [style.width.px]="200">
+          {{ "coding.generate.lower-limit" | translate }}
+        </div>
+        <mat-form-field>
+          <mat-label>{{ "rule.NUMERIC_MORE_THAN" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointYMoreThen" />
+        </mat-form-field>
+        <mat-form-field [style.margin.px]="8">
+          <mat-label>{{ "rule.NUMERIC_MIN" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointYMin" />
+        </mat-form-field>
+      </div>
+      <div class="fx-row-start-center">
+        <div [style.width.px]="200">
+          {{ "coding.generate.upper-limit" | translate }}
+        </div>
+        <mat-form-field>
+          <mat-label>{{ "rule.NUMERIC_LESS_THAN" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointYLessThen" />
+        </mat-form-field>
+        <mat-form-field [style.margin.px]="8">
+          <mat-label>{{ "rule.NUMERIC_MAX" | translate }}</mat-label>
+          <input matInput [(ngModel)]="geogebraPointYMax" />
         </mat-form-field>
       </div>
     </div>
