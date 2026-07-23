@@ -49,6 +49,20 @@ describe('GenerateCodingDialogComponent', () => {
     };
   };
 
+  const allowCodeCreation = (
+    schemerService: jasmine.SpyObj<SchemerService>
+  ): void => {
+    schemerService.addCode.and.callFake((codes: CodeData[], type: CodeType) => {
+      const code = {
+        id: type === 'RESIDUAL_AUTO' ? 0 : 1,
+        type,
+        score: type === 'FULL_CREDIT' ? 1 : 0
+      } as CodeData;
+      codes.push(code);
+      return code;
+    });
+  };
+
   beforeEach(() => {
     spyOn(CodingFactory, 'getValueAsNumber').and.callFake((v: unknown) => {
       if (v === null || typeof v === 'undefined') return null;
@@ -396,7 +410,7 @@ describe('GenerateCodingDialogComponent', () => {
     const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
 
     expect(closed.fragmenting).toBe(
-      '^\\s*ggb_490000\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*$'
+      '^\\s*[^=]+\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*$'
     );
     expect(fullCredit.ruleSets?.[0].rules[0]).toEqual({
       method: 'NUMERIC_MATCH',
@@ -442,15 +456,15 @@ describe('GenerateCodingDialogComponent', () => {
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
 
     expect(closed.fragmenting).toBe(
-      '^\\s*α\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*°?\\s*$'
+      '^\\s*[^=]+\\s*=\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*°?\\s*$'
     );
     expect(transformValue('α = -42.14159°', closed.fragmenting || '', false)).toEqual(['-42.14159']);
   });
 
   it('generateButtonClick should generate GeoGebra point rules for both coordinates', () => {
     const { component, dialogRef, schemerService } = createComponent({
-      id: 'A',
-      alias: 'Punkt A',
+      id: '01_B_1',
+      alias: 'B_1',
       type: 'string',
       format: 'ggb-variable'
     });
@@ -475,9 +489,9 @@ describe('GenerateCodingDialogComponent', () => {
     const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
 
     expect(closed.fragmenting).toBe(
-      '^\\s*A\\s*=\\s*\\(\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*,\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*\\)\\s*$'
+      '^\\s*[^=]+\\s*=\\s*\\(\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*\\)\\s*$'
     );
-    expect(transformValue('A = (-1.3, 2.4)', closed.fragmenting || '', false)).toEqual(['-1.3', '2.4']);
+    expect(transformValue('B_1 = (-1.3, 2.4)', closed.fragmenting || '', false)).toEqual(['-1.3', '2.4']);
     expect(fullCredit.ruleSets?.[0]).toEqual({
       ruleOperatorAnd: true,
       rules: [
@@ -496,16 +510,16 @@ describe('GenerateCodingDialogComponent', () => {
 
     const correct = CodingFactory.code(
       {
-        id: 'A',
-        value: 'A = (-1.3, 2.4)',
+        id: '01_B_1',
+        value: 'B_1 = (-1.3, 2.4)',
         status: 'VALUE_CHANGED'
       },
       closed
     );
     const wrongY = CodingFactory.code(
       {
-        id: 'A',
-        value: 'A = (-1.3, 999)',
+        id: '01_B_1',
+        value: 'B_1 = (-1.3, 999)',
         status: 'VALUE_CHANGED'
       },
       closed
@@ -515,6 +529,234 @@ describe('GenerateCodingDialogComponent', () => {
     expect(correct.score).toBe(1);
     expect(wrongY.code).not.toBe(1);
     expect(wrongY.score).toBe(0);
+  });
+
+  it('generateButtonClick should not treat variable-length GeoGebra structures as 2D points', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointX = '1';
+    component.geogebraPointY = '2';
+    allowCodeCreation(schemerService);
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const codeValue = (value: string) => CodingFactory.code(
+      {
+        id: 'A',
+        value,
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(codeValue('A = (1, 2)').code).toBe(1);
+
+    [
+      'A = {}',
+      'A = {1, 2}',
+      'A = {(1, 2), (3, 4)}',
+      'A = {{1, 2}, {3, 4}}',
+      'A = (1,2,3)',
+      'A = (1,2,3,4)',
+      'A = [1, 2]',
+      'A = (1; 2)',
+      'A = Polygon((1, 2), (3, 4), (5, 6))',
+      'A = 1 + 2i',
+      'A = ?'
+    ].forEach(value => {
+      expect(codeValue(value).code)
+        .withContext(value)
+        .toBeUndefined();
+      expect(codeValue(value).score)
+        .withContext(value)
+        .toBeUndefined();
+    });
+  });
+
+  it('generateButtonClick should generate bounds for both GeoGebra point coordinates', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointXMin = '0';
+    component.geogebraPointXLessThen = '10';
+    component.geogebraPointYMoreThen = '-5';
+    component.geogebraPointYMax = '5';
+    allowCodeCreation(schemerService);
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0]).toEqual({
+      ruleOperatorAnd: true,
+      rules: [
+        {
+          method: 'NUMERIC_MIN',
+          parameters: ['0'],
+          fragment: 0
+        },
+        {
+          method: 'NUMERIC_LESS_THAN',
+          parameters: ['10'],
+          fragment: 0
+        },
+        {
+          method: 'NUMERIC_MORE_THAN',
+          parameters: ['-5'],
+          fragment: 1
+        },
+        {
+          method: 'NUMERIC_MAX',
+          parameters: ['5'],
+          fragment: 1
+        }
+      ]
+    });
+
+    const codePoint = (value: string) => CodingFactory.code(
+      {
+        id: 'A',
+        value,
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(codePoint('A = (0, 5)').code).toBe(1);
+    expect(codePoint('A = (10, 5)').code).not.toBe(1);
+    expect(codePoint('A = (0, -5)').code).not.toBe(1);
+  });
+
+  it('generateButtonClick should allow only the x coordinate to be configured', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointX = '3';
+    allowCodeCreation(schemerService);
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0].rules).toEqual([
+      {
+        method: 'NUMERIC_MATCH',
+        parameters: ['3'],
+        fragment: 0
+      }
+    ]);
+    expect(CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (3, 999)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    ).code).toBe(1);
+  });
+
+  it('generateButtonClick should allow only the y coordinate to be configured', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointYMin = '2';
+    component.geogebraPointYMax = '4';
+    allowCodeCreation(schemerService);
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0].rules).toEqual([
+      {
+        method: 'NUMERIC_MIN',
+        parameters: ['2'],
+        fragment: 1
+      },
+      {
+        method: 'NUMERIC_MAX',
+        parameters: ['4'],
+        fragment: 1
+      }
+    ]);
+    expect(CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (-999, 3)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    ).code).toBe(1);
+  });
+
+  it('canGenerate should validate GeoGebra point coordinate criteria', () => {
+    const { component } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    expect(component.canGenerate()).toBeFalse();
+
+    component.geogebraPointX = 'not-a-number';
+    expect(component.canGenerate()).toBeFalse();
+
+    component.geogebraPointX = '';
+    component.geogebraPointXMoreThen = '1';
+    component.geogebraPointXMin = '2';
+    expect(component.canGenerate()).toBeFalse();
+
+    component.geogebraPointXMoreThen = '';
+    component.geogebraPointXMin = '2';
+    component.geogebraPointXMax = '1';
+    expect(component.canGenerate()).toBeFalse();
+
+    component.geogebraPointXMin = '1';
+    component.geogebraPointXMax = '1';
+    expect(component.canGenerate()).toBeTrue();
+
+    component.geogebraPointXMin = '';
+    component.geogebraPointXMoreThen = '1';
+    expect(component.canGenerate()).toBeFalse();
+  });
+
+  it('canGenerate should ignore absent point bounds with the real numeric conversion', () => {
+    (CodingFactory.getValueAsNumber as jasmine.Spy).and.callThrough();
+    const { component } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointXMin = '1';
+    expect(component.canGenerate()).toBeTrue();
+
+    component.geogebraPointXMin = '';
+    component.geogebraPointYMax = '-1';
+    expect(component.canGenerate()).toBeTrue();
   });
 
   it('generateButtonClick should force GeoGebra fragmenting for point rules', () => {
@@ -555,7 +797,7 @@ describe('GenerateCodingDialogComponent', () => {
     );
 
     expect(closed.fragmenting).toBe(
-      '^\\s*A\\s*=\\s*\\(\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*,\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*\\)\\s*$'
+      '^\\s*[^=]+\\s*=\\s*\\(\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*,\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*\\)\\s*$'
     );
     expect(coded.code).toBe(1);
     expect(coded.score).toBe(1);
@@ -589,7 +831,7 @@ describe('GenerateCodingDialogComponent', () => {
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
     const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
 
-    expect(closed.fragmenting).toBe('^\\s*ggb_PunktRichtig\\s*=\\s*(true|false)\\s*$');
+    expect(closed.fragmenting).toBe('^\\s*[^=]+\\s*=\\s*(true|false)\\s*$');
     expect(fullCredit.ruleSets?.[0].rules[0]).toEqual({
       method: 'IS_TRUE',
       parameters: []
