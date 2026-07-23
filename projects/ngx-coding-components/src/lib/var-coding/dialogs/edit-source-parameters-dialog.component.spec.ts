@@ -289,6 +289,32 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.solverSourceWarning).toContain('V2');
   });
 
+  it('solverSourceWarning should recognize indexed and policy-qualified references', () => {
+    [
+      solverRef('V2[0]'),
+      solverRef('V2:0'),
+      solverRef('V2[1]:INC:0')
+    ].forEach(solverExpression => {
+      const dialog = createDialog({
+        selfAlias: 'D',
+        sourceType: 'SOLVER',
+        sourceParameters: { solverExpression },
+        deriveSources: ['v1']
+      });
+
+      expect(dialog.solverSourceWarning).toContain('V2');
+
+      const selectedDialog = createDialog({
+        selfAlias: 'D',
+        sourceType: 'SOLVER',
+        sourceParameters: { solverExpression },
+        deriveSources: ['v2']
+      });
+
+      expect(selectedDialog.solverSourceWarning).toBeNull();
+    });
+  });
+
   it('solverSourceWarning should update when expression or source selection changes', () => {
     const dialog = createDialog({
       selfAlias: 'D',
@@ -381,6 +407,67 @@ describe('EditSourceParametersDialog', () => {
       'Bitte numerischen Testwert prüfen'
     );
     expect(dialog.solverTestResult?.message).toContain('V1');
+  });
+
+  it('runSolverTest should apply an empty-value policy', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: solverRef('V1:0') },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = '';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'success',
+      message: 'Ergebnis: 0'
+    });
+  });
+
+  it('runSolverTest should apply a non-numeric-value policy', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: solverRef('V1:ERROR:5') },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = 'abc';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'success',
+      message: 'Ergebnis: 5'
+    });
+  });
+
+  it('runSolverTest should evaluate a numeric fragment from a raw value', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: solverRef('V1[1]') },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'V1',
+            sourceType: 'BASE',
+            fragmenting: '([A-Za-z]+)-(\\d+)'
+          }
+        ]
+      }
+    });
+
+    dialog.solverTestValues['v1'] = 'ABC-7';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'success',
+      message: 'Ergebnis: 7'
+    });
   });
 
   it('runSolverTest should report syntax and evaluation errors', () => {
