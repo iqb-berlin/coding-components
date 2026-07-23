@@ -54,7 +54,16 @@ interface SolverExpressionExample {
   descriptionKey: string;
 }
 
+interface SolverVariableReference {
+  sourceId: string;
+  hasFragmentIndex: boolean;
+  emptyPolicy?: string;
+  nonNumericPolicy?: string;
+}
+
 const SOLVER_VARIABLE_PREFIX = '$';
+const SOLVER_VARIABLE_REFERENCE_PATTERN =
+  /\$\{\s*([\w,-]+)(?:\s*\[\s*(\d+)\s*])?(?:\s*:([^}:]*))?(?:\s*:([^}:]*))?\s*}/g;
 
 @Component({
   templateUrl: 'edit-source-parameters-dialog.component.html',
@@ -439,10 +448,12 @@ export class EditSourceParametersDialog {
     }
 
     const variableCodings = this.getVariableCodingsForSolverTest();
-    const referencedVariables = EditSourceParametersDialog.getReferencedSolverVariables(
+    const solverReferences = EditSourceParametersDialog.getSolverReferences(
       expression,
       variableCodings
     );
+    const referencedVariables = EditSourceParametersDialog
+      .getReferencedSolverVariables(solverReferences);
     const missingSources = this.getMissingSolverSourceIds(referencedVariables);
 
     if (missingSources.length > 0) {
@@ -456,11 +467,13 @@ export class EditSourceParametersDialog {
       return;
     }
 
-    const invalidNumericSources = referencedVariables.filter(
-      sourceId => CodingFactory.getValueAsNumber(
-        this.solverTestValues[sourceId] || ''
-      ) === null
-    );
+    const invalidNumericSources = [
+      ...new Set(
+        solverReferences
+          .filter(reference => this.isInvalidSolverTestValue(reference))
+          .map(reference => reference.sourceId)
+      )
+    ];
 
     if (invalidNumericSources.length > 0) {
       this.solverTestResult = {
@@ -554,8 +567,10 @@ export class EditSourceParametersDialog {
 
     const solverReferences = referencedVariables ||
       EditSourceParametersDialog.getReferencedSolverVariables(
-        expression,
-        this.getVariableCodingsForSolverTest()
+        EditSourceParametersDialog.getSolverReferences(
+          expression,
+          this.getVariableCodingsForSolverTest()
+        )
       );
 
     return solverReferences.filter(
@@ -563,21 +578,49 @@ export class EditSourceParametersDialog {
     );
   }
 
-  private static getReferencedSolverVariables(
+  private static getSolverReferences(
     expression: string,
     variableCodings: VariableCodingData[]
-  ): string[] {
+  ): SolverVariableReference[] {
     const variableIdsByAlias = new Map(
       variableCodings
         .filter(coding => Boolean(coding.alias))
         .map(coding => [coding.alias as string, coding.id])
     );
-    const references = Array.from(expression.matchAll(/\$\{(\s*[\w,-]+\s*)}/g))
-      .map(match => match[1].trim())
-      .map(variableName => variableIdsByAlias.get(variableName) ||
-        variableName);
 
-    return [...new Set(references)];
+    return Array.from(
+      expression.matchAll(SOLVER_VARIABLE_REFERENCE_PATTERN)
+    )
+      .map(match => ({
+        sourceId: variableIdsByAlias.get(match[1]) || match[1],
+        hasFragmentIndex: typeof match[2] !== 'undefined',
+        emptyPolicy: match[3],
+        nonNumericPolicy: match[4]
+      }));
+  }
+
+  private static getReferencedSolverVariables(
+    references: SolverVariableReference[]
+  ): string[] {
+    return [...new Set(references.map(reference => reference.sourceId))];
+  }
+
+  private isInvalidSolverTestValue(
+    reference: SolverVariableReference
+  ): boolean {
+    if (reference.hasFragmentIndex) return false;
+
+    const value = this.solverTestValues[reference.sourceId] || '';
+    if (CodingFactory.getValueAsNumber(value) !== null) return false;
+
+    const policy = value.trim() ?
+      reference.nonNumericPolicy :
+      reference.emptyPolicy;
+    if (typeof policy === 'undefined') return true;
+
+    const trimmedPolicy = policy.trim();
+    return trimmedPolicy.toUpperCase() !== 'INC' &&
+      CodingFactory.getValueAsNumber(trimmedPolicy) === null;
   }
 
   private getSourceLabel(sourceId: string): string {
