@@ -7,6 +7,11 @@ import { SchemerService } from '../../services/schemer.service';
 
 describe('EditSourceParametersDialog', () => {
   const solverRef = (variableName: string): string => `\${${variableName}}`;
+  const solverPolicies = [
+    { token: 'ERROR', outcome: 'error' },
+    { token: 'INC', outcome: 'incomplete' },
+    { token: '5', outcome: 'success' }
+  ] as const;
 
   const translations: Record<string, string> = {
     'derive-processing.solver-test.result': 'Ergebnis',
@@ -73,6 +78,66 @@ describe('EditSourceParametersDialog', () => {
       schemerService,
       translateService
     );
+  };
+
+  const expectSolverOutcome = (
+    dialog: EditSourceParametersDialog,
+    outcome: 'success' | 'incomplete' | 'error' | 'invalid',
+    successValue = '5'
+  ): void => {
+    dialog.runSolverTest();
+
+    if (outcome === 'success') {
+      expect(dialog.solverTestResult).toEqual({
+        type: 'success',
+        message: `Ergebnis: ${successValue}`
+      });
+      return;
+    }
+
+    if (outcome === 'incomplete') {
+      expect(dialog.solverTestResult).toEqual({
+        type: 'incomplete',
+        message: 'Ergebnis: Kodierung unvollständig'
+      });
+      return;
+    }
+
+    expect(dialog.solverTestResult?.type).toBe('error');
+    if (outcome === 'invalid') {
+      expect(dialog.solverTestResult?.message).toContain(
+        'Bitte numerischen Testwert prüfen'
+      );
+    } else {
+      expect(dialog.solverTestResult?.message).toBe(
+        'Der Ausdruck konnte nicht ausgewertet werden.'
+      );
+    }
+  };
+
+  const createPolicyDialog = (
+    reference: string,
+    testValue: string,
+    fragmenting?: string
+  ): EditSourceParametersDialog => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: { solverExpression: solverRef(reference) },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'V1',
+            sourceType: 'BASE',
+            ...(typeof fragmenting === 'string' ? { fragmenting } : {})
+          }
+        ]
+      }
+    });
+    dialog.solverTestValues['v1'] = testValue;
+    return dialog;
   };
 
   it('should set newVariableMode when selfId is missing', () => {
@@ -392,6 +457,273 @@ describe('EditSourceParametersDialog', () => {
     );
   });
 
+  it('solverSourceReferences should include references for each source fragment', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'Bruch',
+            sourceType: 'BASE',
+            fragmenting: '^(\\d+)\\s*/\\s*(\\d+)$'
+          }
+        ]
+      }
+    });
+
+    expect(dialog.solverSourceReferences.map(
+      source => dialog.getSolverSourceReference(source)
+    )).toEqual([
+      solverRef('Bruch'),
+      solverRef('Bruch[0]'),
+      solverRef('Bruch[1]')
+    ]);
+  });
+
+  it('solverSourceReferences should ignore invalid fragmenting patterns', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'V1',
+            sourceType: 'BASE',
+            fragmenting: '('
+          }
+        ]
+      }
+    });
+
+    expect(dialog.solverSourceReferences.map(
+      source => dialog.getSolverSourceReference(source)
+    )).toEqual([solverRef('V1')]);
+  });
+
+  it('solverSourceWarning should recognize fragment and policy references', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression: `${solverRef('V1[0]:INC')} + ${solverRef('V2:0:INC')}`
+      },
+      deriveSources: ['v1']
+    });
+
+    expect(dialog.solverSourceWarning).toBe(
+      'Warnung: Im Solver-Ausdruck referenzierte Variable(n) ' +
+      'sind nicht als Quell-Variable(n) ausgewählt: V2'
+    );
+  });
+
+  it('runSolverTest should evaluate fragment references from raw source values', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression: solverRef('Bruch[0]:INC')
+      },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'Bruch',
+            sourceType: 'BASE',
+            fragmenting: '^(\\d+)\\s*/\\s*(\\d+)$'
+          }
+        ]
+      }
+    });
+
+    dialog.solverTestValues['v1'] = '1/2';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'success',
+      message: 'Ergebnis: 1'
+    });
+  });
+
+  solverPolicies.forEach(emptyPolicy => {
+    solverPolicies.forEach(nonNumericPolicy => {
+      const policyLabel =
+        `empty=${emptyPolicy.token}, nonNumeric=${nonNumericPolicy.token}`;
+      const referencePolicies =
+        `${emptyPolicy.token}:${nonNumericPolicy.token}`;
+
+      it(`should apply whole-value empty policies (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1:${referencePolicies}`,
+          ''
+        );
+
+        expectSolverOutcome(dialog, emptyPolicy.outcome);
+      });
+
+      it(`should apply whole-value non-numeric policies (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1:${referencePolicies}`,
+          'abc'
+        );
+        const expectedOutcome = nonNumericPolicy.token === 'ERROR' ?
+          'invalid' :
+          nonNumericPolicy.outcome;
+
+        expectSolverOutcome(dialog, expectedOutcome);
+      });
+
+      it(`should preserve whole numeric values (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1:${referencePolicies}`,
+          '7'
+        );
+
+        expectSolverOutcome(dialog, 'success', '7');
+      });
+
+      it(`should apply fragment empty policies (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1[0]:${referencePolicies}`,
+          '',
+          '^(.*)$'
+        );
+
+        expectSolverOutcome(dialog, emptyPolicy.outcome);
+      });
+
+      it(`should apply fragment non-numeric policies (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1[0]:${referencePolicies}`,
+          'abc',
+          '^(.*)$'
+        );
+
+        expectSolverOutcome(dialog, nonNumericPolicy.outcome);
+      });
+
+      it(`should preserve numeric fragment values (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1[0]:${referencePolicies}`,
+          '7',
+          '^(.*)$'
+        );
+
+        expectSolverOutcome(dialog, 'success', '7');
+      });
+
+      it(`should apply empty policies to missing fragments (${policyLabel})`, () => {
+        const dialog = createPolicyDialog(
+          `V1[1]:${referencePolicies}`,
+          '7',
+          '^(\\d+)$'
+        );
+
+        expectSolverOutcome(dialog, emptyPolicy.outcome);
+      });
+    });
+  });
+
+  it('runSolverTest should support the shorthand empty policy syntax', () => {
+    const defaultError = createPolicyDialog('V1:ERROR', '');
+    expectSolverOutcome(defaultError, 'error');
+
+    const incomplete = createPolicyDialog('V1:INC', '');
+    expectSolverOutcome(incomplete, 'incomplete');
+
+    const replacement = createPolicyDialog('V1:5', '');
+    expectSolverOutcome(replacement, 'success');
+  });
+
+  it('runSolverTest should resolve ID and alias references together', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression:
+          `${solverRef('First[1]:ERROR:ERROR')} + ` +
+          `${solverRef('v2:ERROR:4')}`
+      },
+      deriveSources: ['v1', 'v2'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'First',
+            sourceType: 'BASE',
+            fragmenting: '^([A-Z]+)-(\\d+)$'
+          },
+          {
+            id: 'v2',
+            alias: 'Second',
+            sourceType: 'BASE'
+          }
+        ]
+      }
+    });
+
+    dialog.solverTestValues['v1'] = 'ABC-12';
+    dialog.solverTestValues['v2'] = 'abc';
+
+    expectSolverOutcome(dialog, 'success', '16');
+  });
+
+  it('runSolverTest should handle whole and fragment references to one source', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression:
+          `${solverRef('V1[0]:ERROR:ERROR')} + ` +
+          `${solverRef('V1:ERROR:5')}`
+      },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'V1',
+            sourceType: 'BASE',
+            fragmenting: '^(\\d+)$'
+          }
+        ]
+      }
+    });
+    dialog.solverTestValues['v1'] = '7';
+
+    expectSolverOutcome(dialog, 'success', '14');
+  });
+
+  it('solverSourceReferences should ignore non-capturing regex groups', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [
+          {
+            id: 'v1',
+            alias: 'V1',
+            sourceType: 'BASE',
+            fragmenting: '^(?:prefix-)(\\d+)$'
+          }
+        ]
+      }
+    });
+
+    expect(dialog.solverSourceReferences.map(
+      source => dialog.getSolverSourceReference(source)
+    )).toEqual([
+      solverRef('V1'),
+      solverRef('V1[0]')
+    ]);
+  });
+
   it('runSolverTest should report non-numeric test values', () => {
     const dialog = createDialog({
       selfAlias: 'D',
@@ -425,6 +757,12 @@ describe('EditSourceParametersDialog', () => {
       type: 'success',
       message: 'Ergebnis: 0'
     });
+  });
+
+  it('runSolverTest should treat whitespace-only values as empty', () => {
+    const dialog = createPolicyDialog('V1:0:ERROR', '   ');
+
+    expectSolverOutcome(dialog, 'success', '0');
   });
 
   it('runSolverTest should apply a non-numeric-value policy', () => {
@@ -554,5 +892,10 @@ describe('EditSourceParametersDialog', () => {
     expect(expressions.some(
       expression => expression.includes('?') && expression.includes(':')
     )).toBeTrue();
+    expect(dialog.solverPolicySyntax).toBe(
+      solverRef('VAR[i]:emptyPolicy:nonNumericPolicy')
+    );
+    expect(expressions).toContain(solverRef('Bruch[0]:INC'));
+    expect(expressions).toContain(solverRef('Summand:0:INC'));
   });
 });

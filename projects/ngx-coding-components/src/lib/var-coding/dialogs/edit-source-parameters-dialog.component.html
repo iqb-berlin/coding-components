@@ -59,13 +59,18 @@
       </mat-form-field>
 
       <mat-menu #solverSourceMenu="matMenu">
-        @for (source of selectedSolverSources; track source.id) {
+        @for (source of solverSourceReferences; track getSolverSourceReference(source)) {
           <button class="solver-source-menu__item"
                   mat-menu-item
                   type="button"
                   (click)="insertSolverSourceReference(source, solverExpressionInput)">
             <mat-icon>input</mat-icon>
-            <span>{{ source.label }}</span>
+            <span>
+              {{ source.label }}
+              @if (source.fragmentIndex !== undefined) {
+                [{{ source.fragmentIndex }}]
+              }
+            </span>
             <code class="solver-source-menu__reference">
               {{ getSolverSourceReference(source) }}
             </code>
