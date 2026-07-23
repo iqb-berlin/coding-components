@@ -122,13 +122,16 @@
     },
     "solver-help": {
       "title": "Syntaxhilfe für Solver-Ausdrücke",
-      "description": "Solver-Ausdrücke werden mit math.js ausgewertet. Verwenden Sie Zahlen, Rechenzeichen und math.js-Funktionen; Quellvariablen referenzieren Sie mit ${Variablenname} oder ${VariablenID}.",
+      "description": "Solver-Ausdrücke werden mit math.js ausgewertet. Quellvariablen referenzieren Sie mit ${Variablenname}; ${VAR[0]} greift auf das erste Fragment zu (Indizes beginnen bei 0).",
+      "policies": "Optional folgen Policies für leere/fehlende und nichtnumerische Werte: ${VAR[i]:Leer-Policy:Nichtnumerisch-Policy}. Erlaubt sind ERROR, INC oder ein numerischer Defaultwert.",
+      "fragment-mismatch": "Passt der Wert nicht auf die Fragmentierungs-Regex, gilt das Fragment als fehlend und die erste Policy wird verwendet.",
       "examples-title": "Beispiele:",
       "examples": {
         "arithmetic": "einfache Rechenoperationen",
         "variables": "Werte aus zwei Quellvariablen addieren",
         "function": "Prozentwert berechnen und runden",
-        "condition": "Bedingung: Ergebnis ist 1, wenn Punkte mindestens 5 sind, sonst 0"
+        "condition": "Bedingung: Ergebnis ist 1, wenn Punkte mindestens 5 sind, sonst 0",
+        "fragment-policies": "Bruchfragmente verwenden; fehlende oder nichtnumerische Fragmente ergeben CODING_INCOMPLETE"
       },
       "docs-link": "math.js-Syntax öffnen"
     }

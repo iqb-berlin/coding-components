@@ -30,7 +30,7 @@ import {
   VariableSourceParameters
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { Response } from '@iqbspecs/response/response.interface';
-import { CodingFactory, CodingSchemeFactory } from '@iqb/responses';
+import { CodingSchemeFactory } from '@iqb/responses';
 import {
   SchemerService,
   VARIABLE_NAME_CHECK_PATTERN
@@ -45,7 +45,7 @@ export interface EditSourceParametersDialogData {
 }
 
 type SolverTestResult = {
-  type: 'success' | 'error';
+  type: 'success' | 'warning' | 'error';
   message: string;
 };
 
@@ -192,6 +192,11 @@ const SOLVER_VARIABLE_PREFIX = '$';
       color: #b71c1c;
     }
 
+    .solver-test-result-warning {
+      background: #fff8e1;
+      color: #5f3f00;
+    }
+
     .solver-test-hint {
       color: rgba(0, 0, 0, 0.6);
       margin-bottom: 8px;
@@ -247,6 +252,11 @@ export class EditSourceParametersDialog {
     {
       expression: `${SOLVER_VARIABLE_PREFIX}{Punkte} >= 5 ? 1 : 0`,
       descriptionKey: 'derive-processing.solver-help.examples.condition'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{FORMEL[1]:INC:INC} - 2 * ` +
+        `${SOLVER_VARIABLE_PREFIX}{FORMEL[0]:INC:INC}`,
+      descriptionKey: 'derive-processing.solver-help.examples.fragment-policies'
     }
   ];
 
@@ -456,23 +466,6 @@ export class EditSourceParametersDialog {
       return;
     }
 
-    const invalidNumericSources = referencedVariables.filter(
-      sourceId => CodingFactory.getValueAsNumber(
-        this.solverTestValues[sourceId] || ''
-      ) === null
-    );
-
-    if (invalidNumericSources.length > 0) {
-      this.solverTestResult = {
-        type: 'error',
-        message: `${this.tr(
-          'derive-processing.solver-test.error-invalid-value'
-        )}: ${invalidNumericSources.map(sourceId => this.getSourceLabel(sourceId))
-          .join(', ')}`
-      };
-      return;
-    }
-
     try {
       const result = CodingSchemeFactory.deriveValue(
         variableCodings,
@@ -486,6 +479,14 @@ export class EditSourceParametersDialog {
           message: `${this.tr('derive-processing.solver-test.result')}: ${
             EditSourceParametersDialog.formatSolverTestValue(result.value)
           }`
+        };
+        return;
+      }
+
+      if (result.status === 'CODING_INCOMPLETE') {
+        this.solverTestResult = {
+          type: 'warning',
+          message: this.tr('derive-processing.solver-test.incomplete')
         };
         return;
       }
@@ -572,12 +573,29 @@ export class EditSourceParametersDialog {
         .filter(coding => Boolean(coding.alias))
         .map(coding => [coding.alias as string, coding.id])
     );
-    const references = Array.from(expression.matchAll(/\$\{(\s*[\w,-]+\s*)}/g))
-      .map(match => match[1].trim())
+    const references = Array.from(expression.matchAll(/\$\{([^{}]+)}/g))
+      .map(match => EditSourceParametersDialog.getSolverVariableName(match[1]))
+      .filter((variableName): variableName is string => Boolean(variableName))
       .map(variableName => variableIdsByAlias.get(variableName) ||
         variableName);
 
     return [...new Set(references)];
+  }
+
+  private static getSolverVariableName(tokenContent: string): string | null {
+    let variableName = tokenContent.split(':', 1)[0].trim();
+
+    if (variableName.endsWith(']')) {
+      const fragmentStart = variableName.lastIndexOf('[');
+      if (fragmentStart < 0) return null;
+
+      const fragmentIndex = variableName.slice(fragmentStart + 1, -1).trim();
+      if (!/^\d+$/.test(fragmentIndex)) return null;
+
+      variableName = variableName.slice(0, fragmentStart).trim();
+    }
+
+    return /^[a-zA-Z0-9_,-]+$/.test(variableName) ? variableName : null;
   }
 
   private getSourceLabel(sourceId: string): string {

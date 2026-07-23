@@ -10,6 +10,8 @@ describe('EditSourceParametersDialog', () => {
 
   const translations: Record<string, string> = {
     'derive-processing.solver-test.result': 'Ergebnis',
+    'derive-processing.solver-test.incomplete':
+      'Kontrolliert unvollständiges Ergebnis (INC).',
     'derive-processing.solver-test.error-expression-missing': 'Bitte einen Solver-Ausdruck eingeben.',
     'derive-processing.solver-test.error-sources-missing': 'Bitte mindestens eine Quellvariable auswählen.',
     'derive-processing.solver-test.error-unselected-source': 'Der Ausdruck verweist auf nicht ausgewählte Quelle(n)',
@@ -289,6 +291,23 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.solverSourceWarning).toContain('V2');
   });
 
+  it('solverSourceWarning should recognize fragment and policy references', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression:
+          `${solverRef('V1')} + \${V2[0]} + \${V2[1]:INC} + \${V2[2]:0:INC}`
+      },
+      deriveSources: ['v1']
+    });
+
+    expect(dialog.solverSourceWarning).toContain(
+      'Warnung: Im Solver-Ausdruck referenzierte Variable(n)'
+    );
+    expect(dialog.solverSourceWarning).toContain('V2');
+  });
+
   it('solverSourceWarning should update when expression or source selection changes', () => {
     const dialog = createDialog({
       selfAlias: 'D',
@@ -365,7 +384,7 @@ describe('EditSourceParametersDialog', () => {
     );
   });
 
-  it('runSolverTest should report non-numeric test values', () => {
+  it('runSolverTest should report DERIVE_ERROR for non-numeric values without a policy', () => {
     const dialog = createDialog({
       selfAlias: 'D',
       sourceType: 'SOLVER',
@@ -376,11 +395,115 @@ describe('EditSourceParametersDialog', () => {
     dialog.solverTestValues['v1'] = 'abc';
     dialog.runSolverTest();
 
-    expect(dialog.solverTestResult?.type).toBe('error');
-    expect(dialog.solverTestResult?.message).toContain(
-      'Bitte numerischen Testwert prüfen'
-    );
-    expect(dialog.solverTestResult?.message).toContain('V1');
+    expect(dialog.solverTestResult).toEqual({
+      type: 'error',
+      message: 'Der Ausdruck konnte nicht ausgewertet werden.'
+    });
+  });
+
+  it('runSolverTest should let a non-numeric policy handle the raw source value', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression: `${solverRef('V1:ERROR:INC')} + 1`
+      },
+      deriveSources: ['v1']
+    });
+
+    dialog.solverTestValues['v1'] = 'abc';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'warning',
+      message: 'Kontrolliert unvollständiges Ergebnis (INC).'
+    });
+  });
+
+  it('runSolverTest should evaluate numeric fragments from a formula source', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression:
+          `${solverRef('V1[1]')} - 2 * ${solverRef('V1[0]')}`
+      },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [{
+          id: 'v1',
+          alias: 'V1',
+          sourceType: 'BASE',
+          fragmenting: '^\\\\frac\\{?(\\d+)\\}?\\{?(\\d+)\\}?$'
+        }]
+      }
+    });
+
+    dialog.solverTestValues['v1'] = '\\frac{1}{2}';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'success',
+      message: 'Ergebnis: 0'
+    });
+  });
+
+  it('runSolverTest should report regex mismatches as incomplete with INC', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression:
+          `${solverRef('V1[1]:INC:INC')} - 2 * ${
+            solverRef('V1[0]:INC:INC')
+          }`
+      },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [{
+          id: 'v1',
+          alias: 'V1',
+          sourceType: 'BASE',
+          fragmenting: '^\\\\frac\\{?(\\d+)\\}?\\{?(\\d+)\\}?$'
+        }]
+      }
+    });
+
+    dialog.solverTestValues['v1'] = '\\frac{1}{zwei}';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'warning',
+      message: 'Kontrolliert unvollständiges Ergebnis (INC).'
+    });
+  });
+
+  it('runSolverTest should report regex mismatches as errors without a policy', () => {
+    const dialog = createDialog({
+      selfAlias: 'D',
+      sourceType: 'SOLVER',
+      sourceParameters: {
+        solverExpression:
+          `${solverRef('V1[1]')} - 2 * ${solverRef('V1[0]')}`
+      },
+      deriveSources: ['v1'],
+      codingScheme: {
+        variableCodings: [{
+          id: 'v1',
+          alias: 'V1',
+          sourceType: 'BASE',
+          fragmenting: '^\\\\frac\\{?(\\d+)\\}?\\{?(\\d+)\\}?$'
+        }]
+      }
+    });
+
+    dialog.solverTestValues['v1'] = '\\frac{1}{2}+1';
+    dialog.runSolverTest();
+
+    expect(dialog.solverTestResult).toEqual({
+      type: 'error',
+      message: 'Der Ausdruck konnte nicht ausgewertet werden.'
+    });
   });
 
   it('runSolverTest should report syntax and evaluation errors', () => {
@@ -432,5 +555,10 @@ describe('EditSourceParametersDialog', () => {
     expect(expressions.some(
       expression => expression.includes('?') && expression.includes(':')
     )).toBeTrue();
+    expect(expressions).toContain(
+      `${solverRef('FORMEL[1]:INC:INC')} - 2 * ${
+        solverRef('FORMEL[0]:INC:INC')
+      }`
+    );
   });
 });

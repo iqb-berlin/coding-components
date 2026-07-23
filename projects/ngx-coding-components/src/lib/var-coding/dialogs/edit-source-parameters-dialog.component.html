@@ -110,6 +110,7 @@
         @if (solverTestResult) {
           <div class="solver-test-result"
                [class.solver-test-result-ok]="solverTestResult.type === 'success'"
+               [class.solver-test-result-warning]="solverTestResult.type === 'warning'"
                [class.solver-test-result-error]="solverTestResult.type === 'error'">
             {{ solverTestResult.message }}
           </div>
@@ -124,6 +125,8 @@
           </span>
         </div>
         <p>{{ 'derive-processing.solver-help.description' | translate }}</p>
+        <p>{{ 'derive-processing.solver-help.policies' | translate }}</p>
+        <p>{{ 'derive-processing.solver-help.fragment-mismatch' | translate }}</p>
         <div>{{ 'derive-processing.solver-help.examples-title' | translate }}</div>
         <ul>
           @for (example of solverExpressionExamples; track example.expression) {
