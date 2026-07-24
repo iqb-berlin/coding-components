@@ -1111,6 +1111,55 @@ describe('SchemerComponent', () => {
     expect(emitSpy).toHaveBeenCalled();
   });
 
+  it('should keep an activated no-value variable valid after reload', () => {
+    const originalVariableInfo = {
+      id: 'marking-panel_1',
+      alias: '_08_reached',
+      type: 'no-value',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: []
+    } as unknown as VariableInfo;
+
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'marking-panel_1',
+        alias: '_08_reached',
+        sourceType: 'BASE_NO_VALUE',
+        sourceParameters: {
+          processing: ['TAKE_DISPLAYED_AS_VALUE_CHANGED']
+        },
+        codes: [{
+          id: 0,
+          type: 'INTENDED_INCOMPLETE',
+          score: 0,
+          label: '',
+          manualInstruction: '',
+          ruleSetOperatorAnd: false,
+          ruleSets: []
+        }]
+      } as unknown as VariableCodingData]
+    } as unknown as never);
+    schemerService.setVarList([{ ...originalVariableInfo }]);
+    selectVariableDialog.afterClosedValue = ['_08_reached'];
+
+    component.activateBaseNoValueVars();
+
+    const persistedScheme = JSON.parse(JSON.stringify(
+      schemerService.codingScheme
+    ));
+    schemerService.setCodingScheme(persistedScheme);
+    schemerService.setVarList([{ ...originalVariableInfo }]);
+    component.updateVariableLists();
+
+    expect(
+      schemerService.codingScheme?.variableCodings[0].sourceType
+    ).toBe('BASE');
+    expect(component.problems.some(p => p.type === 'INVALID_SOURCE')).toBeFalse();
+  });
+
   it('showCodingScheme should do nothing when codingScheme is null', () => {
     schemerService.setCodingScheme(null);
     component.showCodingScheme();
