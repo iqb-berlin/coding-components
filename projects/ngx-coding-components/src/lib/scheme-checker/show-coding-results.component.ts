@@ -35,11 +35,14 @@ import { Response } from '@iqbspecs/response/response.interface';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { transformValue } from '@iqb/responses/value-transform';
 
-type Data = {
+/**
+ * Data required when opening {@link ShowCodingResultsComponent} as a dialog.
+ */
+export interface ShowCodingResultsData {
   responses: Response[];
   varsWithCodes: string[];
   variableCodings: VariableCodingData[];
-};
+}
 
 @Component({
   template: `
@@ -69,10 +72,16 @@ type Data = {
         class="toggle"
         name="transformedValueView"
         [checked]="transformedValueView"
+        [disabled]="!transformedValuesAvailable"
         (change)="toggleChange($event)"
       >
-        Transformierte Werte (Fragmentierung)
+        {{ 'coding.transformed-values' | translate }}
       </mat-slide-toggle>
+      @if (!transformedValuesAvailable) {
+      <span class="transformed-values-hint">
+        {{ 'coding.transformed-values-unavailable' | translate }}
+      </span>
+      }
     </div>
     <mat-dialog-content>
       @if (isLoading) {
@@ -96,7 +105,7 @@ type Data = {
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             {{
               column === 'transformed'
-                ? 'Transformiert'
+                ? ('coding.transformed' | translate)
                 : ('coding.' + column | translate)
             }}
           </th>
@@ -125,6 +134,7 @@ type Data = {
   styles: [
     '.filter{width:100%;margin-top:10px}',
     '.toggle{margin-left:15px}',
+    '.transformed-values-hint{display:block;margin-left:15px;font-size:12px}',
     '.title{display:inline!important}'
   ],
   standalone: true,
@@ -162,9 +172,14 @@ export class ShowCodingResultsComponent implements OnInit {
   rawResponsesView = false;
   transformedValueView = false;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: Data) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ShowCodingResultsData) {}
 
   @ViewChild(MatSort) sort!: MatSort;
+
+  get transformedValuesAvailable(): boolean {
+    return Array.isArray(this.data.variableCodings) &&
+      this.data.variableCodings.length > 0;
+  }
 
   matSort(sort: MatSort) {
     if (this.dataSource) {
@@ -198,7 +213,7 @@ export class ShowCodingResultsComponent implements OnInit {
     if (hasSubform) {
       this.displayedColumns.unshift('subform');
     }
-    if (this.transformedValueView) {
+    if (this.transformedValueView && this.transformedValuesAvailable) {
       this.displayedColumns.push('transformed');
     }
   }
@@ -229,7 +244,9 @@ export class ShowCodingResultsComponent implements OnInit {
   }
 
   private getTransformedValue(r: Response): unknown {
-    const vc = (this.data.variableCodings || []).find(c => c.id === r.id);
+    const variableCodings = this.data.variableCodings || [];
+    const vc = variableCodings.find(c => c.alias === r.id) ||
+      variableCodings.find(c => c.id === r.id);
     if (!vc) return undefined;
 
     const sortArray = (vc.processing || []).includes('SORT_ARRAY');
@@ -268,6 +285,7 @@ export class ShowCodingResultsComponent implements OnInit {
       this.codedVariablesOnly = !this.codedVariablesOnly;
       this.rebuildTableData();
     } else if (event.source.name === 'transformedValueView') {
+      if (!this.transformedValuesAvailable) return;
       this.transformedValueView = !this.transformedValueView;
       this.rebuildTableData();
     }
