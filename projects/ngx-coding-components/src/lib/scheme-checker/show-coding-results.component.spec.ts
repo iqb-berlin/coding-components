@@ -1,12 +1,15 @@
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Response } from '@iqbspecs/response/response.interface';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { ShowCodingResultsComponent } from './show-coding-results.component';
+import {
+  ShowCodingResultsComponent,
+  ShowCodingResultsData
+} from './show-coding-results.component';
 
 describe('ShowCodingResultsComponent', () => {
   let component: ShowCodingResultsComponent;
 
-  const baseData = {
+  const baseData: ShowCodingResultsData = {
     responses: [
       { id: 'v1', value: 'a', status: 'VALUE_CHANGED' } as Response,
       { id: 'v2', value: ['x', 'y'], status: 'DISPLAYED' } as Response
@@ -19,7 +22,7 @@ describe('ShowCodingResultsComponent', () => {
   };
 
   beforeEach(() => {
-    component = new ShowCodingResultsComponent(baseData as unknown as never);
+    component = new ShowCodingResultsComponent(baseData);
     component.ngOnInit();
   });
 
@@ -37,7 +40,7 @@ describe('ShowCodingResultsComponent', () => {
           id: 'v1', value: 'a', status: 'VALUE_CHANGED', subform: 's1'
         } as unknown as Response
       ]
-    } as unknown as never);
+    });
     c2.ngOnInit();
 
     expect(c2.displayedColumns[0]).toBe('subform');
@@ -74,6 +77,112 @@ describe('ShowCodingResultsComponent', () => {
 
     expect(component.transformedValueView).toBeTrue();
     expect(component.displayedColumns.includes('transformed')).toBeTrue();
+  });
+
+  it('should resolve coded response aliases and preserve fragment strings', () => {
+    const aliasComponent = new ShowCodingResultsComponent({
+      responses: [
+        {
+          id: 'visible-id',
+          value: String.raw`\frac12`,
+          status: 'VALUE_CHANGED'
+        } as Response
+      ],
+      varsWithCodes: ['visible-id'],
+      variableCodings: [
+        {
+          id: 'internal-id',
+          alias: 'visible-id',
+          sourceType: 'BASE',
+          fragmenting: String.raw`^\\frac\{?(\d+)\}?\{?(\d+)\}?$`
+        } as unknown as VariableCodingData
+      ]
+    });
+    aliasComponent.ngOnInit();
+
+    aliasComponent.toggleChange({
+      source: { name: 'transformedValueView' }
+    } as unknown as MatSlideToggleChange);
+
+    const rows = aliasComponent.dataSource.data as { transformed: string }[];
+    expect(rows[0].transformed).toBe('["1","2"]');
+  });
+
+  it('should fall back to the internal variable id', () => {
+    const idComponent = new ShowCodingResultsComponent({
+      responses: [
+        {
+          id: 'internal-id',
+          value: 'ABC-007',
+          status: 'VALUE_CHANGED'
+        } as Response
+      ],
+      varsWithCodes: ['internal-id'],
+      variableCodings: [
+        {
+          id: 'internal-id',
+          alias: 'visible-id',
+          sourceType: 'BASE',
+          fragmenting: String.raw`^([A-Z]+)-(\d+)$`
+        } as unknown as VariableCodingData
+      ]
+    });
+    idComponent.ngOnInit();
+
+    idComponent.toggleChange({
+      source: { name: 'transformedValueView' }
+    } as unknown as MatSlideToggleChange);
+
+    const rows = idComponent.dataSource.data as { transformed: string }[];
+    expect(rows[0].transformed).toBe('["ABC","007"]');
+  });
+
+  it('should transform sorted arrays and retain empty fragment matches', () => {
+    const arrayComponent = new ShowCodingResultsComponent({
+      responses: [
+        {
+          id: 'visible-id',
+          value: ['B-02', 'no match', 'A-01'],
+          status: 'VALUE_CHANGED'
+        } as Response
+      ],
+      varsWithCodes: ['visible-id'],
+      variableCodings: [
+        {
+          id: 'internal-id',
+          alias: 'visible-id',
+          sourceType: 'BASE',
+          processing: ['SORT_ARRAY'],
+          fragmenting: String.raw`^([A-Z])-(\d+)$`
+        } as unknown as VariableCodingData
+      ]
+    });
+    arrayComponent.ngOnInit();
+
+    arrayComponent.toggleChange({
+      source: { name: 'transformedValueView' }
+    } as unknown as MatSlideToggleChange);
+
+    const rows = arrayComponent.dataSource.data as { transformed: string }[];
+    expect(rows[0].transformed).toBe('[["A","01"],["B","02"],[]]');
+  });
+
+  it('should disable transformed values when variable codings are missing', () => {
+    const dataWithoutVariableCodings = {
+      responses: baseData.responses,
+      varsWithCodes: baseData.varsWithCodes
+    } as unknown as ShowCodingResultsData;
+    const unavailableComponent =
+      new ShowCodingResultsComponent(dataWithoutVariableCodings);
+    unavailableComponent.ngOnInit();
+
+    unavailableComponent.toggleChange({
+      source: { name: 'transformedValueView' }
+    } as unknown as MatSlideToggleChange);
+
+    expect(unavailableComponent.transformedValuesAvailable).toBeFalse();
+    expect(unavailableComponent.transformedValueView).toBeFalse();
+    expect(unavailableComponent.displayedColumns).not.toContain('transformed');
   });
 
   it('applyFilter should set the dataSource filter to trimmed lower-case', () => {
