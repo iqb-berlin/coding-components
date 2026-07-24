@@ -54,6 +54,12 @@ interface SolverExpressionExample {
   descriptionKey: string;
 }
 
+interface SolverSourceReference {
+  id: string;
+  label: string;
+  fragmentIndex?: number;
+}
+
 interface SolverVariableReference {
   sourceId: string;
   hasFragmentIndex: boolean;
@@ -244,6 +250,9 @@ export class EditSourceParametersDialog {
   readonly solverExpressionDocsUrl =
     'https://mathjs.org/docs/expressions/syntax.html';
 
+  readonly solverPolicySyntax =
+    `${SOLVER_VARIABLE_PREFIX}{VAR[i]:emptyPolicy:nonNumericPolicy}`;
+
   readonly solverExpressionExamples: SolverExpressionExample[] = [
     {
       expression: '1 + 2 * 3',
@@ -261,6 +270,14 @@ export class EditSourceParametersDialog {
     {
       expression: `${SOLVER_VARIABLE_PREFIX}{Punkte} >= 5 ? 1 : 0`,
       descriptionKey: 'derive-processing.solver-help.examples.condition'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{Bruch[0]:INC}`,
+      descriptionKey: 'derive-processing.solver-help.examples.fragment'
+    },
+    {
+      expression: `${SOLVER_VARIABLE_PREFIX}{Summand:0:INC}`,
+      descriptionKey: 'derive-processing.solver-help.examples.policies'
     }
   ];
 
@@ -312,6 +329,18 @@ export class EditSourceParametersDialog {
       id: sourceId,
       label: this.possibleNewSources.get(sourceId) || sourceId
     }));
+  }
+
+  get solverSourceReferences(): SolverSourceReference[] {
+    return this.selectedSolverSources.flatMap(source => {
+      const fragmentReferences = this.getSourceFragmentIndexes(source.id)
+        .map(fragmentIndex => ({
+          ...source,
+          fragmentIndex
+        }));
+
+      return [source, ...fragmentReferences];
+    });
   }
 
   get solverSourceWarning(): string | null {
@@ -402,11 +431,12 @@ export class EditSourceParametersDialog {
   }
 
   insertSolverSourceReference(
-    source: { id: string; label: string },
+    source: SolverSourceReference,
     input: HTMLInputElement
   ): void {
     const reference = this.getSolverVariableReference(
-      source.label || source.id
+      source.label || source.id,
+      source.fragmentIndex
     );
     const expression = this.data.sourceParameters.solverExpression || '';
     const selectionStart = input.selectionStart ?? expression.length;
@@ -426,8 +456,11 @@ export class EditSourceParametersDialog {
     });
   }
 
-  getSolverSourceReference(source: { id: string; label: string }): string {
-    return this.getSolverVariableReference(source.label || source.id);
+  getSolverSourceReference(source: SolverSourceReference): string {
+    return this.getSolverVariableReference(
+      source.label || source.id,
+      source.fragmentIndex
+    );
   }
 
   clearSolverTestResult(): void {
@@ -626,11 +659,10 @@ export class EditSourceParametersDialog {
     if (reference.hasFragmentIndex) return false;
 
     const value = this.solverTestValues[reference.sourceId] || '';
+    if (!value.trim()) return false;
     if (CodingFactory.getValueAsNumber(value) !== null) return false;
 
-    const policy = value.trim() ?
-      reference.nonNumericPolicy :
-      reference.emptyPolicy;
+    const policy = reference.nonNumericPolicy;
     if (typeof policy === 'undefined') return true;
 
     const trimmedPolicy = policy.trim();
@@ -722,8 +754,30 @@ export class EditSourceParametersDialog {
     return JSON.stringify(value) || '';
   }
 
-  private getSolverVariableReference(variableName: string): string {
-    return `${this.solverVariablePrefix}{${variableName}}`;
+  private getSourceFragmentIndexes(sourceId: string): number[] {
+    const sourceCoding = this.schemerService.codingScheme?.variableCodings
+      .find(coding => coding.id === sourceId);
+    const fragmenting = sourceCoding?.fragmenting;
+
+    if (!fragmenting) return [];
+
+    try {
+      const emptyAlternativeMatch = new RegExp(`(?:${fragmenting})|`).exec('');
+      const fragmentCount = (emptyAlternativeMatch?.length || 1) - 1;
+      return Array.from({ length: fragmentCount }, (_, index) => index);
+    } catch {
+      return [];
+    }
+  }
+
+  private getSolverVariableReference(
+    variableName: string,
+    fragmentIndex?: number
+  ): string {
+    const fragmentSuffix = typeof fragmentIndex === 'number' ?
+      `[${fragmentIndex}]` :
+      '';
+    return `${this.solverVariablePrefix}{${variableName}${fragmentSuffix}}`;
   }
 
   private setSolverTestError(translationKey: string): void {

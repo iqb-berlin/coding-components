@@ -59,13 +59,18 @@
       </mat-form-field>
 
       <mat-menu #solverSourceMenu="matMenu">
-        @for (source of selectedSolverSources; track source.id) {
+        @for (source of solverSourceReferences; track getSolverSourceReference(source)) {
           <button class="solver-source-menu__item"
                   mat-menu-item
                   type="button"
                   (click)="insertSolverSourceReference(source, solverExpressionInput)">
             <mat-icon>input</mat-icon>
-            <span>{{ source.label }}</span>
+            <span>
+              {{ source.label }}
+              @if (source.fragmentIndex !== undefined) {
+                [{{ source.fragmentIndex }}]
+              }
+            </span>
             <code class="solver-source-menu__reference">
               {{ getSolverSourceReference(source) }}
             </code>
@@ -125,6 +130,11 @@
           </span>
         </div>
         <p>{{ 'derive-processing.solver-help.description' | translate }}</p>
+        <p>
+          <code>{{ solverPolicySyntax }}</code>
+          -
+          {{ 'derive-processing.solver-help.policy-description' | translate }}
+        </p>
         <div>{{ 'derive-processing.solver-help.examples-title' | translate }}</div>
         <ul>
           @for (example of solverExpressionExamples; track example.expression) {
