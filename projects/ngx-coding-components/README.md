@@ -10,6 +10,14 @@ This library provides the UI for the **IQB Schemer**, a powerful tool to manage 
 - **`<scheme-checker>`**: A utility to test schemes against sample responses.
 - **`<schemer-standalone-menu>`**: A development helper for loading/saving JSON files.
 
+### Coding results dialog
+
+When opening `ShowCodingResultsComponent` through Angular Material, use the
+exported `ShowCodingResultsData` interface. In addition to the coded
+`responses` and `varsWithCodes`, pass the complete `variableCodings` used for
+coding. The component needs them to resolve aliases and display fragmented or
+sorted response values.
+
 ## Features
 
 - Real-time validation of coding logic.
