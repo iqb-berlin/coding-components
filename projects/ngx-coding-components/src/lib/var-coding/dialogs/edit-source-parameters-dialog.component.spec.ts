@@ -558,12 +558,14 @@ describe('EditSourceParametersDialog', () => {
         `${emptyPolicy.token}:${nonNumericPolicy.token}`;
 
       it(`should apply whole-value empty policies (${policyLabel})`, () => {
-        const dialog = createPolicyDialog(
-          `V1:${referencePolicies}`,
-          ''
-        );
+        ['', '   '].forEach(testValue => {
+          const dialog = createPolicyDialog(
+            `V1:${referencePolicies}`,
+            testValue
+          );
 
-        expectSolverOutcome(dialog, emptyPolicy.outcome);
+          expectSolverOutcome(dialog, emptyPolicy.outcome);
+        });
       });
 
       it(`should apply whole-value non-numeric policies (${policyLabel})`, () => {

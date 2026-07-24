@@ -659,11 +659,10 @@ export class EditSourceParametersDialog {
     if (reference.hasFragmentIndex) return false;
 
     const value = this.solverTestValues[reference.sourceId] || '';
+    if (!value.trim()) return false;
     if (CodingFactory.getValueAsNumber(value) !== null) return false;
 
-    const policy = value.trim() ?
-      reference.nonNumericPolicy :
-      reference.emptyPolicy;
+    const policy = reference.nonNumericPolicy;
     if (typeof policy === 'undefined') return true;
 
     const trimmedPolicy = policy.trim();
