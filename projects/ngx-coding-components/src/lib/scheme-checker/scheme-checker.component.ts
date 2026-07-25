@@ -76,7 +76,7 @@ export class SchemeCheckerComponent {
       });
       const varsWithCodes: string[] = this._codingScheme.variableCodings
         .filter(v => v.codes && v.codes.length > 0)
-        .map(v => v.id);
+        .map(v => v.alias || v.id);
       this.showCodingResultsDialog.open(ShowCodingResultsComponent, {
         width: '800px',
         height: '600px',

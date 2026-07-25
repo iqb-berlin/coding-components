@@ -128,7 +128,7 @@ describe('SchemeCheckerComponent', () => {
     expect(dialogOpenSpy.calls.mostRecent().args[0]).toBe(ShowCodingResultsComponent);
     const config = dialogOpenSpy.calls.mostRecent().args[1] as { data: unknown };
     expect(config.data).toEqual(jasmine.objectContaining({
-      varsWithCodes: ['v1']
+      varsWithCodes: ['A']
     }));
   });
 
