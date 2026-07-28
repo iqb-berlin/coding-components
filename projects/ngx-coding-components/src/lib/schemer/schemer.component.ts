@@ -62,7 +62,10 @@ import {
   CodingSchemeValidationProblem,
   validateCodingScheme
 } from '../services/coding-scheme-validation';
-import { validateVariableCodingChange } from '../services/schemer-identifier-validation';
+import {
+  isEmptyVariableCoding,
+  validateVariableCodingChange
+} from '../services/schemer-identifier-validation';
 
 @Component({
   selector: 'iqb-schemer',
@@ -189,28 +192,18 @@ export class SchemerComponent implements OnDestroy {
     ) {
       // remove orphan+empty base variables
       const varListIds = this.schemerService.varList.map(v => v.id);
-      const varCodingsToDelete = [
-        ...this.schemerService.codingScheme.variableCodings
-          .filter(
-            bv => bv.sourceType === 'BASE' &&
-              varListIds.indexOf(bv.id) < 0 &&
-              SchemerComponent.isEmptyCoding(bv)
-          )
-          .map(bv => bv.id)
-      ];
+      const variableCodings =
+        this.schemerService.codingScheme.variableCodings;
+      const varCodingsToDelete = variableCodings.filter(
+        bv => bv.sourceType === 'BASE' &&
+          varListIds.indexOf(bv.id) < 0 &&
+          SchemerComponent.isEmptyCoding(bv)
+      );
       if (varCodingsToDelete.length > 0) {
         varCodingsToDelete.forEach(vc => {
-          if (this.schemerService.codingScheme) {
-            const varCodingIndexToDelete =
-              this.schemerService.codingScheme.variableCodings.findIndex(
-                vcd => vcd.id === vc
-              );
-            if (varCodingIndexToDelete >= 0) {
-              this.schemerService.codingScheme.variableCodings.splice(
-                varCodingIndexToDelete,
-                1
-              );
-            }
+          const varCodingIndexToDelete = variableCodings.indexOf(vc);
+          if (varCodingIndexToDelete >= 0) {
+            variableCodings.splice(varCodingIndexToDelete, 1);
           }
         });
       }
@@ -460,16 +453,7 @@ export class SchemerComponent implements OnDestroy {
   }
 
   private static isEmptyCoding(coding: VariableCodingData): boolean {
-    if (coding.label && coding.label !== coding.id) return false;
-    if (
-      (coding.processing && coding.processing.length > 0) ||
-      coding.fragmenting ||
-      (coding.codes && coding.codes.length > 0)
-    ) return false;
-    return !(
-      (coding.manualInstruction && coding.manualInstruction.length > 0) ||
-      coding.codeModel !== 'MANUAL_AND_RULES'
-    );
+    return isEmptyVariableCoding(coding);
   }
 
   addVarScheme() {
@@ -534,8 +518,8 @@ export class SchemerComponent implements OnDestroy {
               }
             });
           } else {
-            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
             this.updateVariableLists();
+            this.codingSchemeChanged.emit(this.schemerService.codingScheme);
           }
         }
       });
@@ -619,13 +603,14 @@ export class SchemerComponent implements OnDestroy {
             ) :
             null;
           if (!identifierAnalysis || identifierAnalysis.hasProblems) {
+            const errorMessage = identifierAnalysis?.hasInvalid ?
+              'data-error.variable-id.character' :
+              'data-error.variable-id.double';
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
                 title: this.tr('schemer.rename.error.title'),
-                content: this.translateService.instant(
-                  'data-error.variable-id.double'
-                ),
+                content: this.translateService.instant(errorMessage),
                 type: MessageType.error
               }
             });

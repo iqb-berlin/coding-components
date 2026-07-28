@@ -19,6 +19,21 @@ const copyVariableIdentifiers = (
   sourceIndex
 });
 
+export const isEmptyVariableCoding = (
+  coding: VariableCodingData
+): boolean => {
+  if (coding.label && coding.label !== coding.id) return false;
+  if (
+    (coding.processing && coding.processing.length > 0) ||
+    coding.fragmenting ||
+    (coding.codes && coding.codes.length > 0)
+  ) return false;
+  return !(
+    (coding.manualInstruction && coding.manualInstruction.length > 0) ||
+    coding.codeModel !== 'MANUAL_AND_RULES'
+  );
+};
+
 export type SchemerIdentifierOrigin =
   'VAR_LIST' |
   'BASE_CODING' |
@@ -35,6 +50,7 @@ const getSchemerIdentifiersForValidation = (
 ): SchemerIdentifier[] => {
   const representedBaseIds = new Set(varList.map(variable => variable.id));
   const matchedBaseIds = new Set<string>();
+  const canRemoveOrphanBaseCodings = varList.length > 0;
 
   return [
     ...varList.map((variable, sourceIndex) => copyVariableIdentifiers(
@@ -47,6 +63,12 @@ const getSchemerIdentifiersForValidation = (
       .filter(({ coding }) => {
         const isBaseCoding = coding.sourceType === 'BASE' ||
           coding.sourceType === 'BASE_NO_VALUE';
+        if (
+          canRemoveOrphanBaseCodings &&
+          coding.sourceType === 'BASE' &&
+          !representedBaseIds.has(coding.id) &&
+          isEmptyVariableCoding(coding)
+        ) return false;
         if (!isBaseCoding || !representedBaseIds.has(coding.id)) return true;
         if (matchedBaseIds.has(coding.id)) return true;
 
