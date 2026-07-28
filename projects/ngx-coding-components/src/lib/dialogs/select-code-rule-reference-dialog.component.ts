@@ -67,13 +67,8 @@ export class SelectCodeRuleReferenceDialogComponent {
     public dialogRef: MatDialogRef<SelectCodeRuleReferenceDialogComponent>
   ) {
     if (typeof this.refData.value === 'number') {
-      if (this.refData.value < 0 && !this.refData.isFragmentMode) {
-        this.newValue = 0;
-        this.newSelection = ['ANY_OPEN'];
-      } else {
-        this.newValue = this.refData.value + 1;
-        this.newSelection = ['specific'];
-      }
+      this.newValue = this.refData.value + 1;
+      this.newSelection = ['specific'];
     } else {
       this.newValue = 0;
       this.newSelection = [this.refData.value || 'ANY'];

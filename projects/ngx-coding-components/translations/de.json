@@ -421,7 +421,6 @@
     "reference": {
       "label": "Position im Werte-Array",
       "title": "Position im Werte-Array ändern",
-      "invalid": "Ungültige Position – öffnen, um auf ‚Irgendeine - Offen‘ umzustellen",
       "prompt": "Die Regeln dieses Regelsatzes beziehen sich auf ein Werte-Array insgesamt (Summe, Länge), auf irgendeinen Wert oder auf einen spezifischen.",
       "any": "Irgendeine - Strikt",
       "any-open": "Irgendeine - Offen",

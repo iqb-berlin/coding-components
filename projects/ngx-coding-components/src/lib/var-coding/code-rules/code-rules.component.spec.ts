@@ -132,24 +132,6 @@ describe('CodeRulesComponent', () => {
     expect(emitSpy).not.toHaveBeenCalled();
   });
 
-  it('editArrayReference should preserve invalid entries when dialog is dismissed', () => {
-    const emitSpy = spyOn(component.codeRulesChanged, 'emit');
-    const rs = {
-      ruleOperatorAnd: false,
-      valueArrayPos: -1,
-      rules: []
-    } as unknown as never;
-
-    dialogOpenSpy.and.returnValue({
-      afterClosed: () => of(undefined)
-    });
-
-    component.editArrayReference(rs);
-
-    expect((rs as unknown as { valueArrayPos: number }).valueArrayPos).toBe(-1);
-    expect(emitSpy).not.toHaveBeenCalled();
-  });
-
   it('editArrayReference should update valueArrayPos and emit when dialog returns a value', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
     const rs = { ruleOperatorAnd: false, rules: [] } as unknown as never;
@@ -162,16 +144,5 @@ describe('CodeRulesComponent', () => {
 
     expect((rs as unknown as { valueArrayPos: number }).valueArrayPos).toBe(2);
     expect(emitSpy).toHaveBeenCalled();
-  });
-
-  it('should identify negative array references as invalid', () => {
-    expect(component.hasInvalidArrayReference({
-      valueArrayPos: -1,
-      rules: []
-    } as unknown as never)).toBeTrue();
-    expect(component.hasInvalidArrayReference({
-      valueArrayPos: 'ANY_OPEN',
-      rules: []
-    } as unknown as never)).toBeFalse();
   });
 });

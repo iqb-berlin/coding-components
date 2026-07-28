@@ -18,26 +18,6 @@ describe('SelectCodeRuleReferenceDialogComponent', () => {
     expect(component.newValue).toBe(4);
   });
 
-  it('should offer ANY_OPEN when repairing a negative array position', () => {
-    const { component } = createComponent({
-      isFragmentMode: false,
-      value: -1
-    });
-
-    expect(component.newSelection).toEqual(['ANY_OPEN']);
-    expect(component.newValue).toBe(0);
-  });
-
-  it('should keep negative fragment positions explicit and unsaveable', () => {
-    const { component } = createComponent({
-      isFragmentMode: true,
-      value: -1
-    });
-
-    expect(component.newSelection).toEqual(['specific']);
-    expect(component.newValue).toBe(0);
-  });
-
   it('should initialize with non-specific selection when value is a keyword', () => {
     const { component } = createComponent({ isFragmentMode: false, value: 'SUM' });
 
