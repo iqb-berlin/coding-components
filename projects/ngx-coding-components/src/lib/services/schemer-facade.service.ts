@@ -2,20 +2,16 @@ import { Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from './schemer.service';
-import { ResolveVarListDuplicatesDialogComponent } from '../dialogs/resolve-varlist-duplicates-dialog.component';
-import {
-  getVariableIdentifiersForValidation,
-  getVarListConflictAnalysis
-} from './schemer-varlist-validation';
+import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SchemerFacadeService {
-  private resolvingVarListDuplicates = false;
-  private dismissedVarListDuplicateSignature: string | null = null;
-  private varListDuplicateResolutionGeneration = 0;
-  private varListDuplicateDialogRef: MatDialogRef<ResolveVarListDuplicatesDialogComponent> | null = null;
+  private resolvingIdentifierConflicts = false;
+  private dismissedIdentifierConflictSignature: string | null = null;
+  private identifierConflictResolutionGeneration = 0;
+  private identifierConflictDialogRef: MatDialogRef<ResolveIdentifierConflictsDialogComponent> | null = null;
 
   constructor(
     private schemerService: SchemerService,
@@ -26,61 +22,53 @@ export class SchemerFacadeService {
     this.schemerService.setVarList(value);
   }
 
-  resetVarListDuplicateResolutionState(): void {
-    this.varListDuplicateResolutionGeneration += 1;
-    this.resolvingVarListDuplicates = false;
-    this.dismissedVarListDuplicateSignature = null;
-    const dialogRef = this.varListDuplicateDialogRef;
-    this.varListDuplicateDialogRef = null;
+  resetIdentifierConflictResolutionState(): void {
+    this.identifierConflictResolutionGeneration += 1;
+    this.resolvingIdentifierConflicts = false;
+    this.dismissedIdentifierConflictSignature = null;
+    const dialogRef = this.identifierConflictDialogRef;
+    this.identifierConflictDialogRef = null;
     dialogRef?.close?.();
   }
 
-  tryResolveVarListDuplicates(): boolean {
-    const variableIdentifiers = getVariableIdentifiersForValidation(
-      this.schemerService.varList || [],
-      this.schemerService.codingScheme?.variableCodings || []
-    );
-    const analysis = getVarListConflictAnalysis(variableIdentifiers);
+  tryResolveIdentifierConflicts(): boolean {
+    const analysis = this.schemerService.getIdentifierAnalysis();
 
     if (!analysis.hasProblems) {
-      this.dismissedVarListDuplicateSignature = null;
+      this.dismissedIdentifierConflictSignature = null;
       return false;
     }
 
-    if (this.resolvingVarListDuplicates) {
+    if (this.resolvingIdentifierConflicts) {
       return true;
     }
 
-    if (this.dismissedVarListDuplicateSignature === analysis.signature) {
+    if (this.dismissedIdentifierConflictSignature === analysis.signature) {
       return true;
     }
 
-    this.resolvingVarListDuplicates = true;
+    this.resolvingIdentifierConflicts = true;
 
-    const generation = this.varListDuplicateResolutionGeneration;
+    const generation = this.identifierConflictResolutionGeneration;
     const dialogRef = this.dialog.open(
-      ResolveVarListDuplicatesDialogComponent,
+      ResolveIdentifierConflictsDialogComponent,
       {
         width: '850px',
         disableClose: true,
         data: {
-          varList: variableIdentifiers
+          analysis
         }
       }
     );
-    this.varListDuplicateDialogRef = dialogRef;
+    this.identifierConflictDialogRef = dialogRef;
 
     dialogRef.afterClosed().subscribe(() => {
-      if (generation !== this.varListDuplicateResolutionGeneration) return;
+      if (generation !== this.identifierConflictResolutionGeneration) return;
 
-      this.varListDuplicateDialogRef = null;
-      this.resolvingVarListDuplicates = false;
-      const currentIdentifiers = getVariableIdentifiersForValidation(
-        this.schemerService.varList || [],
-        this.schemerService.codingScheme?.variableCodings || []
-      );
-      const currentAnalysis = getVarListConflictAnalysis(currentIdentifiers);
-      this.dismissedVarListDuplicateSignature =
+      this.identifierConflictDialogRef = null;
+      this.resolvingIdentifierConflicts = false;
+      const currentAnalysis = this.schemerService.getIdentifierAnalysis();
+      this.dismissedIdentifierConflictSignature =
         currentAnalysis.hasProblems &&
         currentAnalysis.signature === analysis.signature ?
           analysis.signature :

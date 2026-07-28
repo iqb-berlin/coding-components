@@ -7,6 +7,10 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { of, Subject } from 'rxjs';
 import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 import { FileService } from '../services/file.service';
+import {
+  getSchemerIdentifierAnalysis,
+  SchemerIdentifierAnalysis
+} from '../services/schemer-identifier-validation';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SchemerComponent } from './schemer.component';
 
@@ -37,13 +41,16 @@ describe('SchemerComponent', () => {
     setCodingScheme: (v: unknown) => void;
     setVarList: (v: unknown) => void;
     setUserRole: (v: unknown) => void;
-    checkRenamedVarAliasOk: (alias: string, id?: string) => boolean;
+    getProspectiveIdentifierAnalysis: (
+      candidate: VariableCodingData,
+      replacedCodingId?: string
+    ) => SchemerIdentifierAnalysis | null;
     isProtectedBaseVariable: (varCoding: VariableCodingData | null | undefined) => boolean;
   };
 
   let schemerFacade: {
-    tryResolveVarListDuplicates: jasmine.Spy;
-    resetVarListDuplicateResolutionState: jasmine.Spy;
+    tryResolveIdentifierConflicts: jasmine.Spy;
+    resetIdentifierConflictResolutionState: jasmine.Spy;
   };
 
   let dialog: FakeMatDialog;
@@ -74,7 +81,26 @@ describe('SchemerComponent', () => {
       setUserRole: (v: unknown) => {
         schemerService.userRole = v as unknown as never;
       },
-      checkRenamedVarAliasOk: () => true,
+      getProspectiveIdentifierAnalysis: (
+        candidate: VariableCodingData,
+        replacedCodingId?: string
+      ) => {
+        if (!schemerService.codingScheme) return null;
+        const replacedIndex = replacedCodingId === undefined ?
+          -1 :
+          schemerService.codingScheme.variableCodings.findIndex(
+            coding => coding.id === replacedCodingId
+          );
+        const prospectiveCodings = replacedIndex < 0 ?
+          [...schemerService.codingScheme.variableCodings, candidate] :
+          schemerService.codingScheme.variableCodings.map((coding, index) => (
+            index === replacedIndex ? candidate : coding
+          ));
+        return getSchemerIdentifierAnalysis(
+          schemerService.varList,
+          prospectiveCodings
+        );
+      },
       isProtectedBaseVariable: (varCoding: VariableCodingData | null | undefined) => (
         !!varCoding &&
         varCoding.sourceType === 'BASE' &&
@@ -83,8 +109,8 @@ describe('SchemerComponent', () => {
     };
 
     schemerFacade = {
-      tryResolveVarListDuplicates: jasmine.createSpy('tryResolveVarListDuplicates').and.returnValue(false),
-      resetVarListDuplicateResolutionState: jasmine.createSpy('resetVarListDuplicateResolutionState')
+      tryResolveIdentifierConflicts: jasmine.createSpy('tryResolveIdentifierConflicts').and.returnValue(false),
+      resetIdentifierConflictResolutionState: jasmine.createSpy('resetIdentifierConflictResolutionState')
     };
 
     component = new SchemerComponent(
@@ -101,7 +127,7 @@ describe('SchemerComponent', () => {
   });
 
   it('updateVariableLists should return early if schemerFacade wants to resolve duplicates', () => {
-    schemerFacade.tryResolveVarListDuplicates.and.returnValue(true);
+    schemerFacade.tryResolveIdentifierConflicts.and.returnValue(true);
 
     schemerService.setVarList([
       {
@@ -115,13 +141,13 @@ describe('SchemerComponent', () => {
     component.updateVariableLists();
 
     expect(validateSpy).not.toHaveBeenCalled();
-    expect(component.hasVarListDuplicateConflict).toBeTrue();
+    expect(component.hasIdentifierConflict).toBeTrue();
     expect(component.basicVariables).toEqual([]);
     expect(component.selectedCoding$.getValue()).toBeNull();
   });
 
-  it('updateVariableLists should not mutate codingScheme while varList duplicate conflict is active', () => {
-    schemerFacade.tryResolveVarListDuplicates.and.returnValue(true);
+  it('updateVariableLists should not mutate codingScheme while an identifier conflict is active', () => {
+    schemerFacade.tryResolveIdentifierConflicts.and.returnValue(true);
 
     const orphanEmptyBase: VariableCodingData = {
       id: 'orphan',
@@ -180,7 +206,7 @@ describe('SchemerComponent', () => {
     const changes$ = new Subject<VariableCodingData | null>();
 
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
-    schemerFacade.tryResolveVarListDuplicates.and.returnValue(false);
+    schemerFacade.tryResolveIdentifierConflicts.and.returnValue(false);
 
     component.varCodingElement = {
       varCodingChanged: changes$.asObservable()
@@ -189,7 +215,7 @@ describe('SchemerComponent', () => {
     changes$.next(null);
     tick(300);
 
-    expect(schemerFacade.tryResolveVarListDuplicates).toHaveBeenCalled();
+    expect(schemerFacade.tryResolveIdentifierConflicts).toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalledWith(schemerService.codingScheme);
     changes$.complete();
   }));
@@ -197,7 +223,7 @@ describe('SchemerComponent', () => {
   it('ngOnDestroy should reset duplicate resolution state', () => {
     component.ngOnDestroy();
 
-    expect(schemerFacade.resetVarListDuplicateResolutionState)
+    expect(schemerFacade.resetIdentifierConflictResolutionState)
       .toHaveBeenCalled();
   });
 
@@ -512,16 +538,20 @@ describe('SchemerComponent', () => {
     component.selectedCoding$.next(selected);
 
     inputDialog.afterClosedValue = 'NewAlias';
-    const checkSpy = jasmine.createSpy('checkRenamedVarAliasOk').and.returnValue(true);
-    (schemerService as unknown as { checkRenamedVarAliasOk: (a: string, id?: string) => boolean })
-      .checkRenamedVarAliasOk = checkSpy;
+    const analysisSpy = spyOn(
+      schemerService,
+      'getProspectiveIdentifierAnalysis'
+    ).and.callThrough();
 
     spyOn(CodingSchemeFactory, 'validate').and.returnValue([] as unknown as CodingSchemeProblem[]);
 
     component.renameVarScheme();
 
     expect(selected.alias).toBe('NewAlias');
-    expect(checkSpy).toHaveBeenCalledWith('NewAlias', 'd1');
+    expect(analysisSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ id: 'd1', alias: 'NewAlias' }),
+      'd1'
+    );
     expect(emitSpy).toHaveBeenCalled();
   });
 
@@ -560,7 +590,9 @@ describe('SchemerComponent', () => {
     component.selectedCoding$.next(selected);
 
     inputDialog.afterClosedValue = 'DupAlias';
-    (schemerService as unknown as { checkRenamedVarAliasOk: () => boolean }).checkRenamedVarAliasOk = () => false;
+    spyOn(schemerService, 'getProspectiveIdentifierAnalysis').and.returnValue(
+      getSchemerIdentifierAnalysis([{ id: '' } as VariableInfo])
+    );
 
     component.renameVarScheme();
 
@@ -813,8 +845,11 @@ describe('SchemerComponent', () => {
 
   it('addVarScheme should show error when alias duplicate', () => {
     schemerService.userRole = 'RW_MAXIMAL';
-    schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
-    (schemerService as unknown as { checkRenamedVarAliasOk: () => boolean }).checkRenamedVarAliasOk = () => false;
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'existing', alias: 'DUP', sourceType: 'COPY_VALUE'
+      } as VariableCodingData]
+    });
 
     editSourceParametersDialog.afterClosedValue = {
       selfAlias: 'DUP',
@@ -831,7 +866,6 @@ describe('SchemerComponent', () => {
   it('addVarScheme should add new var scheme when ok', () => {
     schemerService.userRole = 'RW_MAXIMAL';
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
-    (schemerService as unknown as { checkRenamedVarAliasOk: () => boolean }).checkRenamedVarAliasOk = () => true;
     spyOn(CodingSchemeFactory, 'validate').and.returnValue([] as unknown as CodingSchemeProblem[]);
 
     editSourceParametersDialog.afterClosedValue = {
@@ -853,9 +887,6 @@ describe('SchemerComponent', () => {
     } as unknown as VariableCodingData;
     schemerService.userRole = 'RW_MAXIMAL';
     schemerService.setCodingScheme({ variableCodings: [existing] });
-    (schemerService as unknown as
-      { checkRenamedVarAliasOk: () => boolean })
-      .checkRenamedVarAliasOk = () => true;
     spyOn(Date.prototype, 'getTime').and.returnValue(123);
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
     const updateSpy = spyOn(component, 'updateVariableLists');

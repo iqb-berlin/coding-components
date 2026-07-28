@@ -19,10 +19,9 @@ import {
   VariableValue
 } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  isValidVariableIdentifier,
-  validateVariableList
-} from './variable-identifier-validation';
-import { getVariableIdentifiersForValidation } from './schemer-varlist-validation';
+  getSchemerIdentifierAnalysis,
+  SchemerIdentifierAnalysis
+} from './schemer-identifier-validation';
 import {
   addCode as addCodeOp,
   canPasteSingleCodeInto as canPasteSingleCodeIntoOp,
@@ -238,43 +237,34 @@ export class SchemerService {
     return undefined;
   }
 
-  checkRenamedVarAliasOk(checkAlias: string, checkId?: string): boolean {
-    if (
-      !isValidVariableIdentifier(checkAlias) ||
-      !this.codingScheme?.variableCodings
-    ) {
-      return false; // Ein Alias wird benötigt, und eine Codierungsstruktur muss vorhanden sein.
-    }
-
-    const identifiers = getVariableIdentifiersForValidation(
+  getIdentifierAnalysis(): SchemerIdentifierAnalysis {
+    return getSchemerIdentifierAnalysis(
       this.varList,
-      this.codingScheme.variableCodings
+      this.codingScheme?.variableCodings || []
     );
-    let candidateIndex = checkId === undefined ?
+  }
+
+  getProspectiveIdentifierAnalysis(
+    candidate: VariableCodingData,
+    replacedCodingId?: string
+  ): SchemerIdentifierAnalysis | null {
+    if (!this.codingScheme?.variableCodings) return null;
+
+    const replacedIndex = replacedCodingId === undefined ?
       -1 :
-      identifiers.findIndex(variable => variable.id === checkId);
-
-    if (candidateIndex < 0) {
-      const existingIds = new Set(
-        identifiers.map(variable => variable.id.toLowerCase())
+      this.codingScheme.variableCodings.findIndex(
+        coding => coding.id === replacedCodingId
       );
-      let candidateId = 'new-derived-variable';
-      while (existingIds.has(candidateId.toLowerCase())) {
-        candidateId += '_';
-      }
-      candidateIndex = identifiers.length;
-      identifiers.push({ id: candidateId, alias: checkAlias });
-    } else {
-      identifiers[candidateIndex] = {
-        ...identifiers[candidateIndex],
-        alias: checkAlias
-      };
-    }
+    const prospectiveVariableCodings = replacedIndex < 0 ?
+      [...this.codingScheme.variableCodings, candidate] :
+      this.codingScheme.variableCodings.map((coding, index) => (
+        index === replacedIndex ? candidate : coding
+      ));
 
-    return !validateVariableList(identifiers).some(error => (
-      error.variableIndex === candidateIndex ||
-      error.conflictingVariableIndex === candidateIndex
-    ));
+    return getSchemerIdentifierAnalysis(
+      this.varList,
+      prospectiveVariableCodings
+    );
   }
 
   copySingleCode(code: CodeData): boolean {

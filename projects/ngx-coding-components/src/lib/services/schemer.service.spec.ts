@@ -19,43 +19,56 @@ describe('SchemerService', () => {
     sessionStorage.removeItem(copiedCodeStorageKey);
   });
 
-  describe('checkRenamedVarAliasOk', () => {
-    it('should return false when alias or codingScheme is missing', () => {
+  describe('getProspectiveIdentifierAnalysis', () => {
+    const coding = (
+      id: string,
+      alias: string
+    ): VariableCodingData => ({
+      id,
+      alias,
+      sourceType: 'COPY_VALUE'
+    } as VariableCodingData);
+
+    it('should return null when no coding scheme exists', () => {
       service.setCodingScheme(null);
-      expect(service.checkRenamedVarAliasOk('A')).toBeFalse();
-      service.setCodingScheme({ variableCodings: [] } as unknown as never);
-      expect(service.checkRenamedVarAliasOk('')).toBeFalse();
+
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('new', 'New')
+      )).toBeNull();
     });
 
-    it('should detect duplicates case-insensitively and allow same variable id', () => {
+    it('should validate additions against the complete prospective state', () => {
+      service.setCodingScheme({
+        variableCodings: [coding('v1', 'Existing')]
+      } as unknown as never);
+
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('v2', 'existing')
+      )?.hasProblems).toBeTrue();
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('v2', 'a')
+      )?.hasProblems).toBeFalse();
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('v2', '01.Text')
+      )?.hasProblems).toBeTrue();
+    });
+
+    it('should replace the selected coding before validating a rename', () => {
       service.setCodingScheme({
         variableCodings: [
-          { id: 'v1', alias: 'ABC', sourceType: 'BASE' } as unknown as VariableCodingData,
-          { id: 'v2', alias: 'DEF', sourceType: 'BASE' } as unknown as VariableCodingData
+          coding('v1', 'ABC'),
+          coding('v2', 'DEF')
         ]
       } as unknown as never);
 
-      expect(service.checkRenamedVarAliasOk('abc')).toBeFalse();
-      expect(service.checkRenamedVarAliasOk('abc', 'v1')).toBeTrue();
-      expect(service.checkRenamedVarAliasOk('xyz')).toBeTrue();
-    });
-
-    it('should accept one-character aliases and reject invalid characters', () => {
-      service.setCodingScheme({ variableCodings: [] } as unknown as never);
-
-      expect(service.checkRenamedVarAliasOk('a')).toBeTrue();
-      expect(service.checkRenamedVarAliasOk('01.Text')).toBeFalse();
-      expect(service.checkRenamedVarAliasOk('fistgewählt')).toBeFalse();
-    });
-
-    it('should detect collisions with an unaliased public id', () => {
-      service.setCodingScheme({
-        variableCodings: [
-          { id: 'public-id', sourceType: 'BASE' } as VariableCodingData
-        ]
-      } as unknown as never);
-
-      expect(service.checkRenamedVarAliasOk('PUBLIC-ID')).toBeFalse();
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('v1', 'abc'),
+        'v1'
+      )?.hasProblems).toBeFalse();
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('v1', 'def'),
+        'v1'
+      )?.hasProblems).toBeTrue();
     });
 
     it('should detect collisions with a varList-only public id', () => {
@@ -64,46 +77,38 @@ describe('SchemerService', () => {
         type: 'no-value'
       } as never]);
       service.setCodingScheme({
-        variableCodings: [
-          {
-            id: 'derived',
-            alias: 'Derived',
-            sourceType: 'COPY_VALUE'
-          } as VariableCodingData
-        ]
+        variableCodings: [coding('derived', 'Derived')]
       } as unknown as never);
 
-      expect(
-        service.checkRenamedVarAliasOk('INACTIVE-PUBLIC', 'derived')
-      ).toBeFalse();
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('derived', 'INACTIVE-PUBLIC'),
+        'derived'
+      )?.hasProblems).toBeTrue();
     });
 
     it('should allow an alias matching a non-public technical id', () => {
       service.setCodingScheme({
-        variableCodings: [
-          {
-            id: 'technical-id',
-            alias: 'public-id',
-            sourceType: 'BASE'
-          } as VariableCodingData
-        ]
+        variableCodings: [coding('technical-id', 'public-id')]
       } as unknown as never);
 
-      expect(service.checkRenamedVarAliasOk('technical-id')).toBeTrue();
+      expect(service.getProspectiveIdentifierAnalysis(
+        coding('new-id', 'technical-id')
+      )?.hasProblems).toBeFalse();
     });
 
-    it('should choose a case-insensitively unique temporary id', () => {
+    it('should not mutate the current coding scheme', () => {
+      const existing = coding('v1', 'Existing');
       service.setCodingScheme({
-        variableCodings: [
-          {
-            id: 'NEW-DERIVED-VARIABLE',
-            alias: 'existing-public-id',
-            sourceType: 'COPY_VALUE'
-          } as VariableCodingData
-        ]
+        variableCodings: [existing]
       } as unknown as never);
 
-      expect(service.checkRenamedVarAliasOk('new-public-id')).toBeTrue();
+      service.getProspectiveIdentifierAnalysis(
+        coding('v1', 'Changed'),
+        'v1'
+      );
+
+      expect(service.codingScheme?.variableCodings).toEqual([existing]);
+      expect(existing.alias).toBe('Existing');
     });
   });
 
