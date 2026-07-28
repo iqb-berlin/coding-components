@@ -6,17 +6,12 @@ import {
 } from './resolve-varlist-duplicates-dialog.component';
 
 describe('ResolveVarListDuplicatesDialogComponent', () => {
-  type VarListEntry = VariableInfo;
-
-  const createComponent = (options: {
-    varList: Partial<VarListEntry>[];
-  }) => {
+  const createComponent = (varList: Partial<VariableInfo>[]) => {
     const dialogRef = {
       close: jasmine.createSpy('close')
     } as unknown as MatDialogRef<ResolveVarListDuplicatesDialogComponent>;
-
     const data: ResolveVarListDuplicatesDialogData = {
-      varList: options.varList as VariableInfo[]
+      varList: varList as VariableInfo[]
     };
 
     return {
@@ -25,54 +20,69 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
     };
   };
 
-  it('should mark problems for duplicate ids', () => {
-    const { component } = createComponent({
-      varList: [
-        { id: 'A', alias: 'A' },
-        { id: 'A', alias: 'B' }
-      ]
-    });
+  it('should accept one-character ids and aliases', () => {
+    const { component } = createComponent([
+      { id: 'a', alias: 'a' },
+      { id: 'b', alias: 'b' },
+      { id: 'c', alias: 'c' }
+    ]);
 
-    expect(component.hasProblems).toBeTrue();
-    expect(component.duplicateIdValues).toEqual(['A']);
+    expect(component.errorGroups).toEqual([]);
   });
 
-  it('should mark problems for invalid ids/aliases', () => {
-    const { component } = createComponent({
-      varList: [
-        { id: 'A', alias: 'A' }, // invalid because min length is 2
-        { id: 'OK_1', alias: 'x' } // invalid alias (min length 2)
-      ]
-    });
+  it('should group every shared validation reason', () => {
+    const { component } = createComponent([
+      { id: '', alias: 'first' },
+      { id: '01.Text', alias: 'second' },
+      { id: 'duplicate', alias: 'public-a' },
+      { id: 'DUPLICATE', alias: 'public-b' },
+      { id: 'alias-a', alias: 'same-alias' },
+      { id: 'alias-b', alias: 'SAME-ALIAS' },
+      { id: 'public-id' },
+      { id: 'other', alias: 'PUBLIC-ID' }
+    ]);
 
-    expect(component.hasProblems).toBeTrue();
-    expect(component.invalidIdCount).toBeGreaterThan(0);
-    expect(component.invalidAliasCount).toBeGreaterThan(0);
+    expect(component.errorGroups.map(group => group.code)).toEqual([
+      'INVALID_CHARACTERS',
+      'EMPTY_IDENTIFIER',
+      'DUPLICATE_ID',
+      'DUPLICATE_ALIAS',
+      'PUBLIC_IDENTIFIER_COLLISION'
+    ]);
   });
 
-  it('should allow generated ids and aliases with hyphens', () => {
-    const { component } = createComponent({
-      varList: [
-        { id: 'likert-row_4', alias: 'Item-01' },
-        { id: 'likert-row_5', alias: 'Item-02' }
-      ]
-    });
+  it('should show the id and alias of a conflict partner', () => {
+    const { component } = createComponent([
+      { id: 'first-id', alias: 'Public' },
+      { id: 'public' }
+    ]);
+    const collision = component.errorGroups.find(
+      group => group.code === 'PUBLIC_IDENTIFIER_COLLISION'
+    )?.errors[0];
 
-    expect(component.hasProblems).toBeFalse();
-    expect(component.invalidIdCount).toBe(0);
-    expect(component.invalidAliasCount).toBe(0);
+    expect(collision?.conflictingVariableIndex).toBe(0);
+    expect(component.displayConflictPartner(0)).toBe(
+      'Eintrag 1 (ID: first-id, Alias: Public)'
+    );
   });
 
-  it('should allow unique aliases matching other ids', () => {
-    const { component } = createComponent({
-      varList: [
-        { id: '04', alias: '02' },
-        { id: '02', alias: '05' }
-      ]
-    });
+  it('should distinguish an omitted alias from an empty alias', () => {
+    const { component } = createComponent([
+      { id: 'first' },
+      { id: 'second', alias: '' }
+    ]);
 
-    expect(component.hasProblems).toBeFalse();
-    expect(component.statusText).toBe('Keine Konflikte mehr.');
+    expect(component.displayAlias(0)).toBe('(nicht gesetzt)');
+    expect(component.displayAlias(1)).toBe('(leer)');
+  });
+
+  it('should allow aliases matching technical ids that are not public', () => {
+    const { component } = createComponent([
+      { id: '04', alias: '02' },
+      { id: '02', alias: '05' }
+    ]);
+
+    expect(component.errorGroups).toEqual([]);
   });
 
   it('should not mutate the input varList', () => {
@@ -80,26 +90,23 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
       { id: 'AA', alias: 'AA' },
       { id: 'AA', alias: 'BB' }
     ];
-    const { component } = createComponent({
-      varList: original
-    });
+    const { component } = createComponent(original);
 
     component.varList[0].id = 'CHANGED';
 
-    expect(original.map(v => v.id)).toEqual(['AA', 'AA']);
+    expect(original.map(variable => variable.id)).toEqual(['AA', 'AA']);
   });
 
-  it('close should close the dialog without a result payload', () => {
-    const { component, dialogRef } = createComponent({
-      varList: [
-        { id: 'AA', alias: 'AA' },
-        { id: 'BB', alias: 'BB' }
-      ]
-    });
+  it('should close without a result payload', () => {
+    const { component, dialogRef } = createComponent([
+      { id: 'AA', alias: 'AA' },
+      { id: 'AA', alias: 'BB' }
+    ]);
 
     component.close();
 
     expect(dialogRef.close).toHaveBeenCalled();
-    expect((dialogRef.close as jasmine.Spy).calls.mostRecent().args.length).toBe(0);
+    expect((dialogRef.close as jasmine.Spy).calls.mostRecent().args.length)
+      .toBe(0);
   });
 });
