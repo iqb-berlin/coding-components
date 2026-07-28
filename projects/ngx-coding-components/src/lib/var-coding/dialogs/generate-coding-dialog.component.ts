@@ -133,7 +133,7 @@ export class GenerateCodingDialogComponent {
   selectedOption: string = '';
   selectedOptions: string[] = [];
   positionLabels: string[] = [];
-  selectedArrayPos = -1;
+  selectedArrayPos: NonNullable<RuleSet['valueArrayPos']> = 'ANY_OPEN';
   booleanMultiSelections: boolean[] = [];
   multiChoiceOrderMatters = false;
   singleChoiceLongVersion = false;
@@ -222,7 +222,7 @@ export class GenerateCodingDialogComponent {
       this.elseMethod = 'instruction';
       this.generationModel = 'simple-input';
       this.positionLabels = varInfo.valuePositionLabels;
-      this.selectedArrayPos = this.positionLabels.length > 0 ? 0 : -1;
+      this.selectedArrayPos = this.positionLabels.length > 0 ? 0 : 'ANY_OPEN';
       return;
     }
 
@@ -461,6 +461,12 @@ export class GenerateCodingDialogComponent {
     }
 
     return true;
+  }
+
+  private getSelectedArrayPos(): NonNullable<RuleSet['valueArrayPos']> {
+    return typeof this.selectedArrayPos === 'number' && this.selectedArrayPos < 0 ?
+      'ANY_OPEN' :
+      this.selectedArrayPos;
   }
 
   private addCodeToVariable(
@@ -821,7 +827,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSets = [
             <RuleSet>{
               ruleOperatorAnd: false,
-              ...(this.varInfo.multiple ? { valueArrayPos: this.selectedArrayPos } : {}),
+              ...(this.varInfo.multiple ? { valueArrayPos: this.getSelectedArrayPos() } : {}),
               rules: numericRules
             }
           ];
@@ -839,7 +845,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSets = [
             <RuleSet>{
               ruleOperatorAnd: false,
-              ...(this.varInfo.multiple ? { valueArrayPos: this.selectedArrayPos } : {}),
+              ...(this.varInfo.multiple ? { valueArrayPos: this.getSelectedArrayPos() } : {}),
               rules: [
                 {
                   method: 'MATCH',

@@ -35,7 +35,10 @@
         <button
           mat-flat-button
           (click)="editArrayReference(ruleSet)"
-          [matTooltip]="'rule-set.reference.title' | translate"
+          [color]="hasInvalidArrayReference(ruleSet) ? 'warn' : undefined"
+          [matTooltip]="(hasInvalidArrayReference(ruleSet) ?
+            'rule-set.reference.invalid' : 'rule-set.reference.title') |
+            translate"
         >
           A {{ ruleSet.valueArrayPos | ruleReference }}
         </button>
