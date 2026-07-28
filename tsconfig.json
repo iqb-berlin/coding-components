@@ -23,6 +23,9 @@
       "@ngx-translate/core/*": [
         "./node_modules/@ngx-translate/core/*"
       ],
+      "@iqb/ngx-coding-components/translations": [
+        "projects/ngx-coding-components/translations/public-api.ts"
+      ],
       "@ngx-coding-components/*": [
         "projects/ngx-coding-components/src/lib/*"
       ]

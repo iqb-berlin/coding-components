@@ -1,6 +1,9 @@
 import { firstValueFrom } from 'rxjs';
 
-import { NgxCodingComponentsTranslateLoader } from './ngx-coding-components.translate-loader';
+import {
+  NGX_CODING_COMPONENTS_DE_TRANSLATIONS,
+  NgxCodingComponentsTranslateLoader
+} from './ngx-coding-components.translate-loader';
 
 describe('NgxCodingComponentsTranslateLoader', () => {
   it('should return DE translations regardless of lang', async () => {
@@ -11,5 +14,6 @@ describe('NgxCodingComponentsTranslateLoader', () => {
     expect(t1).toBeTruthy();
     expect(t2).toBeTruthy();
     expect(t2).toEqual(t1);
+    expect(t1).toBe(NGX_CODING_COMPONENTS_DE_TRANSLATIONS);
   });
 });
