@@ -207,6 +207,56 @@ describe('SchemerFacadeService', () => {
     ]);
   });
 
+  it('tryResolveIdentifierConflicts should ignore removable empty orphan base codings', () => {
+    const service = createService();
+
+    schemerService.setVarList([
+      { id: 'fresh', alias: 'orphan' } as never
+    ]);
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'orphan',
+        alias: 'orphan',
+        sourceType: 'BASE',
+        label: 'orphan',
+        codeModel: 'MANUAL_AND_RULES',
+        manualInstruction: '',
+        codes: [],
+        processing: []
+      }]
+    } as never);
+
+    expect(service.tryResolveIdentifierConflicts()).toBeFalse();
+    expect(dialog.open).not.toHaveBeenCalled();
+  });
+
+  it('tryResolveIdentifierConflicts should validate empty base codings without a variable list', () => {
+    const service = createService();
+
+    schemerService.setVarList([]);
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'orphan.invalid',
+        alias: 'orphan',
+        sourceType: 'BASE',
+        label: 'orphan.invalid',
+        codeModel: 'MANUAL_AND_RULES',
+        manualInstruction: '',
+        codes: [],
+        processing: []
+      }]
+    } as never);
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => new Subject<unknown>().asObservable()
+    });
+
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalledWith(
+      ResolveIdentifierConflictsDialogComponent,
+      jasmine.objectContaining({ disableClose: true })
+    );
+  });
+
   it('tryResolveIdentifierConflicts should detect derived public collisions', () => {
     const service = createService();
 

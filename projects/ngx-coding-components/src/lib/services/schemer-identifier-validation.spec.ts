@@ -177,6 +177,78 @@ describe('schemer-identifier-validation', () => {
     ]);
   });
 
+  it('should ignore removable empty orphan base codings', () => {
+    const analysis = analyzeVariableIdentifiers(
+      [{ id: 'fresh', alias: 'orphan' } as VariableInfo],
+      [{
+        id: 'orphan',
+        alias: 'orphan',
+        sourceType: 'BASE',
+        label: 'orphan',
+        codeModel: 'MANUAL_AND_RULES',
+        manualInstruction: '',
+        codes: [],
+        processing: []
+      } as VariableCodingData]
+    );
+
+    expect(analysis.hasProblems).toBeFalse();
+    expect(analysis.identifiers).toEqual([{
+      id: 'fresh',
+      alias: 'orphan',
+      origin: 'VAR_LIST',
+      sourceIndex: 0
+    }]);
+  });
+
+  it('should retain empty base codings when the variable list is empty', () => {
+    const analysis = analyzeVariableIdentifiers([], [{
+      id: 'orphan.invalid',
+      alias: 'orphan',
+      sourceType: 'BASE',
+      label: 'orphan.invalid',
+      codeModel: 'MANUAL_AND_RULES',
+      manualInstruction: '',
+      codes: [],
+      processing: []
+    } as VariableCodingData]);
+
+    expect(analysis.hasProblems).toBeTrue();
+    expect(analysis.errors).toContain(jasmine.objectContaining({
+      code: 'INVALID_CHARACTERS',
+      property: 'id',
+      value: 'orphan.invalid'
+    }));
+    expect(analysis.identifiers).toEqual([{
+      id: 'orphan.invalid',
+      alias: 'orphan',
+      origin: 'BASE_CODING',
+      sourceIndex: 0
+    }]);
+  });
+
+  it('should retain non-empty orphan base codings for validation', () => {
+    const analysis = analyzeVariableIdentifiers(
+      [{ id: 'fresh', alias: 'orphan' } as VariableInfo],
+      [{
+        id: 'orphan',
+        alias: 'orphan',
+        sourceType: 'BASE',
+        label: 'orphan',
+        codeModel: 'MANUAL_AND_RULES',
+        manualInstruction: '',
+        codes: [{ id: 1 }],
+        processing: []
+      } as VariableCodingData]
+    );
+
+    expect(analysis.hasProblems).toBeTrue();
+    expect(analysis.errors).toContain(jasmine.objectContaining({
+      code: 'DUPLICATE_ALIAS',
+      value: 'orphan'
+    }));
+  });
+
   ([
     { description: 'BASE and BASE', duplicateSourceType: 'BASE' },
     {

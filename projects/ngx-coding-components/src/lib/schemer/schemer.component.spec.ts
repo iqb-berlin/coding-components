@@ -246,6 +246,60 @@ describe('SchemerComponent', () => {
     expect(ids).not.toContain('orphan');
   });
 
+  it('updateVariableLists should remove the empty instance when orphan BASE ids collide', () => {
+    const populatedOrphan: VariableCodingData = {
+      id: 'orphan',
+      alias: 'orphan',
+      sourceType: 'BASE',
+      label: 'orphan',
+      codeModel: 'MANUAL_AND_RULES',
+      manualInstruction: '',
+      codes: [{
+        id: 1, type: 'FULL_CREDIT', label: '', score: 1
+      }],
+      processing: []
+    } as unknown as VariableCodingData;
+    const emptyOrphan: VariableCodingData = {
+      id: 'orphan',
+      alias: 'orphan',
+      sourceType: 'BASE',
+      label: 'orphan',
+      codeModel: 'MANUAL_AND_RULES',
+      manualInstruction: '',
+      codes: [],
+      processing: []
+    } as unknown as VariableCodingData;
+    const representedBase: VariableCodingData = {
+      id: 'represented',
+      alias: 'represented',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+
+    schemerService.setVarList([{
+      id: 'represented',
+      alias: 'represented',
+      type: 'string',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: []
+    } as unknown as VariableInfo]);
+    schemerService.setCodingScheme({
+      variableCodings: [populatedOrphan, emptyOrphan, representedBase]
+    } as unknown as never);
+    spyOn(CodingSchemeFactory, 'validate')
+      .and.returnValue([] as unknown as CodingSchemeProblem[]);
+
+    component.updateVariableLists();
+
+    expect(schemerService.codingScheme?.variableCodings)
+      .toContain(populatedOrphan);
+    expect(schemerService.codingScheme?.variableCodings)
+      .not.toContain(emptyOrphan);
+  });
+
   it('updateVariableLists should add missing BASE variables for varList entries and sync aliases', () => {
     schemerService.setVarList([
       {
@@ -564,6 +618,29 @@ describe('SchemerComponent', () => {
     expect(selected.alias).toBe('Old');
     expect(messageDialog.open).toHaveBeenCalled();
     expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
+    expect(messageDialog.open.calls.mostRecent().args[1].data.content)
+      .toBe('data-error.variable-id.double');
+  });
+
+  it('renameVarScheme should explain invalid alias characters', () => {
+    schemerService.setCodingScheme({
+      variableCodings: [{
+        id: 'd1', alias: 'Old', sourceType: 'DERIVE', codes: []
+      } as unknown as VariableCodingData]
+    } as unknown as never);
+
+    const selected = (schemerService.codingScheme as unknown as
+      { variableCodings: VariableCodingData[] }).variableCodings[0];
+    component.selectedCoding$.next(selected);
+    inputDialog.afterClosedValue = 'invalid.alias';
+
+    component.renameVarScheme();
+
+    expect(selected.alias).toBe('Old');
+    expect(messageDialog.open.calls.mostRecent().args[0])
+      .toBe(MessageDialogComponent);
+    expect(messageDialog.open.calls.mostRecent().args[1].data.content)
+      .toBe('data-error.variable-id.character');
   });
 
   it('renameVarScheme should reject changes without a coding scheme', () => {
@@ -861,6 +938,62 @@ describe('SchemerComponent', () => {
 
     const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
     expect(scheme.variableCodings.some(v => v.alias === 'NEW')).toBeTrue();
+  });
+
+  it('addVarScheme should remove an empty alias collision before emitting', () => {
+    const orphanEmptyBase: VariableCodingData = {
+      id: 'orphan',
+      alias: 'NEW',
+      sourceType: 'BASE',
+      label: 'orphan',
+      codeModel: 'MANUAL_AND_RULES',
+      manualInstruction: '',
+      codes: [],
+      processing: []
+    } as unknown as VariableCodingData;
+    const representedBase: VariableCodingData = {
+      id: 'represented',
+      alias: 'represented',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setVarList([{
+      id: 'represented',
+      alias: 'represented',
+      type: 'string',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: []
+    } as unknown as VariableInfo]);
+    schemerService.setCodingScheme({
+      variableCodings: [orphanEmptyBase, representedBase]
+    } as unknown as never);
+    spyOn(Date.prototype, 'getTime').and.returnValue(123);
+    spyOn(CodingSchemeFactory, 'validate')
+      .and.returnValue([] as unknown as CodingSchemeProblem[]);
+    let emittedCodings: Pick<VariableCodingData, 'id' | 'alias'>[] = [];
+    component.codingSchemeChanged.subscribe(scheme => {
+      emittedCodings = scheme?.variableCodings.map(({ id, alias }) => ({
+        id,
+        alias
+      })) || [];
+    });
+    editSourceParametersDialog.afterClosedValue = {
+      selfAlias: 'NEW',
+      sourceType: 'SUM_SCORE',
+      sourceParameters: { processing: [], solverExpression: '' },
+      deriveSources: []
+    };
+
+    component.addVarScheme();
+
+    expect(emittedCodings.map(({ id }) => id)).not.toContain('orphan');
+    expect(emittedCodings).toContain({ id: 'd_123', alias: 'NEW' });
+    expect(emittedCodings.filter(({ alias }) => alias === 'NEW').length)
+      .toBe(1);
   });
 
   it('addVarScheme should reject a generated id collision without mutation', () => {

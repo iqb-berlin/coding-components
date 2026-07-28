@@ -220,7 +220,7 @@
     "base-variables-missing": "Es sind keine Basis-Variablen definiert. Bitte gehen Sie zum Editor, um Elemente zu definieren, die Antworten erzeugen. Eventuell ist der verwendete Editor veraltet.",
     "variable-id": {
       "double": "Diese Variablenkennung existiert bereits. In einem Kodierschema darf eine Variablenkennung nur einmal verwendet werden. Groß- oder Kleinschreibung zählt hierbei nicht.",
-      "character": "Eine Variablenkennung darf nur Buchstaben, Ziffern sowie die Zeichen '_' und '-' enthalten. Umlaute und Leerzeichen sind nicht zulässig. Mindestlänge ist 2."
+      "character": "Eine Variablenkennung muss mindestens ein Zeichen enthalten und darf nur ASCII-Buchstaben, Ziffern sowie die Zeichen '_' und '-' verwenden. Umlaute, Leerzeichen und weitere Sonderzeichen sind nicht zulässig."
     }
   },
   "coding-status": {
