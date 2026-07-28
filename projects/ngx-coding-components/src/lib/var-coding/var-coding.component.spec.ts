@@ -695,7 +695,36 @@ describe('VarCodingComponent', () => {
     });
   });
 
-  it('editSourceParameters should reject changes without a coding scheme', () => {
+  it('editSourceParameters should validate and apply standalone changes', () => {
+    const emitSpy = spyOn(component.varCodingChanged, 'emit');
+    component.varCoding = {
+      id: 'v1',
+      alias: 'Original',
+      sourceType: 'COPY_VALUE',
+      sourceParameters: { a: 1 },
+      deriveSources: ['source']
+    } as unknown as VariableCodingData;
+    (schemerService as unknown as { codingScheme: null }).codingScheme = null;
+    dialogOpenSpy.and.returnValue({
+      afterClosed: () => of({
+        selfAlias: 'Changed',
+        sourceType: 'SUM_SCORE',
+        sourceParameters: { b: 2 },
+        deriveSources: ['other-source']
+      })
+    });
+
+    component.editSourceParameters();
+
+    expect(component.varCoding?.alias).toBe('Changed');
+    expect(component.varCoding?.sourceType).toBe('SUM_SCORE');
+    expect((component.varCoding?.sourceParameters as unknown as { b: number })
+      .b).toBe(2);
+    expect(component.varCoding?.deriveSources).toEqual(['other-source']);
+    expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  it('editSourceParameters should reject invalid standalone aliases', () => {
     const emitSpy = spyOn(component.varCodingChanged, 'emit');
     component.varCoding = {
       id: 'v1',
@@ -708,7 +737,7 @@ describe('VarCodingComponent', () => {
     (schemerService as unknown as { codingScheme: null }).codingScheme = null;
     dialogOpenSpy.and.returnValue({
       afterClosed: () => of({
-        selfAlias: 'Changed',
+        selfAlias: 'invalid.alias',
         sourceType: 'SUM_SCORE',
         sourceParameters: { b: 2 },
         deriveSources: ['other-source']
