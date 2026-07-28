@@ -6,8 +6,12 @@
       <mat-label>Name</mat-label>
       <input matInput id="variableId" name="variableId" required
              [readonly]="data.sourceType === 'BASE'"
-             [pattern]="VARIABLE_NAME_CHECK_PATTERN"
              [(ngModel)]="data.selfAlias">
+      @if (data.selfAlias && !isValidVariableIdentifier(data.selfAlias)) {
+        <mat-hint>
+          Erlaubt sind ASCII-Buchstaben, Ziffern, _ und - (mindestens ein Zeichen).
+        </mat-hint>
+      }
     </mat-form-field>
 
     @if (data.sourceType !== 'BASE') {
@@ -159,7 +163,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="primary"
-          [disabled]="!data.selfAlias || !VARIABLE_NAME_CHECK_PATTERN.exec(data.selfAlias) || !data.sourceType || (data.sourceType !== 'BASE' && data.deriveSources.length < 1)"
+          [disabled]="!isValidVariableIdentifier(data.selfAlias) || !data.sourceType || (data.sourceType !== 'BASE' && data.deriveSources.length < 1)"
           [mat-dialog-close]="data">{{ 'dialog-save' | translate }}</button>
   <button mat-raised-button [mat-dialog-close]="false">{{ 'dialog-cancel' | translate }}</button>
 </mat-dialog-actions>

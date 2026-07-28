@@ -39,6 +39,72 @@ describe('SchemerService', () => {
       expect(service.checkRenamedVarAliasOk('abc', 'v1')).toBeTrue();
       expect(service.checkRenamedVarAliasOk('xyz')).toBeTrue();
     });
+
+    it('should accept one-character aliases and reject invalid characters', () => {
+      service.setCodingScheme({ variableCodings: [] } as unknown as never);
+
+      expect(service.checkRenamedVarAliasOk('a')).toBeTrue();
+      expect(service.checkRenamedVarAliasOk('01.Text')).toBeFalse();
+      expect(service.checkRenamedVarAliasOk('fistgewählt')).toBeFalse();
+    });
+
+    it('should detect collisions with an unaliased public id', () => {
+      service.setCodingScheme({
+        variableCodings: [
+          { id: 'public-id', sourceType: 'BASE' } as VariableCodingData
+        ]
+      } as unknown as never);
+
+      expect(service.checkRenamedVarAliasOk('PUBLIC-ID')).toBeFalse();
+    });
+
+    it('should detect collisions with a varList-only public id', () => {
+      service.setVarList([{
+        id: 'inactive-public',
+        type: 'no-value'
+      } as never]);
+      service.setCodingScheme({
+        variableCodings: [
+          {
+            id: 'derived',
+            alias: 'Derived',
+            sourceType: 'COPY_VALUE'
+          } as VariableCodingData
+        ]
+      } as unknown as never);
+
+      expect(
+        service.checkRenamedVarAliasOk('INACTIVE-PUBLIC', 'derived')
+      ).toBeFalse();
+    });
+
+    it('should allow an alias matching a non-public technical id', () => {
+      service.setCodingScheme({
+        variableCodings: [
+          {
+            id: 'technical-id',
+            alias: 'public-id',
+            sourceType: 'BASE'
+          } as VariableCodingData
+        ]
+      } as unknown as never);
+
+      expect(service.checkRenamedVarAliasOk('technical-id')).toBeTrue();
+    });
+
+    it('should choose a case-insensitively unique temporary id', () => {
+      service.setCodingScheme({
+        variableCodings: [
+          {
+            id: 'NEW-DERIVED-VARIABLE',
+            alias: 'existing-public-id',
+            sourceType: 'COPY_VALUE'
+          } as VariableCodingData
+        ]
+      } as unknown as never);
+
+      expect(service.checkRenamedVarAliasOk('new-public-id')).toBeTrue();
+    });
   });
 
   describe('addCode', () => {

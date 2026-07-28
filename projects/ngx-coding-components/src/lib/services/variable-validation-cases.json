@@ -1,0 +1,133 @@
+{
+  "identifierCases": {
+    "valid": [
+      "a",
+      "01",
+      "_03a",
+      "ggb-01",
+      "a_very-long_variable-identifier_0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    ],
+    "invalid": [
+      { "value": "", "code": "EMPTY_IDENTIFIER" },
+      { "value": "01.Text", "code": "INVALID_CHARACTERS" },
+      { "value": "fistgewählt", "code": "INVALID_CHARACTERS" },
+      { "value": "contains space", "code": "INVALID_CHARACTERS" }
+    ]
+  },
+  "variableListCases": [
+    {
+      "name": "omitted alias",
+      "variables": [{ "id": "a" }],
+      "errors": []
+    },
+    {
+      "name": "empty alias",
+      "variables": [{ "id": "a", "alias": "" }],
+      "errors": [
+        {
+          "code": "EMPTY_IDENTIFIER",
+          "variableIndex": 0,
+          "property": "alias",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "name": "invalid identifiers",
+      "variables": [
+        { "id": "" },
+        { "id": "01.Text" },
+        { "id": "valid", "alias": "fistgewählt" }
+      ],
+      "errors": [
+        {
+          "code": "EMPTY_IDENTIFIER",
+          "variableIndex": 0,
+          "property": "id",
+          "value": ""
+        },
+        {
+          "code": "INVALID_CHARACTERS",
+          "variableIndex": 1,
+          "property": "id",
+          "value": "01.Text"
+        },
+        {
+          "code": "INVALID_CHARACTERS",
+          "variableIndex": 2,
+          "property": "alias",
+          "value": "fistgewählt"
+        }
+      ]
+    },
+    {
+      "name": "case-insensitive duplicate id",
+      "variables": [{ "id": "A" }, { "id": "a" }],
+      "errors": [
+        {
+          "code": "DUPLICATE_ID",
+          "variableIndex": 1,
+          "property": "id",
+          "value": "a",
+          "conflictingVariableIndex": 0
+        }
+      ]
+    },
+    {
+      "name": "case-insensitive duplicate alias",
+      "variables": [
+        { "id": "a", "alias": "Public" },
+        { "id": "b", "alias": "public" }
+      ],
+      "errors": [
+        {
+          "code": "DUPLICATE_ALIAS",
+          "variableIndex": 1,
+          "property": "alias",
+          "value": "public",
+          "conflictingVariableIndex": 0
+        }
+      ]
+    },
+    {
+      "name": "alias collides with an unaliased public id",
+      "variables": [
+        { "id": "technical" },
+        { "id": "other", "alias": "TECHNICAL" }
+      ],
+      "errors": [
+        {
+          "code": "PUBLIC_IDENTIFIER_COLLISION",
+          "variableIndex": 1,
+          "property": "alias",
+          "value": "TECHNICAL",
+          "conflictingVariableIndex": 0
+        }
+      ]
+    },
+    {
+      "name": "unaliased public id collides with an alias",
+      "variables": [
+        { "id": "first", "alias": "Public" },
+        { "id": "public" }
+      ],
+      "errors": [
+        {
+          "code": "PUBLIC_IDENTIFIER_COLLISION",
+          "variableIndex": 1,
+          "property": "id",
+          "value": "public",
+          "conflictingVariableIndex": 0
+        }
+      ]
+    },
+    {
+      "name": "alias matches another aliased variable technical id",
+      "variables": [
+        { "id": "technical", "alias": "first-public" },
+        { "id": "other", "alias": "technical" }
+      ],
+      "errors": []
+    }
+  ]
+}
