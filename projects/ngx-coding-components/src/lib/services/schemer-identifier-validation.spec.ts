@@ -5,12 +5,11 @@ import {
   VariableValidationErrorCode
 } from './variable-identifier-validation';
 import {
-  getVariableIdentifiersForValidation,
-  getVarListConflictAnalysis,
+  getSchemerIdentifierAnalysis,
   isInvalidVarListAlias,
   isInvalidVarListId,
   isInvalidVarListName
-} from './schemer-varlist-validation';
+} from './schemer-identifier-validation';
 
 interface VariableValidationCases {
   identifierCases: {
@@ -24,7 +23,7 @@ interface VariableValidationCases {
   }>;
 }
 
-describe('schemer-varlist-validation', () => {
+describe('schemer-identifier-validation', () => {
   const conformanceCases = validationCases as unknown as VariableValidationCases;
 
   it('should use the shared identifier rules for ids, aliases and names', () => {
@@ -47,7 +46,7 @@ describe('schemer-varlist-validation', () => {
 
   conformanceCases.variableListCases.forEach(testCase => {
     it(`should pass the shared conformance case: ${testCase.name}`, () => {
-      const analysis = getVarListConflictAnalysis(
+      const analysis = getSchemerIdentifierAnalysis(
         testCase.variables as VariableInfo[]
       );
 
@@ -57,7 +56,7 @@ describe('schemer-varlist-validation', () => {
   });
 
   it('should expose case-insensitive duplicate ids and aliases', () => {
-    const analysis = getVarListConflictAnalysis([
+    const analysis = getSchemerIdentifierAnalysis([
       { id: 'AA', alias: 'Alias' },
       { id: 'aa', alias: 'alias' },
       { id: 'BB', alias: 'Other' }
@@ -70,7 +69,7 @@ describe('schemer-varlist-validation', () => {
   });
 
   it('should distinguish invalid ids from invalid aliases', () => {
-    const analysis = getVarListConflictAnalysis([
+    const analysis = getSchemerIdentifierAnalysis([
       { id: '01.Text', alias: 'valid' },
       { id: 'also-valid', alias: '' }
     ] as VariableInfo[]);
@@ -81,7 +80,7 @@ describe('schemer-varlist-validation', () => {
   });
 
   it('should classify missing and null identifiers as empty', () => {
-    const analysis = getVarListConflictAnalysis([
+    const analysis = getSchemerIdentifierAnalysis([
       {} as VariableInfo,
       { id: null } as unknown as VariableInfo
     ]);
@@ -103,7 +102,7 @@ describe('schemer-varlist-validation', () => {
   });
 
   it('should allow aliases matching technical ids that are not public', () => {
-    const analysis = getVarListConflictAnalysis([
+    const analysis = getSchemerIdentifierAnalysis([
       { id: '04', alias: '02' },
       { id: '02', alias: '05' }
     ] as VariableInfo[]);
@@ -112,21 +111,38 @@ describe('schemer-varlist-validation', () => {
   });
 
   it('should preserve exact values and omitted aliases in its signature', () => {
-    const analysis = getVarListConflictAnalysis([
+    const analysis = getSchemerIdentifierAnalysis([
       { id: ' aa ', alias: ' Alias ' },
       { id: 'BB' },
       { id: 'CC', alias: '' }
     ] as VariableInfo[]);
 
     expect(analysis.signature).toBe(JSON.stringify([
-      { id: ' aa ', alias: ' Alias ', hasAlias: true },
-      { id: 'BB', hasAlias: false },
-      { id: 'CC', alias: '', hasAlias: true }
+      {
+        id: ' aa ',
+        alias: ' Alias ',
+        hasAlias: true,
+        origin: 'VARIABLE_LIST',
+        sourceIndex: 0
+      },
+      {
+        id: 'BB',
+        hasAlias: false,
+        origin: 'VARIABLE_LIST',
+        sourceIndex: 1
+      },
+      {
+        id: 'CC',
+        alias: '',
+        hasAlias: true,
+        origin: 'VARIABLE_LIST',
+        sourceIndex: 2
+      }
     ]));
   });
 
   it('should add derived and unrepresented base coding identifiers', () => {
-    const identifiers = getVariableIdentifiersForValidation(
+    const analysis = getSchemerIdentifierAnalysis(
       [
         { id: 'base', alias: 'Base' } as VariableInfo,
         { id: 'inactive', alias: 'Inactive' } as VariableInfo
@@ -140,12 +156,22 @@ describe('schemer-varlist-validation', () => {
       ] as never[]
     );
 
-    expect(identifiers).toEqual([
-      { id: 'base', alias: 'Base' },
-      { id: 'inactive', alias: 'Inactive' },
-      { id: 'orphan', alias: 'Orphan' },
-      { id: 'orphan-no-value' },
-      { id: 'd_1', alias: 'Derived' }
+    expect(analysis.identifiers).toEqual([
+      {
+        id: 'base', alias: 'Base', origin: 'VARIABLE_LIST', sourceIndex: 0
+      },
+      {
+        id: 'inactive', alias: 'Inactive', origin: 'VARIABLE_LIST', sourceIndex: 1
+      },
+      {
+        id: 'orphan', alias: 'Orphan', origin: 'BASE_CODING', sourceIndex: 2
+      },
+      {
+        id: 'orphan-no-value', origin: 'BASE_CODING', sourceIndex: 3
+      },
+      {
+        id: 'd_1', alias: 'Derived', origin: 'DERIVED_CODING', sourceIndex: 4
+      }
     ]);
   });
 
@@ -157,7 +183,7 @@ describe('schemer-varlist-validation', () => {
     }
   ] as const).forEach(({ description, duplicateSourceType }) => {
     it(`should retain duplicate represented ${description} codings`, () => {
-      const identifiers = getVariableIdentifiersForValidation(
+      const analysis = getSchemerIdentifierAnalysis(
         [{ id: 'base', alias: 'Public' } as VariableInfo],
         [
           { id: 'base', alias: 'Public', sourceType: 'BASE' },
@@ -169,11 +195,18 @@ describe('schemer-varlist-validation', () => {
         ] as never[]
       );
 
-      expect(identifiers).toEqual([
-        { id: 'base', alias: 'Public' },
-        { id: 'base', alias: 'Duplicate' }
+      expect(analysis.identifiers).toEqual([
+        {
+          id: 'base', alias: 'Public', origin: 'VARIABLE_LIST', sourceIndex: 0
+        },
+        {
+          id: 'base',
+          alias: 'Duplicate',
+          origin: 'BASE_CODING',
+          sourceIndex: 1
+        }
       ]);
-      expect(getVarListConflictAnalysis(identifiers).errors).toContain(
+      expect(analysis.errors).toContain(
         jasmine.objectContaining({
           code: 'DUPLICATE_ID',
           variableIndex: 1,

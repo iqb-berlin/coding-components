@@ -1,21 +1,22 @@
 import { MatDialogRef } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  ResolveVarListDuplicatesDialogComponent,
-  ResolveVarListDuplicatesDialogData
-} from './resolve-varlist-duplicates-dialog.component';
+  ResolveIdentifierConflictsDialogComponent,
+  ResolveIdentifierConflictsDialogData
+} from './resolve-identifier-conflicts-dialog.component';
+import { getSchemerIdentifierAnalysis } from '../services/schemer-identifier-validation';
 
-describe('ResolveVarListDuplicatesDialogComponent', () => {
+describe('ResolveIdentifierConflictsDialogComponent', () => {
   const createComponent = (varList: Partial<VariableInfo>[]) => {
     const dialogRef = {
       close: jasmine.createSpy('close')
-    } as unknown as MatDialogRef<ResolveVarListDuplicatesDialogComponent>;
-    const data: ResolveVarListDuplicatesDialogData = {
-      varList: varList as VariableInfo[]
+    } as unknown as MatDialogRef<ResolveIdentifierConflictsDialogComponent>;
+    const data: ResolveIdentifierConflictsDialogData = {
+      analysis: getSchemerIdentifierAnalysis(varList as VariableInfo[])
     };
 
     return {
-      component: new ResolveVarListDuplicatesDialogComponent(dialogRef, data),
+      component: new ResolveIdentifierConflictsDialogComponent(dialogRef, data),
       dialogRef
     };
   };
@@ -62,7 +63,33 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
 
     expect(collision?.conflictingVariableIndex).toBe(0);
     expect(component.displayConflictPartner(0)).toBe(
-      'Eintrag 1 (ID: first-id, Alias: Public)'
+      'Eintrag 1 (Variablenliste, Eintrag 1, ID: first-id, Alias: Public)'
+    );
+  });
+
+  it('should distinguish variable-list, base-coding and derived sources', () => {
+    const dialogRef = {
+      close: jasmine.createSpy('close')
+    } as unknown as MatDialogRef<ResolveIdentifierConflictsDialogComponent>;
+    const analysis = getSchemerIdentifierAnalysis(
+      [{ id: 'base' } as VariableInfo],
+      [
+        { id: 'base', sourceType: 'BASE' },
+        { id: 'orphan', sourceType: 'BASE_NO_VALUE' },
+        { id: 'derived', alias: 'invalid.alias', sourceType: 'COPY_VALUE' }
+      ] as never[]
+    );
+    const component = new ResolveIdentifierConflictsDialogComponent(
+      dialogRef,
+      { analysis }
+    );
+
+    expect(component.sourceLabel(0)).toBe('Variablenliste, Eintrag 1');
+    expect(component.sourceLabel(1)).toBe(
+      'Coding-Scheme (Basisvariable), Eintrag 2'
+    );
+    expect(component.sourceLabel(2)).toBe(
+      'Coding-Scheme (Derived-Variable), Eintrag 3'
     );
   });
 
@@ -92,7 +119,7 @@ describe('ResolveVarListDuplicatesDialogComponent', () => {
     ];
     const { component } = createComponent(original);
 
-    component.varList[0].id = 'CHANGED';
+    component.identifiers[0].id = 'CHANGED';
 
     expect(original.map(variable => variable.id)).toEqual(['AA', 'AA']);
   });

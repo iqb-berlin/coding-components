@@ -1,8 +1,9 @@
 <div class="scheme-body fx-row-space-between-stretch">
-  @if (hasVarListDuplicateConflict) {
+  @if (hasIdentifierConflict) {
   <div style="margin: 20px">
     <div style="margin-bottom: 12px;">
-      Bitte korrigiere die Variablenliste und lade den Schemer neu.
+      Bitte korrigiere die betroffenen Variablenbezeichner an ihrer im Dialog
+      angegebenen Quelle und lade den Schemer neu.
     </div>
     <div class="fx-row-start-center fx-gap-10">
       <button mat-button (click)="showSchemerInfo()">

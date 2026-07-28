@@ -8,14 +8,17 @@ import {
 } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import {
-  VariableIdentifiers,
   VariableValidationError,
   VariableValidationErrorCode
 } from '../services/variable-identifier-validation';
-import { getVarListConflictAnalysis } from '../services/schemer-varlist-validation';
+import {
+  SchemerIdentifier,
+  SchemerIdentifierAnalysis,
+  SchemerIdentifierOrigin
+} from '../services/schemer-identifier-validation';
 
-export interface ResolveVarListDuplicatesDialogData {
-  varList: VariableIdentifiers[];
+export interface ResolveIdentifierConflictsDialogData {
+  analysis: SchemerIdentifierAnalysis;
 }
 
 interface ValidationErrorGroup {
@@ -55,12 +58,13 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
 
 @Component({
   template: `
-    <h1 mat-dialog-title>Ungültige Variablenliste</h1>
+    <h1 mat-dialog-title>Ungültige Variablenbezeichner</h1>
 
     <mat-dialog-content>
       <p>
-        Die Variablenliste kann nicht übernommen werden. Bitte korrigiere sie
-        im Editor und lade den Schemer neu.
+        Die Variablenbezeichner können nicht übernommen werden. Bitte
+        korrigiere die betroffenen Einträge an der jeweils angegebenen Quelle
+        und lade den Schemer neu.
       </p>
 
       <aside class="identifier-help">
@@ -82,6 +86,7 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
           @for (error of group.errors; track $index) {
             <div class="error-entry">
               <div><b>Eintrag {{ error.variableIndex + 1 }}</b></div>
+              <div><b>Quelle:</b> {{ sourceLabel(error.variableIndex) }}</div>
               <div><b>ID:</b> {{ displayId(error.variableIndex) }}</div>
               <div><b>Alias:</b> {{ displayAlias(error.variableIndex) }}</div>
               <div><b>Betroffen:</b> {{ propertyLabel(error.property) }}</div>
@@ -145,43 +150,53 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
     MatButton
   ]
 })
-export class ResolveVarListDuplicatesDialogComponent {
-  varList: VariableIdentifiers[];
+export class ResolveIdentifierConflictsDialogComponent {
+  identifiers: SchemerIdentifier[];
   errorGroups: ValidationErrorGroup[] = [];
 
   constructor(
-    private dialogRef: MatDialogRef<ResolveVarListDuplicatesDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ResolveVarListDuplicatesDialogData
+    private dialogRef: MatDialogRef<ResolveIdentifierConflictsDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: ResolveIdentifierConflictsDialogData
   ) {
-    this.varList = (data.varList || []).map(variable => ({ ...variable }));
-    this.recompute();
-  }
-
-  recompute(): void {
-    const analysis = getVarListConflictAnalysis(this.varList);
-
+    this.identifiers = data.analysis.identifiers.map(identifier => ({
+      ...identifier
+    }));
     this.errorGroups = ERROR_GROUPS
       .map(group => ({
         ...group,
-        errors: analysis.errors.filter(error => error.code === group.code)
+        errors: data.analysis.errors.filter(error => error.code === group.code)
       }))
       .filter(group => group.errors.length > 0);
   }
 
   displayId(variableIndex: number): string {
-    const id = this.varList[variableIndex]?.id;
+    const id = this.identifiers[variableIndex]?.id;
     return id === '' || id === undefined ? '(leer)' : id;
   }
 
   displayAlias(variableIndex: number): string {
-    const variable = this.varList[variableIndex];
+    const variable = this.identifiers[variableIndex];
     if (!variable || variable.alias === undefined) return '(nicht gesetzt)';
     return variable.alias === '' ? '(leer)' : variable.alias;
   }
 
   displayConflictPartner(variableIndex: number): string {
-    return `Eintrag ${variableIndex + 1} (ID: ${this.displayId(variableIndex)}, ` +
+    return `Eintrag ${variableIndex + 1} ` +
+      `(${this.sourceLabel(variableIndex)}, ` +
+      `ID: ${this.displayId(variableIndex)}, ` +
       `Alias: ${this.displayAlias(variableIndex)})`;
+  }
+
+  sourceLabel(variableIndex: number): string {
+    const identifier = this.identifiers[variableIndex];
+    if (!identifier) return '(unbekannt)';
+
+    const labels: Record<SchemerIdentifierOrigin, string> = {
+      VARIABLE_LIST: 'Variablenliste',
+      BASE_CODING: 'Coding-Scheme (Basisvariable)',
+      DERIVED_CODING: 'Coding-Scheme (Derived-Variable)'
+    };
+    return `${labels[identifier.origin]}, Eintrag ${identifier.sourceIndex + 1}`;
   }
 
   // eslint-disable-next-line class-methods-use-this

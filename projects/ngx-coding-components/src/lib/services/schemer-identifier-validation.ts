@@ -7,25 +7,44 @@ import {
 } from './variable-identifier-validation';
 
 const copyVariableIdentifiers = (
-  variable: VariableIdentifiers
-): VariableIdentifiers => ({
+  variable: VariableIdentifiers,
+  origin: SchemerIdentifierOrigin,
+  sourceIndex: number
+): SchemerIdentifier => ({
   id: variable.id,
   ...(Object.prototype.hasOwnProperty.call(variable, 'alias') ?
     { alias: variable.alias } :
-    {})
+    {}),
+  origin,
+  sourceIndex
 });
 
-export const getVariableIdentifiersForValidation = (
+export type SchemerIdentifierOrigin =
+  'VARIABLE_LIST' |
+  'BASE_CODING' |
+  'DERIVED_CODING';
+
+export interface SchemerIdentifier extends VariableIdentifiers {
+  origin: SchemerIdentifierOrigin;
+  sourceIndex: number;
+}
+
+const getSchemerIdentifiersForValidation = (
   varList: VariableIdentifiers[] = [],
   variableCodings: VariableCodingData[] = []
-): VariableIdentifiers[] => {
+): SchemerIdentifier[] => {
   const representedBaseIds = new Set(varList.map(variable => variable.id));
   const matchedBaseIds = new Set<string>();
 
   return [
-    ...varList.map(copyVariableIdentifiers),
+    ...varList.map((variable, sourceIndex) => copyVariableIdentifiers(
+      variable,
+      'VARIABLE_LIST',
+      sourceIndex
+    )),
     ...variableCodings
-      .filter(coding => {
+      .map((coding, sourceIndex) => ({ coding, sourceIndex }))
+      .filter(({ coding }) => {
         const isBaseCoding = coding.sourceType === 'BASE' ||
           coding.sourceType === 'BASE_NO_VALUE';
         if (!isBaseCoding || !representedBaseIds.has(coding.id)) return true;
@@ -34,11 +53,18 @@ export const getVariableIdentifiersForValidation = (
         matchedBaseIds.add(coding.id);
         return false;
       })
-      .map(copyVariableIdentifiers)
+      .map(({ coding, sourceIndex }) => copyVariableIdentifiers(
+        coding,
+        coding.sourceType === 'BASE' || coding.sourceType === 'BASE_NO_VALUE' ?
+          'BASE_CODING' :
+          'DERIVED_CODING',
+        sourceIndex
+      ))
   ];
 };
 
-export type VarListConflictAnalysis = {
+export type SchemerIdentifierAnalysis = {
+  identifiers: SchemerIdentifier[];
   signature: string;
   errors: VariableValidationError[];
   duplicateIds: Set<string>;
@@ -67,15 +93,22 @@ const isInvalidIdentifierError = (error: VariableValidationError): boolean => (
   error.code === 'EMPTY_IDENTIFIER' || error.code === 'INVALID_CHARACTERS'
 );
 
-export const getVarListConflictAnalysis = (
-  varList: VariableIdentifiers[] = []
-): VarListConflictAnalysis => {
-  const signature = JSON.stringify(varList.map(variable => ({
+export const getSchemerIdentifierAnalysis = (
+  varList: VariableIdentifiers[] = [],
+  variableCodings: VariableCodingData[] = []
+): SchemerIdentifierAnalysis => {
+  const identifiers = getSchemerIdentifiersForValidation(
+    varList,
+    variableCodings
+  );
+  const signature = JSON.stringify(identifiers.map(variable => ({
     id: variable.id,
     alias: variable.alias,
-    hasAlias: Object.prototype.hasOwnProperty.call(variable, 'alias')
+    hasAlias: Object.prototype.hasOwnProperty.call(variable, 'alias'),
+    origin: variable.origin,
+    sourceIndex: variable.sourceIndex
   })));
-  const errors = validateVariableList(varList);
+  const errors = validateVariableList(identifiers);
   const duplicateIds = new Set(errors
     .filter(error => error.code === 'DUPLICATE_ID')
     .map(error => String(error.value).toUpperCase()));
@@ -94,6 +127,7 @@ export const getVarListConflictAnalysis = (
   const hasInvalid = errors.some(isInvalidIdentifierError);
 
   return {
+    identifiers,
     signature,
     errors,
     duplicateIds,

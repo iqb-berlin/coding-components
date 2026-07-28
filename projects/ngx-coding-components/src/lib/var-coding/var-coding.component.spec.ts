@@ -26,7 +26,7 @@ describe('VarCodingComponent', () => {
   let getAliasSpy: jasmine.Spy;
   let setCodingToTextModeSpy: jasmine.Spy;
   let isProtectedBaseVariableSpy: jasmine.Spy;
-  let checkRenamedVarAliasOkSpy: jasmine.Spy;
+  let getProspectiveIdentifierAnalysisSpy: jasmine.Spy;
 
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
@@ -42,7 +42,9 @@ describe('VarCodingComponent', () => {
     getAliasSpy = jasmine.createSpy('getVariableAliasById').and.callFake((id: string) => `${id}_ALIAS`);
     setCodingToTextModeSpy = jasmine.createSpy('setCodingToTextMode');
     isProtectedBaseVariableSpy = jasmine.createSpy('isProtectedBaseVariable').and.returnValue(false);
-    checkRenamedVarAliasOkSpy = jasmine.createSpy('checkRenamedVarAliasOk').and.returnValue(true);
+    getProspectiveIdentifierAnalysisSpy = jasmine
+      .createSpy('getProspectiveIdentifierAnalysis')
+      .and.returnValue({ hasProblems: false });
 
     await TestBed.configureTestingModule({
       imports: [
@@ -76,7 +78,7 @@ describe('VarCodingComponent', () => {
             getVariableAliasById: getAliasSpy,
             setCodingToTextMode: setCodingToTextModeSpy,
             isProtectedBaseVariable: isProtectedBaseVariableSpy,
-            checkRenamedVarAliasOk: checkRenamedVarAliasOkSpy
+            getProspectiveIdentifierAnalysis: getProspectiveIdentifierAnalysisSpy
           }
         }
       ]
@@ -644,7 +646,16 @@ describe('VarCodingComponent', () => {
     expect(component.varCoding?.alias).toBe('A2');
     expect(component.varCoding?.sourceType).toBe('DERIVE');
     expect(component.varCoding?.deriveSources).toEqual(['x1']);
-    expect(checkRenamedVarAliasOkSpy).toHaveBeenCalledOnceWith('A2', 'v1');
+    expect(getProspectiveIdentifierAnalysisSpy).toHaveBeenCalledOnceWith(
+      jasmine.objectContaining({
+        id: 'v1',
+        alias: 'A2',
+        sourceType: 'DERIVE',
+        sourceParameters: { b: 2 },
+        deriveSources: ['x1']
+      }),
+      'v1'
+    );
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
   });
 
@@ -663,7 +674,7 @@ describe('VarCodingComponent', () => {
         deriveSources: []
       } as unknown as VariableCodingData;
       const originalVarCoding = JSON.stringify(component.varCoding);
-      checkRenamedVarAliasOkSpy.and.returnValue(false);
+      getProspectiveIdentifierAnalysisSpy.and.returnValue(false);
 
       dialogOpenSpy.and.returnValue({
         afterClosed: () => of({
@@ -676,7 +687,16 @@ describe('VarCodingComponent', () => {
 
       component.editSourceParameters();
 
-      expect(checkRenamedVarAliasOkSpy).toHaveBeenCalledOnceWith(alias, 'v1');
+      expect(getProspectiveIdentifierAnalysisSpy).toHaveBeenCalledOnceWith(
+        jasmine.objectContaining({
+          id: 'v1',
+          alias,
+          sourceType: 'DERIVE',
+          sourceParameters: { b: 2 },
+          deriveSources: ['x1']
+        }),
+        'v1'
+      );
       expect(JSON.stringify(component.varCoding)).toBe(originalVarCoding);
       expect(emitSpy).not.toHaveBeenCalled();
       expect(dialogOpenSpy.calls.mostRecent().args[0]).toBe(MessageDialogComponent);

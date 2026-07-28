@@ -62,10 +62,6 @@ import {
   CodingSchemeValidationProblem,
   validateCodingScheme
 } from '../services/coding-scheme-validation';
-import {
-  getVariableIdentifiersForValidation,
-  getVarListConflictAnalysis
-} from '../services/schemer-varlist-validation';
 
 @Component({
   selector: 'iqb-schemer',
@@ -100,7 +96,7 @@ export class SchemerComponent implements OnDestroy {
       .pipe(debounceTime(300))
       .subscribe(() => {
         this.updateVariableLists();
-        if (!this.hasVarListDuplicateConflict) {
+        if (!this.hasIdentifierConflict) {
           this.codingSchemeChanged.emit(this.schemerService.codingScheme);
         }
       });
@@ -144,7 +140,7 @@ export class SchemerComponent implements OnDestroy {
   codingStatus: { [id: string]: string } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
   problems: CodingSchemeValidationProblem[] = [];
-  hasVarListDuplicateConflict = false;
+  hasIdentifierConflict = false;
   varCodingChangedSubscription: Subscription | null = null;
 
   constructor(
@@ -173,8 +169,8 @@ export class SchemerComponent implements OnDestroy {
   }
 
   updateVariableLists() {
-    if (this.schemerFacade.tryResolveVarListDuplicates()) {
-      this.hasVarListDuplicateConflict = true;
+    if (this.schemerFacade.tryResolveIdentifierConflicts()) {
+      this.hasIdentifierConflict = true;
       this.selectVarScheme();
       this.basicVariables = [];
       this.derivedVariables = [];
@@ -182,7 +178,7 @@ export class SchemerComponent implements OnDestroy {
       this.problems = [];
       return;
     }
-    this.hasVarListDuplicateConflict = false;
+    this.hasIdentifierConflict = false;
 
     if (
       this.schemerService.varList &&
@@ -410,23 +406,12 @@ export class SchemerComponent implements OnDestroy {
         this.schemerService.codingScheme.variableCodings.findIndex(
           v => v.id === importedVar.id
         );
-      const prospectiveVariableCodings = existingIndex >= 0 ?
-        this.schemerService.codingScheme.variableCodings.map(
-          (coding, index) => (
-            index === existingIndex ? importedVar : coding
-          )
-        ) :
-        [
-          ...this.schemerService.codingScheme.variableCodings,
-          importedVar
-        ];
-      const identifierAnalysis = getVarListConflictAnalysis(
-        getVariableIdentifiersForValidation(
-          this.schemerService.varList,
-          prospectiveVariableCodings
-        )
-      );
-      if (identifierAnalysis.hasProblems) {
+      const identifierAnalysis =
+        this.schemerService.getProspectiveIdentifierAnalysis(
+          importedVar,
+          existingIndex >= 0 ? importedVar.id : undefined
+        );
+      if (!identifierAnalysis || identifierAnalysis.hasProblems) {
         throw new Error(this.tr('schemer.import.invalid-identifiers'));
       }
 
@@ -523,21 +508,10 @@ export class SchemerComponent implements OnDestroy {
             codes: [],
             page: ''
           };
-          const identifierAnalysis = getVarListConflictAnalysis(
-            getVariableIdentifiersForValidation(
-              this.schemerService.varList,
-              [
-                ...this.schemerService.codingScheme.variableCodings,
-                newVarScheme
-              ]
-            )
-          );
+          const identifierAnalysis =
+            this.schemerService.getProspectiveIdentifierAnalysis(newVarScheme);
           let errorMessage = '';
-          if (
-            !this.schemerService.checkRenamedVarAliasOk(
-              dialogResultTyped.selfAlias
-            ) || identifierAnalysis.hasProblems
-          ) {
+          if (!identifierAnalysis || identifierAnalysis.hasProblems) {
             errorMessage = 'data-error.variable-id.double';
           } else {
             this.schemerService.codingScheme.variableCodings.push(newVarScheme);
@@ -625,12 +599,12 @@ export class SchemerComponent implements OnDestroy {
       });
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false) {
-          if (
-            !this.schemerService.checkRenamedVarAliasOk(
-              result,
+          const identifierAnalysis =
+            this.schemerService.getProspectiveIdentifierAnalysis(
+              { ...selectedCoding, alias: result },
               selectedCoding.id
-            )
-          ) {
+            );
+          if (!identifierAnalysis || identifierAnalysis.hasProblems) {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
@@ -838,6 +812,6 @@ export class SchemerComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
-    this.schemerFacade.resetVarListDuplicateResolutionState();
+    this.schemerFacade.resetIdentifierConflictResolutionState();
   }
 }

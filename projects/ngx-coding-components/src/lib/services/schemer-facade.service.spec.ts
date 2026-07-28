@@ -1,6 +1,6 @@
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
-import { ResolveVarListDuplicatesDialogComponent } from '../dialogs/resolve-varlist-duplicates-dialog.component';
+import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 import { SchemerFacadeService } from './schemer-facade.service';
 import { SchemerService } from './schemer.service';
 
@@ -17,7 +17,7 @@ describe('SchemerFacadeService', () => {
 
   const createService = () => new SchemerFacadeService(schemerService, dialog);
 
-  it('tryResolveVarListDuplicates should keep blocking while already resolving', () => {
+  it('tryResolveIdentifierConflicts should keep blocking while already resolving', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -30,13 +30,13 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => afterClosed$.asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
 
     afterClosed$.complete();
   });
 
-  it('tryResolveVarListDuplicates should stop blocking while resolving if the current varList becomes valid', () => {
+  it('tryResolveIdentifierConflicts should stop blocking while resolving if the current varList becomes valid', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -49,14 +49,14 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => afterClosed$.asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
 
     schemerService.setVarList([
       { id: 'AA', alias: 'AA' } as never,
       { id: 'BB', alias: 'BB' } as never
     ]);
 
-    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(service.tryResolveIdentifierConflicts()).toBeFalse();
 
     afterClosed$.next(null);
     afterClosed$.complete();
@@ -66,19 +66,19 @@ describe('SchemerFacadeService', () => {
       { id: 'A', alias: 'B' } as never
     ]);
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(2);
   });
 
-  it('tryResolveVarListDuplicates should return false for an empty varList', () => {
+  it('tryResolveIdentifierConflicts should return false for an empty varList', () => {
     const service = createService();
 
     schemerService.setVarList([]);
-    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(service.tryResolveIdentifierConflicts()).toBeFalse();
     expect(dialog.open).not.toHaveBeenCalled();
   });
 
-  it('tryResolveVarListDuplicates should return false when there are no duplicates', () => {
+  it('tryResolveIdentifierConflicts should return false when there are no duplicates', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -86,11 +86,11 @@ describe('SchemerFacadeService', () => {
       { id: 'BB', alias: 'BB' } as never
     ]);
 
-    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(service.tryResolveIdentifierConflicts()).toBeFalse();
     expect(dialog.open).not.toHaveBeenCalled();
   });
 
-  it('tryResolveVarListDuplicates should allow unique aliases matching other ids', () => {
+  it('tryResolveIdentifierConflicts should allow unique aliases matching other ids', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -98,30 +98,34 @@ describe('SchemerFacadeService', () => {
       { id: '02', alias: '05' } as never
     ]);
 
-    expect(service.tryResolveVarListDuplicates()).toBeFalse();
+    expect(service.tryResolveIdentifierConflicts()).toBeFalse();
     expect(dialog.open).not.toHaveBeenCalled();
   });
 
-  it('tryResolveVarListDuplicates should open dialog when invalid ids or aliases exist', () => {
+  it('tryResolveIdentifierConflicts should open dialog when invalid ids or aliases exist', () => {
     const service = createService();
 
     schemerService.setVarList([
       { id: '01.Text', alias: 'valid' } as never,
       { id: 'also-valid', alias: '' } as never
     ]);
+    const analysis = schemerService.getIdentifierAnalysis();
+    spyOn(schemerService, 'getIdentifierAnalysis').and.returnValue(analysis);
 
     (dialog.open as jasmine.Spy).and.returnValue({
       afterClosed: () => new Subject<unknown>().asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalled();
     expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(
-      ResolveVarListDuplicatesDialogComponent
+      ResolveIdentifierConflictsDialogComponent
     );
+    expect((dialog.open as jasmine.Spy).calls.mostRecent().args[1].data)
+      .toEqual({ analysis });
   });
 
-  it('tryResolveVarListDuplicates should open dialog when duplicates exist', () => {
+  it('tryResolveIdentifierConflicts should open dialog when duplicates exist', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -133,14 +137,14 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => new Subject<unknown>().asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalled();
     expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(
-      ResolveVarListDuplicatesDialogComponent
+      ResolveIdentifierConflictsDialogComponent
     );
   });
 
-  it('tryResolveVarListDuplicates should block invalid derived identifiers', () => {
+  it('tryResolveIdentifierConflicts should block invalid derived identifiers', () => {
     const service = createService();
 
     schemerService.setVarList([{ id: 'base' } as never]);
@@ -155,16 +159,21 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => new Subject<unknown>().asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     const dialogData = (dialog.open as jasmine.Spy).calls.mostRecent().args[1]
       .data;
-    expect(dialogData.varList).toEqual([
-      { id: 'base' },
-      { id: 'd_1', alias: '01.Text' }
+    expect(dialogData.analysis.identifiers).toEqual([
+      { id: 'base', origin: 'VARIABLE_LIST', sourceIndex: 0 },
+      {
+        id: 'd_1',
+        alias: '01.Text',
+        origin: 'DERIVED_CODING',
+        sourceIndex: 1
+      }
     ]);
   });
 
-  it('tryResolveVarListDuplicates should block unrepresented invalid base codings', () => {
+  it('tryResolveIdentifierConflicts should block unrepresented invalid base codings', () => {
     const service = createService();
 
     schemerService.setVarList([{ id: 'base' } as never]);
@@ -184,16 +193,21 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => new Subject<unknown>().asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     const dialogData = (dialog.open as jasmine.Spy).calls.mostRecent().args[1]
       .data;
-    expect(dialogData.varList).toEqual([
-      { id: 'base' },
-      { id: 'orphan.invalid', alias: 'Orphan' }
+    expect(dialogData.analysis.identifiers).toEqual([
+      { id: 'base', origin: 'VARIABLE_LIST', sourceIndex: 0 },
+      {
+        id: 'orphan.invalid',
+        alias: 'Orphan',
+        origin: 'BASE_CODING',
+        sourceIndex: 1
+      }
     ]);
   });
 
-  it('tryResolveVarListDuplicates should detect derived public collisions', () => {
+  it('tryResolveIdentifierConflicts should detect derived public collisions', () => {
     const service = createService();
 
     schemerService.setVarList([{ id: 'base-public' } as never]);
@@ -208,11 +222,11 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => new Subject<unknown>().asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalled();
   });
 
-  it('tryResolveVarListDuplicates should keep blocking a dismissed duplicate signature', () => {
+  it('tryResolveIdentifierConflicts should keep blocking a dismissed duplicate signature', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -225,15 +239,15 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => afterClosed$.asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     afterClosed$.next(null);
     afterClosed$.complete();
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(1);
   });
 
-  it('resetVarListDuplicateResolutionState should allow the same dismissed conflict to open again', () => {
+  it('resetIdentifierConflictResolutionState should allow the same dismissed conflict to open again', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -246,19 +260,19 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => afterClosed$.asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     afterClosed$.next(null);
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(1);
 
-    service.resetVarListDuplicateResolutionState();
+    service.resetIdentifierConflictResolutionState();
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(2);
   });
 
-  it('resetVarListDuplicateResolutionState should clear an in-progress dialog state', () => {
+  it('resetIdentifierConflictResolutionState should clear an in-progress dialog state', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -270,17 +284,17 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => new Subject<unknown>().asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(1);
 
-    service.resetVarListDuplicateResolutionState();
+    service.resetIdentifierConflictResolutionState();
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(2);
   });
 
-  it('resetVarListDuplicateResolutionState should ignore stale dialog close callbacks', () => {
+  it('resetIdentifierConflictResolutionState should ignore stale dialog close callbacks', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -303,17 +317,17 @@ describe('SchemerFacadeService', () => {
       nextDialogRef
     );
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
 
-    service.resetVarListDuplicateResolutionState();
+    service.resetIdentifierConflictResolutionState();
     staleAfterClosed$.next(null);
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(staleDialogRef.close).toHaveBeenCalled();
     expect(dialog.open).toHaveBeenCalledTimes(2);
   });
 
-  it('tryResolveVarListDuplicates should not mutate varList or codingScheme when dialog closes', () => {
+  it('tryResolveIdentifierConflicts should not mutate varList or codingScheme when dialog closes', () => {
     const service = createService();
 
     schemerService.setVarList([
@@ -335,7 +349,7 @@ describe('SchemerFacadeService', () => {
       afterClosed: () => afterClosed$.asObservable()
     });
 
-    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(service.tryResolveIdentifierConflicts()).toBeTrue();
 
     afterClosed$.next(null);
     afterClosed$.complete();
