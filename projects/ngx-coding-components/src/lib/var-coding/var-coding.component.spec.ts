@@ -10,6 +10,7 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VarCodingComponent } from './var-coding.component';
 import { SchemerService } from '../services/schemer.service';
 import { DEFAULT_RESIDUAL_MANUAL_INSTRUCTION } from '../services/schemer-code-ops';
+import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 
 describe('VarCodingComponent', () => {
   let component: VarCodingComponent;
@@ -25,6 +26,7 @@ describe('VarCodingComponent', () => {
   let getAliasSpy: jasmine.Spy;
   let setCodingToTextModeSpy: jasmine.Spy;
   let isProtectedBaseVariableSpy: jasmine.Spy;
+  let checkRenamedVarAliasOkSpy: jasmine.Spy;
 
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
@@ -40,6 +42,7 @@ describe('VarCodingComponent', () => {
     getAliasSpy = jasmine.createSpy('getVariableAliasById').and.callFake((id: string) => `${id}_ALIAS`);
     setCodingToTextModeSpy = jasmine.createSpy('setCodingToTextMode');
     isProtectedBaseVariableSpy = jasmine.createSpy('isProtectedBaseVariable').and.returnValue(false);
+    checkRenamedVarAliasOkSpy = jasmine.createSpy('checkRenamedVarAliasOk').and.returnValue(true);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -72,7 +75,8 @@ describe('VarCodingComponent', () => {
             sortCodes: sortCodesSpy,
             getVariableAliasById: getAliasSpy,
             setCodingToTextMode: setCodingToTextModeSpy,
-            isProtectedBaseVariable: isProtectedBaseVariableSpy
+            isProtectedBaseVariable: isProtectedBaseVariableSpy,
+            checkRenamedVarAliasOk: checkRenamedVarAliasOkSpy
           }
         }
       ]
@@ -640,7 +644,43 @@ describe('VarCodingComponent', () => {
     expect(component.varCoding?.alias).toBe('A2');
     expect(component.varCoding?.sourceType).toBe('DERIVE');
     expect(component.varCoding?.deriveSources).toEqual(['x1']);
+    expect(checkRenamedVarAliasOkSpy).toHaveBeenCalledOnceWith('A2', 'v1');
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  [
+    { description: 'case-insensitive duplicate aliases', alias: 'existing' },
+    { description: 'public identifier collisions', alias: 'PUBLIC-ID' }
+  ].forEach(({ description, alias }) => {
+    it(`editSourceParameters should reject ${description} before mutation`, () => {
+      const emitSpy = spyOn(component.varCodingChanged, 'emit');
+      (schemerService as unknown as { userRole: string }).userRole = 'RW_MAXIMAL';
+      component.varCoding = {
+        id: 'v1',
+        alias: 'Original',
+        sourceType: 'BASE',
+        sourceParameters: { a: 1 },
+        deriveSources: []
+      } as unknown as VariableCodingData;
+      const originalVarCoding = JSON.stringify(component.varCoding);
+      checkRenamedVarAliasOkSpy.and.returnValue(false);
+
+      dialogOpenSpy.and.returnValue({
+        afterClosed: () => of({
+          selfAlias: alias,
+          sourceType: 'DERIVE',
+          sourceParameters: { b: 2 },
+          deriveSources: ['x1']
+        })
+      });
+
+      component.editSourceParameters();
+
+      expect(checkRenamedVarAliasOkSpy).toHaveBeenCalledOnceWith(alias, 'v1');
+      expect(JSON.stringify(component.varCoding)).toBe(originalVarCoding);
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(dialogOpenSpy.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
+    });
   });
 
   it('editSourceParameters should ignore false/undefined dialog results', () => {

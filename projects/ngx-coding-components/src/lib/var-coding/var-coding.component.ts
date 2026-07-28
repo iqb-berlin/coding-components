@@ -493,6 +493,21 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           } =
             dialogResult as EditSourceParametersDialogData;
 
+          if (!this.schemerService.checkRenamedVarAliasOk(
+            selfAlias,
+            this.varCoding.id
+          )) {
+            this.messageDialog.open(MessageDialogComponent, {
+              width: '400px',
+              data: <MessageDialogData>{
+                title: this.translateService.instant('schemer.rename.error.title'),
+                content: this.translateService.instant('data-error.variable-id.double'),
+                type: MessageType.error
+              }
+            });
+            return;
+          }
+
           Object.assign(this.varCoding, {
             alias: selfAlias,
             sourceType,
