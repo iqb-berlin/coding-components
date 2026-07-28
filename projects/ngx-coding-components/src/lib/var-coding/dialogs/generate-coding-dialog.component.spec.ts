@@ -1,4 +1,5 @@
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { CodingSchemeFactory } from '@iqb/responses';
 import { transformValue } from '@iqb/responses/value-transform';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { TranslateService } from '@ngx-translate/core';
@@ -6,6 +7,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import {
   CodeData,
   CodeType,
+  RuleSet,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { SchemerService } from '../../services/schemer.service';
@@ -372,12 +374,95 @@ describe('GenerateCodingDialogComponent', () => {
     const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as unknown as { codes: unknown[] };
     expect((closed as { fragmenting?: string }).fragmenting).toBe('');
     const fullCredit = (closed.codes as Array<{ type: string; ruleSets:
-    Array<{ rules: Array<{ method: string; parameters: string[] }> }> }>)
+    Array<{ valueArrayPos?: RuleSet['valueArrayPos']; rules:
+    Array<{ method: string; parameters: string[] }> }> }>)
       .find(c => c.type === 'FULL_CREDIT')!;
     expect(fullCredit.ruleSets[0].rules[0]).toEqual({
       method: 'MATCH',
       parameters: ['abc']
     });
+    expect(fullCredit.ruleSets[0].valueArrayPos).toBeUndefined();
+  });
+
+  it('should default multiple inputs without position labels to ANY_OPEN', () => {
+    const { component } = createComponent({
+      type: 'string',
+      multiple: true,
+      valuePositionLabels: []
+    });
+
+    expect(component.generationModel).toBe('simple-input');
+    expect(component.selectedArrayPos).toBe('ANY_OPEN');
+  });
+
+  it('should default multiple inputs with position labels to the first position', () => {
+    const { component } = createComponent({
+      type: 'string',
+      multiple: true,
+      valuePositionLabels: ['First', 'Second']
+    });
+
+    expect(component.selectedArrayPos).toBe(0);
+  });
+
+  it('should generate valid ANY_OPEN rules for variable-length multiple inputs', () => {
+    const {
+      component, dialogRef, schemerService, varInfo
+    } = createComponent({
+      type: 'string',
+      multiple: true,
+      valuePositionLabels: []
+    });
+    allowCodeCreation(schemerService);
+    component.selectedOption = 'outside';
+    component.selectedArrayPos = -1;
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent()
+      .args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || [])
+      .find(code => code.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0].valueArrayPos).toBe('ANY_OPEN');
+    expect(CodingSchemeFactory.validate([varInfo], [closed])
+      .some(problem => problem.type === 'RULESET_VALUE_ARRAY_POS_INVALID'))
+      .toBeFalse();
+
+    const matching = CodingFactory.code({
+      id: varInfo.id,
+      value: ['inside', 'outside'],
+      status: 'VALUE_CHANGED'
+    }, closed);
+    const notMatching = CodingFactory.code({
+      id: varInfo.id,
+      value: ['inside', 'allowed'],
+      status: 'VALUE_CHANGED'
+    }, closed);
+
+    expect(matching.code).toBe(1);
+    expect(notMatching.code).not.toBe(1);
+  });
+
+  it('should defensively replace a negative numeric array position', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      type: 'string',
+      multiple: true,
+      valuePositionLabels: []
+    });
+    allowCodeCreation(schemerService);
+    component.textAsNumeric = true;
+    component.numericMatch = '42';
+    component.selectedArrayPos = -1;
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent()
+      .args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || [])
+      .find(code => code.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0].valueArrayPos).toBe('ANY_OPEN');
   });
 
   it('generateButtonClick should fragment GeoGebra numeric values before numeric rules', () => {

@@ -67,6 +67,12 @@ export class CodeRulesComponent {
     this.codeRulesChanged.emit(this.code);
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  hasInvalidArrayReference(ruleSet: RuleSet): boolean {
+    return typeof ruleSet.valueArrayPos === 'number' &&
+      ruleSet.valueArrayPos < 0;
+  }
+
   addRuleSet() {
     if (!this.code) {
       return;
@@ -105,7 +111,7 @@ export class CodeRulesComponent {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
+        if (dialogResult !== false && typeof dialogResult !== 'undefined') {
           ruleSet.valueArrayPos = dialogResult;
           this.setCodeRulesChanged();
         }
