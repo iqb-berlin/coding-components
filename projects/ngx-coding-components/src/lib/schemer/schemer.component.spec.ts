@@ -7,10 +7,6 @@ import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { of, Subject } from 'rxjs';
 import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 import { FileService } from '../services/file.service';
-import {
-  getSchemerIdentifierAnalysis,
-  SchemerIdentifierAnalysis
-} from '../services/schemer-identifier-validation';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SchemerComponent } from './schemer.component';
 
@@ -41,10 +37,6 @@ describe('SchemerComponent', () => {
     setCodingScheme: (v: unknown) => void;
     setVarList: (v: unknown) => void;
     setUserRole: (v: unknown) => void;
-    getProspectiveIdentifierAnalysis: (
-      candidate: VariableCodingData,
-      replacedCodingId?: string
-    ) => SchemerIdentifierAnalysis | null;
     isProtectedBaseVariable: (varCoding: VariableCodingData | null | undefined) => boolean;
   };
 
@@ -80,26 +72,6 @@ describe('SchemerComponent', () => {
       },
       setUserRole: (v: unknown) => {
         schemerService.userRole = v as unknown as never;
-      },
-      getProspectiveIdentifierAnalysis: (
-        candidate: VariableCodingData,
-        replacedCodingId?: string
-      ) => {
-        if (!schemerService.codingScheme) return null;
-        const replacedIndex = replacedCodingId === undefined ?
-          -1 :
-          schemerService.codingScheme.variableCodings.findIndex(
-            coding => coding.id === replacedCodingId
-          );
-        const prospectiveCodings = replacedIndex < 0 ?
-          [...schemerService.codingScheme.variableCodings, candidate] :
-          schemerService.codingScheme.variableCodings.map((coding, index) => (
-            index === replacedIndex ? candidate : coding
-          ));
-        return getSchemerIdentifierAnalysis(
-          schemerService.varList,
-          prospectiveCodings
-        );
       },
       isProtectedBaseVariable: (varCoding: VariableCodingData | null | undefined) => (
         !!varCoding &&
@@ -538,20 +510,11 @@ describe('SchemerComponent', () => {
     component.selectedCoding$.next(selected);
 
     inputDialog.afterClosedValue = 'NewAlias';
-    const analysisSpy = spyOn(
-      schemerService,
-      'getProspectiveIdentifierAnalysis'
-    ).and.callThrough();
-
     spyOn(CodingSchemeFactory, 'validate').and.returnValue([] as unknown as CodingSchemeProblem[]);
 
     component.renameVarScheme();
 
     expect(selected.alias).toBe('NewAlias');
-    expect(analysisSpy).toHaveBeenCalledWith(
-      jasmine.objectContaining({ id: 'd1', alias: 'NewAlias' }),
-      'd1'
-    );
     expect(emitSpy).toHaveBeenCalled();
   });
 
@@ -580,9 +543,14 @@ describe('SchemerComponent', () => {
 
   it('renameVarScheme should show error when alias duplicate', () => {
     schemerService.setCodingScheme({
-      variableCodings: [{
-        id: 'd1', alias: 'Old', sourceType: 'DERIVE', codes: []
-      } as unknown as VariableCodingData]
+      variableCodings: [
+        {
+          id: 'd1', alias: 'Old', sourceType: 'DERIVE', codes: []
+        } as unknown as VariableCodingData,
+        {
+          id: 'd2', alias: 'DupAlias', sourceType: 'DERIVE', codes: []
+        } as unknown as VariableCodingData
+      ]
     } as unknown as never);
 
     const selected = (schemerService.codingScheme as unknown as
@@ -590,14 +558,28 @@ describe('SchemerComponent', () => {
     component.selectedCoding$.next(selected);
 
     inputDialog.afterClosedValue = 'DupAlias';
-    spyOn(schemerService, 'getProspectiveIdentifierAnalysis').and.returnValue(
-      getSchemerIdentifierAnalysis([{ id: '' } as VariableInfo])
-    );
 
     component.renameVarScheme();
 
+    expect(selected.alias).toBe('Old');
     expect(messageDialog.open).toHaveBeenCalled();
     expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
+  });
+
+  it('renameVarScheme should reject changes without a coding scheme', () => {
+    const selected = {
+      id: 'd1', alias: 'Old', sourceType: 'DERIVE', codes: []
+    } as unknown as VariableCodingData;
+    component.selectedCoding$.next(selected);
+    schemerService.setCodingScheme(null);
+    inputDialog.afterClosedValue = 'NewAlias';
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    component.renameVarScheme();
+
+    expect(selected.alias).toBe('Old');
+    expect(messageDialog.open).toHaveBeenCalled();
+    expect(emitSpy).not.toHaveBeenCalled();
   });
 
   it('exportVariable should show info dialog when no scheme', async () => {

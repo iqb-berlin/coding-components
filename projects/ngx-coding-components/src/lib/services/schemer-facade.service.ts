@@ -3,6 +3,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from './schemer.service';
 import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
+import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,10 @@ export class SchemerFacadeService {
   }
 
   tryResolveIdentifierConflicts(): boolean {
-    const analysis = this.schemerService.getIdentifierAnalysis();
+    const analysis = analyzeVariableIdentifiers(
+      this.schemerService.varList,
+      this.schemerService.codingScheme?.variableCodings || []
+    );
 
     if (!analysis.hasProblems) {
       this.dismissedIdentifierConflictSignature = null;
@@ -67,7 +71,10 @@ export class SchemerFacadeService {
 
       this.identifierConflictDialogRef = null;
       this.resolvingIdentifierConflicts = false;
-      const currentAnalysis = this.schemerService.getIdentifierAnalysis();
+      const currentAnalysis = analyzeVariableIdentifiers(
+        this.schemerService.varList,
+        this.schemerService.codingScheme?.variableCodings || []
+      );
       this.dismissedIdentifierConflictSignature =
         currentAnalysis.hasProblems &&
         currentAnalysis.signature === analysis.signature ?

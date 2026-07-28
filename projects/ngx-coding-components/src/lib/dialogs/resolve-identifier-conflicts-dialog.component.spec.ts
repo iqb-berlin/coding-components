@@ -4,7 +4,7 @@ import {
   ResolveIdentifierConflictsDialogComponent,
   ResolveIdentifierConflictsDialogData
 } from './resolve-identifier-conflicts-dialog.component';
-import { getSchemerIdentifierAnalysis } from '../services/schemer-identifier-validation';
+import { analyzeVariableIdentifiers } from '../services/schemer-identifier-validation';
 
 describe('ResolveIdentifierConflictsDialogComponent', () => {
   const createComponent = (varList: Partial<VariableInfo>[]) => {
@@ -12,7 +12,7 @@ describe('ResolveIdentifierConflictsDialogComponent', () => {
       close: jasmine.createSpy('close')
     } as unknown as MatDialogRef<ResolveIdentifierConflictsDialogComponent>;
     const data: ResolveIdentifierConflictsDialogData = {
-      analysis: getSchemerIdentifierAnalysis(varList as VariableInfo[])
+      analysis: analyzeVariableIdentifiers(varList as VariableInfo[])
     };
 
     return {
@@ -71,7 +71,7 @@ describe('ResolveIdentifierConflictsDialogComponent', () => {
     const dialogRef = {
       close: jasmine.createSpy('close')
     } as unknown as MatDialogRef<ResolveIdentifierConflictsDialogComponent>;
-    const analysis = getSchemerIdentifierAnalysis(
+    const analysis = analyzeVariableIdentifiers(
       [{ id: 'base' } as VariableInfo],
       [
         { id: 'base', sourceType: 'BASE' },

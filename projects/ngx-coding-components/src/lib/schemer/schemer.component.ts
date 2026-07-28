@@ -62,6 +62,7 @@ import {
   CodingSchemeValidationProblem,
   validateCodingScheme
 } from '../services/coding-scheme-validation';
+import { validateVariableCodingChange } from '../services/schemer-identifier-validation';
 
 @Component({
   selector: 'iqb-schemer',
@@ -406,12 +407,15 @@ export class SchemerComponent implements OnDestroy {
         this.schemerService.codingScheme.variableCodings.findIndex(
           v => v.id === importedVar.id
         );
-      const identifierAnalysis =
-        this.schemerService.getProspectiveIdentifierAnalysis(
-          importedVar,
-          existingIndex >= 0 ? importedVar.id : undefined
-        );
-      if (!identifierAnalysis || identifierAnalysis.hasProblems) {
+      const identifierAnalysis = validateVariableCodingChange(
+        this.schemerService.varList,
+        this.schemerService.codingScheme.variableCodings,
+        {
+          coding: importedVar,
+          replacedCodingId: existingIndex >= 0 ? importedVar.id : undefined
+        }
+      );
+      if (identifierAnalysis.hasProblems) {
         throw new Error(this.tr('schemer.import.invalid-identifiers'));
       }
 
@@ -508,10 +512,13 @@ export class SchemerComponent implements OnDestroy {
             codes: [],
             page: ''
           };
-          const identifierAnalysis =
-            this.schemerService.getProspectiveIdentifierAnalysis(newVarScheme);
+          const identifierAnalysis = validateVariableCodingChange(
+            this.schemerService.varList,
+            this.schemerService.codingScheme.variableCodings,
+            { coding: newVarScheme }
+          );
           let errorMessage = '';
-          if (!identifierAnalysis || identifierAnalysis.hasProblems) {
+          if (identifierAnalysis.hasProblems) {
             errorMessage = 'data-error.variable-id.double';
           } else {
             this.schemerService.codingScheme.variableCodings.push(newVarScheme);
@@ -599,11 +606,18 @@ export class SchemerComponent implements OnDestroy {
       });
       dialogRef.afterClosed().subscribe(result => {
         if (result !== false) {
-          const identifierAnalysis =
-            this.schemerService.getProspectiveIdentifierAnalysis(
-              { ...selectedCoding, alias: result },
-              selectedCoding.id
-            );
+          const variableCodings =
+            this.schemerService.codingScheme?.variableCodings;
+          const identifierAnalysis = variableCodings ?
+            validateVariableCodingChange(
+              this.schemerService.varList,
+              variableCodings,
+              {
+                coding: { ...selectedCoding, alias: result },
+                replacedCodingId: selectedCoding.id
+              }
+            ) :
+            null;
           if (!identifierAnalysis || identifierAnalysis.hasProblems) {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',

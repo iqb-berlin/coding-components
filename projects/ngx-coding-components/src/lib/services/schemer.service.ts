@@ -19,10 +19,6 @@ import {
   VariableValue
 } from '@iqbspecs/variable-info/variable-info.interface';
 import {
-  getSchemerIdentifierAnalysis,
-  SchemerIdentifierAnalysis
-} from './schemer-identifier-validation';
-import {
   addCode as addCodeOp,
   canPasteSingleCodeInto as canPasteSingleCodeIntoOp,
   copySingleCode as copySingleCodeOp,
@@ -235,36 +231,6 @@ export class SchemerService {
       };
     }
     return undefined;
-  }
-
-  getIdentifierAnalysis(): SchemerIdentifierAnalysis {
-    return getSchemerIdentifierAnalysis(
-      this.varList,
-      this.codingScheme?.variableCodings || []
-    );
-  }
-
-  getProspectiveIdentifierAnalysis(
-    candidate: VariableCodingData,
-    replacedCodingId?: string
-  ): SchemerIdentifierAnalysis | null {
-    if (!this.codingScheme?.variableCodings) return null;
-
-    const replacedIndex = replacedCodingId === undefined ?
-      -1 :
-      this.codingScheme.variableCodings.findIndex(
-        coding => coding.id === replacedCodingId
-      );
-    const prospectiveVariableCodings = replacedIndex < 0 ?
-      [...this.codingScheme.variableCodings, candidate] :
-      this.codingScheme.variableCodings.map((coding, index) => (
-        index === replacedIndex ? candidate : coding
-      ));
-
-    return getSchemerIdentifierAnalysis(
-      this.varList,
-      prospectiveVariableCodings
-    );
   }
 
   copySingleCode(code: CodeData): boolean {
