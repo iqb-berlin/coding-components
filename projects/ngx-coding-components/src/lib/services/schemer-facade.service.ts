@@ -3,7 +3,10 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from './schemer.service';
 import { ResolveVarListDuplicatesDialogComponent } from '../dialogs/resolve-varlist-duplicates-dialog.component';
-import { getVarListConflictAnalysis } from './schemer-varlist-validation';
+import {
+  getVariableIdentifiersForValidation,
+  getVarListConflictAnalysis
+} from './schemer-varlist-validation';
 
 @Injectable({
   providedIn: 'root'
@@ -33,13 +36,11 @@ export class SchemerFacadeService {
   }
 
   tryResolveVarListDuplicates(): boolean {
-    const varList = this.schemerService.varList || [];
-    if (varList.length === 0) {
-      this.dismissedVarListDuplicateSignature = null;
-      return false;
-    }
-
-    const analysis = getVarListConflictAnalysis(varList);
+    const variableIdentifiers = getVariableIdentifiersForValidation(
+      this.schemerService.varList || [],
+      this.schemerService.codingScheme?.variableCodings || []
+    );
+    const analysis = getVarListConflictAnalysis(variableIdentifiers);
 
     if (!analysis.hasProblems) {
       this.dismissedVarListDuplicateSignature = null;
@@ -63,7 +64,7 @@ export class SchemerFacadeService {
         width: '850px',
         disableClose: true,
         data: {
-          varList: this.schemerService.varList
+          varList: variableIdentifiers
         }
       }
     );
@@ -74,9 +75,11 @@ export class SchemerFacadeService {
 
       this.varListDuplicateDialogRef = null;
       this.resolvingVarListDuplicates = false;
-      const currentAnalysis = getVarListConflictAnalysis(
-        this.schemerService.varList || []
+      const currentIdentifiers = getVariableIdentifiersForValidation(
+        this.schemerService.varList || [],
+        this.schemerService.codingScheme?.variableCodings || []
       );
+      const currentAnalysis = getVarListConflictAnalysis(currentIdentifiers);
       this.dismissedVarListDuplicateSignature =
         currentAnalysis.hasProblems &&
         currentAnalysis.signature === analysis.signature ?

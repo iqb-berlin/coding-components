@@ -66,6 +66,7 @@
       "no-scheme": "Kein Antwortschema geladen.",
       "invalid-format": "Ungültiges Import-Format.",
       "missing-id": "Import enthält keine Variable-ID.",
+      "invalid-identifiers": "Import enthält ungültige oder nicht eindeutige Variablenbezeichner.",
       "overwrite": {
         "title": "Variable überschreiben?",
         "content": "Die Variable '{{variable}}' existiert bereits. Überschreiben?",

@@ -106,8 +106,8 @@ describe('SchemerFacadeService', () => {
     const service = createService();
 
     schemerService.setVarList([
-      { id: 'A', alias: 'AA' } as never,
-      { id: 'BB', alias: 'x' } as never
+      { id: '01.Text', alias: 'valid' } as never,
+      { id: 'also-valid', alias: '' } as never
     ]);
 
     (dialog.open as jasmine.Spy).and.returnValue({
@@ -138,6 +138,78 @@ describe('SchemerFacadeService', () => {
     expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(
       ResolveVarListDuplicatesDialogComponent
     );
+  });
+
+  it('tryResolveVarListDuplicates should block invalid derived identifiers', () => {
+    const service = createService();
+
+    schemerService.setVarList([{ id: 'base' } as never]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        { id: 'base', alias: 'base', sourceType: 'BASE' },
+        { id: 'd_1', alias: '01.Text', sourceType: 'COPY_VALUE' }
+      ]
+    } as never);
+
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => new Subject<unknown>().asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    const dialogData = (dialog.open as jasmine.Spy).calls.mostRecent().args[1]
+      .data;
+    expect(dialogData.varList).toEqual([
+      { id: 'base' },
+      { id: 'd_1', alias: '01.Text' }
+    ]);
+  });
+
+  it('tryResolveVarListDuplicates should block unrepresented invalid base codings', () => {
+    const service = createService();
+
+    schemerService.setVarList([{ id: 'base' } as never]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        { id: 'base', alias: 'base', sourceType: 'BASE' },
+        {
+          id: 'orphan.invalid',
+          alias: 'Orphan',
+          sourceType: 'BASE',
+          codes: [{ id: 1 }]
+        }
+      ]
+    } as never);
+
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => new Subject<unknown>().asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    const dialogData = (dialog.open as jasmine.Spy).calls.mostRecent().args[1]
+      .data;
+    expect(dialogData.varList).toEqual([
+      { id: 'base' },
+      { id: 'orphan.invalid', alias: 'Orphan' }
+    ]);
+  });
+
+  it('tryResolveVarListDuplicates should detect derived public collisions', () => {
+    const service = createService();
+
+    schemerService.setVarList([{ id: 'base-public' } as never]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        { id: 'base-public', alias: 'base-public', sourceType: 'BASE' },
+        { id: 'd_1', alias: 'BASE-PUBLIC', sourceType: 'COPY_VALUE' }
+      ]
+    } as never);
+
+    (dialog.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => new Subject<unknown>().asObservable()
+    });
+
+    expect(service.tryResolveVarListDuplicates()).toBeTrue();
+    expect(dialog.open).toHaveBeenCalled();
   });
 
   it('tryResolveVarListDuplicates should keep blocking a dismissed duplicate signature', () => {

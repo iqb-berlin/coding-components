@@ -689,6 +689,82 @@ describe('SchemerComponent', () => {
     expect(messageDialog.open.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
   });
 
+  it('importVariable should reject invalid derived identifiers without mutation', async () => {
+    const existing = {
+      id: 'keep', alias: 'Keep', sourceType: 'COPY_VALUE', codes: []
+    } as unknown as VariableCodingData;
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setCodingScheme({ variableCodings: [existing] });
+    spyOn(FileService, 'loadFile').and.resolveTo(JSON.stringify({
+      type: 'iqb-variable-export',
+      version: 1,
+      variableCoding: {
+        id: 'new-derived',
+        alias: '01.Text',
+        sourceType: 'COPY_VALUE',
+        codes: []
+      }
+    }));
+    const updateSpy = spyOn(component, 'updateVariableLists');
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    await component.importVariable();
+
+    expect(schemerService.codingScheme?.variableCodings).toEqual([existing]);
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(emitSpy).not.toHaveBeenCalled();
+    const [, config] = messageDialog.open.calls.mostRecent().args;
+    expect(config.data.content).toBe('schemer.import.invalid-identifiers');
+  });
+
+  it('importVariable should reject an invalid overwrite without mutation', async () => {
+    const existing = {
+      id: 'derived', alias: 'Valid', sourceType: 'COPY_VALUE', codes: []
+    } as unknown as VariableCodingData;
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setCodingScheme({ variableCodings: [existing] });
+    spyOn(FileService, 'loadFile').and.resolveTo(JSON.stringify({
+      type: 'iqb-variable-export',
+      version: 1,
+      variableCoding: {
+        id: 'derived',
+        alias: '',
+        sourceType: 'COPY_VALUE',
+        codes: []
+      }
+    }));
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    await component.importVariable();
+
+    expect(schemerService.codingScheme?.variableCodings).toEqual([existing]);
+    expect(emitSpy).not.toHaveBeenCalled();
+    expect(messageDialog.open.calls.mostRecent().args[0])
+      .toBe(MessageDialogComponent);
+  });
+
+  it('importVariable should reject public identifier collisions', async () => {
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setVarList([{ id: 'public-id' } as VariableInfo]);
+    schemerService.setCodingScheme({ variableCodings: [] });
+    spyOn(FileService, 'loadFile').and.resolveTo(JSON.stringify({
+      type: 'iqb-variable-export',
+      version: 1,
+      variableCoding: {
+        id: 'derived',
+        alias: 'PUBLIC-ID',
+        sourceType: 'COPY_VALUE',
+        codes: []
+      }
+    }));
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+
+    await component.importVariable();
+
+    expect(schemerService.codingScheme?.variableCodings).toEqual([]);
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
   it('importVariable should show unknown error text for non-Error rejections', async () => {
     schemerService.userRole = 'RW_MAXIMAL';
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
@@ -769,6 +845,35 @@ describe('SchemerComponent', () => {
 
     const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
     expect(scheme.variableCodings.some(v => v.alias === 'NEW')).toBeTrue();
+  });
+
+  it('addVarScheme should reject a generated id collision without mutation', () => {
+    const existing = {
+      id: 'D_123', alias: 'EXISTING', sourceType: 'COPY_VALUE', codes: []
+    } as unknown as VariableCodingData;
+    schemerService.userRole = 'RW_MAXIMAL';
+    schemerService.setCodingScheme({ variableCodings: [existing] });
+    (schemerService as unknown as
+      { checkRenamedVarAliasOk: () => boolean })
+      .checkRenamedVarAliasOk = () => true;
+    spyOn(Date.prototype, 'getTime').and.returnValue(123);
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+    const updateSpy = spyOn(component, 'updateVariableLists');
+
+    editSourceParametersDialog.afterClosedValue = {
+      selfAlias: 'NEW',
+      sourceType: 'SUM_SCORE',
+      sourceParameters: { processing: [], solverExpression: '' },
+      deriveSources: []
+    };
+
+    component.addVarScheme();
+
+    expect(schemerService.codingScheme?.variableCodings).toEqual([existing]);
+    expect(emitSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(messageDialog.open.calls.mostRecent().args[0])
+      .toBe(MessageDialogComponent);
   });
 
   it('isEmptyCoding should return false when label differs from id', () => {

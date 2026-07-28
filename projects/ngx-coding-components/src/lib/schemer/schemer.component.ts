@@ -62,6 +62,10 @@ import {
   CodingSchemeValidationProblem,
   validateCodingScheme
 } from '../services/coding-scheme-validation';
+import {
+  getVariableIdentifiersForValidation,
+  getVarListConflictAnalysis
+} from '../services/schemer-varlist-validation';
 
 @Component({
   selector: 'iqb-schemer',
@@ -406,6 +410,25 @@ export class SchemerComponent implements OnDestroy {
         this.schemerService.codingScheme.variableCodings.findIndex(
           v => v.id === importedVar.id
         );
+      const prospectiveVariableCodings = existingIndex >= 0 ?
+        this.schemerService.codingScheme.variableCodings.map(
+          (coding, index) => (
+            index === existingIndex ? importedVar : coding
+          )
+        ) :
+        [
+          ...this.schemerService.codingScheme.variableCodings,
+          importedVar
+        ];
+      const identifierAnalysis = getVarListConflictAnalysis(
+        getVariableIdentifiersForValidation(
+          this.schemerService.varList,
+          prospectiveVariableCodings
+        )
+      );
+      if (identifierAnalysis.hasProblems) {
+        throw new Error(this.tr('schemer.import.invalid-identifiers'));
+      }
 
       if (existingIndex >= 0) {
         const confirmRef = this.messageDialog.open(ConfirmDialogComponent, {
@@ -487,27 +510,36 @@ export class SchemerComponent implements OnDestroy {
           const timestamp = new Date().getTime();
           const dialogResultTyped: EditSourceParametersDialogData =
             dialogResult;
+          const newVarScheme = <VariableCodingData>{
+            id: `d_${timestamp}`,
+            alias: dialogResultTyped.selfAlias,
+            label: '',
+            sourceType: dialogResultTyped.sourceType,
+            sourceParameters: dialogResultTyped.sourceParameters,
+            deriveSources: dialogResultTyped.deriveSources,
+            processing: [],
+            codeModel: 'MANUAL_AND_RULES',
+            manualInstruction: '',
+            codes: [],
+            page: ''
+          };
+          const identifierAnalysis = getVarListConflictAnalysis(
+            getVariableIdentifiersForValidation(
+              this.schemerService.varList,
+              [
+                ...this.schemerService.codingScheme.variableCodings,
+                newVarScheme
+              ]
+            )
+          );
           let errorMessage = '';
           if (
             !this.schemerService.checkRenamedVarAliasOk(
               dialogResultTyped.selfAlias
-            )
+            ) || identifierAnalysis.hasProblems
           ) {
             errorMessage = 'data-error.variable-id.double';
           } else {
-            const newVarScheme = <VariableCodingData>{
-              id: `d_${timestamp}`,
-              alias: dialogResultTyped.selfAlias,
-              label: '',
-              sourceType: dialogResultTyped.sourceType,
-              sourceParameters: dialogResultTyped.sourceParameters,
-              deriveSources: dialogResultTyped.deriveSources,
-              processing: [],
-              codeModel: 'MANUAL_AND_RULES',
-              manualInstruction: '',
-              codes: [],
-              page: ''
-            };
             this.schemerService.codingScheme.variableCodings.push(newVarScheme);
             this.selectVarScheme(newVarScheme);
           }
