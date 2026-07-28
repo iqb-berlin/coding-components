@@ -596,6 +596,17 @@ export class GenerateCodingDialogComponent {
       return null;
     }
 
+    if (hasMin && hasMax && lowerValue !== null && upperValue !== null) {
+      return [{
+        method: 'NUMERIC_FULL_RANGE',
+        parameters: [
+          lowerValue.toString(10),
+          upperValue.toString(10)
+        ],
+        fragment
+      }];
+    }
+
     const ruleInputs: Array<[CodingRule['method'], string, boolean]> = [
       ['NUMERIC_MORE_THAN', moreThan, hasMoreThan],
       ['NUMERIC_MIN', min, hasMin],

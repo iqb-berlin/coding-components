@@ -723,6 +723,52 @@ describe('GenerateCodingDialogComponent', () => {
     expect(codePoint('A = (0, -5)').code).not.toBe(1);
   });
 
+  it('generateButtonClick should combine closed ranges for both GeoGebra point coordinates', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointXMin = '0';
+    component.geogebraPointXMax = '10';
+    component.geogebraPointYMin = '-4';
+    component.geogebraPointYMax = '4';
+    allowCodeCreation(schemerService);
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0].rules).toEqual([
+      {
+        method: 'NUMERIC_FULL_RANGE',
+        parameters: ['0', '10'],
+        fragment: 0
+      },
+      {
+        method: 'NUMERIC_FULL_RANGE',
+        parameters: ['-4', '4'],
+        fragment: 1
+      }
+    ]);
+
+    const codePoint = (value: string) => CodingFactory.code(
+      {
+        id: 'A',
+        value,
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    );
+
+    expect(codePoint('A = (0, 4)').code).toBe(1);
+    expect(codePoint('A = (10, -4)').code).toBe(1);
+    expect(codePoint('A = (10.1, 0)').code).not.toBe(1);
+  });
+
   it('generateButtonClick should allow only the x coordinate to be configured', () => {
     const { component, dialogRef, schemerService } = createComponent({
       id: 'A',
@@ -775,13 +821,8 @@ describe('GenerateCodingDialogComponent', () => {
 
     expect(fullCredit.ruleSets?.[0].rules).toEqual([
       {
-        method: 'NUMERIC_MIN',
-        parameters: ['2'],
-        fragment: 1
-      },
-      {
-        method: 'NUMERIC_MAX',
-        parameters: ['4'],
+        method: 'NUMERIC_FULL_RANGE',
+        parameters: ['2', '4'],
         fragment: 1
       }
     ]);
@@ -793,6 +834,48 @@ describe('GenerateCodingDialogComponent', () => {
       },
       closed
     ).code).toBe(1);
+  });
+
+  it('generateButtonClick should combine equal zero bounds for one point coordinate', () => {
+    const { component, dialogRef, schemerService } = createComponent({
+      id: 'A',
+      type: 'string',
+      format: 'ggb-variable'
+    });
+
+    component.setGeoGebraCodingMode('point');
+    component.geogebraPointXMin = '0';
+    component.geogebraPointXMax = '0';
+    allowCodeCreation(schemerService);
+
+    component.generateButtonClick();
+
+    const closed = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+    const fullCredit = (closed.codes || []).find(c => c.type === 'FULL_CREDIT') as CodeData;
+
+    expect(fullCredit.ruleSets?.[0].rules).toEqual([
+      {
+        method: 'NUMERIC_FULL_RANGE',
+        parameters: ['0', '0'],
+        fragment: 0
+      }
+    ]);
+    expect(CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (0, 999)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    ).code).toBe(1);
+    expect(CodingFactory.code(
+      {
+        id: 'A',
+        value: 'A = (0.1, 999)',
+        status: 'VALUE_CHANGED'
+      },
+      closed
+    ).code).not.toBe(1);
   });
 
   it('canGenerate should validate GeoGebra point coordinate criteria', () => {
