@@ -19,6 +19,11 @@ import {
   VariableValue
 } from '@iqbspecs/variable-info/variable-info.interface';
 import {
+  isValidVariableIdentifier,
+  validateVariableList
+} from './variable-identifier-validation';
+import { getVariableIdentifiersForValidation } from './schemer-varlist-validation';
+import {
   addCode as addCodeOp,
   canPasteSingleCodeInto as canPasteSingleCodeIntoOp,
   copySingleCode as copySingleCodeOp,
@@ -30,7 +35,6 @@ import {
 } from './schemer-code-ops';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
-export const VARIABLE_NAME_CHECK_PATTERN = /^[a-zA-Z0-9_]{2,}$/;
 const COPIED_CODE_STORAGE_KEY = 'iqb-schemer-copied-code';
 const COPIED_CODE_STORAGE_TYPE = 'iqb-schemer-code-clipboard';
 const COPIED_CODE_STORAGE_VERSION = 1;
@@ -235,17 +239,42 @@ export class SchemerService {
   }
 
   checkRenamedVarAliasOk(checkAlias: string, checkId?: string): boolean {
-    if (!checkAlias || !this.codingScheme?.variableCodings) {
+    if (
+      !isValidVariableIdentifier(checkAlias) ||
+      !this.codingScheme?.variableCodings
+    ) {
       return false; // Ein Alias wird benötigt, und eine Codierungsstruktur muss vorhanden sein.
     }
 
-    const normalisedAlias = checkAlias.toUpperCase();
-    const hasDuplicate = this.codingScheme.variableCodings.some(
-      (variable: VariableCodingData) => variable.alias?.toUpperCase() === normalisedAlias &&
-        variable.id !== checkId
+    const identifiers = getVariableIdentifiersForValidation(
+      this.varList,
+      this.codingScheme.variableCodings
     );
+    let candidateIndex = checkId === undefined ?
+      -1 :
+      identifiers.findIndex(variable => variable.id === checkId);
 
-    return !hasDuplicate;
+    if (candidateIndex < 0) {
+      const existingIds = new Set(
+        identifiers.map(variable => variable.id.toLowerCase())
+      );
+      let candidateId = 'new-derived-variable';
+      while (existingIds.has(candidateId.toLowerCase())) {
+        candidateId += '_';
+      }
+      candidateIndex = identifiers.length;
+      identifiers.push({ id: candidateId, alias: checkAlias });
+    } else {
+      identifiers[candidateIndex] = {
+        ...identifiers[candidateIndex],
+        alias: checkAlias
+      };
+    }
+
+    return !validateVariableList(identifiers).some(error => (
+      error.variableIndex === candidateIndex ||
+      error.conflictingVariableIndex === candidateIndex
+    ));
   }
 
   copySingleCode(code: CodeData): boolean {

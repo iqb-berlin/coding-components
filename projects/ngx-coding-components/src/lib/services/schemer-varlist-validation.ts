@@ -1,10 +1,46 @@
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { VARIABLE_NAME_CHECK_PATTERN } from './schemer.service';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import {
+  isValidVariableIdentifier,
+  validateVariableList,
+  VariableIdentifiers,
+  VariableValidationError
+} from './variable-identifier-validation';
 
-const VARIABLE_ID_CHECK_PATTERN = /^[a-zA-Z0-9_-]{2,}$/;
+const copyVariableIdentifiers = (
+  variable: VariableIdentifiers
+): VariableIdentifiers => ({
+  id: variable.id,
+  ...(Object.prototype.hasOwnProperty.call(variable, 'alias') ?
+    { alias: variable.alias } :
+    {})
+});
+
+export const getVariableIdentifiersForValidation = (
+  varList: VariableIdentifiers[] = [],
+  variableCodings: VariableCodingData[] = []
+): VariableIdentifiers[] => {
+  const representedBaseIds = new Set(varList.map(variable => variable.id));
+  const matchedBaseIds = new Set<string>();
+
+  return [
+    ...varList.map(copyVariableIdentifiers),
+    ...variableCodings
+      .filter(coding => {
+        const isBaseCoding = coding.sourceType === 'BASE' ||
+          coding.sourceType === 'BASE_NO_VALUE';
+        if (!isBaseCoding || !representedBaseIds.has(coding.id)) return true;
+        if (matchedBaseIds.has(coding.id)) return true;
+
+        matchedBaseIds.add(coding.id);
+        return false;
+      })
+      .map(copyVariableIdentifiers)
+  ];
+};
 
 export type VarListConflictAnalysis = {
   signature: string;
+  errors: VariableValidationError[];
   duplicateIds: Set<string>;
   duplicateAliases: Set<string>;
   duplicateIdValues: string[];
@@ -17,73 +53,49 @@ export type VarListConflictAnalysis = {
   hasProblems: boolean;
 };
 
-const normaliseName = (value: string | null | undefined): string => (value || '').trim();
-
-const normaliseKey = (value: string | null | undefined): string => normaliseName(value).toUpperCase();
-
-const getCounts = (values: string[]): Map<string, number> => {
-  const counts = new Map<string, number>();
-  values
-    .map(normaliseName)
-    .filter(v => !!v)
-    .forEach(v => {
-      const key = v.toUpperCase();
-      counts.set(key, (counts.get(key) || 0) + 1);
-    });
-  return counts;
-};
-
 export const isInvalidVarListName = (
   value: string | null | undefined
-): boolean => {
-  const name = normaliseName(value);
-  return !name || !VARIABLE_NAME_CHECK_PATTERN.test(name);
-};
+): boolean => !isValidVariableIdentifier(value);
 
 export const isInvalidVarListId = (
   value: string | null | undefined
-): boolean => {
-  const name = normaliseName(value);
-  return !name || !VARIABLE_ID_CHECK_PATTERN.test(name);
-};
+): boolean => !isValidVariableIdentifier(value);
 
 export const isInvalidVarListAlias = isInvalidVarListId;
 
+const isInvalidIdentifierError = (error: VariableValidationError): boolean => (
+  error.code === 'EMPTY_IDENTIFIER' || error.code === 'INVALID_CHARACTERS'
+);
+
 export const getVarListConflictAnalysis = (
-  varList: VariableInfo[] = []
+  varList: VariableIdentifiers[] = []
 ): VarListConflictAnalysis => {
-  const signature = varList
-    .map(v => `${normaliseKey(v.id)}|${normaliseKey(v.alias || v.id)}`)
-    .join(';;');
-
-  const idCounts = getCounts(varList.map(v => normaliseName(v.id)));
-  const aliasCounts = getCounts(
-    varList.map(v => normaliseName(v.alias || v.id))
-  );
-
-  const duplicateIds = new Set(
-    Array.from(idCounts.entries())
-      .filter(([, c]) => c > 1)
-      .map(([k]) => k)
-  );
-  const duplicateAliases = new Set(
-    Array.from(aliasCounts.entries())
-      .filter(([, c]) => c > 1)
-      .map(([k]) => k)
-  );
-
-  const invalidIdCount = varList.filter(v => isInvalidVarListId(v.id))
-    .length;
-  const invalidAliasCount = varList.filter(v => (
-    isInvalidVarListAlias(v.alias || v.id)
+  const signature = JSON.stringify(varList.map(variable => ({
+    id: variable.id,
+    alias: variable.alias,
+    hasAlias: Object.prototype.hasOwnProperty.call(variable, 'alias')
+  })));
+  const errors = validateVariableList(varList);
+  const duplicateIds = new Set(errors
+    .filter(error => error.code === 'DUPLICATE_ID')
+    .map(error => String(error.value).toUpperCase()));
+  const duplicateAliases = new Set(errors
+    .filter(error => error.code === 'DUPLICATE_ALIAS')
+    .map(error => String(error.value).toUpperCase()));
+  const invalidIdCount = errors.filter(error => (
+    error.property === 'id' && isInvalidIdentifierError(error)
+  )).length;
+  const invalidAliasCount = errors.filter(error => (
+    error.property === 'alias' && isInvalidIdentifierError(error)
   )).length;
 
   const hasDuplicateId = duplicateIds.size > 0;
   const hasDuplicateAlias = duplicateAliases.size > 0;
-  const hasInvalid = invalidIdCount > 0 || invalidAliasCount > 0;
+  const hasInvalid = errors.some(isInvalidIdentifierError);
 
   return {
     signature,
+    errors,
     duplicateIds,
     duplicateAliases,
     duplicateIdValues: Array.from(duplicateIds.values()).sort(),
@@ -93,6 +105,6 @@ export const getVarListConflictAnalysis = (
     hasDuplicateId,
     hasDuplicateAlias,
     hasInvalid,
-    hasProblems: hasDuplicateId || hasDuplicateAlias || hasInvalid
+    hasProblems: errors.length > 0
   };
 };

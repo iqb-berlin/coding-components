@@ -9,7 +9,12 @@ import {
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import {
+  MatFormField,
+  MatHint,
+  MatLabel,
+  MatSuffix
+} from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
@@ -31,10 +36,10 @@ import {
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { Response } from '@iqbspecs/response/response.interface';
 import { CodingFactory, CodingSchemeFactory } from '@iqb/responses';
+import { SchemerService } from '../../services/schemer.service';
 import {
-  SchemerService,
-  VARIABLE_NAME_CHECK_PATTERN
-} from '../../services/schemer.service';
+  isValidVariableIdentifier
+} from '../../services/variable-identifier-validation';
 
 export interface EditSourceParametersDialogData {
   selfId: string;
@@ -229,6 +234,7 @@ const SOLVER_VARIABLE_REFERENCE_PATTERN =
     TranslateModule,
     FormsModule,
     MatFormField,
+    MatHint,
     MatInput,
     MatCheckbox,
     MatLabel,
@@ -797,5 +803,8 @@ export class EditSourceParametersDialog {
     b: KeyValue<string, string>
   ): number => a.value.localeCompare(b.value);
 
-  protected readonly VARIABLE_NAME_CHECK_PATTERN = VARIABLE_NAME_CHECK_PATTERN;
+  // eslint-disable-next-line class-methods-use-this
+  protected isValidVariableIdentifier(value: unknown): boolean {
+    return isValidVariableIdentifier(value);
+  }
 }
