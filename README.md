@@ -291,7 +291,9 @@ The library exports several MatDialog-ready components:
 The library ships with German (`de`) translations. Use the `NgxCodingComponentsTranslateLoader` to integrate them.
 
 ```ts
-import { NgxCodingComponentsTranslateLoader } from '@iqb/ngx-coding-components';
+import {
+  NgxCodingComponentsTranslateLoader
+} from '@iqb/ngx-coding-components/translations';
 
 // In your app providers:
 TranslateModule.forRoot({
@@ -301,6 +303,12 @@ TranslateModule.forRoot({
   }
 })
 ```
+
+The `translations` secondary entry point contains only the translation loader
+and the German translation object. Importing from it does not pull the full
+component library into the application's initial bundle. Applications with an
+existing loader can merge `NGX_CODING_COMPONENTS_DE_TRANSLATIONS` into their
+own translations.
 
 If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
 
