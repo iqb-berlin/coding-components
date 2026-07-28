@@ -1,14 +1,16 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import validationCases from './variable-validation-cases.json';
 import {
   VariableValidationError,
   VariableValidationErrorCode
 } from './variable-identifier-validation';
 import {
-  getSchemerIdentifierAnalysis,
+  analyzeVariableIdentifiers,
   isInvalidVarListAlias,
   isInvalidVarListId,
-  isInvalidVarListName
+  isInvalidVarListName,
+  validateVariableCodingChange
 } from './schemer-identifier-validation';
 
 interface VariableValidationCases {
@@ -46,7 +48,7 @@ describe('schemer-identifier-validation', () => {
 
   conformanceCases.variableListCases.forEach(testCase => {
     it(`should pass the shared conformance case: ${testCase.name}`, () => {
-      const analysis = getSchemerIdentifierAnalysis(
+      const analysis = analyzeVariableIdentifiers(
         testCase.variables as VariableInfo[]
       );
 
@@ -56,7 +58,7 @@ describe('schemer-identifier-validation', () => {
   });
 
   it('should expose case-insensitive duplicate ids and aliases', () => {
-    const analysis = getSchemerIdentifierAnalysis([
+    const analysis = analyzeVariableIdentifiers([
       { id: 'AA', alias: 'Alias' },
       { id: 'aa', alias: 'alias' },
       { id: 'BB', alias: 'Other' }
@@ -69,7 +71,7 @@ describe('schemer-identifier-validation', () => {
   });
 
   it('should distinguish invalid ids from invalid aliases', () => {
-    const analysis = getSchemerIdentifierAnalysis([
+    const analysis = analyzeVariableIdentifiers([
       { id: '01.Text', alias: 'valid' },
       { id: 'also-valid', alias: '' }
     ] as VariableInfo[]);
@@ -80,7 +82,7 @@ describe('schemer-identifier-validation', () => {
   });
 
   it('should classify missing and null identifiers as empty', () => {
-    const analysis = getSchemerIdentifierAnalysis([
+    const analysis = analyzeVariableIdentifiers([
       {} as VariableInfo,
       { id: null } as unknown as VariableInfo
     ]);
@@ -102,7 +104,7 @@ describe('schemer-identifier-validation', () => {
   });
 
   it('should allow aliases matching technical ids that are not public', () => {
-    const analysis = getSchemerIdentifierAnalysis([
+    const analysis = analyzeVariableIdentifiers([
       { id: '04', alias: '02' },
       { id: '02', alias: '05' }
     ] as VariableInfo[]);
@@ -111,7 +113,7 @@ describe('schemer-identifier-validation', () => {
   });
 
   it('should preserve exact values and omitted aliases in its signature', () => {
-    const analysis = getSchemerIdentifierAnalysis([
+    const analysis = analyzeVariableIdentifiers([
       { id: ' aa ', alias: ' Alias ' },
       { id: 'BB' },
       { id: 'CC', alias: '' }
@@ -122,27 +124,27 @@ describe('schemer-identifier-validation', () => {
         id: ' aa ',
         alias: ' Alias ',
         hasAlias: true,
-        origin: 'VARIABLE_LIST',
+        origin: 'VAR_LIST',
         sourceIndex: 0
       },
       {
         id: 'BB',
         hasAlias: false,
-        origin: 'VARIABLE_LIST',
+        origin: 'VAR_LIST',
         sourceIndex: 1
       },
       {
         id: 'CC',
         alias: '',
         hasAlias: true,
-        origin: 'VARIABLE_LIST',
+        origin: 'VAR_LIST',
         sourceIndex: 2
       }
     ]));
   });
 
   it('should add derived and unrepresented base coding identifiers', () => {
-    const analysis = getSchemerIdentifierAnalysis(
+    const analysis = analyzeVariableIdentifiers(
       [
         { id: 'base', alias: 'Base' } as VariableInfo,
         { id: 'inactive', alias: 'Inactive' } as VariableInfo
@@ -158,10 +160,10 @@ describe('schemer-identifier-validation', () => {
 
     expect(analysis.identifiers).toEqual([
       {
-        id: 'base', alias: 'Base', origin: 'VARIABLE_LIST', sourceIndex: 0
+        id: 'base', alias: 'Base', origin: 'VAR_LIST', sourceIndex: 0
       },
       {
-        id: 'inactive', alias: 'Inactive', origin: 'VARIABLE_LIST', sourceIndex: 1
+        id: 'inactive', alias: 'Inactive', origin: 'VAR_LIST', sourceIndex: 1
       },
       {
         id: 'orphan', alias: 'Orphan', origin: 'BASE_CODING', sourceIndex: 2
@@ -183,7 +185,7 @@ describe('schemer-identifier-validation', () => {
     }
   ] as const).forEach(({ description, duplicateSourceType }) => {
     it(`should retain duplicate represented ${description} codings`, () => {
-      const analysis = getSchemerIdentifierAnalysis(
+      const analysis = analyzeVariableIdentifiers(
         [{ id: 'base', alias: 'Public' } as VariableInfo],
         [
           { id: 'base', alias: 'Public', sourceType: 'BASE' },
@@ -197,7 +199,7 @@ describe('schemer-identifier-validation', () => {
 
       expect(analysis.identifiers).toEqual([
         {
-          id: 'base', alias: 'Public', origin: 'VARIABLE_LIST', sourceIndex: 0
+          id: 'base', alias: 'Public', origin: 'VAR_LIST', sourceIndex: 0
         },
         {
           id: 'base',
@@ -215,6 +217,80 @@ describe('schemer-identifier-validation', () => {
           conflictingVariableIndex: 0
         })
       );
+    });
+  });
+
+  describe('validateVariableCodingChange', () => {
+    const coding = (id: string, alias: string): VariableCodingData => ({
+      id,
+      alias,
+      sourceType: 'COPY_VALUE'
+    } as VariableCodingData);
+
+    it('should validate additions against the complete prospective state', () => {
+      const variableCodings = [coding('v1', 'Existing')];
+      const validAnalysis = validateVariableCodingChange(
+        [],
+        variableCodings,
+        { coding: coding('v2', 'a') }
+      );
+
+      expect(validateVariableCodingChange([], variableCodings, {
+        coding: coding('v2', 'existing')
+      }).hasProblems).toBeTrue();
+      expect(validAnalysis.hasProblems).toBeFalse();
+      expect(validAnalysis.identifiers[1]).toEqual({
+        id: 'v2',
+        alias: 'a',
+        origin: 'DERIVED_CODING',
+        sourceIndex: 1
+      });
+      expect(validateVariableCodingChange([], variableCodings, {
+        coding: coding('v2', '01.Text')
+      }).hasProblems).toBeTrue();
+    });
+
+    it('should replace the selected coding before validating a change', () => {
+      const variableCodings = [
+        coding('v1', 'ABC'),
+        coding('v2', 'DEF')
+      ];
+
+      expect(validateVariableCodingChange([], variableCodings, {
+        coding: coding('v1', 'abc'),
+        replacedCodingId: 'v1'
+      }).hasProblems).toBeFalse();
+      expect(validateVariableCodingChange([], variableCodings, {
+        coding: coding('v1', 'def'),
+        replacedCodingId: 'v1'
+      }).hasProblems).toBeTrue();
+    });
+
+    it('should include variable-list identifiers in change validation', () => {
+      const analysis = validateVariableCodingChange(
+        [{ id: 'inactive-public' } as VariableInfo],
+        [coding('derived', 'Derived')],
+        {
+          coding: coding('derived', 'INACTIVE-PUBLIC'),
+          replacedCodingId: 'derived'
+        }
+      );
+
+      expect(analysis.hasProblems).toBeTrue();
+      expect(analysis.identifiers[0].origin).toBe('VAR_LIST');
+    });
+
+    it('should not mutate the coding list or its entries', () => {
+      const existing = coding('v1', 'Existing');
+      const variableCodings = [existing];
+
+      validateVariableCodingChange([], variableCodings, {
+        coding: coding('v1', 'Changed'),
+        replacedCodingId: 'v1'
+      });
+
+      expect(variableCodings).toEqual([existing]);
+      expect(existing.alias).toBe('Existing');
     });
   });
 });

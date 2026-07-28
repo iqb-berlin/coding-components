@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 import { SchemerFacadeService } from './schemer-facade.service';
 import { SchemerService } from './schemer.service';
+import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
 
 describe('SchemerFacadeService', () => {
   let schemerService: SchemerService;
@@ -109,8 +110,7 @@ describe('SchemerFacadeService', () => {
       { id: '01.Text', alias: 'valid' } as never,
       { id: 'also-valid', alias: '' } as never
     ]);
-    const analysis = schemerService.getIdentifierAnalysis();
-    spyOn(schemerService, 'getIdentifierAnalysis').and.returnValue(analysis);
+    const analysis = analyzeVariableIdentifiers(schemerService.varList);
 
     (dialog.open as jasmine.Spy).and.returnValue({
       afterClosed: () => new Subject<unknown>().asObservable()
@@ -163,7 +163,7 @@ describe('SchemerFacadeService', () => {
     const dialogData = (dialog.open as jasmine.Spy).calls.mostRecent().args[1]
       .data;
     expect(dialogData.analysis.identifiers).toEqual([
-      { id: 'base', origin: 'VARIABLE_LIST', sourceIndex: 0 },
+      { id: 'base', origin: 'VAR_LIST', sourceIndex: 0 },
       {
         id: 'd_1',
         alias: '01.Text',
@@ -197,7 +197,7 @@ describe('SchemerFacadeService', () => {
     const dialogData = (dialog.open as jasmine.Spy).calls.mostRecent().args[1]
       .data;
     expect(dialogData.analysis.identifiers).toEqual([
-      { id: 'base', origin: 'VARIABLE_LIST', sourceIndex: 0 },
+      { id: 'base', origin: 'VAR_LIST', sourceIndex: 0 },
       {
         id: 'orphan.invalid',
         alias: 'Orphan',

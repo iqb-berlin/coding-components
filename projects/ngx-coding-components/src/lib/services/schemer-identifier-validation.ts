@@ -20,7 +20,7 @@ const copyVariableIdentifiers = (
 });
 
 export type SchemerIdentifierOrigin =
-  'VARIABLE_LIST' |
+  'VAR_LIST' |
   'BASE_CODING' |
   'DERIVED_CODING';
 
@@ -30,8 +30,8 @@ export interface SchemerIdentifier extends VariableIdentifiers {
 }
 
 const getSchemerIdentifiersForValidation = (
-  varList: VariableIdentifiers[] = [],
-  variableCodings: VariableCodingData[] = []
+  varList: ReadonlyArray<VariableIdentifiers> = [],
+  variableCodings: ReadonlyArray<VariableCodingData> = []
 ): SchemerIdentifier[] => {
   const representedBaseIds = new Set(varList.map(variable => variable.id));
   const matchedBaseIds = new Set<string>();
@@ -39,7 +39,7 @@ const getSchemerIdentifiersForValidation = (
   return [
     ...varList.map((variable, sourceIndex) => copyVariableIdentifiers(
       variable,
-      'VARIABLE_LIST',
+      'VAR_LIST',
       sourceIndex
     )),
     ...variableCodings
@@ -93,9 +93,9 @@ const isInvalidIdentifierError = (error: VariableValidationError): boolean => (
   error.code === 'EMPTY_IDENTIFIER' || error.code === 'INVALID_CHARACTERS'
 );
 
-export const getSchemerIdentifierAnalysis = (
-  varList: VariableIdentifiers[] = [],
-  variableCodings: VariableCodingData[] = []
+export const analyzeVariableIdentifiers = (
+  varList: ReadonlyArray<VariableIdentifiers> = [],
+  variableCodings: ReadonlyArray<VariableCodingData> = []
 ): SchemerIdentifierAnalysis => {
   const identifiers = getSchemerIdentifiersForValidation(
     varList,
@@ -141,4 +141,26 @@ export const getSchemerIdentifierAnalysis = (
     hasInvalid,
     hasProblems: errors.length > 0
   };
+};
+
+export interface VariableCodingChange {
+  coding: VariableCodingData;
+  replacedCodingId?: string;
+}
+
+export const validateVariableCodingChange = (
+  varList: ReadonlyArray<VariableIdentifiers>,
+  variableCodings: ReadonlyArray<VariableCodingData>,
+  change: VariableCodingChange
+): SchemerIdentifierAnalysis => {
+  const replacedIndex = change.replacedCodingId === undefined ?
+    -1 :
+    variableCodings.findIndex(coding => coding.id === change.replacedCodingId);
+  const changedVariableCodings = replacedIndex < 0 ?
+    [...variableCodings, change.coding] :
+    variableCodings.map((coding, index) => (
+      index === replacedIndex ? change.coding : coding
+    ));
+
+  return analyzeVariableIdentifiers(varList, changedVariableCodings);
 };

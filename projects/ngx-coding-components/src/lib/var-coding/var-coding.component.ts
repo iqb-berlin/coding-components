@@ -65,6 +65,7 @@ import {
   EditSourceParametersDialog,
   EditSourceParametersDialogData
 } from './dialogs/edit-source-parameters-dialog.component';
+import { validateVariableCodingChange } from '../services/schemer-identifier-validation';
 
 @Component({
   selector: 'var-coding',
@@ -500,11 +501,18 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             sourceParameters,
             deriveSources
           };
-          const identifierAnalysis =
-            this.schemerService.getProspectiveIdentifierAnalysis(
-              prospectiveCoding,
-              this.varCoding.id
-            );
+          const variableCodings =
+            this.schemerService.codingScheme?.variableCodings;
+          const identifierAnalysis = variableCodings ?
+            validateVariableCodingChange(
+              this.schemerService.varList,
+              variableCodings,
+              {
+                coding: prospectiveCoding,
+                replacedCodingId: this.varCoding.id
+              }
+            ) :
+            null;
           if (!identifierAnalysis || identifierAnalysis.hasProblems) {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',

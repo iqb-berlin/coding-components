@@ -26,7 +26,6 @@ describe('VarCodingComponent', () => {
   let getAliasSpy: jasmine.Spy;
   let setCodingToTextModeSpy: jasmine.Spy;
   let isProtectedBaseVariableSpy: jasmine.Spy;
-  let getProspectiveIdentifierAnalysisSpy: jasmine.Spy;
 
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
@@ -42,10 +41,6 @@ describe('VarCodingComponent', () => {
     getAliasSpy = jasmine.createSpy('getVariableAliasById').and.callFake((id: string) => `${id}_ALIAS`);
     setCodingToTextModeSpy = jasmine.createSpy('setCodingToTextMode');
     isProtectedBaseVariableSpy = jasmine.createSpy('isProtectedBaseVariable').and.returnValue(false);
-    getProspectiveIdentifierAnalysisSpy = jasmine
-      .createSpy('getProspectiveIdentifierAnalysis')
-      .and.returnValue({ hasProblems: false });
-
     await TestBed.configureTestingModule({
       imports: [
         VarCodingComponent,
@@ -67,6 +62,7 @@ describe('VarCodingComponent', () => {
           provide: SchemerService,
           useValue: {
             userRole: 'RW_MAXIMAL',
+            varList: [],
             codingScheme: { variableCodings: [{ id: 'b1', sourceType: 'BASE' }, { id: 'b2', sourceType: 'BASE' }] },
             codingToTextMode: 'EXTENDED',
             addCode: addCodeSpy,
@@ -77,8 +73,7 @@ describe('VarCodingComponent', () => {
             sortCodes: sortCodesSpy,
             getVariableAliasById: getAliasSpy,
             setCodingToTextMode: setCodingToTextModeSpy,
-            isProtectedBaseVariable: isProtectedBaseVariableSpy,
-            getProspectiveIdentifierAnalysis: getProspectiveIdentifierAnalysisSpy
+            isProtectedBaseVariable: isProtectedBaseVariableSpy
           }
         }
       ]
@@ -102,7 +97,6 @@ describe('VarCodingComponent', () => {
       manualInstruction: '<p>text</p>',
       codes: []
     } as unknown as VariableCodingData;
-
     component.wipeInstructions();
 
     expect(component.varCoding?.manualInstruction).toBe('');
@@ -631,6 +625,9 @@ describe('VarCodingComponent', () => {
       sourceParameters: { a: 1 },
       deriveSources: []
     } as unknown as VariableCodingData;
+    (schemerService as unknown as {
+      codingScheme: { variableCodings: VariableCodingData[] };
+    }).codingScheme = { variableCodings: [component.varCoding] };
 
     dialogOpenSpy.and.returnValue({
       afterClosed: () => of({
@@ -646,16 +643,6 @@ describe('VarCodingComponent', () => {
     expect(component.varCoding?.alias).toBe('A2');
     expect(component.varCoding?.sourceType).toBe('DERIVE');
     expect(component.varCoding?.deriveSources).toEqual(['x1']);
-    expect(getProspectiveIdentifierAnalysisSpy).toHaveBeenCalledOnceWith(
-      jasmine.objectContaining({
-        id: 'v1',
-        alias: 'A2',
-        sourceType: 'DERIVE',
-        sourceParameters: { b: 2 },
-        deriveSources: ['x1']
-      }),
-      'v1'
-    );
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
   });
 
@@ -674,7 +661,22 @@ describe('VarCodingComponent', () => {
         deriveSources: []
       } as unknown as VariableCodingData;
       const originalVarCoding = JSON.stringify(component.varCoding);
-      getProspectiveIdentifierAnalysisSpy.and.returnValue(false);
+      (schemerService as unknown as {
+        varList: Array<{ id: string }>;
+        codingScheme: { variableCodings: VariableCodingData[] };
+      }).varList = [{ id: 'public-id' }];
+      (schemerService as unknown as {
+        codingScheme: { variableCodings: VariableCodingData[] };
+      }).codingScheme = {
+        variableCodings: [
+          component.varCoding,
+          {
+            id: 'other',
+            alias: 'EXISTING',
+            sourceType: 'COPY_VALUE'
+          } as VariableCodingData
+        ]
+      };
 
       dialogOpenSpy.and.returnValue({
         afterClosed: () => of({
@@ -687,20 +689,39 @@ describe('VarCodingComponent', () => {
 
       component.editSourceParameters();
 
-      expect(getProspectiveIdentifierAnalysisSpy).toHaveBeenCalledOnceWith(
-        jasmine.objectContaining({
-          id: 'v1',
-          alias,
-          sourceType: 'DERIVE',
-          sourceParameters: { b: 2 },
-          deriveSources: ['x1']
-        }),
-        'v1'
-      );
       expect(JSON.stringify(component.varCoding)).toBe(originalVarCoding);
       expect(emitSpy).not.toHaveBeenCalled();
       expect(dialogOpenSpy.calls.mostRecent().args[0]).toBe(MessageDialogComponent);
     });
+  });
+
+  it('editSourceParameters should reject changes without a coding scheme', () => {
+    const emitSpy = spyOn(component.varCodingChanged, 'emit');
+    component.varCoding = {
+      id: 'v1',
+      alias: 'Original',
+      sourceType: 'COPY_VALUE',
+      sourceParameters: { a: 1 },
+      deriveSources: ['source']
+    } as unknown as VariableCodingData;
+    const originalVarCoding = JSON.stringify(component.varCoding);
+    (schemerService as unknown as { codingScheme: null }).codingScheme = null;
+    dialogOpenSpy.and.returnValue({
+      afterClosed: () => of({
+        selfAlias: 'Changed',
+        sourceType: 'SUM_SCORE',
+        sourceParameters: { b: 2 },
+        deriveSources: ['other-source']
+      })
+    });
+
+    component.editSourceParameters();
+
+    expect(JSON.stringify(component.varCoding)).toBe(originalVarCoding);
+    expect(emitSpy).not.toHaveBeenCalled();
+    expect(dialogOpenSpy.calls.mostRecent().args[0]).toBe(
+      MessageDialogComponent
+    );
   });
 
   it('editSourceParameters should ignore false/undefined dialog results', () => {

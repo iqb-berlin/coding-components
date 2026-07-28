@@ -192,7 +192,7 @@ export class ResolveIdentifierConflictsDialogComponent {
     if (!identifier) return '(unbekannt)';
 
     const labels: Record<SchemerIdentifierOrigin, string> = {
-      VARIABLE_LIST: 'Variablenliste',
+      VAR_LIST: 'Variablenliste',
       BASE_CODING: 'Coding-Scheme (Basisvariable)',
       DERIVED_CODING: 'Coding-Scheme (Derived-Variable)'
     };
