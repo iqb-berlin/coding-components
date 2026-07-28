@@ -27,9 +27,11 @@ describe('SchemerFacadeService', () => {
     ]);
 
     const afterClosed$ = new Subject<unknown>();
-    (dialog.open as jasmine.Spy).and.returnValue({
+    const dialogRef = {
+      close: jasmine.createSpy('close'),
       afterClosed: () => afterClosed$.asObservable()
-    });
+    };
+    (dialog.open as jasmine.Spy).and.returnValue(dialogRef);
 
     expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(service.tryResolveIdentifierConflicts()).toBeTrue();
@@ -46,9 +48,11 @@ describe('SchemerFacadeService', () => {
     ]);
 
     const afterClosed$ = new Subject<unknown>();
-    (dialog.open as jasmine.Spy).and.returnValue({
+    const dialogRef = {
+      close: jasmine.createSpy('close'),
       afterClosed: () => afterClosed$.asObservable()
-    });
+    };
+    (dialog.open as jasmine.Spy).and.returnValue(dialogRef);
 
     expect(service.tryResolveIdentifierConflicts()).toBeTrue();
 
@@ -58,6 +62,7 @@ describe('SchemerFacadeService', () => {
     ]);
 
     expect(service.tryResolveIdentifierConflicts()).toBeFalse();
+    expect(dialogRef.close).toHaveBeenCalled();
 
     afterClosed$.next(null);
     afterClosed$.complete();
@@ -70,6 +75,40 @@ describe('SchemerFacadeService', () => {
     expect(service.tryResolveIdentifierConflicts()).toBeTrue();
     expect(dialog.open).toHaveBeenCalledTimes(2);
   });
+
+  it(
+    'tryResolveIdentifierConflicts should close a transient scheme-only conflict once varList makes the state valid',
+    () => {
+      const service = createService();
+      const afterClosed$ = new Subject<unknown>();
+      const dialogRef = {
+        close: jasmine.createSpy('close'),
+        afterClosed: () => afterClosed$.asObservable()
+      };
+      (dialog.open as jasmine.Spy).and.returnValue(dialogRef);
+
+      schemerService.setCodingScheme({
+        variableCodings: [{
+          id: 'a',
+          alias: '',
+          sourceType: 'BASE'
+        }]
+      } as never);
+
+      expect(service.tryResolveIdentifierConflicts()).toBeTrue();
+
+      schemerService.setVarList([{ id: 'a', alias: 'A' } as never]);
+
+      expect(service.tryResolveIdentifierConflicts()).toBeFalse();
+      expect(dialogRef.close).toHaveBeenCalled();
+
+      afterClosed$.next(null);
+      afterClosed$.complete();
+
+      expect(service.tryResolveIdentifierConflicts()).toBeFalse();
+      expect(dialog.open).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it('tryResolveIdentifierConflicts should return false for an empty varList', () => {
     const service = createService();

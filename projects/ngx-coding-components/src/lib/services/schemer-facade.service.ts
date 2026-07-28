@@ -39,7 +39,14 @@ export class SchemerFacadeService {
     );
 
     if (!analysis.hasProblems) {
-      this.dismissedIdentifierConflictSignature = null;
+      if (
+        this.resolvingIdentifierConflicts ||
+        this.identifierConflictDialogRef
+      ) {
+        this.resetIdentifierConflictResolutionState();
+      } else {
+        this.dismissedIdentifierConflictSignature = null;
+      }
       return false;
     }
 
