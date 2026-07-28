@@ -501,19 +501,19 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             sourceParameters,
             deriveSources
           };
+          const hasCodingScheme = !!this.schemerService.codingScheme;
           const variableCodings =
-            this.schemerService.codingScheme?.variableCodings;
-          const identifierAnalysis = variableCodings ?
-            validateVariableCodingChange(
-              this.schemerService.varList,
-              variableCodings,
-              {
-                coding: prospectiveCoding,
-                replacedCodingId: this.varCoding.id
-              }
-            ) :
-            null;
-          if (!identifierAnalysis || identifierAnalysis.hasProblems) {
+            this.schemerService.codingScheme?.variableCodings ||
+            [this.varCoding];
+          const identifierAnalysis = validateVariableCodingChange(
+            hasCodingScheme ? this.schemerService.varList : [],
+            variableCodings,
+            {
+              coding: prospectiveCoding,
+              replacedCodingId: this.varCoding.id
+            }
+          );
+          if (identifierAnalysis.hasProblems) {
             this.messageDialog.open(MessageDialogComponent, {
               width: '400px',
               data: <MessageDialogData>{
