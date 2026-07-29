@@ -173,6 +173,138 @@ describe('SchemerComponent', () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
+  it('updateVariableLists should select the first derived variable initially', () => {
+    const basic = {
+      id: 'basic',
+      alias: 'Basic',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+    const derived = {
+      id: 'derived',
+      alias: 'Derived',
+      sourceType: 'DERIVE',
+      codes: []
+    } as unknown as VariableCodingData;
+    schemerService.setCodingScheme({
+      variableCodings: [basic, derived]
+    } as unknown as never);
+
+    component.updateVariableLists();
+
+    expect(component.selectedCoding$.getValue()).toBe(derived);
+  });
+
+  it('updateVariableLists should restore the selection by id after a scheme update', () => {
+    const previousSelection = {
+      id: 'derived',
+      alias: 'Previous',
+      sourceType: 'DERIVE',
+      codes: []
+    } as unknown as VariableCodingData;
+    component.selectedCoding$.next(previousSelection);
+
+    const replacement = {
+      id: 'derived',
+      alias: 'Replacement',
+      sourceType: 'DERIVE',
+      codes: []
+    } as unknown as VariableCodingData;
+    component.codingScheme = {
+      variableCodings: [
+        {
+          id: 'basic',
+          alias: 'Basic',
+          sourceType: 'BASE',
+          codes: []
+        } as unknown as VariableCodingData,
+        replacement
+      ]
+    } as unknown as never;
+
+    expect(component.selectedCoding$.getValue()).toBe(replacement);
+  });
+
+  it('varList updates should preserve the selected variable', () => {
+    const selected = {
+      id: 'basic',
+      alias: 'Basic',
+      sourceType: 'BASE',
+      codes: []
+    } as unknown as VariableCodingData;
+    schemerService.setCodingScheme({
+      variableCodings: [
+        selected,
+        {
+          id: 'derived',
+          alias: 'Derived',
+          sourceType: 'DERIVE',
+          codes: []
+        } as unknown as VariableCodingData
+      ]
+    } as unknown as never);
+    component.selectedCoding$.next(selected);
+
+    component.varList = [{
+      id: 'basic',
+      alias: 'Updated Basic',
+      type: 'string',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: []
+    } as unknown as VariableInfo];
+
+    expect(component.selectedCoding$.getValue()).toBe(selected);
+  });
+
+  it('updateVariableLists should fall back when the selected variable was removed', () => {
+    component.selectedCoding$.next({
+      id: 'removed',
+      alias: 'Removed',
+      sourceType: 'DERIVE',
+      codes: []
+    } as unknown as VariableCodingData);
+    const fallback = {
+      id: 'remaining',
+      alias: 'Remaining',
+      sourceType: 'DERIVE',
+      codes: []
+    } as unknown as VariableCodingData;
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'basic',
+          alias: 'Basic',
+          sourceType: 'BASE',
+          codes: []
+        } as unknown as VariableCodingData,
+        fallback
+      ]
+    } as unknown as never);
+
+    component.updateVariableLists();
+
+    expect(component.selectedCoding$.getValue()).toBe(fallback);
+  });
+
+  it('updateVariableLists should select null when no variables are available', () => {
+    component.selectedCoding$.next({
+      id: 'removed',
+      alias: 'Removed',
+      sourceType: 'DERIVE',
+      codes: []
+    } as unknown as VariableCodingData);
+    schemerService.setCodingScheme({
+      variableCodings: []
+    } as unknown as never);
+
+    component.updateVariableLists();
+
+    expect(component.selectedCoding$.getValue()).toBeNull();
+  });
+
   it('varCodingElement setter should subscribe when var-coding appears after conflict recovery', fakeAsync(() => {
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
     const changes$ = new Subject<VariableCodingData | null>();
@@ -1154,7 +1286,7 @@ describe('SchemerComponent', () => {
 
   it('deleteVarScheme should remove selected variables and emit', () => {
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
-    const updateSpy = spyOn(component, 'updateVariableLists');
+    const updateSpy = spyOn(component, 'updateVariableLists').and.callThrough();
 
     schemerService.setCodingScheme({
       variableCodings: [
@@ -1178,7 +1310,7 @@ describe('SchemerComponent', () => {
 
     const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
     expect(scheme.variableCodings.some(v => v.id === 'd1')).toBeFalse();
-    expect(component.selectedCoding$.getValue()).toBeNull();
+    expect(component.selectedCoding$.getValue()?.id).toBe('v1');
     expect(updateSpy).toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalled();
   });
@@ -1261,7 +1393,7 @@ describe('SchemerComponent', () => {
 
   it('activateBaseNoValueVars should switch selected BASE_NO_VALUE vars to BASE and emit', () => {
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
-    const updateSpy = spyOn(component, 'updateVariableLists');
+    const updateSpy = spyOn(component, 'updateVariableLists').and.callThrough();
 
     schemerService.setCodingScheme({
       variableCodings: [
@@ -1280,6 +1412,7 @@ describe('SchemerComponent', () => {
     const scheme = schemerService.codingScheme as unknown as { variableCodings: VariableCodingData[] };
     expect(scheme.variableCodings.find(v => v.id === 'n1')?.sourceType).toBe('BASE');
     expect(schemerService.varList.some(v => v.id === 'n1')).toBeTrue();
+    expect(component.selectedCoding$.getValue()?.id).toBe('n1');
     expect(updateSpy).toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalled();
   });

@@ -130,7 +130,6 @@ export class SchemerComponent implements OnDestroy {
     this.schemerService.setVarList([]);
     if (value) {
       this.schemerService.setVarList(parseVarListInput(value));
-      this.selectVarScheme();
       this.updateVariableLists();
     }
   }
@@ -173,6 +172,8 @@ export class SchemerComponent implements OnDestroy {
   }
 
   updateVariableLists() {
+    const previousSelectedId = this.selectedCoding$.value?.id;
+
     if (this.schemerFacade.tryResolveIdentifierConflicts()) {
       this.hasIdentifierConflict = true;
       this.selectVarScheme();
@@ -304,6 +305,17 @@ export class SchemerComponent implements OnDestroy {
         }
       });
     }
+
+    const availableVariables = [
+      ...this.basicVariables,
+      ...this.derivedVariables
+    ];
+    const nextSelection =
+      availableVariables.find(variable => variable.id === previousSelectedId) ??
+      this.derivedVariables[0] ??
+      this.basicVariables[0] ??
+      null;
+    this.selectVarScheme(nextSelection);
   }
 
   selectVarScheme(coding: VariableCodingData | null = null) {
@@ -564,7 +576,6 @@ export class SchemerComponent implements OnDestroy {
           if (changed) {
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-            this.selectedCoding$.next(null);
           }
         }
       });
@@ -699,7 +710,6 @@ export class SchemerComponent implements OnDestroy {
           if (changed) {
             this.updateVariableLists();
             this.codingSchemeChanged.emit(this.schemerService.codingScheme);
-            this.selectedCoding$.next(null);
           }
         }
       });
