@@ -20,6 +20,7 @@
     "lint": "eslint -c .eslintrc.cjs src projects --ext .ts,.js --cache --ignore-pattern '**/karma.conf.js'",
     "lint:fix": "eslint -c .eslintrc.cjs src projects --ext .ts,.js --fix --cache --ignore-pattern '**/karma.conf.js'",
     "audit:prod": "npm audit --omit=dev",
+    "test:ajv-override": "node --test scripts/ajv-override.test.js",
     "validate:scheme": "node scripts/validate-coding-scheme.js",
     "test": "npm run test:cc && npm run test:schemer",
     "test:watch": "npm run test:cc:watch",
