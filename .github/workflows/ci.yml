@@ -48,6 +48,9 @@ jobs:
           CI: true
         run: npm run test:coverage
 
+      - name: Coding-scheme validation script
+        run: npm run test:scheme
+
       - name: Ajv compatibility with fast-uri override
         run: npm run test:ajv-override
 
