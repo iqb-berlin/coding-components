@@ -51,6 +51,9 @@ jobs:
       - name: Coding-scheme validation script
         run: npm run test:scheme
 
+      - name: Ajv compatibility with fast-uri override
+        run: npm run test:ajv-override
+
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4

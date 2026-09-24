@@ -3,7 +3,6 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
-const { ValidationFactory } = require('@iqbspecs/validate-json/validation.factory');
 const { validateScheme } = require('./validate-coding-scheme');
 
 const schemaFile = require.resolve(
@@ -11,14 +10,16 @@ const schemaFile = require.resolve(
 );
 const schema = JSON.parse(fs.readFileSync(schemaFile, 'utf8'));
 const schemaVersion = schema.$id.split('@').at(-1);
-const schemaStatus = ValidationFactory.addLocalSchema(
-  schemaFile,
-  'coding-scheme',
-  schemaVersion
-);
 
 test('validates one coding-scheme file and reports schema errors', async t => {
-  assert.equal(schemaStatus, 'VALID');
+  const originalFetch = global.fetch;
+  global.fetch = async () => {
+    throw new Error('Validation unexpectedly fetched a schema');
+  };
+  t.after(() => {
+    global.fetch = originalFetch;
+  });
+
   const temporaryDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), 'coding-scheme-validation-')
   );
@@ -37,6 +38,10 @@ test('validates one coding-scheme file and reports schema errors', async t => {
   }));
   assert.equal(await validateScheme(schemeFile, output), 0);
   assert.match(messages.at(-1), /valid against schema/);
+  assert.equal(
+    await validateScheme('sample-data/coding-scheme-valid.json', output),
+    0
+  );
 
   fs.writeFileSync(schemeFile, JSON.stringify({
     version: schemaVersion,

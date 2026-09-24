@@ -2,6 +2,10 @@
 
 const fs = require('node:fs');
 const { ValidationFactory } = require('@iqbspecs/validate-json/validation.factory');
+const bundledSchemaFile = require.resolve(
+  '@iqbspecs/coding-scheme/coding-scheme.schema.json'
+);
+const bundledSchema = require(bundledSchemaFile);
 
 async function validateScheme(schemeFile, output = console) {
   let scheme;
@@ -17,6 +21,18 @@ async function validateScheme(schemeFile, output = console) {
   if (typeof schemaVersion !== 'string' || !/^\d+\.\d+$/.test(schemaVersion)) {
     output.error(`Missing or invalid coding-scheme version in ${schemeFile}`);
     return 1;
+  }
+
+  if (bundledSchema.$id === `coding-scheme@iqb-standard@${schemaVersion}`) {
+    const registration = ValidationFactory.addLocalSchema(
+      bundledSchemaFile,
+      'coding-scheme',
+      schemaVersion
+    );
+    if (registration !== 'VALID') {
+      output.error(`Unable to load bundled coding-scheme schema: ${registration}`);
+      return 1;
+    }
   }
 
   const result = await ValidationFactory.validate(
