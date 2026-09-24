@@ -246,7 +246,7 @@ const SOLVER_VARIABLE_REFERENCE_PATTERN =
     KeyValuePipe,
     ReactiveFormsModule,
     MatIcon
-]
+  ]
 })
 export class EditSourceParametersDialog {
   readonly solverExpressionDocsUrl =
