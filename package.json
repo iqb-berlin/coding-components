@@ -29,7 +29,8 @@
     "test:schemer": "ng test schemer --watch=false --browsers=ChromeHeadless",
     "test:schemer:watch": "ng test schemer",
     "test:schemer:coverage": "ng test schemer --watch=false --browsers=ChromeHeadless --code-coverage",
-    "test:coverage": "npm run test:cc:coverage && npm run test:schemer:coverage"
+    "test:coverage": "npm run test:cc:coverage && npm run test:schemer:coverage",
+    "test:scheme": "node --test scripts/validate-coding-scheme.test.js"
   },
   "dependencies": {
     "@angular/animations": "^20.3.25",
@@ -47,7 +48,6 @@
     "@iqb/responses": "^5.2.2",
     "@iqbspecs/coding-scheme": "^3.4.1",
     "@iqbspecs/response": "^2.0.0",
-    "@iqbspecs/validate-json": "^0.4.0",
     "@iqbspecs/variable-info": "^1.3.0",
     "@ngx-translate/core": "^15.0.0",
     "katex": "^0.16.11",
@@ -92,6 +92,7 @@
     "@angular/cli": "^20.3.28",
     "@angular/compiler-cli": "^20.3.25",
     "@iqb/eslint-config": "^2.2.0",
+    "@iqbspecs/validate-json": "0.4.0",
     "@tiptap/core": "^2.27.2",
     "@tiptap/extension-blockquote": "^2.27.2",
     "@tiptap/extension-bold": "^2.27.2",
