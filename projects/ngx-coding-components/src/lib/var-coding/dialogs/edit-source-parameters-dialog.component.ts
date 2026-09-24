@@ -24,9 +24,7 @@ import {
   MatSelect,
   MatSelectTrigger
 } from '@angular/material/select';
-import {
-  KeyValue, KeyValuePipe, NgForOf, NgIf
-} from '@angular/common';
+import { KeyValue, KeyValuePipe } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   SourceProcessingType,
@@ -246,11 +244,9 @@ const SOLVER_VARIABLE_REFERENCE_PATTERN =
     MatMenuTrigger,
     MatTooltip,
     KeyValuePipe,
-    NgForOf,
     ReactiveFormsModule,
-    NgIf,
     MatIcon
-  ]
+]
 })
 export class EditSourceParametersDialog {
   readonly solverExpressionDocsUrl =
