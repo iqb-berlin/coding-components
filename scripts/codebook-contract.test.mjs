@@ -24,7 +24,7 @@ for (const manual of [false, true]) for (const closed of [false, true]) for (con
 }
 
 test('manual rich text handles empty HTML, invisible text, image and formula-only content', () => {
-  for (const empty of ['', '  ', '<p>&nbsp;&#8203;</p>', '<p><br></p>', '<script>foo</script>']) assert.equal(hasCodebookManualInstruction(empty), false, empty);
+  for (const empty of ['', '  ', '<p>&nbsp;&#8203;</p>', '<p><br></p>', '<script>foo</script>', '<p>&#8288;</p>', '<p>&shy;</p>', '<p>&#65039;</p>']) assert.equal(hasCodebookManualInstruction(empty), false, empty);
   for (const nonempty of ['Text', '<p>&lt;</p>', '<span class="iqb-math-formula" data-latex="x^2"></span>', '<img src="data:image/png;base64,aGVsbG8=">', '[[iqb-math:x^2]]']) assert.equal(hasCodebookManualInstruction(nonempty), true, nonempty);
 });
 
@@ -133,5 +133,11 @@ test('Studio reference preserves document, styles, numbering, settings and page 
     const expected = await readFile(new URL(`./fixtures/studio-codebook/${file}`, import.meta.url), 'utf8');
     const actual = (await zip.file(`word/${file}`).async('string')).replace(new Date().toLocaleDateString(), '{{DATE}}');
     assert.equal(actual, expected, file);
+  }
+});
+
+test('invisible-only instructions do not include variables in manual exports', () => {
+  for (const instruction of ['<p>&#8288;</p>', '<p>&shy;</p>', '<p>&#65039;</p>']) {
+    assert.deepEqual(data([variable('EMPTY', [code(1, instruction)])], { hasOnlyManualCoding: true }), []);
   }
 });
