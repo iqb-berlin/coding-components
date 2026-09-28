@@ -61,7 +61,12 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   contentOptions = { ...DEFAULT_CODEBOOK_OPTIONS };
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['defaultContentOptions']) this.contentOptions = { ...DEFAULT_CODEBOOK_OPTIONS, ...this.defaultContentOptions };
+    if (changes['defaultContentOptions']) {
+      // Only shared options cross this boundary; host-specific filters stay with the host.
+      this.contentOptions = Object.fromEntries(Object.entries(DEFAULT_CODEBOOK_OPTIONS).map(([key, value]) => (
+        [key, this.defaultContentOptions[key as keyof CodeBookContentSetting] ?? value]
+      ))) as unknown as CodeBookContentSetting;
+    }
     if (changes['availableUnits']) {
       this.dataSource.data = this.availableUnits;
       this.dataSource.filterPredicate = (unit, filter) => [unit.key, unit.unitName, unit.groupName || '']

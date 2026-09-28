@@ -49,6 +49,20 @@ describe('Studio codebook selection contract', () => {
     expect(config.contentOptions.missingsProfile).toBe('Profil');
   });
 
+  it('does not copy or emit host-specific options', () => {
+    const hostOptions = { showScore: false, trainingRequirement: 'all', jobDefinitionId: 10 };
+    component.defaultContentOptions = hostOptions;
+    component.ngOnChanges({ defaultContentOptions: new SimpleChange(null, hostOptions, true) });
+    hostOptions.trainingRequirement = 'required';
+    component.toggle(component.availableUnits[0]);
+    const emit = spyOn(component.exportRequested, 'emit');
+    component.exportCodingBook();
+    const options = emit.calls.mostRecent().args[0]!.contentOptions;
+    expect(options.showScore).toBeFalse();
+    expect(Object.keys(options)).not.toContain('trainingRequirement');
+    expect(Object.keys(options)).not.toContain('jobDefinitionId');
+  });
+
   it('blocks export for empty selection, loading, busy and unsaved changes', () => {
     const emit = spyOn(component.exportRequested, 'emit');
     component.exportCodingBook(); component.toggle(component.availableUnits[0]);
