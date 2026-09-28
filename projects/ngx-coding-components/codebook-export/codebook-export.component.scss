@@ -1,0 +1,44 @@
+mat-select {
+  width: 100%;
+}
+
+.settings {
+  margin-left: 20px;
+  min-width: 300px;
+}
+
+.settings-group {
+  margin-bottom: 24px;
+  width: 100%;
+
+  h4 {
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+    color: #666;
+  }
+}
+
+
+.selection-summary {
+  margin-top: 12px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #555;
+}
+
+:host { display: block; }
+.fx-column-start-stretch { display: flex; flex-direction: column; }
+.fx-row-start-stretch, .fx-row-space-between-stretch { display: flex; align-items: stretch; gap: 16px; }
+.fx-row-space-between-stretch { width: 100%; }
+.fx-column-start-start { display: flex; flex-direction: column; align-items: flex-start; }
+.fx-row-space-between-stretch > .fx-column-start-stretch { flex: 1; min-width: 320px; }
+mat-table { width: 100%; max-height: 55vh; overflow: auto; }
+mat-form-field { width: 100%; }
+.mat-column-select { flex: 0 0 48px; }
+@media (max-width: 760px) {
+  .fx-row-space-between-stretch { flex-direction: column; }
+  .settings { margin-left: 0; min-width: 0; }
+}
