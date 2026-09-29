@@ -5,8 +5,8 @@
     <mat-form-field>
       <mat-label>Name</mat-label>
       <input matInput id="variableId" name="variableId" required
-             [readonly]="data.sourceType === 'BASE'"
-             [(ngModel)]="data.selfAlias">
+        [readonly]="data.sourceType === 'BASE'"
+        [(ngModel)]="data.selfAlias">
       @if (data.selfAlias && !isValidVariableIdentifier(data.selfAlias)) {
         <mat-hint>
           Erlaubt sind ASCII-Buchstaben, Ziffern, _ und - (mindestens ein Zeichen).
@@ -17,15 +17,19 @@
     @if (data.sourceType !== 'BASE') {
       <mat-form-field>
         <mat-select  placeholder="Quell-Variablen" [formControl]="selectedSources" multiple
-                     (selectionChange)="updateDeriveSources()" (closed)="updateDeriveSources()">
+          (selectionChange)="updateDeriveSources()" (closed)="updateDeriveSources()">
           <button (click)="toggleAllSelection()" style="margin: 10px" mat-stroked-button>Alle auswählen</button>
           <mat-select-trigger>
             Quell-Variablen
-            <span *ngIf="selectedSources.value" class="example-additional-selection">
-              ({{selectedSources.value.length}})
-            </span>
+            @if (selectedSources.value) {
+              <span class="example-additional-selection">
+                ({{selectedSources.value.length}})
+              </span>
+            }
           </mat-select-trigger>
-          <mat-option *ngFor="let source of possibleNewSources | keyvalue: compareFn" [value]="source.key">{{source.value}}</mat-option>
+          @for (source of possibleNewSources | keyvalue: compareFn; track source) {
+            <mat-option [value]="source.key">{{source.value}}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
       <mat-form-field>
@@ -43,7 +47,7 @@
     @if (possibleDeriveProcessing.length > 0) {
       @for (p of possibleDeriveProcessing; track p) {
         <mat-checkbox [checked]="data.sourceParameters.processing?.includes(p)"
-                      (change)="alterProcessing(p, $event.checked)">
+          (change)="alterProcessing(p, $event.checked)">
           {{ 'derive-processing.' + p | translate }}
         </mat-checkbox>
       }
@@ -52,12 +56,12 @@
       <mat-form-field class="solver-expression-field">
         <mat-label>{{ 'derive-processing.SOLVER_EXPRESSION' | translate }}</mat-label>
         <input #solverExpressionInput matInput [(ngModel)]="data.sourceParameters.solverExpression"
-               (ngModelChange)="clearSolverTestResult()">
+          (ngModelChange)="clearSolverTestResult()">
         <button mat-icon-button matSuffix type="button"
-                [matMenuTriggerFor]="solverSourceMenu"
-                [disabled]="selectedSolverSources.length < 1"
-                [attr.aria-label]="'derive-processing.solver-insert-source.label' | translate"
-                [matTooltip]="'derive-processing.solver-insert-source.label' | translate">
+          [matMenuTriggerFor]="solverSourceMenu"
+          [disabled]="selectedSolverSources.length < 1"
+          [attr.aria-label]="'derive-processing.solver-insert-source.label' | translate"
+          [matTooltip]="'derive-processing.solver-insert-source.label' | translate">
           <mat-icon>data_object</mat-icon>
         </button>
       </mat-form-field>
@@ -65,9 +69,9 @@
       <mat-menu #solverSourceMenu="matMenu">
         @for (source of solverSourceReferences; track getSolverSourceReference(source)) {
           <button class="solver-source-menu__item"
-                  mat-menu-item
-                  type="button"
-                  (click)="insertSolverSourceReference(source, solverExpressionInput)">
+            mat-menu-item
+            type="button"
+            (click)="insertSolverSourceReference(source, solverExpressionInput)">
             <mat-icon>input</mat-icon>
             <span>
               {{ source.label }}
@@ -93,8 +97,8 @@
         <div class="solver-test-header">
           <div class="solver-test-title">{{ 'derive-processing.solver-test.title' | translate }}</div>
           <button mat-stroked-button color="primary" type="button"
-                  [disabled]="data.deriveSources.length < 1"
-                  (click)="runSolverTest()">
+            [disabled]="data.deriveSources.length < 1"
+            (click)="runSolverTest()">
             <mat-icon>calculate</mat-icon>
             {{ 'derive-processing.solver-test.action' | translate }}
           </button>
@@ -106,7 +110,7 @@
               <mat-form-field>
                 <mat-label>{{ source.label }}</mat-label>
                 <input matInput [(ngModel)]="solverTestValues[source.id]"
-                       (ngModelChange)="clearSolverTestResult()">
+                  (ngModelChange)="clearSolverTestResult()">
               </mat-form-field>
             }
           </div>
@@ -118,9 +122,9 @@
 
         @if (solverTestResult) {
           <div class="solver-test-result"
-               [class.solver-test-result-ok]="solverTestResult.type === 'success'"
-               [class.solver-test-result-incomplete]="solverTestResult.type === 'incomplete'"
-               [class.solver-test-result-error]="solverTestResult.type === 'error'">
+            [class.solver-test-result-ok]="solverTestResult.type === 'success'"
+            [class.solver-test-result-incomplete]="solverTestResult.type === 'incomplete'"
+            [class.solver-test-result-error]="solverTestResult.type === 'error'">
             {{ solverTestResult.message }}
           </div>
         }
@@ -150,9 +154,9 @@
           }
         </ul>
         <a class="solver-expression-help__link"
-           [href]="solverExpressionDocsUrl"
-           target="_blank"
-           rel="noopener noreferrer">
+          [href]="solverExpressionDocsUrl"
+          target="_blank"
+          rel="noopener noreferrer">
           {{ 'derive-processing.solver-help.docs-link' | translate }}
           <mat-icon aria-hidden="true">open_in_new</mat-icon>
         </a>
@@ -163,7 +167,7 @@
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="primary"
-          [disabled]="!isValidVariableIdentifier(data.selfAlias) || !data.sourceType || (data.sourceType !== 'BASE' && data.deriveSources.length < 1)"
-          [mat-dialog-close]="data">{{ 'dialog-save' | translate }}</button>
+    [disabled]="!isValidVariableIdentifier(data.selfAlias) || !data.sourceType || (data.sourceType !== 'BASE' && data.deriveSources.length < 1)"
+  [mat-dialog-close]="data">{{ 'dialog-save' | translate }}</button>
   <button mat-raised-button [mat-dialog-close]="false">{{ 'dialog-cancel' | translate }}</button>
 </mat-dialog-actions>
