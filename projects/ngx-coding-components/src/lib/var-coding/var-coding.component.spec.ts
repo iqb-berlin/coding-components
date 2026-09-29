@@ -11,6 +11,7 @@ import { VarCodingComponent } from './var-coding.component';
 import { SchemerService } from '../services/schemer.service';
 import { DEFAULT_RESIDUAL_MANUAL_INSTRUCTION } from '../services/schemer-code-ops';
 import { MessageDialogComponent } from '../dialogs/message-dialog.component';
+import { MATH_TABLE_GENERAL_MANUAL_INSTRUCTION } from './dialogs/math-table-coding-generator';
 
 describe('VarCodingComponent', () => {
   let component: VarCodingComponent;
@@ -130,6 +131,7 @@ describe('VarCodingComponent', () => {
       id: 'v1',
       alias: 'A',
       sourceType: 'BASE',
+      manualInstruction: '<p>existing note</p>',
       codes: []
     } as unknown as VariableCodingData;
 
@@ -586,12 +588,13 @@ describe('VarCodingComponent', () => {
     expect(component.varCoding).toBe(original);
   });
 
-  it('smartSchemer without ctrlKey should apply GeneratedCodingData and emit', () => {
+  it('smartSchemer should use generated MathTable instructions when no general instructions exist', () => {
     const emitSpy = spyOn(component.varCodingChanged, 'emit');
     component.varCoding = {
       id: 'v1',
       alias: 'A',
       sourceType: 'BASE',
+      manualInstruction: '',
       codes: []
     } as unknown as VariableCodingData;
 
@@ -599,7 +602,7 @@ describe('VarCodingComponent', () => {
       afterClosed: () => of({
         processing: ['SORT_ARRAY'],
         fragmenting: 'x',
-        manualInstruction: '<p>generated</p>',
+        manualInstruction: MATH_TABLE_GENERAL_MANUAL_INSTRUCTION,
         codeModel: 'SOME',
         codes: [{
           id: 0, type: 'RESIDUAL_AUTO', label: '', score: 0
@@ -610,9 +613,91 @@ describe('VarCodingComponent', () => {
     component.smartSchemer({ ctrlKey: false } as unknown as MouseEvent);
 
     expect(component.varCoding?.processing).toEqual(['SORT_ARRAY']);
-    expect(component.varCoding?.manualInstruction).toBe('<p>generated</p>');
+    expect(component.varCoding?.manualInstruction).toBe(MATH_TABLE_GENERAL_MANUAL_INSTRUCTION);
     expect(component.hasResidualAutoCode).toBeTrue();
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  [
+    { generatedInstruction: '', description: 'empty generated instructions' },
+    { generatedInstruction: MATH_TABLE_GENERAL_MANUAL_INSTRUCTION, description: 'generated MathTable instructions' }
+  ].forEach(({ generatedInstruction, description }) => {
+    it(`smartSchemer should preserve existing general instructions with ${description}`, () => {
+      const emitSpy = spyOn(component.varCodingChanged, 'emit');
+      component.varCoding = {
+        id: 'v1',
+        alias: 'A',
+        sourceType: 'BASE',
+        manualInstruction: '<p>Existing <strong>rich text</strong> note</p>',
+        codes: []
+      } as unknown as VariableCodingData;
+
+      dialogOpenSpy.and.returnValue({
+        afterClosed: () => of({
+          processing: [],
+          fragmenting: '',
+          manualInstruction: generatedInstruction,
+          codeModel: 'MANUAL_AND_RULES',
+          codes: [{ id: 1, type: 'FULL_CREDIT' }]
+        })
+      });
+
+      component.smartSchemer({ ctrlKey: false } as unknown as MouseEvent);
+
+      expect(component.varCoding?.manualInstruction).toBe(
+        '<p>Existing <strong>rich text</strong> note</p>'
+      );
+      expect(component.varCoding?.codes?.length).toBe(1);
+      expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+    });
+  });
+
+  [
+    {
+      existing: '<p style="margin-bottom: 0px;"></p>',
+      description: 'empty styled paragraph',
+      hasContent: false
+    },
+    {
+      existing: '<p>&nbsp;<br></p>',
+      description: 'whitespace-only paragraph',
+      hasContent: false
+    },
+    {
+      existing: '<p><img src="data:image/png;base64,AA=="></p>',
+      description: 'image-only note',
+      hasContent: true
+    },
+    {
+      existing: '<p><span class="iqb-math-formula" data-latex="x"></span></p>',
+      description: 'formula-only note',
+      hasContent: true
+    }
+  ].forEach(({ existing, description, hasContent }) => {
+    it(`smartSchemer should handle ${description} when applying generated MathTable instructions`, () => {
+      component.varCoding = {
+        id: 'v1',
+        alias: 'A',
+        sourceType: 'BASE',
+        manualInstruction: existing,
+        codes: []
+      } as unknown as VariableCodingData;
+      dialogOpenSpy.and.returnValue({
+        afterClosed: () => of({
+          processing: [],
+          fragmenting: '',
+          manualInstruction: MATH_TABLE_GENERAL_MANUAL_INSTRUCTION,
+          codeModel: 'MANUAL_ONLY',
+          codes: []
+        })
+      });
+
+      component.smartSchemer({ ctrlKey: false } as unknown as MouseEvent);
+
+      expect(component.varCoding?.manualInstruction).toBe(
+        hasContent ? existing : MATH_TABLE_GENERAL_MANUAL_INSTRUCTION
+      );
+    });
   });
 
   it('editSourceParameters should apply dialog result and emit', () => {

@@ -113,6 +113,15 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     return this._varCoding;
   }
 
+  private static hasManualInstructionContent(html: string): boolean {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    return Boolean(
+      template.content.textContent?.replace(/[\s\u200B-\u200D\uFEFF]/g, '') ||
+      template.content.querySelector('img, .iqb-math-formula, math')
+    );
+  }
+
   lastChangeFrom$ = new BehaviorSubject<string>('init');
   lastChangeFromSubscription: Subscription | null = null;
   varInfo: VariableInfo | undefined;
@@ -317,7 +326,10 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             Object.assign(this.varCoding, {
               processing: newCoding.processing,
               fragmenting: newCoding.fragmenting,
-              manualInstruction: newCoding.manualInstruction || '',
+              manualInstruction: VarCodingComponent.hasManualInstructionContent(
+                this.varCoding.manualInstruction || ''
+              ) ? this.varCoding.manualInstruction :
+                newCoding.manualInstruction || '',
               codeModel: newCoding.codeModel,
               codes: newCoding.codes
             });
