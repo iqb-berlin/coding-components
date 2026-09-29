@@ -1,0 +1,153 @@
+<div class="fx-column-start-stretch">
+  <h2 mat-dialog-title>{{ 'codebook.workspace.export-coding-book' | translate }}</h2>
+  <mat-dialog-content class="fx-row-start-stretch dialog-content">
+    <div class="fx-row-space-between-stretch">
+      <div class="fx-column-start-stretch">
+        <div class="selected-units-hint">
+          @if (selection.length === 0) { <p>{{ 'codebook.workspace.select-unit' | translate }}</p> }
+          @if (selection.length === 1) { <p>{{ 'codebook.workspace.unit-selected' | translate }}</p> }
+          @if (selection.length > 1) { <p>{{ selection.length }} {{ 'codebook.workspace.units-selected' | translate }}</p> }
+        </div>
+        <mat-form-field>
+          <mat-label>{{ 'codebook.search-filter.filter-units' | translate }}</mat-label>
+          <input matInput data-cy="search-filter-input" [(ngModel)]="filter" (ngModelChange)="applyFilter()"
+            [placeholder]="'codebook.search-filter.enter-filter' | translate">
+          <button matSuffix mat-icon-button type="button" [disabled]="!filter"
+            [attr.aria-label]="'codebook.search-filter.delete-filter' | translate"
+            [matTooltip]="'codebook.search-filter.delete-filter' | translate"
+            (click)="filter = ''; applyFilter()"><span aria-hidden="true">×</span></button>
+        </mat-form-field>
+        <mat-table [dataSource]="dataSource" matSort matSortActive="key" matSortDirection="asc" matSortDisableClear>
+          <ng-container matColumnDef="select">
+            <mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="toggleAll()" [disabled]="loading || busy"
+                [checked]="allSelected" [indeterminate]="selection.length > 0 && !allSelected"
+                [attr.aria-label]="'codebook.coding.select-all-units' | translate"
+                [matTooltip]="filter ? ('codebook.coding.select-all-including-hidden' | translate) : ''"></mat-checkbox>
+            </mat-header-cell>
+            <mat-cell *matCellDef="let unit">
+              <mat-checkbox [checked]="selection.includes(unit.unitId)" [disabled]="unit.disabled || busy"
+                [attr.data-cy]="'workspace-select-unit-list-checkbox-' + unit.key" [attr.aria-label]="unit.key" (change)="toggle(unit)"></mat-checkbox>
+            </mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="key">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'codebook.workspace.unit-key' | translate }}</mat-header-cell>
+            <mat-cell *matCellDef="let unit" data-cy="workspace-select-unit-list-key">{{ unit.key }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'codebook.workspace.unit-name' | translate }}</mat-header-cell>
+            <mat-cell *matCellDef="let unit">{{ unit.unitName }}</mat-cell>
+          </ng-container>
+          <ng-container matColumnDef="group">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'codebook.workspace.group' | translate }}</mat-header-cell>
+            <mat-cell *matCellDef="let unit">{{ unit.groupName }}</mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="columns; sticky: true"></mat-header-row>
+          <mat-row *matRowDef="let unit; columns: columns"></mat-row>
+        </mat-table>
+        <div class="selection-summary">
+          {{ 'codebook.coding.selected-units' | translate: { count: selection.length } }}
+        </div>
+      </div>
+      <div class="settings">
+        <section class="example-section fx-column-start-start">
+          <div class="settings-group">
+            <h4>{{'codebook.coding.codebook-content' | translate}}</h4>
+            <div class="fx-column-start-start">
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.has-only-vars-with-codes-tooltip' | translate"
+                            [(ngModel)]="contentOptions.hasOnlyVarsWithCodes">
+                {{'codebook.coding.has-only-vars-with-codes' | translate}}
+              </mat-checkbox>
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.has-only-manual-coding-tooltip' | translate"
+                            [(ngModel)]="contentOptions.hasOnlyManualCoding">
+                {{'codebook.coding.has-only-manual-coding' | translate}}
+              </mat-checkbox>
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.has-closed-vars-tooltip' | translate"
+                            [(ngModel)]="contentOptions.hasClosedVars">
+                {{'codebook.coding.has-closed-vars' | translate}}
+              </mat-checkbox>
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.has-derived-vars-tooltip' | translate"
+                            [(ngModel)]="contentOptions.hasDerivedVars">
+                {{'codebook.coding.has-derived-vars' | translate}}
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h4>{{'codebook.coding.codebook-formatting' | translate}}</h4>
+            <div class="fx-column-start-start">
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.has-general-instructions-tooltip' | translate"
+                            [(ngModel)]="contentOptions.hasGeneralInstructions">
+                {{'codebook.coding.has-general-instructions' | translate}}
+              </mat-checkbox>
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.show-score-tooltip' | translate"
+                            [(ngModel)]="contentOptions.showScore">
+                {{'codebook.coding.show-score' | translate}}
+              </mat-checkbox>
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.code-label-to-upper-tooltip' | translate"
+                            [(ngModel)]="contentOptions.codeLabelToUpper">
+                {{'codebook.coding.code-label-to-upper' | translate}}
+              </mat-checkbox>
+              <mat-checkbox class="example-margin"
+                            [matTooltip]="'codebook.coding.hide-item-var-relation-tooltip' | translate"
+                            [(ngModel)]="contentOptions.hideItemVarRelation">
+                {{'codebook.coding.hide-item-var-relation' | translate}}
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h4>{{ 'codebook.workspace.coding-missing-profiles' | translate }}</h4>
+            <mat-select class="select-missings-profile"
+                        placeholder="{{'codebook.workspace.select-missings-profile' | translate }}"
+                        [(value)]="selectedMissingsProfileId"
+                        (click)="$event.stopPropagation()">
+              <mat-option [value]="0">—</mat-option>
+              @for (missingsProfile of missingsProfiles; track missingsProfile.id) {
+                <mat-option [value]="missingsProfile.id">
+                  {{missingsProfile.label}}
+                </mat-option>
+              }
+            </mat-select>
+          </div>
+
+          <div class="settings-group">
+            <h4>{{'codebook.coding.export-format' | translate}}</h4>
+            <mat-radio-group [(ngModel)]="contentOptions.exportFormat" aria-label="Exportformat">
+              <mat-radio-button value="json">JSON</mat-radio-button>
+              <mat-radio-button value="docx">DOCX</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <ng-content select="[codebookFilters]"></ng-content>
+          @if(workspaceChanges) {
+            <mat-error>{{'codebook.coding.error-save-changes' | translate}}</mat-error>
+          }
+        </section>
+      </div>
+
+    </div>
+  </mat-dialog-content>
+  <ng-content select="[codebookStatus]"></ng-content>
+  <mat-dialog-actions align="end">
+
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            (click)="exportCodingBook()"
+            [disabled]="exportDisabled"
+>
+      {{ 'codebook.export' | translate }}
+    </button>
+    <button mat-raised-button (click)="cancel.emit()">
+      {{ 'codebook.dialogs.cancel' | translate }}
+    </button>
+  </mat-dialog-actions>
+</div>

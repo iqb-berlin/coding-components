@@ -14,6 +14,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
+      "@iqb/ngx-coding-components/codebook-export": ["projects/ngx-coding-components/codebook-export/public-api.ts"],
+      "@iqb/ngx-coding-components/codebook-generator": ["projects/ngx-coding-components/codebook-generator/public-api.ts"],
+      "@iqb/ngx-coding-components/codebook-models": ["projects/ngx-coding-components/codebook-models/public-api.ts"],
       "@ngx-translate/core": [
         "./node_modules/@ngx-translate/core"
       ],

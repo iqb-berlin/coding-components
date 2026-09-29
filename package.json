@@ -9,7 +9,7 @@
     "build:elements": "ng build --project coding-components -c elements",
     "serve:elements": "npx http-server dist/coding-components-elements -p 8081",
     "buildxx": "ng run coding-components:build",
-    "build_cc": "rm -rf dist/ngx-coding-components && ng build ngx-coding-components",
+    "build_cc": "rm -rf dist/ngx-coding-components && ng build ngx-coding-components && node scripts/build-codebook-node.mjs",
     "build": "npm run build_cc && npm run start",
     "build_sc": "rm -f dist/*.* && rm -rf dist/schemer && ng build --project schemer --output-hashing=none",
     "pack_sc": "node scripts/wrap_and_pack.js schemer $npm_package_config_schemer_version projects/schemer/src/html_wrapper/index.html",
@@ -31,7 +31,8 @@
     "test:schemer:watch": "ng test schemer",
     "test:schemer:coverage": "ng test schemer --watch=false --browsers=ChromeHeadless --code-coverage",
     "test:coverage": "npm run test:cc:coverage && npm run test:schemer:coverage",
-    "test:scheme": "node --test scripts/validate-coding-scheme.test.js"
+    "test:scheme": "node --test scripts/validate-coding-scheme.test.js",
+    "test:codebook": "node --test scripts/codebook-contract.test.mjs"
   },
   "dependencies": {
     "@angular/animations": "^21.2.23",
@@ -120,13 +121,18 @@
     "@tiptap/extension-underline": "^2.27.2",
     "@tiptap/pm": "^2.27.2",
     "@types/jasmine": "~4.3.0",
+    "@types/katex": "^0.16.8",
     "@types/node": "^20.4.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
+    "buffer": "^6.0.3",
+    "cheerio": "^1.1.2",
+    "docx": "^8.5.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-plugin-import": "^2.32.0",
+    "image-size": "^1.2.1",
     "iqb-dev-components": "^1.4.1",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
@@ -134,11 +140,13 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "mathml2omml": "^0.5.0",
     "ng-packagr": "^21.2.7",
     "ngx-build-plus": "^20.0.0",
     "ngx-tiptap": "^12.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "esbuild": "0.28.1"
   },
   "overrides": {
     "@babel/core": "7.29.7",
