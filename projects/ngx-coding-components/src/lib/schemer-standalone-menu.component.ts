@@ -71,7 +71,7 @@ import { UserRoleType } from './services/schemer.service';
     </mat-menu>
   `,
   styles: [
-    '.mat-mdc-fab {z-index: 999; position: absolute; top: -8px; right: -8px}'
+    '.mat-mdc-fab {z-index: 999; position: absolute; top: 4px; right: 8px}'
   ],
   standalone: true,
   imports: [

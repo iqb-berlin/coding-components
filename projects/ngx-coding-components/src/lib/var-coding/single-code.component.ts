@@ -26,8 +26,49 @@ import { CodeInstructionComponent } from './code-instruction.component';
   selector: 'single-code',
   templateUrl: 'single-code.component.html',
   styles: `
+    .code {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) 48px 48px;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .code.with-instruction {
+      grid-template-columns: 48px minmax(0, 3fr) minmax(0, 2fr) 48px 48px;
+    }
+    .code-content, .side-instruction {
+      min-width: 0;
+    }
     .code-main-data {
       background-color: whitesmoke;
+      flex-wrap: wrap;
+    }
+    .code-main-data > mat-form-field {
+      flex-shrink: 0;
+    }
+    @container var-coding (max-width: 800px) {
+      .code, .code.with-instruction {
+        grid-template-columns: 48px minmax(0, 1fr) 48px 48px;
+      }
+      .code-type {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .copy-code {
+        grid-column: 3;
+        grid-row: 1;
+      }
+      .delete-code {
+        grid-column: 4;
+        grid-row: 1;
+      }
+      .code-content {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+      .side-instruction {
+        grid-column: 1 / -1;
+        grid-row: 3;
+      }
     }
     .not-unique-id {
       border: orange solid 2px;

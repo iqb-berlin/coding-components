@@ -2,8 +2,8 @@
 <div class="fx-flex-fill">&nbsp;</div>
 } @if (varCoding) {
 <div class="fx-column-space-between-stretch" [style.padding]="'10px'">
-  <div class="fx-row-start-stretch fx-gap-10">
-    <div class="fx-column-start-stretch fx-gap-10" [style.width.%]="30">
+  <div class="editor-header fx-row-start-stretch fx-gap-10">
+    <div class="variable-details fx-column-start-stretch fx-gap-10">
       <mat-form-field>
         <mat-label>{{ "description-position" | translate }}</mat-label>
         <input
@@ -72,7 +72,7 @@
         </div>
       </div>
     </div>
-    <mat-card [style.flex]="'1 1 auto'" [style.padding-left.px]="12">
+    <mat-card class="manual-instruction" [style.padding-left.px]="12">
       <mat-card-subtitle class="hover-area">
         <div class="fx-row-space-between-center">
           <div class="fx-row-start-center">
@@ -110,8 +110,8 @@
       </mat-card-content>
     </mat-card>
   </div>
-  <div class="fx-row-space-between-center">
-    <div class="fx-row-start-start fx-gap-5">
+  <div class="coding-toolbar fx-row-space-between-center">
+    <div class="coding-actions fx-row-start-start fx-gap-5">
       @if (!schemerService.codingScheme) {
       <button
         mat-icon-button
@@ -225,10 +225,10 @@
         <mat-icon>cancel</mat-icon>
       </button>
     </div>
-    <div class="fx-row-start-center fx-gap-10">
+    <div class="add-code-toolbar fx-row-start-center fx-gap-10">
       @if (schemerService.userRole !== 'RO') {
       <div>{{ "code.prompt.add" | translate }}</div>
-      <div>
+      <div class="add-code-actions">
         @for (codeType of schemerService.orderOfCodeTypes; track codeType) {
         <button
           mat-icon-button

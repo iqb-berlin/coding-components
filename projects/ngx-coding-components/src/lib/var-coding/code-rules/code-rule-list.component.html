@@ -1,14 +1,14 @@
 <mat-card>
   <mat-card-content>
-    <div class="fx-row-start-stretch fx-gap-10">
+    <div class="rules-layout fx-row-start-stretch fx-gap-10">
       @if (ruleSet) {
-        <div class="fx-column-start-stretch fx-flex-fill">
+        <div class="rules-content fx-column-start-stretch fx-flex-fill">
           @for (rule of ruleSet.rules; track ruleIndex; let ruleIndex = $index) {
-            <div class="fx-row-start-center fx-flex-fill fx-gap-10"
+            <div class="rule-row fx-row-start-center fx-flex-fill fx-gap-10"
                  (mouseover)="showCodeButtonsOf=rule.method" (mouseout)="showCodeButtonsOf=''">
-              <div class="fx-column-start-stretch fx-flex-fill">
+              <div class="rule-content fx-column-start-stretch fx-flex-fill">
                 <div class="rule">
-                  <div class="fx-row-start-center fx-gap-5"
+                  <div class="rule-header fx-row-start-center fx-gap-5"
                     [matTooltip]="('rule.' + rule.method + '.description') | translate"
                        matTooltipShowDelay="500">
                     <button mat-icon-button
@@ -190,7 +190,7 @@
               </div>
             </div>
           }
-          <div class="fx-row-space-between-center">
+          <div class="rule-operator-toolbar fx-row-space-between-center">
             <button style="color:#006064"  mat-icon-button
                     [matMenuTriggerFor]="addRuleMenu"
                     [disabled]="schemerService.userRole === 'RO'"

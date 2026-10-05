@@ -2,7 +2,7 @@
   <mat-card-content>
     @if (code ) { @if(code.ruleSets && code.ruleSets.length > 1 || varInfo &&
     varInfo.multiple) {
-    <div class="fx-row-space-between-start">
+    <div class="rule-sets-toolbar fx-row-space-between-start">
       <h4>Regelsätze</h4>
       <div class="fx-row-end-center">
         @if (code.ruleSets && code.ruleSets.length > 1 &&
@@ -25,8 +25,8 @@
     </div>
     } @for (ruleSet of code.ruleSets; track ruleSet; let ruleSetIndex = $index)
     {
-    <div class="fx-row-start-start">
-      <div class="fx-column-center-center">
+    <div class="rule-set fx-row-start-start">
+      <div class="rule-set-index fx-column-center-center">
         @if(code.ruleSets && code.ruleSets.length > 1 || varInfo &&
         varInfo.multiple) {
         <h4>{{ ruleSetIndex + 1 }}</h4>

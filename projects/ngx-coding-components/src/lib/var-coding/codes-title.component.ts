@@ -20,7 +20,7 @@ import {
 @Component({
   selector: 'codes-title',
   template: `
-    <div class="fx-row-space-between-start">
+    <div class="codes-header fx-row-space-between-start">
       @if (schemerService.userRole !== 'RO') {
       <div class="fx-row-center-center" style="margin-top:10px">
         <h2>{{ 'code.header' | translate }}</h2>
@@ -78,6 +78,10 @@ import {
     `
       .sort {
         margin-left: 20px;
+      }
+      .codes-header {
+        flex-wrap: wrap;
+        gap: 10px;
       }
     `
   ],
