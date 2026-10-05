@@ -17,8 +17,8 @@
     "npm_publish": "npm run npm_publish_cc && npm run npm_publish_elements",
     "npm_publish_cc": "cd dist/ngx-coding-components && npm publish --access public",
     "npm_publish_elements": "cd dist/coding-components-elements && npm publish --access public",
-    "lint": "eslint -c .eslintrc.cjs src projects --ext .ts,.js --cache --ignore-pattern '**/karma.conf.js'",
-    "lint:fix": "eslint -c .eslintrc.cjs src projects --ext .ts,.js --fix --cache --ignore-pattern '**/karma.conf.js'",
+    "lint": "eslint -c .eslintrc.cjs src projects e2e --ext .ts,.js --cache --ignore-pattern '**/karma.conf.js'",
+    "lint:fix": "eslint -c .eslintrc.cjs src projects e2e --ext .ts,.js --fix --cache --ignore-pattern '**/karma.conf.js'",
     "audit:prod": "npm audit --omit=dev",
     "test:ajv-override": "node --test scripts/ajv-override.test.js",
     "validate:scheme": "node scripts/validate-coding-scheme.js",
@@ -31,7 +31,8 @@
     "test:schemer:watch": "ng test schemer",
     "test:schemer:coverage": "ng test schemer --watch=false --browsers=ChromeHeadless --code-coverage",
     "test:coverage": "npm run test:cc:coverage && npm run test:schemer:coverage",
-    "test:scheme": "node --test scripts/validate-coding-scheme.test.js"
+    "test:scheme": "node --test scripts/validate-coding-scheme.test.js",
+    "test:schemer:responsive": "playwright test --config playwright.schemer.config.cjs"
   },
   "dependencies": {
     "@angular/animations": "^21.2.23",
@@ -94,6 +95,7 @@
     "@angular/compiler-cli": "^21.2.23",
     "@iqb/eslint-config": "^2.2.0",
     "@iqbspecs/validate-json": "0.4.0",
+    "@playwright/test": "^1.63.0",
     "@tiptap/core": "^2.27.2",
     "@tiptap/extension-blockquote": "^2.27.2",
     "@tiptap/extension-bold": "^2.27.2",

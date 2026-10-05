@@ -57,6 +57,20 @@ Additionally, this library exports multiple dialogs and helpers (see “Public A
 
 # Installation (Angular)
 
+## Schemer viewport support
+
+The Schemer supports container widths of **320 CSS pixels and above**, including
+375, 768, 1024 and 1440 px. At narrow widths the variable navigation moves above
+the editor, editor cards stack and toolbars wrap. The variable list and editor
+scroll vertically independently so their actions remain reachable. The layout
+uses the component's container width, including when embedded in a Verona iframe.
+Below 320 px the component retains its minimum width; the host must provide
+horizontal scrolling.
+
+Run the browser regression tests with `npm run test:schemer:responsive` after
+`npx playwright install chromium`. For a visible local browser run, append
+`-- --headed`. The tests start their own Schemer server on port 4210.
+
 ## Prerequisites
 
 This library is built for modern Angular and requires:
