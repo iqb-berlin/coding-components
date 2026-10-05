@@ -158,3 +158,13 @@ test('DOCX retains nested marks and spaces between differently formatted runs', 
   const text = (await import('cheerio')).load(spaced.xml, { xml: true });
   assert.match(text('w\\:t').toArray().map(element => text(element).text()).join(''), /vor nach/);
 });
+
+test('shared training filters combine with manual/closed and derived-variable selection', () => {
+  const vars = [variable('TRAIN', [code(0, 'Bewerten')], { processing: ['CODER_TRAINING_REQUIRED'] }),
+    variable('OTHER', [code(1, 'Bewerten')]), variable('CLOSED', [code(0, '', 'RESIDUAL_AUTO')], { processing: ['CODER_TRAINING_REQUIRED'] }),
+    variable('DERIVED', [code(1, 'Bewerten')], { sourceType: 'COPY_VALUE', processing: ['CODER_TRAINING_REQUIRED'] })];
+  assert.deepEqual(data(vars, { trainingRequirement: 'required', hasOnlyManualCoding: true, hasDerivedVars: false }).map(v => v.id), ['TRAIN']);
+  assert.deepEqual(data(vars, { trainingRequirement: 'not-required', hasOnlyManualCoding: true }).map(v => v.id), ['OTHER']);
+  assert.deepEqual(data(vars, { trainingRequirement: 'required', hasClosedVars: true }).map(v => v.id), ['CLOSED']);
+  assert.deepEqual(data(vars, { trainingRequirement: 'all' }).map(v => v.id), data(vars).map(v => v.id));
+});

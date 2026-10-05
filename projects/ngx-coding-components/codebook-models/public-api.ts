@@ -11,6 +11,8 @@ export interface ItemMetadata {
 /**
  * Settings for codebook content generation
  */
+export type CodebookTrainingRequirementFilter = 'all' | 'required' | 'not-required';
+
 export interface CodeBookContentSetting {
   /** Export format (docx or json) */
   exportFormat: 'json' | 'docx';
@@ -32,6 +34,8 @@ export interface CodeBookContentSetting {
   showScore: boolean;
   /** Hide item-variable relation */
   hideItemVarRelation: boolean;
+  /** Filter variables by increased coder training requirement; omission means all. */
+  trainingRequirement?: CodebookTrainingRequirementFilter;
 }
 
 /**

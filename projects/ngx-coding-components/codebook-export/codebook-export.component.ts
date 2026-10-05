@@ -27,7 +27,8 @@ export const DEFAULT_CODEBOOK_OPTIONS: CodeBookContentSetting = {
   hasClosedVars: true,
   codeLabelToUpper: true,
   showScore: true,
-  hideItemVarRelation: true
+  hideItemVarRelation: true,
+  trainingRequirement: 'all'
 };
 
 /** Studio's export form. Loading data, downloading and job handling belong to the host. */
@@ -46,6 +47,7 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   @Input() selectedUnitIds: number[] = [];
   @Input() selectedMissingsProfileId = 0;
   @Input() defaultContentOptions: Partial<CodeBookContentSetting> = {};
+  @Input() showGroupColumn = true;
   @Input() loading = false;
   @Input() busy = false;
   @Input() workspaceChanges = false;
@@ -61,6 +63,9 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   contentOptions = { ...DEFAULT_CODEBOOK_OPTIONS };
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['showGroupColumn']) {
+      this.columns = this.showGroupColumn ? ['select', 'key', 'name', 'group'] : ['select', 'key', 'name'];
+    }
     if (changes['defaultContentOptions']) {
       // Only shared options cross this boundary; host-specific filters stay with the host.
       this.contentOptions = Object.fromEntries(Object.entries(DEFAULT_CODEBOOK_OPTIONS).map(([key, value]) => (
@@ -69,7 +74,7 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
     }
     if (changes['availableUnits']) {
       this.dataSource.data = this.availableUnits;
-      this.dataSource.filterPredicate = (unit, filter) => [unit.key, unit.unitName, unit.groupName || '']
+      this.dataSource.filterPredicate = (unit, filter) => [unit.key, unit.unitName, this.showGroupColumn ? unit.groupName || '' : '']
         .some(value => value.toLowerCase().includes(filter));
       this.dataSource.sortingDataAccessor = (unit, column) => ({ key: unit.key, name: unit.unitName, group: unit.groupName || '' }[column] || '');
     }

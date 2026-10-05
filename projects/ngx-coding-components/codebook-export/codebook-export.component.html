@@ -51,6 +51,17 @@
       </div>
       <div class="settings">
         <section class="example-section fx-column-start-start">
+          <ng-content select="[codebookFilters]"></ng-content>
+          <div class="settings-group codebook-training-filter">
+            <mat-form-field>
+              <mat-label>{{ 'codebook.coding.training-requirement-filter' | translate }}</mat-label>
+              <mat-select [(ngModel)]="contentOptions.trainingRequirement" [disabled]="loading || busy">
+                <mat-option value="all">{{ 'codebook.coding.training-requirement-all' | translate }}</mat-option>
+                <mat-option value="required">{{ 'codebook.coding.training-requirement-required' | translate }}</mat-option>
+                <mat-option value="not-required">{{ 'codebook.coding.training-requirement-not-required' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
           <div class="settings-group">
             <h4>{{'codebook.coding.codebook-content' | translate}}</h4>
             <div class="fx-column-start-start">
@@ -126,7 +137,6 @@
             </mat-radio-group>
           </div>
 
-          <ng-content select="[codebookFilters]"></ng-content>
           @if(workspaceChanges) {
             <mat-error>{{'codebook.coding.error-save-changes' | translate}}</mat-error>
           }

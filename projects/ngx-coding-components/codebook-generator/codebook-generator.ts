@@ -53,6 +53,9 @@ export class CodebookGenerator {
   }
 
   private static getVariable(variable: VariableCodingData, options: CodeBookContentSetting): BookVariable | null {
+    const trainingRequired = variable.processing?.includes('CODER_TRAINING_REQUIRED') ?? false;
+    if (options.trainingRequirement === 'required' && !trainingRequired) return null;
+    if (options.trainingRequirement === 'not-required' && trainingRequired) return null;
     if (variable.sourceType === 'BASE_NO_VALUE' || (variable.sourceType !== 'BASE' && !options.hasDerivedVars)) return null;
     const codes = (variable.codes || []).filter(code => code.id !== undefined && code.id !== null);
     const manual = codes.some(code => this.isManual(code));

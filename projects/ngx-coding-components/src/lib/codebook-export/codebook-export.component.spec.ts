@@ -50,17 +50,27 @@ describe('Studio codebook selection contract', () => {
   });
 
   it('does not copy or emit host-specific options', () => {
-    const hostOptions = { showScore: false, trainingRequirement: 'all', jobDefinitionId: 10 };
+    const hostOptions = { showScore: false, jobDefinitionId: 10, variableBundleIds: [7] };
     component.defaultContentOptions = hostOptions;
     component.ngOnChanges({ defaultContentOptions: new SimpleChange(null, hostOptions, true) });
-    hostOptions.trainingRequirement = 'required';
     component.toggle(component.availableUnits[0]);
     const emit = spyOn(component.exportRequested, 'emit');
     component.exportCodingBook();
     const options = emit.calls.mostRecent().args[0]!.contentOptions;
     expect(options.showScore).toBeFalse();
-    expect(Object.keys(options)).not.toContain('trainingRequirement');
+    expect(Object.keys(options)).not.toContain('variableBundleIds');
     expect(Object.keys(options)).not.toContain('jobDefinitionId');
+  });
+
+  it('exports the shared training filter and supports Studio-only groups', () => {
+    component.contentOptions.trainingRequirement = 'required';
+    component.showGroupColumn = false;
+    component.ngOnChanges({ showGroupColumn: new SimpleChange(true, false, false) });
+    expect(component.columns).toEqual(['select', 'key', 'name']);
+    component.toggle(component.availableUnits[0]);
+    const emit = spyOn(component.exportRequested, 'emit');
+    component.exportCodingBook();
+    expect(emit.calls.mostRecent().args[0]!.contentOptions.trainingRequirement).toBe('required');
   });
 
   it('blocks individual and complete selection while loading', () => {
