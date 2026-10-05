@@ -63,6 +63,23 @@ describe('Studio codebook selection contract', () => {
     expect(Object.keys(options)).not.toContain('jobDefinitionId');
   });
 
+  it('blocks individual and complete selection while loading', () => {
+    component.loading = true;
+    const emit = spyOn(component.selectionChanged, 'emit');
+    component.toggle(component.availableUnits[0]); component.toggleAll();
+    expect(component.selection).toEqual([]);
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('notifies the host when refreshed units invalidate its selection', () => {
+    component.toggleAll();
+    const emit = spyOn(component.selectionChanged, 'emit');
+    component.availableUnits = [component.availableUnits[0]];
+    component.ngOnChanges({ availableUnits: new SimpleChange(null, component.availableUnits, false) });
+    expect(component.selection).toEqual([1]);
+    expect(emit).toHaveBeenCalledOnceWith([1]);
+  });
+
   it('blocks export for empty selection, loading, busy and unsaved changes', () => {
     const emit = spyOn(component.exportRequested, 'emit');
     component.exportCodingBook(); component.toggle(component.availableUnits[0]);

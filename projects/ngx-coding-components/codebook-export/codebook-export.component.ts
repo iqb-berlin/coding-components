@@ -78,7 +78,11 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
     }
     if (changes['selectedUnitIds']) this.selection = [...this.selectedUnitIds];
     const validIds = new Set(this.availableUnits.filter(unit => !unit.disabled).map(unit => unit.unitId));
-    this.selection = this.selection.filter(id => validIds.has(id));
+    const validSelection = this.selection.filter(id => validIds.has(id));
+    if (validSelection.length !== this.selection.length) {
+      this.selection = validSelection;
+      this.selectionChanged.emit([...this.selection]);
+    }
   }
 
   ngAfterViewInit(): void { this.dataSource.sort = this.sort; }
@@ -95,13 +99,13 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   applyFilter(): void { this.dataSource.filter = this.filter.trim().toLowerCase(); }
 
   toggle(unit: UnitSelectionItem): void {
-    if (unit.disabled || this.busy) return;
+    if (unit.disabled || this.loading || this.busy) return;
     this.selection = this.selection.includes(unit.unitId) ? this.selection.filter(id => id !== unit.unitId) : [...this.selection, unit.unitId];
     this.selectionChanged.emit([...this.selection]);
   }
 
   toggleAll(): void {
-    if (this.busy) return;
+    if (this.loading || this.busy) return;
     this.selection = this.allSelected ? [] : this.availableUnits.filter(unit => !unit.disabled).map(unit => unit.unitId);
     this.selectionChanged.emit([...this.selection]);
   }
