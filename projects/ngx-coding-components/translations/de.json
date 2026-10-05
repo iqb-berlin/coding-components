@@ -205,6 +205,8 @@
       "warning": "Achtung: Sollten Kodierinformationen bereits vorhanden sein, werden diese gelöscht.",
       "true-code": "Wert für 'Richtig'-Code",
       "empty-value": "Bitte Wert eintragen",
+      "invalid-number": "Bitte eine gültige Zahl eintragen",
+      "invalid-range": "Bitte einen gültigen Bereich eintragen",
       "only-one-lower-limit": "Bitte nur einen Wert für untere Grenze eintragen",
       "only-one-upper-limit": "Bitte nur einen Wert für obere Grenze eintragen",
       "action": "Generiere Kodierung"
