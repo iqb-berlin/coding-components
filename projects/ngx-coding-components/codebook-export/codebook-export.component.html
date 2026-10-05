@@ -22,12 +22,12 @@
             <mat-header-cell *matHeaderCellDef>
               <mat-checkbox (change)="toggleAll()" [disabled]="loading || busy"
                 [checked]="allSelected" [indeterminate]="selection.length > 0 && !allSelected"
-                [attr.aria-label]="'codebook.coding.select-all-units' | translate"
+                [aria-label]="'codebook.coding.select-all-units' | translate"
                 [matTooltip]="filter ? ('codebook.coding.select-all-including-hidden' | translate) : ''"></mat-checkbox>
             </mat-header-cell>
             <mat-cell *matCellDef="let unit">
               <mat-checkbox [checked]="selection.includes(unit.unitId)" [disabled]="unit.disabled || loading || busy"
-                [attr.data-cy]="'workspace-select-unit-list-checkbox-' + unit.key" [attr.aria-label]="unit.key" (change)="toggle(unit)"></mat-checkbox>
+                [attr.data-cy]="'workspace-select-unit-list-checkbox-' + unit.key" [aria-label]="unit.key" (change)="toggle(unit)"></mat-checkbox>
             </mat-cell>
           </ng-container>
           <ng-container matColumnDef="key">

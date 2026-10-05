@@ -1,4 +1,6 @@
 import { SimpleChange } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
 import { CodebookExportComponent } from '../../../codebook-export/codebook-export.component';
 
 describe('Studio codebook selection contract', () => {
@@ -97,5 +99,20 @@ describe('Studio codebook selection contract', () => {
     component.busy = true; component.exportCodingBook(); component.busy = false;
     component.workspaceChanges = true; component.exportCodingBook();
     expect(emit).not.toHaveBeenCalled();
+  });
+});
+
+describe('codebook checkbox accessibility', () => {
+  it('labels the actual checkbox inputs for assistive technology', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CodebookExportComponent, TranslateModule.forRoot()]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CodebookExportComponent);
+    fixture.componentRef.setInput('availableUnits', [{ unitId: 1, key: 'TASK', unitName: 'Aufgabe' }]);
+    fixture.detectChanges();
+    const inputs = fixture.nativeElement.querySelectorAll('input[type="checkbox"]');
+    expect(inputs[0].getAttribute('aria-label')).toBe('codebook.coding.select-all-units');
+    expect(inputs[1].getAttribute('aria-label')).toBe('TASK');
+    fixture.destroy();
   });
 });
