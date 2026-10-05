@@ -3,7 +3,13 @@
   "dest": "../../dist/ngx-coding-components",
   "allowedNonPeerDependencies": [
     "@iqb/mathlive",
-    "katex"
+    "katex",
+    "docx",
+    "cheerio",
+    "buffer",
+    "image-size",
+    "mathml2omml",
+    "@iqb/responses"
   ],
   "lib": {
     "entryFile": "src/public-api.ts"

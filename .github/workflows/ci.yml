@@ -79,6 +79,9 @@ jobs:
           CI: true
         run: npm run test:coverage
 
+      - name: Build shared library and verify codebook contracts
+        run: npm run build_cc && npm run test:codebook
+
       - name: Coding-scheme validation script
         run: npm run test:scheme
 

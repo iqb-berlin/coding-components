@@ -4,8 +4,8 @@
   "exports": {
     "./lib/ngx-coding-components.module": "./lib/ngx-coding-components.module.d.ts"
   },
-  "version": "4.0.0",
-  "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
+  "version": "4.1.0",
+  "author": "IQB - Institut zur Qualit\u00e4tsentwicklung im Bildungswesen",
   "license": "MIT",
   "description": "Angular components for coding responses in assessments of IQB.",
   "repository": {
@@ -29,9 +29,8 @@
     "@angular/platform-browser": "^21.0.0",
     "@angular/platform-browser-dynamic": "^21.0.0",
     "@angular/router": "^21.0.0",
-    "@iqb/responses": "^5.2.2",
     "@iqbspecs/coding-scheme": "^3.4.1",
-    "@iqbspecs/response": "^2.0.0",
+    "@iqbspecs/response": "^1.5.1 || ^2.0.0",
     "@iqbspecs/variable-info": "^1.3.0",
     "@ngx-translate/core": "^15.0.0",
     "@tiptap/core": "^2.23.1",
@@ -72,7 +71,26 @@
   "dependencies": {
     "@iqb/mathlive": "^0.4.1",
     "katex": "^0.16.11",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "docx": "8.5.0",
+    "cheerio": "1.1.2",
+    "buffer": "6.0.3",
+    "image-size": "1.2.1",
+    "mathml2omml": "0.5.0",
+    "@iqb/responses": "5.2.2"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "typesVersions": {
+    "*": {
+      "codebook-models": [
+        "types/iqb-ngx-coding-components-codebook-models.d.ts"
+      ],
+      "codebook-generator": [
+        "types/iqb-ngx-coding-components-codebook-generator.d.ts"
+      ],
+      "codebook-export": [
+        "types/iqb-ngx-coding-components-codebook-export.d.ts"
+      ]
+    }
+  }
 }
