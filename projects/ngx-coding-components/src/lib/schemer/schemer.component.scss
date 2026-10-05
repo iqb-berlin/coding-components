@@ -1,3 +1,9 @@
+:host {
+  display: block;
+  min-width: 320px;
+  container: schemer / inline-size;
+}
+
 .scheme-body {
   height: 100%;
   top: 0;
@@ -12,10 +18,13 @@
   background-color:whitesmoke;
   margin: 0;
   border-left: 5px solid #c4e6e8;
+  min-height: 0;
+  min-width: 0;
 }
 
 .var-scheme-list {
   overflow: auto;
+  min-height: 0;
 }
 
 .var-list-buttons {
@@ -35,6 +44,20 @@
   background-color: white;
   overflow-x: hidden;
   overflow-y: auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+@container schemer (max-width: 650px) {
+  .scheme-body {
+    flex-direction: column;
+  }
+
+  .navi-bar {
+    flex: 0 0 auto;
+    height: 180px;
+    max-height: 30%;
+  }
 }
 
 .var-list-header {

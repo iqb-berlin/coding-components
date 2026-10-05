@@ -16,3 +16,35 @@
   font-style: italic;
   color: darkorange;
 }
+.rules-content, .rule-content {
+  min-width: 0;
+}
+
+.rule-content mat-form-field {
+  min-width: 0;
+  width: 100%;
+}
+
+.rule-header {
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+
+@container code-rules (max-width: 500px) {
+  .rules-layout, .rule-row {
+    flex-wrap: wrap;
+  }
+
+  .rules-content, .rule-content {
+    flex: 1 1 200px;
+  }
+}
+
+.rule-operator-toolbar {
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+mat-button-toggle-group {
+  flex-shrink: 0;
+}

@@ -23,6 +23,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
   selector: 'app-root',
   template: `
     <iqb-schemer class="coder-body"
+                 [class.standalone]="isStandalone"
                  [varList]="varList"
                  [codingScheme]="codings"
                  [userRole]="userRole"
@@ -42,6 +43,7 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
   styles: [
     `
       .coder-body {
+        box-sizing: border-box;
         position: absolute;
         width: 100%;
         height: 100%;
@@ -52,6 +54,10 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
         flex-direction: row;
         justify-content: space-between;
         align-items: stretch;
+      }
+
+      .coder-body.standalone {
+        padding-top: 64px;
       }
     `
   ],

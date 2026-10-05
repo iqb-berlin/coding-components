@@ -70,6 +70,11 @@ interface OptionData {
   label?: string;
 }
 
+interface NumericCodingDefinition {
+  rules: CodingRule[];
+  errorKeys: string[];
+}
+
 @Component({
   templateUrl: 'generate-coding-dialog.component.html',
   styles: [
@@ -317,84 +322,71 @@ export class GenerateCodingDialogComponent {
   }
 
   updateNumericRuleText() {
-    this.numericRuleError = false;
-    const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-    // Only show NUMERIC_MATCH text if numericMatch is not empty
-    if (matchValue && this.numericMatch !== '') {
-      this.numericRuleText = `${this.translateService.instant(
-        'rule.NUMERIC_MATCH'
-      )}: ${matchValue}`;
-    } else {
-      const moreThenValue = CodingFactory.getValueAsNumber(
-        this.numericMoreThen
-      );
-      const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
-      const minValue = CodingFactory.getValueAsNumber(this.numericMin);
-      const lessThenValue = CodingFactory.getValueAsNumber(
-        this.numericLessThen
-      );
-      this.numericRuleText = '';
-      if (moreThenValue && minValue) {
-        this.numericRuleText = this.translateService.instant(
-          'coding.generate.only-one-lower-limit'
-        );
-        this.numericRuleError = true;
-      }
-      if (lessThenValue && maxValue) {
-        this.numericRuleText += ` ${this.translateService.instant(
-          'coding.generate.only-one-upper-limit'
-        )}`;
-        this.numericRuleError = true;
-      }
-      if (!this.numericRuleText) {
-        const ruleTexts: string[] = [];
-        const hasFullRange =
-          moreThenValue && maxValue && moreThenValue < maxValue;
-        const hasClosedRange =
-          minValue && maxValue && minValue <= maxValue;
+    const { rules, errorKeys } = this.getNumericCodingDefinition();
+    this.numericRuleError = errorKeys.length > 0;
+    this.numericRuleText = this.numericRuleError ?
+      errorKeys.map(key => this.translateService.instant(key)).join(' ') :
+      rules.map(rule => {
+        const label = this.translateService.instant(`rule.${rule.method}`);
+        const separator = rule.method === 'NUMERIC_MATCH' ? ': ' : ' ';
+        return `${label}${separator}${rule.parameters?.join(' / ')}`;
+      }).join('; ');
+  }
 
-        if (hasFullRange) {
-          this.numericRuleText = `${this.translateService.instant(
-            'rule.NUMERIC_FULL_RANGE'
-          )} ${moreThenValue} / ${maxValue}`;
-        } else if (hasClosedRange) {
-          this.numericRuleText = `${this.translateService.instant(
-            'rule.NUMERIC_FULL_RANGE'
-          )} ${minValue} / ${maxValue}`;
-        } else {
-          if (moreThenValue) {
-            ruleTexts.push(
-              `${this.translateService.instant(
-                'rule.NUMERIC_MORE_THAN'
-              )} ${moreThenValue}`
-            );
-          }
-          if (minValue) {
-            ruleTexts.push(
-              `${this.translateService.instant('rule.NUMERIC_MIN')} ${minValue}`
-            );
-          }
-          if (lessThenValue) {
-            ruleTexts.push(
-              `${this.translateService.instant(
-                'rule.NUMERIC_LESS_THAN'
-              )} ${lessThenValue}`
-            );
-          }
-          if (maxValue) {
-            ruleTexts.push(
-              `${this.translateService.instant('rule.NUMERIC_MAX')} ${maxValue}`
-            );
-          }
+  private getNumericCodingDefinition(): NumericCodingDefinition {
+    const parseValue = (value: string): number | null => {
+      // The response converter returns 0 for an empty string, so check presence first.
+      if (value.trim() === '') return null;
+      const numericValue = CodingFactory.getValueAsNumber(value);
+      return numericValue !== null && Number.isFinite(numericValue) ? numericValue : null;
+    };
+    const invalid = (errorKeys: string[]): NumericCodingDefinition => ({ rules: [], errorKeys });
 
-          this.numericRuleText =
-            ruleTexts.length > 0 ?
-              ruleTexts.join('; ') :
-              this.translateService.instant('coding.generate.empty-value');
-          this.numericRuleError = ruleTexts.length === 0;
-        }
-      }
+    if (this.numericMatch.trim() !== '') {
+      const matchValue = parseValue(this.numericMatch);
+      return matchValue === null ?
+        invalid(['coding.generate.invalid-number']) :
+        { rules: [{ method: 'NUMERIC_MATCH', parameters: [matchValue.toString(10)] }], errorKeys: [] };
     }
+
+    const inputs: Array<[CodingRule['method'], string]> = [
+      ['NUMERIC_MORE_THAN', this.numericMoreThen],
+      ['NUMERIC_MIN', this.numericMin],
+      ['NUMERIC_LESS_THAN', this.numericLessThen],
+      ['NUMERIC_MAX', this.numericMax]
+    ];
+    const values = inputs.map(([, value]) => parseValue(value));
+    if (inputs.some(([, value], index) => value.trim() !== '' && values[index] === null)) {
+      return invalid(['coding.generate.invalid-number']);
+    }
+
+    const [moreThan, min, lessThan, max] = values;
+    const errorKeys: string[] = [];
+    if (moreThan !== null && min !== null) errorKeys.push('coding.generate.only-one-lower-limit');
+    if (lessThan !== null && max !== null) errorKeys.push('coding.generate.only-one-upper-limit');
+    if (errorKeys.length > 0) return invalid(errorKeys);
+    if (values.every(value => value === null)) return invalid(['coding.generate.empty-value']);
+
+    const lower = moreThan ?? min;
+    const upper = lessThan ?? max;
+    if (lower !== null && upper !== null &&
+      (lower > upper || (lower === upper && (moreThan !== null || lessThan !== null)))) {
+      return invalid(['coding.generate.invalid-range']);
+    }
+
+    if (min !== null && max !== null) {
+      return {
+        rules: [{ method: 'NUMERIC_FULL_RANGE', parameters: [min.toString(10), max.toString(10)] }],
+        errorKeys: []
+      };
+    }
+
+    const rules: CodingRule[] = [];
+    inputs.forEach(([method], index) => {
+      const value = values[index];
+      if (value !== null) rules.push({ method, parameters: [value.toString(10)] });
+    });
+    return { rules, errorKeys: [] };
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -458,6 +450,10 @@ export class GenerateCodingDialogComponent {
 
     if (this.isGeoGebraPointMode()) {
       return this.createGeoGebraPointRules() !== null;
+    }
+
+    if (this.isNumericCodingMode()) {
+      return this.getNumericCodingDefinition().errorKeys.length === 0;
     }
 
     return true;
@@ -766,69 +762,7 @@ export class GenerateCodingDialogComponent {
           this.dialogRef.close(null);
         }
       } else if (this.isNumericCodingMode()) {
-        const numericRules: CodingRule[] = [];
-        const matchValue = CodingFactory.getValueAsNumber(this.numericMatch);
-        if (matchValue !== null && this.numericMatch !== '') {
-          numericRules.push({
-            method: 'NUMERIC_MATCH',
-            parameters: [matchValue.toString(10)]
-          });
-        } else {
-          const moreThanValue = CodingFactory.getValueAsNumber(
-            this.numericMoreThen
-          );
-          const maxValue = CodingFactory.getValueAsNumber(this.numericMax);
-          const minValue = CodingFactory.getValueAsNumber(this.numericMin);
-          const lessThanValue = CodingFactory.getValueAsNumber(
-            this.numericLessThen
-          );
-
-          const hasRangeOverlap =
-            moreThanValue && maxValue && moreThanValue < maxValue;
-
-          const hasClosedRange =
-            minValue && maxValue && minValue <= maxValue;
-
-          if (hasRangeOverlap) {
-            numericRules.push({
-              method: 'NUMERIC_FULL_RANGE',
-              parameters: [moreThanValue.toString(10), maxValue.toString(10)]
-            });
-          } else if (hasClosedRange) {
-            numericRules.push({
-              method: 'NUMERIC_FULL_RANGE',
-              parameters: [minValue.toString(10), maxValue.toString(10)]
-            });
-          } else {
-            if (moreThanValue) {
-              numericRules.push({
-                method: 'NUMERIC_MORE_THAN',
-                parameters: [moreThanValue.toString(10)]
-              });
-            }
-
-            if (minValue) {
-              numericRules.push({
-                method: 'NUMERIC_MIN',
-                parameters: [minValue.toString(10)]
-              });
-            }
-
-            if (lessThanValue) {
-              numericRules.push({
-                method: 'NUMERIC_LESS_THAN',
-                parameters: [lessThanValue.toString(10)]
-              });
-            }
-
-            if (maxValue) {
-              numericRules.push({
-                method: 'NUMERIC_MAX',
-                parameters: [maxValue.toString(10)]
-              });
-            }
-          }
-        }
+        const numericRules = this.getNumericCodingDefinition().rules;
         const newCode = this.schemerService.addCode(
           newVardata.codes || [],
           'FULL_CREDIT'
@@ -837,7 +771,7 @@ export class GenerateCodingDialogComponent {
           newCode.ruleSetOperatorAnd = true;
           newCode.ruleSets = [
             <RuleSet>{
-              ruleOperatorAnd: false,
+              ruleOperatorAnd: true,
               ...(this.varInfo.multiple ? { valueArrayPos: this.getSelectedArrayPos() } : {}),
               rules: numericRules
             }

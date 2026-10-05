@@ -1,1 +1,68 @@
-:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {  display: none;}.mat-flat-button {  min-width: 0;  line-height: 0;  padding: 0;}.rulesContainer {  overflow-y: scroll;}.rule-set-header {  border-top: lightgrey solid 1px;  border-bottom: lightgrey solid 1px;}.mat-button-toggle-checked {  border-bottom: #3f51b5 2px solid;  color: #3f51b5;}.rule{  margin:10px;}code-rule-list{  margin:10px;}:host ::ng-deep .header-less-tabs .mat-mdc-tab-labels { height: 0; }
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.mat-flat-button {
+  min-width: 0;
+  line-height: 0;
+  padding: 0;
+}
+
+.rulesContainer {
+  overflow-y: scroll;
+}
+
+.rule-set-header {
+  border-top: lightgrey solid 1px;
+  border-bottom: lightgrey solid 1px;
+}
+
+.mat-button-toggle-checked {
+  border-bottom: #3f51b5 2px solid;
+  color: #3f51b5;
+}
+.rule{
+  margin:10px;
+}
+code-rule-list{
+  margin:10px;
+}
+
+
+
+:host ::ng-deep .header-less-tabs .mat-mdc-tab-labels { height: 0; }
+
+
+.code-rule-list {
+  min-width: 0;
+}
+
+// A rule card can be narrow even in a wide editor with side-by-side instructions.
+@container code-rules (max-width: 500px) {
+  .rule-set {
+    flex-direction: column;
+  }
+
+  .rule-set-index {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .code-rule-list {
+    align-self: stretch;
+    margin: 10px 0;
+  }
+}
+
+.rule-sets-toolbar {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+mat-button-toggle-group {
+  flex-shrink: 0;
+}
+:host {
+  display: block;
+  container: code-rules / inline-size;
+}

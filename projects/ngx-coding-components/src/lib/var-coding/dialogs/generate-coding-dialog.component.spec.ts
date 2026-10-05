@@ -143,7 +143,7 @@ describe('GenerateCodingDialogComponent', () => {
     expect(component.numericRuleText).toContain('coding.generate.only-one-upper-limit');
   });
 
-  it('updateNumericRuleText should build full range text when moreThen < max', () => {
+  it('updateNumericRuleText should preserve an exclusive lower limit when moreThen < max', () => {
     const { component } = createComponent({
       type: 'integer',
       multiple: false
@@ -155,7 +155,8 @@ describe('GenerateCodingDialogComponent', () => {
     component.updateNumericRuleText();
 
     expect(component.numericRuleError).toBeFalse();
-    expect(component.numericRuleText).toContain('rule.NUMERIC_FULL_RANGE');
+    expect(component.numericRuleText).toContain('rule.NUMERIC_MORE_THAN');
+    expect(component.numericRuleText).toContain('rule.NUMERIC_MAX');
     expect(component.numericRuleText).toContain('1');
     expect(component.numericRuleText).toContain('10');
   });

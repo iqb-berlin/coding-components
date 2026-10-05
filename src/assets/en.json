@@ -1,4 +1,18 @@
 {
+  "rule-set": {
+    "reference": {
+      "label": "Position in the value array",
+      "title": "Change position in the value array",
+      "prompt": "The rules apply to all existing values, at least one value, a specific position, or the sum or length of the value array.",
+      "any": "All existing values must match",
+      "any-open": "At least one value must match",
+      "any-help": "Additional non-matching values prevent a match. Example: [matching, non-matching] → no match.",
+      "any-open-help": "Additional non-matching values are allowed. Example: [matching, non-matching] → match. Exception: With the “Empty input” rule, an empty array [] can also match.",
+      "sum": "Sum",
+      "length": "Length",
+      "specific": "Specific position"
+    }
+  },
   "derive-method": {
     "label": "Derivation method",
     "prompt": "Derivation method",

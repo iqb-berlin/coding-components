@@ -22,13 +22,17 @@ export interface SelectCodeRuleReferenceDialogData {
     <h1 mat-dialog-title>{{ (refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.title' | translate }}</h1>
     <mat-dialog-content>
       <div>{{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.prompt' | translate}}</div>
-      <mat-selection-list [(ngModel)]="newSelection" multiple="false">
-        <mat-list-option [value]="'ANY'">
-          {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.any' | translate}}
+      <mat-selection-list [(ngModel)]="newSelection" multiple="false"
+        [attr.aria-describedby]="!refData.isFragmentMode &&
+          (newSelection[0] === 'ANY' || newSelection[0] === 'ANY_OPEN') ? 'array-reference-help' : null">
+        <mat-list-option [value]="'ANY'" class="reference-option">
+          <span class="reference-label">
+            {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.any' | translate}}
+          </span>
         </mat-list-option>
         @if (!refData.isFragmentMode) {
-          <mat-list-option [value]="'ANY_OPEN'">
-            {{'rule-set.reference.any-open' | translate}}
+          <mat-list-option [value]="'ANY_OPEN'" class="reference-option">
+            <span class="reference-label">{{'rule-set.reference.any-open' | translate}}</span>
           </mat-list-option>
           <mat-list-option [value]="'SUM'">
             {{'rule-set.reference.sum' | translate}}
@@ -37,10 +41,18 @@ export interface SelectCodeRuleReferenceDialogData {
             {{'rule-set.reference.length' | translate}}
           </mat-list-option>
         }
-        <mat-list-option [value]="'specific'">
-          {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.specific' | translate}}:
+        <mat-list-option [value]="'specific'" class="reference-option">
+          <span class="reference-label">
+            {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.specific' | translate}}:
+          </span>
         </mat-list-option>
       </mat-selection-list>
+      @if (!refData.isFragmentMode && (newSelection[0] === 'ANY' || newSelection[0] === 'ANY_OPEN')) {
+        <p id="array-reference-help" aria-live="polite">
+          {{(newSelection[0] === 'ANY' ? 'rule-set.reference.any-help' :
+            'rule-set.reference.any-open-help') | translate}}
+        </p>
+      }
       <mat-form-field>
         <input matInput [disabled]="newSelection[0] !== 'specific'"
           [(ngModel)]="newValue"
@@ -53,6 +65,19 @@ export interface SelectCodeRuleReferenceDialogData {
       <button mat-raised-button [mat-dialog-close]="false">{{'dialog-cancel' | translate}}</button>
     </mat-dialog-actions>
     `,
+  styles: [`
+    .reference-option {
+      height: auto;
+      min-height: 48px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .reference-label {
+      display: block;
+      white-space: normal;
+      line-height: 1.4;
+    }
+  `],
   standalone: true,
   imports: [
     MatDialogTitle, MatDialogContent, MatSelectionList, ReactiveFormsModule, FormsModule,
