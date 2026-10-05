@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createRequire } from 'node:module';
 import JSZip from 'jszip';
+import { load } from 'cheerio';
 import { CodebookGenerator, CodebookDocxGenerator, hasCodebookManualInstruction } from '../dist/ngx-coding-components/fesm2022/iqb-ngx-coding-components-codebook-generator.mjs';
 
 const options = { exportFormat: 'json', missingsProfile: '', hasOnlyManualCoding: false,
@@ -100,6 +101,60 @@ test('plain instructions and whitespace around formatted text are not lost', asy
   const plain = await document('Bitte bewerten'); assert.match(plain.xml, /Bitte bewerten/);
   const { xml } = await document('<p>vor <strong>fett</strong> nach</p>');
   assert.match(xml, />vor </); assert.match(xml, /> nach</);
+});
+
+function descriptionParagraphs(xml) {
+  const $ = load(xml, { xml: true });
+  return $('w\\:tr').first().children('w\\:tc').last().find('w\\:p').toArray()
+    .map(paragraph => $(paragraph).find('w\\:t').text());
+}
+
+for (const tag of ['ul', 'ol']) {
+  test(`DOCX retains direct ${tag} list text and existing paragraph list items exactly once`, async () => {
+    const { xml } = await document(`<${tag}><li>Erstes <strong>Kriterium</strong></li><li><p>Zweites Kriterium</p></li></${tag}>`);
+    assert.deepEqual(descriptionParagraphs(xml), ['Erstes Kriterium', 'Zweites Kriterium']);
+    const $ = load(xml, { xml: true });
+    assert.equal($('w\\:numPr').length, 2);
+    assert.equal($('w\\:r').filter((_, run) => $(run).find('w\\:t').text() === 'Kriterium').find('w\\:b').length, 1);
+  });
+}
+
+test('DOCX keeps loose text and formatting before, between and after blocks in source order', async () => {
+  const { xml } = await document('Vor <strong>fett</strong><p>Regel</p>Zwischen <em>kursiv</em><h2>Hinweis</h2>Danach');
+  assert.deepEqual(descriptionParagraphs(xml), ['Vor fett', 'Regel', 'Zwischen kursiv', 'Hinweis', 'Danach']);
+  const $ = load(xml, { xml: true });
+  assert.equal($('w\\:r').filter((_, run) => $(run).find('w\\:t').text() === 'fett').find('w\\:b').length, 1);
+  assert.equal($('w\\:r').filter((_, run) => $(run).find('w\\:t').text() === 'kursiv').find('w\\:i').length, 1);
+});
+
+test('DOCX keeps mixed and nested list contents without repeating paragraphs or images', async () => {
+  const image = 'iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAIAAABwJOjsAAAAJElEQVR4nGOQSDgwIIhh1OJRi0ctHrV41OJRi0ctHrV45FgMAHBlzy43YLJ+AAAAAElFTkSuQmCC';
+  const { xml, zip } = await document(`<ul><li>Vor<p>Absatz</p>Danach<ul><li>Unterpunkt [[iqb-math:x^2]]</li></ul><img src="data:image/png;base64,${image}"></li></ul>`);
+  assert.deepEqual(descriptionParagraphs(xml), ['Vor', 'Absatz', 'Danach', 'Unterpunkt ', '']);
+  const $ = load(xml, { xml: true });
+  assert.equal($('w\\:drawing').length, 1);
+  assert.equal($('m\\:oMath').length, 1);
+  assert.equal(Object.keys(zip.files).filter(name => name.startsWith('word/media/') && !zip.files[name].dir).length, 1);
+});
+
+test('complete DOCX exports keep list instructions and plain instructions after generated rules in ESM and CJS', async () => {
+  const require = createRequire(import.meta.url);
+  const commonjs = require('../dist/ngx-coding-components/cjs/codebook-generator.cjs');
+  for (const [instruction, ruleSets, expected] of [
+    ['<ul><li>Erstes Kriterium</li><li>Zweites Kriterium</li></ul>', [], ['Erstes Kriterium', 'Zweites Kriterium']],
+    ['Manuelle Instruktion', [{ rules: [{ method: 'MATCH', parameters: ['ABC'] }], ruleOperatorAnd: true }], ['ABC', 'Manuelle Instruktion']]
+  ]) {
+    const units = [unit([variable('V', [{ ...code(1, instruction), ruleSets }])])];
+    let reference;
+    for (const generator of [CodebookGenerator, commonjs.CodebookGenerator]) {
+      const blob = await generator.generateCodebook(units, { ...options, exportFormat: 'docx', hasOnlyManualCoding: true, hasClosedVars: true }, []);
+      const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+      const xml = await zip.file('word/document.xml').async('string');
+      assert.deepEqual(descriptionParagraphs(xml), expected);
+      if (reference) assert.equal(xml, reference);
+      reference = xml;
+    }
+  }
 });
 
 test('escaped inequality formulas produce valid XML text in inline and block form', async () => {

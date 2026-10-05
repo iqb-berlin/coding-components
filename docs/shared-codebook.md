@@ -49,7 +49,9 @@ aber im Codebook-Dialog nicht mehr angeboten (Issue #176).
 * Die Kennzeichnung lautet IQB Codebook. Studio-Formatierung, Tabellen, Seitenfelder,
   eingebettete Bilder und Formelkonvertierung bleiben erhalten. Klartextinstruktionen
   und Leerzeichen an Formatgrenzen werden nicht mehr verschluckt. Verschachtelte
-  Textmarkierungen bleiben kombiniert erhalten.
+  Textmarkierungen bleiben kombiniert erhalten. Direkte Listentexte und Klartext
+  vor, zwischen und nach HTML-Absätzen werden in Quellreihenfolge übernommen;
+  bestehende Absatzinhalte, Bilder und Formeln erscheinen weiterhin genau einmal.
 
 ## Paket und Laufzeit
 

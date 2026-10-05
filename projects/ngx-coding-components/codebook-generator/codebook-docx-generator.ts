@@ -677,6 +677,31 @@ export class CodebookDocxGenerator {
     return !!elem.parent && (elem.parent as Element).name === 'li';
   }
 
+  /** Put loose text and inline marks into paragraphs without duplicating existing blocks. */
+  private static wrapInlineParagraphs(cheerioAPI: cheerio.CheerioAPI, parent: AnyNode): void {
+    let inlineNodes: AnyNode[] = [];
+    const flush = () => {
+      if (inlineNodes.some(node => node.type === 'tag' || (node.type === 'text' && node.data.trim()))) {
+        cheerioAPI(inlineNodes).wrapAll('<p></p>');
+      }
+      inlineNodes = [];
+    };
+    cheerioAPI(parent).contents().toArray().forEach(node => {
+      if (node.type === 'tag' && (
+        /^(p|h[1-4]|img|ul|ol|li|div|blockquote)$/.test(node.name) ||
+        cheerioAPI(node).find('p,h1,h2,h3,h4,img,ul,ol').length > 0
+      )) {
+        flush();
+        if (!/^(p|h[1-4]|img)$/.test(node.name)) {
+          CodebookDocxGenerator.wrapInlineParagraphs(cheerioAPI, node);
+        }
+      } else if (node.type === 'text' || node.type === 'tag') {
+        inlineNodes.push(node);
+      }
+    });
+    flush();
+  }
+
   private static htmlToDocx(
     html: string,
     contentSetting: CodeBookContentSetting
@@ -688,6 +713,7 @@ export class CodebookDocxGenerator {
       null,
       false
     );
+    CodebookDocxGenerator.wrapInlineParagraphs(cheerioAPI, cheerioAPI.root()[0]);
     const elements: Paragraph[] = [];
     cheerioAPI('p,h1,h2,h3,h4,img').each((i, elem) => {
       try {
