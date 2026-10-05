@@ -15,7 +15,8 @@ import {
   PageNumber,
   ITableCellBorders,
   ImportedXmlComponent,
-  ParagraphChild
+  ParagraphChild,
+  IRunOptions
 } from 'docx';
 
 import {
@@ -393,181 +394,42 @@ export class CodebookDocxGenerator {
     children: ParagraphChild[],
     colorParsed: string,
     backgroundColor: string,
-    size: string
+    size: string,
+    formatting: Pick<IRunOptions, 'bold' | 'italics' | 'underline' | 'strike' | 'subScript' | 'superScript'> = {}
   ): void {
+    const runStyle = {
+      ...formatting,
+      color: colorParsed,
+      shading: { fill: backgroundColor },
+      size: CodebookDocxGenerator.getFontSize(size)
+    };
     nodes.forEach(node => {
       if (node.type === 'text') {
-        if ('data' in node && node.data && node.data.trim()) {
-          children.push(
-            new TextRun({
-              text: node.data.replace(/\s+/g, ' '),
-              color: colorParsed,
-              shading: {
-                fill: backgroundColor
-              },
-              size: CodebookDocxGenerator.getFontSize(size)
-            })
-          );
-        }
-      } else if (node.type === 'tag') {
-        const element = node as Element;
-        const tagName = element.name.toLowerCase();
-
-        if (
-          tagName === 'span' &&
-          element.attribs?.['class']?.includes('iqb-math-formula')
-        ) {
-          const rawLatex = element.attribs?.['data-latex'] || '';
-          const latex = CodebookDocxGenerator.decodeLatex(rawLatex).trim();
-          if (latex) {
-            const ommlComponent = CodebookDocxGenerator.latexToOmml(latex);
-            if (ommlComponent) {
-              children.push(ommlComponent);
-            } else {
-              children.push(
-                new TextRun({
-                  text: latex,
-                  color: colorParsed,
-                  shading: {
-                    fill: backgroundColor
-                  },
-                  size: CodebookDocxGenerator.getFontSize(size)
-                })
-              );
-            }
-          }
-          return;
-        }
-
-        if (tagName === 'strong' || tagName === 'b') {
-          if (element.children) {
-            element.children.forEach(child => {
-              if (child.type === 'text' && child.data) {
-                children.push(
-                  new TextRun({
-                    text: child.data.replace(/\s+/g, ' '),
-                    bold: true,
-                    color: colorParsed,
-                    shading: {
-                      fill: backgroundColor
-                    },
-                    size: CodebookDocxGenerator.getFontSize(size)
-                  })
-                );
-              }
-            });
-          }
-        } else if (tagName === 'em' || tagName === 'i') {
-          if (element.children) {
-            element.children.forEach(child => {
-              if (child.type === 'text' && child.data) {
-                children.push(
-                  new TextRun({
-                    text: child.data.replace(/\s+/g, ' '),
-                    italics: true,
-                    color: colorParsed,
-                    shading: {
-                      fill: backgroundColor
-                    },
-                    size: CodebookDocxGenerator.getFontSize(size)
-                  })
-                );
-              }
-            });
-          }
-        } else if (tagName === 'u') {
-          if (element.children) {
-            element.children.forEach(child => {
-              if (child.type === 'text' && child.data) {
-                children.push(
-                  new TextRun({
-                    text: child.data.replace(/\s+/g, ' '),
-                    underline: {},
-                    color: colorParsed,
-                    shading: {
-                      fill: backgroundColor
-                    },
-                    size: CodebookDocxGenerator.getFontSize(size)
-                  })
-                );
-              }
-            });
-          }
-        } else if (tagName === 's') {
-          if (element.children) {
-            element.children.forEach(child => {
-              if (child.type === 'text' && child.data) {
-                children.push(
-                  new TextRun({
-                    text: child.data.replace(/\s+/g, ' '),
-                    strike: true,
-                    color: colorParsed,
-                    shading: {
-                      fill: backgroundColor
-                    },
-                    size: CodebookDocxGenerator.getFontSize(size)
-                  })
-                );
-              }
-            });
-          }
-        } else if (tagName === 'sub') {
-          if (element.children) {
-            element.children.forEach(child => {
-              if (child.type === 'text' && child.data) {
-                children.push(
-                  new TextRun({
-                    text: child.data.replace(/\s+/g, ' '),
-                    subScript: true,
-                    color: colorParsed,
-                    shading: {
-                      fill: backgroundColor
-                    },
-                    size: CodebookDocxGenerator.getFontSize(size)
-                  })
-                );
-              }
-            });
-          }
-        } else if (tagName === 'sup') {
-          if (element.children) {
-            element.children.forEach(child => {
-              if (child.type === 'text' && child.data) {
-                children.push(
-                  new TextRun({
-                    text: child.data.replace(/\s+/g, ' '),
-                    superScript: true,
-                    color: colorParsed,
-                    shading: {
-                      fill: backgroundColor
-                    },
-                    size: CodebookDocxGenerator.getFontSize(size)
-                  })
-                );
-              }
-            });
-          }
-        } else if (tagName === 'br') {
-          children.push(
-            new TextRun({
-              break: 1,
-              color: colorParsed,
-              shading: {
-                fill: backgroundColor
-              },
-              size: CodebookDocxGenerator.getFontSize(size)
-            })
-          );
-        } else if (element.children && element.children.length > 0) {
-          CodebookDocxGenerator.processInlineElements(
-            element.children,
-            children,
-            colorParsed,
-            backgroundColor,
-            size
-          );
-        }
+        if (node.data) children.push(new TextRun({ text: node.data.replace(/\s+/g, ' '), ...runStyle }));
+        return;
       }
+      if (node.type !== 'tag') return;
+      const element = node as Element;
+      const tagName = element.name.toLowerCase();
+      if (tagName === 'span' && element.attribs?.['class']?.split(/\s+/).includes('iqb-math-formula')) {
+        const latex = CodebookDocxGenerator.decodeLatex(element.attribs?.['data-latex'] || '').trim();
+        if (latex) children.push(CodebookDocxGenerator.latexToOmml(latex) || new TextRun({ text: latex, ...runStyle }));
+        return;
+      }
+      if (tagName === 'br') {
+        children.push(new TextRun({ break: 1, ...runStyle }));
+        return;
+      }
+      const nestedFormatting = { ...formatting };
+      if (tagName === 'strong' || tagName === 'b') nestedFormatting.bold = true;
+      if (tagName === 'em' || tagName === 'i') nestedFormatting.italics = true;
+      if (tagName === 'u') nestedFormatting.underline = {};
+      if (tagName === 's' || tagName === 'strike') nestedFormatting.strike = true;
+      if (tagName === 'sub') { nestedFormatting.subScript = true; nestedFormatting.superScript = false; }
+      if (tagName === 'sup') { nestedFormatting.superScript = true; nestedFormatting.subScript = false; }
+      CodebookDocxGenerator.processInlineElements(
+        element.children, children, colorParsed, backgroundColor, size, nestedFormatting
+      );
     });
   }
 

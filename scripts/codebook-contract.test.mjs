@@ -141,3 +141,20 @@ test('invisible-only instructions do not include variables in manual exports', (
     assert.deepEqual(data([variable('EMPTY', [code(1, instruction)])], { hasOnlyManualCoding: true }), []);
   }
 });
+
+test('DOCX retains nested marks and spaces between differently formatted runs', async () => {
+  const { xml } = await document('<p><strong><em>BEWERTEN</em></strong> <u><s>Text</s></u> <sub><em>unten</em></sub> <sup><strong>oben</strong></sup></p>');
+  const $ = (await import('cheerio')).load(xml, { xml: true });
+  const runs = $('w\\:r').toArray();
+  const findRun = text => runs.find(run => $(run).find('w\\:t').text() === text);
+  assert.equal($(findRun('BEWERTEN')).find('w\\:b').length, 1);
+  assert.equal($(findRun('BEWERTEN')).find('w\\:i').length, 1);
+  assert.equal($(findRun('Text')).find('w\\:u').length, 1);
+  assert.equal($(findRun('Text')).find('w\\:strike').length, 1);
+  assert.equal($(findRun('unten')).find('w\\:vertAlign').attr('w:val'), 'subscript');
+  assert.equal($(findRun('oben')).find('w\\:vertAlign').attr('w:val'), 'superscript');
+  assert.match($('w\\:t').toArray().map(element => $(element).text()).join(''), /BEWERTEN Text unten oben/);
+  const spaced = await document('<p><strong>vor</strong> <em>nach</em></p>');
+  const text = (await import('cheerio')).load(spaced.xml, { xml: true });
+  assert.match(text('w\\:t').toArray().map(element => text(element).text()).join(''), /vor nach/);
+});
