@@ -195,11 +195,14 @@
     "reference": {
       "label": "Position im Werte-Array",
       "title": "Position im Werte-Array ändern",
-      "prompt": "Die Regeln dieses Regelsatzes beziehen sich auf ein Werte-Array insgesamt (Summe), auf irgendeinen Wert oder auf einen spezifischen.",
-      "any": "Irgendeine",
+      "prompt": "Die Regeln beziehen sich auf alle vorhandenen Werte, mindestens einen Wert, eine bestimmte Position oder auf Summe bzw. Länge des Werte-Arrays.",
+      "any": "Alle vorhandenen Werte müssen passen",
+      "any-open": "Mindestens ein Wert muss passen",
+      "any-help": "Zusätzliche nicht passende Werte verhindern einen Treffer. Beispiel: [passend, nicht passend] → kein Treffer.",
+      "any-open-help": "Zusätzliche nicht passende Werte sind erlaubt. Beispiel: [passend, nicht passend] → Treffer. Ausnahme: Mit der Regel „Leere Eingabe“ kann auch ein leeres Array [] einen Treffer ergeben.",
       "sum": "Summe",
       "length": "Länge",
-      "specific": "Spezielle"
+      "specific": "Bestimmte Position"
     }
   },
   "rule": {
