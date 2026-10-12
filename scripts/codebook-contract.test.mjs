@@ -103,6 +103,20 @@ test('plain instructions and whitespace around formatted text are not lost', asy
   assert.match(xml, />vor </); assert.match(xml, /> nach</);
 });
 
+test('whitespace-only general instructions do not add paragraphs to Studio layout', async () => {
+  const units = instruction => [{ key: 'A', name: 'Aufgabe', items: [], missings: [], variables: [{
+    id: 'V', label: 'Variable', sourceType: 'BASE', generalInstruction: instruction,
+    codes: [{ id: '1', label: 'Code', score: '1', description: '<p>Bewerten</p>' }]
+  }] }];
+  let expected;
+  for (const instruction of ['', ' ', '\t\r\n', '\u00a0']) {
+    const zip = await JSZip.loadAsync(await (await CodebookDocxGenerator.generateDocx(units(instruction), options)).arrayBuffer());
+    const actual = await zip.file('word/document.xml').async('string');
+    if (expected) assert.equal(actual, expected, JSON.stringify(instruction));
+    expected = actual;
+  }
+});
+
 function descriptionParagraphs(xml) {
   const $ = load(xml, { xml: true });
   return $('w\\:tr').first().children('w\\:tc').last().find('w\\:p').toArray()

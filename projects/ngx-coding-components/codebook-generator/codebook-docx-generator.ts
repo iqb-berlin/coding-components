@@ -706,6 +706,7 @@ export class CodebookDocxGenerator {
     html: string,
     contentSetting: CodeBookContentSetting
   ) {
+    if (!html.trim()) return [];
     const normalizedHtml = CodebookDocxGenerator.normalizeMathTokens(html);
     const blockHtml = /<(p|h[1-4]|img|ul|ol)\b/i.test(normalizedHtml) ? normalizedHtml : `<p>${normalizedHtml}</p>`;
     const cheerioAPI = cheerio.load(
