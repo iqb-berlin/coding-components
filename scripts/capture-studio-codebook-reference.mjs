@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createRequire, Module } from 'node:module';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { referenceCorpus, referenceOptions } from './fixtures/codebook-synthetic.mjs';
 import { docxParts, partHashes } from './codebook-docx-test-utils.mjs';
 
@@ -13,6 +13,12 @@ const ref = '2504265721a59c7c65425072951ce82ab16f0fb8';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const source = path => execFileSync('git', ['show', `${ref}:${path}`], { cwd: studio, encoding: 'utf8' });
+const baselineLock = JSON.parse(source('package-lock.json'));
+for (const name of ['docx', '@iqb/responses', 'mathml2omml', 'cheerio', '@iqbspecs/coding-scheme']) {
+  const installed = JSON.parse(await readFile(new URL(`../node_modules/${name}/package.json`, import.meta.url), 'utf8'));
+  assert.equal(installed.version, baselineLock.packages[`node_modules/${name}`].version,
+    `Reference capture requires the original Studio dependency version: ${name}`);
+}
 const math = await import('mathml2omml');
 function compile(code, overrides = {}) {
   const output = ts.transpileModule(code, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;

@@ -38,7 +38,9 @@ aber im Codebook-Dialog nicht mehr angeboten (Issue #176).
 * Leere HTML-Strukturen, unsichtbare Zeichen und Leerzeichen sind keine Instruktion;
   unterstützte Bilder und Formeln sind eine Instruktion. Allgemeine Instruktionen
   allein machen keinen Code manuell.
-* Code 0 und Missing 0 bleiben erhalten. Leere Exporte liefern `[]` bzw. ein gültiges
+* Code 0 und Missing 0 bleiben erhalten. Missing-Codes behalten ihren JSON-Datentyp
+  aus dem Profil (Zahl oder Zeichenkette); Kodierbox wandelt Zahlen nicht mehr in
+  Zeichenketten um. Leere Exporte liefern `[]` bzw. ein gültiges
   DOCX. Fehlerhafte Schemen melden die betroffene Aufgabe.
 * Aufgaben werden nach Schlüssel, Variablen nach Alias/ID sortiert; Codefolge bleibt.
 * Schulungsbedarf: alle, nur mit oder nur ohne CODER_TRAINING_REQUIRED; kombiniert
@@ -81,8 +83,42 @@ Rollback: vorherige Bibliotheks-/Anwendungsversion; keine Datenmigration.
   JSON, DOCX-Struktur, Bilder, Formeln, Itembeziehungen und CJS/ESM-Gleichheit.
 * `npm run test:cc`: Angular-Tests einschließlich Auswahl/Suche/Sperrzustände.
 * Beide Hosts testen ihre echten Adapter und bestehenden Formelregressionen.
+* Die künstlichen Fälle in `scripts/fixtures/codebook-synthetic.mjs` enthalten keine
+  Aufgabeninhalte aus den Beispiel-ZIPs. Die Matrix durchläuft alle 256 Kombinationen
+  der acht Ja/Nein-Optionen, drei Schulungsfilter, drei Missing-Konstellationen und
+  beide Formate: 4.608 Exporte. Alle neun Quelltypen werden in der Datenauswahl geprüft.
+* 32 zusätzliche Referenzfälle vergleichen Rohschema → JSON und sämtliche relevanten
+  DOCX-Bestandteile mit dem ursprünglichen Studio. Die Referenz wird ausschließlich
+  aus dem dokumentierten alten Studio-Commit erzeugt, niemals aus dem neuen Generator.
+* `node scripts/compare-codebook-installations.mjs STUDIO_ROOT BOX_ROOT OUTPUT_DIR`
+  prüft dieselbe Matrix über Studios DownloadWorkspacesClass und Kodierboxs echten
+  Generation-Service samt Adapter mit Datenquellen im jeweiligen Anwendungsformat.
+  Nur Datenbank-/Profilzugriffe werden im Speicher bereitgestellt. Der Vergleich
+  schließt Bilder, Beziehungen, Styles, Fußzeilen und Missing-Datentypen ein.
+  Das ist ausdrücklich kein HTTP-, Browser-, Berechtigungs- oder Redis-End-to-End-Test.
 * Studio-Frontend prüft direkten Export, Ladezustände, Fehlermeldung und Speichersperre.
 * Kodierbox prüft Scope-Filter, wiederholte Starts, langsame Statusabfragen und Schließen.
 * Frontend- und Backend-Prüfungen auf dem Entwicklungsrechner nacheinander ausführen.
 * Vor Ausrollen bleiben visuelle Mehrseiten-DOCX-Abnahme und Host-Browserabläufe
   einschließlich Netzwerkprüfung verpflichtend.
+
+### Microsoft Word unter Windows
+
+Word unter Windows ist ein eigener Abnahmeweg. XML-Gleichheit und LibreOffice-
+Rendering ersetzen ihn nicht. Der Installationsvergleich legt künstliche Exporte
+sechs DOCX-Dateien und `word-expectations.json` im Ausgabeverzeichnis ab: je Anwendung
+einen Filter-/Missing-0-Fall sowie Rich-Text-Fälle mit und ohne Score-Spalte. Die
+Rich-Text-Fälle werden zusätzlich direkt gegen die alte Studio-Referenz geprüft.
+Auf einem Windows-Rechner mit Desktop-Word:
+
+```powershell
+./scripts/verify-codebook-word-windows.ps1 -Directory C:\Codebook-Pruefung
+```
+
+Das Skript öffnet alle Dateien regulär und schreibgeschützt, aktualisiert Felder,
+prüft Textgleichheit, Seitenzahl, Tabellen, ungeteilte Zeilen, Bilder, Formeln und
+Fußzeilen und exportiert sechs PDFs. Es speichert Word-Version und Build im Ergebnis.
+Anschließend alle gerenderten Dokumente vollständig visuell prüfen: insbesondere
+Spaltenbreiten, Umbrüche, Formeln, Bilder, Schriften und „Seite X von Y“.
+`visualAcceptanceComplete` bleibt bis zur tatsächlichen visuellen Abnahme false.
+Eine nicht ausgeführte Windows-Prüfung darf nicht als bestanden gemeldet werden.
