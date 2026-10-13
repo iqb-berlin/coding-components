@@ -126,9 +126,9 @@ function descriptionParagraphs(xml) {
 for (const tag of ['ul', 'ol']) {
   test(`DOCX retains direct ${tag} list text and existing paragraph list items exactly once`, async () => {
     const { xml } = await document(`<${tag}><li>Erstes <strong>Kriterium</strong></li><li><p>Zweites Kriterium</p></li></${tag}>`);
-    assert.deepEqual(descriptionParagraphs(xml), ['Erstes Kriterium', 'Zweites Kriterium']);
+    assert.deepEqual(descriptionParagraphs(xml), tag === 'ol' ? ['1.Erstes Kriterium', '2.Zweites Kriterium'] : ['Erstes Kriterium', 'Zweites Kriterium']);
     const $ = load(xml, { xml: true });
-    assert.equal($('w\\:numPr').length, 2);
+    assert.equal($('w\\:numPr').length, tag === 'ul' ? 2 : 0);
     assert.equal($('w\\:r').filter((_, run) => $(run).find('w\\:t').text() === 'Kriterium').find('w\\:b').length, 1);
   });
 }
@@ -144,7 +144,7 @@ test('DOCX keeps loose text and formatting before, between and after blocks in s
 test('DOCX keeps mixed and nested list contents without repeating paragraphs or images', async () => {
   const image = 'iVBORw0KGgoAAAANSUhEUgAAACgAAAAUCAIAAABwJOjsAAAAJElEQVR4nGOQSDgwIIhh1OJRi0ctHrV41OJRi0ctHrV45FgMAHBlzy43YLJ+AAAAAElFTkSuQmCC';
   const { xml, zip } = await document(`<ul><li>Vor<p>Absatz</p>Danach<ul><li>Unterpunkt [[iqb-math:x^2]]</li></ul><img src="data:image/png;base64,${image}"></li></ul>`);
-  assert.deepEqual(descriptionParagraphs(xml), ['Vor', 'Absatz', 'Danach', 'Unterpunkt ', '']);
+  assert.deepEqual(descriptionParagraphs(xml), ['Vor', 'Absatz', 'Danach', '•Unterpunkt ', '']);
   const $ = load(xml, { xml: true });
   assert.equal($('w\\:drawing').length, 1);
   assert.equal($('m\\:oMath').length, 1);

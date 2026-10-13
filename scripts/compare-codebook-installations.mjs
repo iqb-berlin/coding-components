@@ -7,7 +7,7 @@ import { resolve, join } from 'node:path';
 import { load } from 'cheerio';
 import { optionMatrix, selectionCorpus, missingCases, expectedSelection, defaults, referenceCorpus, referenceOptions } from './fixtures/codebook-synthetic.mjs';
 import { whitespaceReferenceCases, whitespaceReferenceUnits } from './fixtures/codebook-whitespace.mjs';
-import { docxParts, partHashes } from './codebook-docx-test-utils.mjs';
+import { docxParts, partHashes, originalStudioCompatibleParts } from './codebook-docx-test-utils.mjs';
 
 const [studioPath, boxPath, outputPath] = process.argv.slice(2);
 if (!studioPath || !boxPath || !outputPath) throw new Error('Usage: node scripts/compare-codebook-installations.mjs STUDIO_ROOT BOX_ROOT OUTPUT_DIR');
@@ -80,7 +80,7 @@ async function compare(options, missings, save = false, suffix = '', reference =
     const aParts = await docxParts(a);
     const bParts = await docxParts(b);
     assert.deepEqual(partHashes(aParts), partHashes(bParts), 'complete DOCX parts including images/relationships/footer/styles');
-    if (reference) assert.deepEqual(partHashes(aParts), reference.docxParts, 'installed host vs original Studio DOCX');
+    if (reference) assert.deepEqual(partHashes(originalStudioCompatibleParts(aParts)), reference.docxParts, 'installed host vs original Studio DOCX');
     const $ = load(aParts['word/document.xml'], { xml: true });
     assert.equal($('w\\:body').children('w\\:p').toArray().some(p => /^\s+$/.test($(p).find('w\\:t').text())), false);
     if (save) {

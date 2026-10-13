@@ -30,6 +30,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { PreserveWhitespace } from './extensions/preserve-whitespace';
 import { AnchorId } from './extensions/anchorId';
 import { Indent } from './extensions/indent';
 import { HangingIndent } from './extensions/hanging-indent';
@@ -75,7 +76,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
   orderedListStyle: string = 'decimal';
 
   defaultExtensions = [
-    Document, Text, ListItem,
+    Document, Text, ListItem, PreserveWhitespace,
     Underline, Superscript, Subscript,
     TextStyle, Color,
     Bold, Italic, Strike, History,
@@ -107,6 +108,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
   ];
 
   editor: Editor = new Editor({
+    parseOptions: { preserveWhitespace: 'full' },
     extensions: this.defaultExtensions
   });
 

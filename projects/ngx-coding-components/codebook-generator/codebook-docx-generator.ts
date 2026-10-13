@@ -4,6 +4,13 @@ import {
   HeadingLevel,
   ImageRun,
   NumberFormat,
+  HorizontalPositionAlign,
+  HorizontalPositionRelativeFrom,
+  VerticalPositionRelativeFrom,
+  TextWrappingType,
+  TextWrappingSide,
+  TabStopType,
+  Tab,
   Packer,
   Paragraph,
   Table,
@@ -41,6 +48,14 @@ import { WebColors } from './web-colors';
 // an `exports` map in that package would kill the boot -- see the swagger import in
 // setting.controller.ts.
 type FileChild = Paragraph | Table;
+type InstructionParagraph = {
+  element: Element;
+  marker?: string;
+  listDepth?: number;
+  listIndent?: number;
+  quoteDepth?: number;
+  imageWidth?: number;
+};
 
 export class CodebookDocxGenerator {
   private static ommlCache: Record<string, string> = {};
@@ -395,7 +410,8 @@ export class CodebookDocxGenerator {
     colorParsed: string,
     backgroundColor: string,
     size: string,
-    formatting: Pick<IRunOptions, 'bold' | 'italics' | 'underline' | 'strike' | 'subScript' | 'superScript'> = {}
+    formatting: Pick<IRunOptions, 'bold' | 'italics' | 'underline' | 'strike' | 'subScript' | 'superScript'> = {},
+    imageWidth = 334
   ): void {
     const runStyle = {
       ...formatting,
@@ -406,15 +422,39 @@ export class CodebookDocxGenerator {
     nodes.forEach(node => {
       if (node.type === 'text') {
         // Preserve non-breaking spaces and repeated spacing from Studio instructions.
-        if (node.data) children.push(new TextRun({ text: node.data, ...runStyle }));
+        node.data.split('\n').forEach((line, index) => {
+          if (index) children.push(new TextRun({ break: 1, ...runStyle }));
+          if (line) children.push(new TextRun({ text: line, ...runStyle }));
+        });
         return;
       }
       if (node.type !== 'tag') return;
       const element = node as Element;
       const tagName = element.name.toLowerCase();
-      if (tagName === 'span' && element.attribs?.['class']?.split(/\s+/).includes('iqb-math-formula')) {
-        const latex = CodebookDocxGenerator.decodeLatex(element.attribs?.['data-latex'] || '').trim();
-        if (latex) children.push(CodebookDocxGenerator.latexToOmml(latex) || new TextRun({ text: latex, ...runStyle }));
+      const styles = CodebookDocxGenerator.inlineStyles(element);
+      const nestedColor = CodebookDocxGenerator.cssColor(styles['color'], colorParsed);
+      const nestedBackground = CodebookDocxGenerator.cssColor(styles['background-color'], backgroundColor);
+      const nestedSize = styles['font-size'] || size;
+      if ((tagName === 'span' && element.attribs?.['class']?.split(/\s+/).includes('iqb-math-formula')) ||
+          tagName === 'aspect-nodeview-math-formula') {
+        const storedLatex = element.attribs?.['data-latex'] || element.attribs?.['formula'] || '';
+        const latex = CodebookDocxGenerator.decodeLatex(storedLatex).trim();
+        if (latex) {
+          const mathStyle: IRunOptions = {
+            ...formatting,
+            size: CodebookDocxGenerator.getFontSize(nestedSize),
+            color: nestedColor,
+            shading: { fill: nestedBackground }
+          };
+          children.push(
+            CodebookDocxGenerator.latexToOmml(latex, mathStyle) || new TextRun({ text: latex, ...mathStyle })
+          );
+        }
+        return;
+      }
+      if (tagName === 'img') {
+        const fontPixels = (CodebookDocxGenerator.getFontSize(size) * 2) / 3;
+        children.push(CodebookDocxGenerator.createImageRun(element, imageWidth, fontPixels));
         return;
       }
       if (tagName === 'br') {
@@ -429,7 +469,7 @@ export class CodebookDocxGenerator {
       if (tagName === 'sub') { nestedFormatting.subScript = true; nestedFormatting.superScript = false; }
       if (tagName === 'sup') { nestedFormatting.superScript = true; nestedFormatting.subScript = false; }
       CodebookDocxGenerator.processInlineElements(
-        element.children, children, colorParsed, backgroundColor, size, nestedFormatting
+        element.children, children, nestedColor, nestedBackground, nestedSize, nestedFormatting, imageWidth
       );
     });
   }
@@ -465,11 +505,6 @@ export class CodebookDocxGenerator {
     elem: Element,
     contentSetting: CodeBookContentSetting
   ): Paragraph {
-    const imageBuffer = Buffer.from(
-      elem.attribs['src'].substring(elem.attribs['src'].indexOf(',') + 1),
-      'base64'
-    );
-    const size = CodebookDocxGenerator.getImageSize(imageBuffer);
     return new Paragraph({
       spacing: {
         before: 100,
@@ -480,56 +515,68 @@ export class CodebookDocxGenerator {
         end: 100
       },
       children: [
-        new ImageRun({
-          data: imageBuffer,
-          transformation: CodebookDocxGenerator.getTransformation(
-            size,
-            contentSetting.showScore ? 334 : 382
-          )
-        })
+        CodebookDocxGenerator.createImageRun(elem, contentSetting.showScore ? 334 : 382)
       ]
     });
   }
 
-  private static getBackgroundColor(
-    cheerioAPI: cheerio.CheerioAPI,
-    elem: Element
-  ): string {
-    const mark = cheerioAPI(elem).find('mark');
-    return cheerioAPI(mark).css('background-color') || '#FFFFFF';
+  private static createImageRun(elem: Element, maxWidth: number, fontPixels = 20): ImageRun {
+    const source = elem.attribs['src'] || '';
+    const imageBuffer = Buffer.from(source.substring(source.indexOf(',') + 1), 'base64');
+    const actual = CodebookDocxGenerator.getImageSize(imageBuffer);
+    const styles = CodebookDocxGenerator.inlineStyles(elem);
+    let height = actual.height;
+    if (styles['height'] === '1em') height = fontPixels;
+    else if (/^\d+(\.\d+)?px$/.test(styles['height'] || '')) height = parseFloat(styles['height']);
+    const width = /^\d+(\.\d+)?px$/.test(styles['width'] || '') ?
+      parseFloat(styles['width']) : (actual.width * height) / actual.height;
+    const side = styles['float'];
+    return new ImageRun({
+      data: imageBuffer,
+      transformation: CodebookDocxGenerator.getTransformation({ width, height }, maxWidth),
+      ...(side === 'left' || side === 'right' ? {
+        floating: {
+          horizontalPosition: {
+            relative: HorizontalPositionRelativeFrom.COLUMN,
+            align: side === 'left' ? HorizontalPositionAlign.LEFT : HorizontalPositionAlign.RIGHT
+          },
+          verticalPosition: { relative: VerticalPositionRelativeFrom.PARAGRAPH, offset: 0 },
+          layoutInCell: true,
+          allowOverlap: false,
+          wrap: {
+            type: TextWrappingType.SQUARE,
+            side: side === 'left' ? TextWrappingSide.RIGHT : TextWrappingSide.LEFT,
+            margins: { [side === 'left' ? 'right' : 'left']: 9525 * 10 }
+          }
+        }
+      } : {})
+    });
   }
 
-  private static getColor(
-    cheerioAPI: cheerio.CheerioAPI,
-    tag: cheerio.Cheerio<Element>
-  ): string {
-    const color = cheerioAPI(tag).css('color');
-    // const name = elem.name;
-    let colorParsed: string = '#000000';
-    if (color) {
-      if (color.startsWith('#')) {
-        colorParsed = color;
-      } else if (color.startsWith('rgb')) {
-        const rgbString = CodebookDocxGenerator.parseCssRgbString(color);
-        if (rgbString) {
-          colorParsed = CodebookDocxGenerator.toHex(
-            rgbString[0],
-            rgbString[1],
-            rgbString[2]
-          );
-        }
-      } else if (WebColors.getHexFromWebColor(color.toLowerCase())) {
-        colorParsed = `#${WebColors.getHexFromWebColor(color.toLowerCase())}`;
+  private static inlineStyles(elem: Element): Record<string, string> {
+    return Object.fromEntries((elem.attribs['style'] || '').split(';').flatMap(declaration => {
+      const colon = declaration.indexOf(':');
+      if (colon < 0) return [];
+      const property = declaration.substring(0, colon).trim().toLowerCase();
+      const value = declaration.substring(colon + 1).trim();
+      return [[property, value]];
+    }));
+  }
+
+  private static cssColor(value: string | undefined, fallback: string): string {
+    if (!value || value === 'inherit' || value === 'initial' || value === 'currentColor') return fallback;
+    if (/^#[0-9a-f]{6}$/i.test(value)) return value.substring(1).toUpperCase();
+    if (/^#[0-9a-f]{3}$/i.test(value)) {
+      return value.substring(1).split('').map(part => part + part).join('')
+        .toUpperCase();
+    }
+    if (value.startsWith('rgb')) {
+      const rgb = CodebookDocxGenerator.parseCssRgbString(value);
+      if (rgb?.length === 3 && rgb.every(component => Number.isFinite(component))) {
+        return CodebookDocxGenerator.toHex(rgb[0], rgb[1], rgb[2]).toUpperCase();
       }
     }
-    return colorParsed;
-  }
-
-  private static getSize(
-    cheerioAPI: cheerio.CheerioAPI,
-    tag: cheerio.Cheerio<Element>
-  ): string {
-    return cheerioAPI(tag).css('font-size') || '20pt';
+    return WebColors.getHexFromWebColor(value.toLowerCase())?.replace(/^#/, '').toUpperCase() || fallback;
   }
 
   private static getTextAlignment(
@@ -543,14 +590,9 @@ export class CodebookDocxGenerator {
     return html.replace(/^<p><\/p>/, '');
   }
 
-  private static convertLineBreaksToHTMLBreaks(html: string): string {
-    return html.replace(/\n/g, '<br>');
-  }
-
   private static prepareHtml(html: string): string {
-    return CodebookDocxGenerator.convertLineBreaksToHTMLBreaks(
-      CodebookDocxGenerator.stripFromLeadingEmptyParagraph(html)
-    );
+    // Newlines in LaTeX/HTML attributes are data, not paragraph breaks.
+    return CodebookDocxGenerator.stripFromLeadingEmptyParagraph(html);
   }
 
   private static decodeLatex(latex: string): string {
@@ -562,7 +604,7 @@ export class CodebookDocxGenerator {
     }
   }
 
-  private static latexToOmml(latex: string): ImportedXmlComponent | null {
+  private static latexToOmml(latex: string, style?: IRunOptions): ImportedXmlComponent | null {
     const trimmed = latex.trim();
     if (!trimmed) return null;
     try {
@@ -572,9 +614,11 @@ export class CodebookDocxGenerator {
           throwOnError: false,
           strict: 'ignore'
         });
-        CodebookDocxGenerator.ommlCache[trimmed] = mml2omml(mathml);
+        CodebookDocxGenerator.ommlCache[trimmed] = CodebookDocxGenerator.normalizeStretchyBars(
+          mathml, mml2omml(mathml)
+        );
       }
-      const omml = CodebookDocxGenerator.ommlCache[trimmed];
+      const omml = CodebookDocxGenerator.styleMathRuns(CodebookDocxGenerator.ommlCache[trimmed], style);
       return CodebookDocxGenerator.unwrapImportedXmlRoot(
         ImportedXmlComponent.fromXmlString(
           CodebookDocxGenerator.sanitizeOmmlXml(omml)
@@ -583,6 +627,100 @@ export class CodebookDocxGenerator {
     } catch {
       return null;
     }
+  }
+
+  /** The converter treats wide over/underlines as fixed-width accents and loses their position. */
+  private static normalizeStretchyBars(mathml: string, omml: string): string {
+    const math = cheerio.load(mathml, { xml: true }, false);
+    const positions: Array<'top' | 'bot' | undefined> = [];
+    math('mover,munder').each((_, node) => {
+      const operator = math(node).children().last();
+      if (operator[0]?.name === 'mo' && operator.text() === '\u203e') {
+        let position: 'top' | 'bot' | undefined;
+        if (operator.attr('stretchy') !== 'false') position = node.name === 'munder' ? 'bot' : 'top';
+        positions.push(position);
+      }
+    });
+    if (!positions.some(position => position)) return omml;
+    const $ = cheerio.load(omml, { xml: true }, false);
+    let index = 0;
+    $('m\\:acc').each((_, node) => {
+      const accent = $(node);
+      if (accent.children('m\\:accPr').children('m\\:chr').attr('m:val') !== '\u203e') return;
+      const position = positions[index];
+      index += 1;
+      if (!position) return;
+      const bar = $('<m:bar/>');
+      const properties = $('<m:barPr/>').append(`<m:pos m:val="${position}"/>`);
+      properties.append(accent.children('m\\:accPr').children('m\\:ctrlPr'));
+      bar.append(properties).append(accent.children('m\\:e'));
+      accent.replaceWith(bar);
+    });
+    return $.xml();
+  }
+
+  /** Apply surrounding editor marks without changing cached LaTeX or unstyled Studio math. */
+  private static styleMathRuns(omml: string, style?: IRunOptions): string {
+    if (!style) return omml;
+    const properties: Record<string, Record<string, string>> = {};
+    if (style.bold) properties['b'] = {};
+    if (style.italics) properties['i'] = {};
+    if (style.underline) properties['u'] = { 'w:val': 'single' };
+    if (style.strike) properties['strike'] = {};
+    if (style.size !== 20) {
+      properties['sz'] = { 'w:val': String(style.size) };
+      properties['szCs'] = { 'w:val': String(style.size) };
+    }
+    if (style.color && !['#000000', '000000'].includes(style.color)) {
+      properties['color'] = { 'w:val': style.color.replace(/^#/, '') };
+    }
+    const fill = style.shading?.fill;
+    if (fill && !['#FFFFFF', 'FFFFFF'].includes(fill)) properties['shd'] = { 'w:fill': fill.replace(/^#/, '') };
+    if (!Object.keys(properties).length) return omml;
+    const $ = cheerio.load(omml, { xml: true }, false);
+    const applyProperties = (parent: cheerio.Cheerio<Element>): void => {
+      let runProperties = parent.children('w\\:rPr').first();
+      if (!runProperties.length) {
+        parent.append('<w:rPr/>');
+        runProperties = parent.children('w\\:rPr').first();
+      }
+      Object.entries(properties).forEach(([name, attributes]) => {
+        runProperties.children(`w\\:${name}`).remove();
+        runProperties.append(`<w:${name}/>`);
+        runProperties.children(`w\\:${name}`).last().attr(attributes);
+      });
+      const order = ['b', 'bCs', 'i', 'iCs', 'strike', 'color', 'sz', 'szCs', 'u', 'shd'];
+      const children = runProperties.children().toArray().sort((a, b) => (
+        order.indexOf(a.name.substring(2)) - order.indexOf(b.name.substring(2))
+      ));
+      runProperties.empty().append(children);
+    };
+    $('m\\:r').each((_, run) => {
+      const element = $(run);
+      applyProperties(element);
+      element.prepend(element.children('w\\:rPr').remove());
+      const mathProperties = element.children('m\\:rPr').remove();
+      if (mathProperties.length) element.prepend(mathProperties);
+    });
+    // Math control properties also style fraction bars, radicals and large operators.
+    ['acc', 'bar', 'borderBox', 'box', 'd', 'eqArr', 'f', 'func', 'groupChr',
+      'limLow', 'limUpp', 'm', 'nary', 'phant', 'rad', 'sPre', 'sSub', 'sSubSup', 'sSup'].forEach(name => {
+      $(`m\\:${name}`).each((_, node) => {
+        const element = $(node);
+        let structureProperties = element.children(`m\\:${name}Pr`).first();
+        if (!structureProperties.length) {
+          element.prepend(`<m:${name}Pr/>`);
+          structureProperties = element.children(`m\\:${name}Pr`).first();
+        }
+        let control = structureProperties.children('m\\:ctrlPr').first();
+        if (!control.length) {
+          structureProperties.append('<m:ctrlPr/>');
+          control = structureProperties.children('m\\:ctrlPr').first();
+        }
+        applyProperties(control);
+      });
+    });
+    return $.xml();
   }
 
   private static unwrapImportedXmlRoot(
@@ -616,12 +754,13 @@ export class CodebookDocxGenerator {
   }
 
   private static createLeftAlignedMathParagraph(
-    mathChildren: ImportedXmlComponent[]
+    mathChildren: ImportedXmlComponent[],
+    alignment = 'left'
   ): ImportedXmlComponent {
     const mathParagraph = new ImportedXmlComponent('m:oMathPara');
     const mathParagraphProperties = new ImportedXmlComponent('m:oMathParaPr');
     mathParagraphProperties.push(
-      new ImportedXmlComponent('m:jc', { 'm:val': 'left' })
+      new ImportedXmlComponent('m:jc', { 'm:val': ['center', 'right'].includes(alignment) ? alignment : 'left' })
     );
     mathParagraph.push(mathParagraphProperties);
     mathChildren.forEach(mathChild => mathParagraph.push(mathChild));
@@ -629,7 +768,8 @@ export class CodebookDocxGenerator {
   }
 
   private static normalizeParagraphChildren(
-    children: ParagraphChild[]
+    children: ParagraphChild[],
+    alignment = 'left'
   ): ParagraphChild[] {
     if (!children.length) {
       return children;
@@ -639,7 +779,7 @@ export class CodebookDocxGenerator {
       CodebookDocxGenerator.isMathComponent
     ) as ImportedXmlComponent[];
     if (mathChildren.length === children.length) {
-      return [CodebookDocxGenerator.createLeftAlignedMathParagraph(mathChildren)];
+      return [CodebookDocxGenerator.createLeftAlignedMathParagraph(mathChildren, alignment)];
     }
 
     return children;
@@ -674,10 +814,6 @@ export class CodebookDocxGenerator {
     );
   }
 
-  private static isListParagraph(elem: Element): boolean {
-    return !!elem.parent && (elem.parent as Element).name === 'li';
-  }
-
   /** Put loose text and inline marks into paragraphs without duplicating existing blocks. */
   private static wrapInlineParagraphs(cheerioAPI: cheerio.CheerioAPI, parent: AnyNode): void {
     let inlineNodes: AnyNode[] = [];
@@ -689,11 +825,11 @@ export class CodebookDocxGenerator {
     };
     cheerioAPI(parent).contents().toArray().forEach(node => {
       if (node.type === 'tag' && (
-        /^(p|h[1-4]|img|ul|ol|li|div|blockquote)$/.test(node.name) ||
-        cheerioAPI(node).find('p,h1,h2,h3,h4,img,ul,ol').length > 0
+        /^(p|h[1-4]|img|hr|ul|ol|li|div|blockquote)$/.test(node.name) ||
+        cheerioAPI(node).find('p,h1,h2,h3,h4,img,hr,ul,ol').length > 0
       )) {
         flush();
-        if (!/^(p|h[1-4]|img)$/.test(node.name)) {
+        if (!/^(p|h[1-4]|img|hr)$/.test(node.name)) {
           CodebookDocxGenerator.wrapInlineParagraphs(cheerioAPI, node);
         }
       } else if (node.type === 'text' || node.type === 'tag') {
@@ -709,7 +845,7 @@ export class CodebookDocxGenerator {
   ) {
     if (!html.trim()) return [];
     const normalizedHtml = CodebookDocxGenerator.normalizeMathTokens(html);
-    const blockHtml = /<(p|h[1-4]|img|ul|ol)\b/i.test(normalizedHtml) ? normalizedHtml : `<p>${normalizedHtml}</p>`;
+    const blockHtml = /<(p|h[1-4]|img|hr|ul|ol)\b/i.test(normalizedHtml) ? normalizedHtml : `<p>${normalizedHtml}</p>`;
     const cheerioAPI = cheerio.load(
       CodebookDocxGenerator.prepareHtml(blockHtml),
       null,
@@ -717,33 +853,120 @@ export class CodebookDocxGenerator {
     );
     CodebookDocxGenerator.wrapInlineParagraphs(cheerioAPI, cheerioAPI.root()[0]);
     const elements: Paragraph[] = [];
-    cheerioAPI('p,h1,h2,h3,h4,img').each((i, elem) => {
-      try {
-        const span = cheerioAPI(elem).find('span');
-        if (elem.name === 'img') {
-          elements.push(CodebookDocxGenerator.createImagePragraph(elem, contentSetting));
-        } else {
-          elements.push(
-            CodebookDocxGenerator.createParagraph(
+    type Context = {
+      listDepth: number; listNesting: number; listIndent: number; quoteDepth: number; marker?: string;
+      legacyBullet?: boolean; size: string; color: string; background: string;
+    };
+    const walk = (parent: AnyNode, context: Context): void => {
+      cheerioAPI(parent).contents().toArray().forEach(node => {
+        if (node.type !== 'tag') return;
+        const elem = node as Element;
+        const styles = CodebookDocxGenerator.inlineStyles(elem);
+        const size = styles['font-size'] || context.size;
+        const color = CodebookDocxGenerator.cssColor(styles['color'], context.color);
+        const background = CodebookDocxGenerator.cssColor(styles['background-color'], context.background);
+        const inherited = {
+          ...context, size, color, background
+        };
+        try {
+          if (elem.name === 'img') {
+            elements.push(CodebookDocxGenerator.createImagePragraph(elem, contentSetting));
+          } else if (/^(p|h[1-4])$/.test(elem.name)) {
+            const headingSize = {
+              h1: '20px', h2: '18px', h3: '16px', h4: '16px'
+            }[elem.name];
+            elements.push(CodebookDocxGenerator.createParagraph(
               cheerioAPI,
               elem.children,
               CodebookDocxGenerator.getTextAlignment(cheerioAPI, elem),
-              CodebookDocxGenerator.getColor(cheerioAPI, span),
-              CodebookDocxGenerator.getBackgroundColor(cheerioAPI, elem),
-              CodebookDocxGenerator.getSize(cheerioAPI, span),
-              CodebookDocxGenerator.isListParagraph(elem)
-            )
-          );
+              color,
+              background,
+              styles['font-size'] || headingSize || size,
+              !!context.legacyBullet,
+              {
+                element: elem,
+                marker: context.marker,
+                listDepth: context.listDepth,
+                listIndent: context.listIndent,
+                quoteDepth: context.quoteDepth,
+                imageWidth: contentSetting.showScore ? 334 : 382
+              }
+            ));
+            context.marker = undefined;
+            context.legacyBullet = false;
+          } else if (elem.name === 'ul' || elem.name === 'ol') {
+            const style = styles['list-style-type'] || styles['list-style'] || (elem.name === 'ol' ? 'decimal' : 'disc');
+            const legacy = elem.name === 'ul' && !styles['list-style-type'] &&
+              !styles['list-style'] && context.listNesting === 0;
+            const parsedStart = Number.parseInt(elem.attribs['start'], 10);
+            const start = Number.isFinite(parsedStart) ? parsedStart : 1;
+            cheerioAPI(elem).children('li').toArray().forEach((li, index) => {
+              const padding = parseFloat(CodebookDocxGenerator.inlineStyles(li)['padding-left']) || 0;
+              walk(li, {
+                ...inherited,
+                marker: legacy ? undefined : CodebookDocxGenerator.listMarker(style, start + index),
+                legacyBullet: legacy,
+                listDepth: legacy ? 0 : context.listNesting + 1,
+                listNesting: context.listNesting + 1,
+                listIndent: context.listIndent + Math.round(padding * 15)
+              });
+            });
+          } else if (elem.name === 'hr') {
+            const short = styles['width'] === '20%' || elem.attribs['short'] === 'true';
+            elements.push(new Paragraph({
+              border: { bottom: { color: '000000', style: 'single', size: 6 } },
+              indent: short ? { end: Math.round((contentSetting.showScore ? 334 : 382) * 15 * 0.8) } : undefined,
+              spacing: { before: 100, after: 100 }
+            }));
+          } else {
+            walk(elem, { ...inherited, quoteDepth: context.quoteDepth + Number(elem.name === 'blockquote') });
+          }
+        } catch {
+          elements.push(new Paragraph({ text: 'HTML konnte nicht verarbeitet werden.' }));
         }
-      } catch {
-        elements.push(
-          new Paragraph({
-            text: 'HTML konnte nicht verarbeitet werden.'
-          })
-        );
-      }
+      });
+    };
+    walk(cheerioAPI.root()[0], {
+      listDepth: 0,
+      listNesting: 0,
+      listIndent: 0,
+      quoteDepth: 0,
+      size: '10pt',
+      color: '#000000',
+      background: '#FFFFFF'
     });
     return elements.filter(e => e !== undefined && e !== null);
+  }
+
+  /** Literal markers retain all CSS list styles, including Greek, in a static Word export. */
+  private static listMarker(style: string, value: number): string {
+    const bullets: Record<string, string> = { disc: '•', circle: '○', square: '▪' };
+    if (bullets[style]) return bullets[style];
+    if (style.includes('roman')) {
+      let remainder = Math.min(10000, Math.max(1, Math.floor(value)));
+      let roman = '';
+      const numbers: [number, string][] = [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+        [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+      numbers.forEach(([number, symbol]) => {
+        while (remainder >= number) {
+          roman += symbol;
+          remainder -= number;
+        }
+      });
+      return `${style.startsWith('lower') ? roman.toLowerCase() : roman}.`;
+    }
+    if (['lower-latin', 'upper-latin', 'lower-alpha', 'upper-alpha', 'lower-greek'].includes(style)) {
+      const alphabet = style === 'lower-greek' ? 'αβγδεζηθικλμνξοπρστυφχψω' : 'abcdefghijklmnopqrstuvwxyz';
+      let number = Math.max(1, Math.floor(value));
+      let marker = '';
+      while (number > 0) {
+        number -= 1;
+        marker = alphabet[number % alphabet.length] + marker;
+        number = Math.floor(number / alphabet.length);
+      }
+      return `${style.startsWith('upper') ? marker.toUpperCase() : marker}.`;
+    }
+    return `${value}.`;
   }
 
   private static getFontSize(size: string): number {
@@ -756,7 +979,11 @@ export class CodebookDocxGenerator {
       'x-large',
       'xx-large'
     ];
-    return sizeTypes.includes(size) ? 20 : parseInt(size, 10);
+    if (sizeTypes.includes(size)) return 20;
+    const number = parseFloat(size);
+    if (!Number.isFinite(number) || number <= 0) return 20;
+    // CSS pixels are 1/96 inch; Word stores font sizes in half-points (1/144 inch).
+    return Math.max(1, Math.min(1638, Math.round(number * (size.endsWith('px') ? 1.5 : 2))));
   }
 
   private static getAlignment(
@@ -781,28 +1008,52 @@ export class CodebookDocxGenerator {
     colorParsed: string,
     backgroundColor: string,
     size: string,
-    isListParagraph: boolean
+    isListParagraph: boolean,
+    options?: InstructionParagraph
   ): Paragraph {
     const children: ParagraphChild[] = [];
+    if (options?.marker) {
+      children.push(new TextRun({
+        children: [options.marker, new Tab()], size: CodebookDocxGenerator.getFontSize(size)
+      }));
+    }
     const childNodes = CodebookDocxGenerator.getChildren(cheerioAPI, elem);
     CodebookDocxGenerator.processInlineElements(
       childNodes,
       children,
       colorParsed,
       backgroundColor,
-      size
+      size,
+      options?.element.name.match(/^h[1-3]$/) ? { bold: true } : {},
+      options?.imageWidth
     );
     const normalizedChildren = CodebookDocxGenerator.normalizeParagraphChildren(
-      children
+      children,
+      textAlignment
     );
+    const styles = options ? CodebookDocxGenerator.inlineStyles(options.element) : {};
+    const pixels = (value: string | undefined) => {
+      const amount = parseFloat(value || '');
+      return Number.isFinite(amount) ? Math.round(amount * (value?.endsWith('pt') ? 20 : 15)) : undefined;
+    };
+    const listStart = (options?.listDepth || 0) * 600 + (options?.listIndent || 0);
+    const start = (pixels(styles['padding-left']) ?? (isListParagraph ? 0 : 100)) + listStart + (options?.quoteDepth || 0) * 600;
+    const textIndent = pixels(styles['text-indent']) || 0;
+    const indent = options?.marker ? { start, hanging: 300 } : {
+      start,
+      end: 100,
+      ...(textIndent < 0 ? { hanging: -textIndent } : {}),
+      ...(textIndent > 0 ? { firstLine: textIndent } : {})
+    };
     return new Paragraph({
       alignment: CodebookDocxGenerator.getAlignment(textAlignment),
       spacing: {
-        before: 100,
-        after: 100
+        before: pixels(styles['margin-top']) ?? 100,
+        after: pixels(styles['margin-bottom']) ?? 100
       },
-      indent: !isListParagraph ? { start: 100, end: 100 } : undefined,
+      indent: isListParagraph ? undefined : indent,
       bullet: isListParagraph ? { level: 0 } : undefined,
+      ...(options?.marker ? { tabStops: [{ type: TabStopType.LEFT, position: start }] } : {}),
       children: normalizedChildren
     });
   }

@@ -32,3 +32,11 @@ is `scripts/codebook-editor-matrix.test.mjs` (384 cases, each ESM and CommonJS).
 `kodierbox-browser.docx` is the corresponding actual browser download produced
 by a real Redis generation job in Kodierbox. Its JSON companion and every
 normalized DOCX part match the Studio browser download exactly.
+
+## Extended Aspect and rich-text acceptance
+
+`aspect-full-matrix.docx` and `cc-full-matrix.docx` contain 2,740 / 2,738 browser-authored cases. `aspect-feature-specimen.docx` and `cc-feature-specimen.docx` provide readable subsets covering every distinct feature. `toolbar-acceptance.docx` includes actual toolbar output plus 13 styled native formula sizes; `studio-reference-current.docx` includes the explicitly corrected 18pt legacy sample.
+
+The current regression corpus is `../codebook-rich-format-cases.mjs`. Execute `npm run build_cc && npm run test:codebook`. The full matrix runs through both ESM and CommonJS and both score layouts. The existing independent original-Studio fixtures are retained; only the strictly asserted font-size correction and equivalent highlight hex spelling are normalized by the legacy comparison.
+
+These six documents were rendered in Microsoft Office Web Viewer / Word: 261 captured pages, with each actual page number independently checked in its footer. The final bidirectional editor interchange produces the same complete normalized Word parts as the rendered matrix. See `docs/codebook-aspect-acceptance-2026-10-13.md`. The earlier fixture documents and package hashes above remain historical evidence.

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { load } from 'cheerio';
 import { CodebookGenerator } from '../dist/ngx-coding-components/fesm2022/iqb-ngx-coding-components-codebook-generator.mjs';
 import { defaults, selectionCorpus, expectedSelection, optionMatrix, missingCases, referenceCorpus, referenceOptions } from './fixtures/codebook-synthetic.mjs';
-import { docxParts, partHashes } from './codebook-docx-test-utils.mjs';
+import { docxParts, partHashes, originalStudioCompatibleParts } from './codebook-docx-test-utils.mjs';
 
 const corpus = selectionCorpus();
 const compactRows = corpus.rows.filter(({ variable }) => variable.sourceType === 'BASE' ||
@@ -84,7 +84,7 @@ test('raw synthetic schemas match original Studio JSON and complete DOCX parts f
     const json = JSON.parse(await (await CodebookGenerator.generateCodebook(units, { ...options, exportFormat: 'json' }, missings)).text());
     assert.deepEqual(json, entry.json, `original Studio raw-schema JSON: case ${index}`);
     const parts = await docxParts(await CodebookGenerator.generateCodebook(units, options, missings));
-    assert.deepEqual(partHashes(parts), entry.docxParts, `original Studio DOCX: case ${index}`);
+    assert.deepEqual(partHashes(originalStudioCompatibleParts(parts)), entry.docxParts, `original Studio DOCX: case ${index}`);
   }
   assert.equal(index, 32);
 });

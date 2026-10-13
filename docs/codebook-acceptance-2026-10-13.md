@@ -1,5 +1,7 @@
 # Codebook-Abnahme vom 13.10.2026
 
+Dieser Bericht beschreibt den früheren Paketstand `dcee6cc…`. Die aktuelle Formatkorrektur und Aspect-Abnahme steht im [ergänzenden Bericht](codebook-aspect-acceptance-2026-10-13.md).
+
 Die P2-Regression bei geschützten und wiederholten Leerzeichen ist behoben.
 Die bisherige Studio-Ausgabe bleibt in den stabilen Referenzfällen erhalten;
 die direkten Studio- und die asynchronen Kodierbox-Exporte liefern identische Dokumentinhalte.
