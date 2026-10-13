@@ -405,7 +405,8 @@ export class CodebookDocxGenerator {
     };
     nodes.forEach(node => {
       if (node.type === 'text') {
-        if (node.data) children.push(new TextRun({ text: node.data.replace(/\s+/g, ' '), ...runStyle }));
+        // Preserve non-breaking spaces and repeated spacing from Studio instructions.
+        if (node.data) children.push(new TextRun({ text: node.data, ...runStyle }));
         return;
       }
       if (node.type !== 'tag') return;

@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { createRequire, Module } from 'node:module';
 import { readFile, writeFile } from 'node:fs/promises';
 import { referenceCorpus, referenceOptions } from './fixtures/codebook-synthetic.mjs';
+import { whitespaceReferenceCases, whitespaceReferenceUnits } from './fixtures/codebook-whitespace.mjs';
 import { docxParts, partHashes } from './codebook-docx-test-utils.mjs';
 
 const studio = process.argv[2];
@@ -56,3 +57,14 @@ const fixture = { source: `iqb-berlin/studio-lite@${ref}`, docx: '8.5.0', respon
     'random media filenames in first-reference order; image bytes and relationships preserved'], cases };
 await writeFile(new URL('./fixtures/studio-codebook/synthetic-reference.json', import.meta.url), `${JSON.stringify(fixture, null, 2)}\n`);
 console.log(`Captured ${cases.length} original Studio JSON/DOCX cases from raw invented schemas.`);
+
+const whitespaceCases = [];
+for (const entry of whitespaceReferenceCases()) {
+  const data = whitespaceReferenceUnits(entry.html).map(unit => adapter.getCodeBookDataForUnit(unit, entry.options, []));
+  const json = data.map(({ key, name, variables, missings }) => ({ key, name, variables, missings }));
+  const parts = await docxParts(await renderer.getDocXCodebook(data, entry.options));
+  whitespaceCases.push({ ...entry, json, docxParts: partHashes(parts) });
+}
+await writeFile(new URL('./fixtures/studio-codebook/whitespace-reference.json', import.meta.url),
+  `${JSON.stringify({ ...fixture, cases: whitespaceCases }, null, 2)}\n`);
+console.log(`Captured ${whitespaceCases.length} original Studio spacing cases for code and general instructions.`);

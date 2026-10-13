@@ -90,11 +90,17 @@ Rollback: vorherige Bibliotheks-/Anwendungsversion; keine Datenmigration.
 * 32 zusätzliche Referenzfälle vergleichen Rohschema → JSON und sämtliche relevanten
   DOCX-Bestandteile mit dem ursprünglichen Studio. Die Referenz wird ausschließlich
   aus dem dokumentierten alten Studio-Commit erzeugt, niemals aus dem neuen Generator.
+* Weitere 20 Studio-Referenzfälle erhalten NBSP, schmale geschützte Leerzeichen und
+  wiederholte Abstände in allgemeinen und Code-Instruktionen, jeweils mit und ohne
+  Score-Spalte. HTML-Zeichenreferenzen, Unicode und fett formatierter Text werden
+  über ESM und CommonJS auf exakte Inhalte und alle DOCX-Bestandteile geprüft.
 * `node scripts/compare-codebook-installations.mjs STUDIO_ROOT BOX_ROOT OUTPUT_DIR`
   prüft dieselbe Matrix über Studios DownloadWorkspacesClass und Kodierboxs echten
   Generation-Service samt Adapter mit Datenquellen im jeweiligen Anwendungsformat.
   Nur Datenbank-/Profilzugriffe werden im Speicher bereitgestellt. Der Vergleich
   schließt Bilder, Beziehungen, Styles, Fußzeilen und Missing-Datentypen ein.
+  Zusätzlich laufen die 20 Abstandsreferenzen in beiden Formaten gegen das alte
+  Studio; zusammen werden 4.654 Exportpaare verglichen.
   Das ist ausdrücklich kein HTTP-, Browser-, Berechtigungs- oder Redis-End-to-End-Test.
 * Studio-Frontend prüft direkten Export, Ladezustände, Fehlermeldung und Speichersperre.
 * Kodierbox prüft Scope-Filter, wiederholte Starts, langsame Statusabfragen und Schließen.

@@ -6,6 +6,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { load } from 'cheerio';
 import { optionMatrix, selectionCorpus, missingCases, expectedSelection, defaults, referenceCorpus, referenceOptions } from './fixtures/codebook-synthetic.mjs';
+import { whitespaceReferenceCases, whitespaceReferenceUnits } from './fixtures/codebook-whitespace.mjs';
 import { docxParts, partHashes } from './codebook-docx-test-utils.mjs';
 
 const [studioPath, boxPath, outputPath] = process.argv.slice(2);
@@ -109,6 +110,15 @@ for (const showScore of [false, true]) {
   for (const exportFormat of ['json', 'docx']) await compare({ ...options, exportFormat },
     [{ code: 99, label: 'Missing', description: 'Keine Antwort' }], true, showScore ? '-rich-scores' : '-rich-no-scores', reference);
 }
+const whitespaceReferences = JSON.parse(await readFile(new URL('./fixtures/studio-codebook/whitespace-reference.json', import.meta.url), 'utf8')).cases;
+let whitespaceCases = 0;
+for (const entry of whitespaceReferenceCases()) {
+  const reference = whitespaceReferences[whitespaceCases++];
+  assert.deepEqual({ id: reference.id, html: reference.html, text: reference.text, options: reference.options }, entry);
+  currentUnits = whitespaceReferenceUnits(entry.html);
+  for (const exportFormat of ['json', 'docx']) await compare({ ...entry.options, exportFormat }, [], false, '', reference);
+}
+assert.equal(whitespaceCases, whitespaceReferences.length);
 await writeFile(join(output, 'word-expectations.json'), JSON.stringify({ cases: wordCases }, null, 2));
 const roots = [studio, box];
 const artifacts = await Promise.all(roots.map(async root => {
@@ -117,6 +127,7 @@ const artifacts = await Promise.all(roots.map(async root => {
 }));
 assert.equal(artifacts[0], artifacts[1], 'both installed artifacts must have the same integrity');
 await writeFile(join(output, 'installation-comparison.json'), JSON.stringify({ hostExportPairs: comparisons, optionCombinations: 768,
-  missingCases: 3, formats: 2, identicalJson: true, identicalAllDocxParts: true, artifactIntegrity: artifacts[0],
+  missingCases: 3, formats: 2, originalStudioWhitespaceCases: whitespaceCases,
+  identicalJson: true, identicalAllDocxParts: true, artifactIntegrity: artifacts[0],
   realHostAdapters: true, inMemoryRepositories: true, httpBrowserRedis: false, windowsWord: false }, null, 2));
 console.log(`PASS: ${comparisons} export pairs through real Studio and Box preparation/adapters.`);

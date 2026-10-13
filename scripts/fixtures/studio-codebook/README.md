@@ -40,3 +40,17 @@ node scripts/capture-studio-codebook-reference.mjs /path/to/studio-checkout
 CI only reads this fixture. Never regenerate it from the shared generator to make
 a failing test pass. Approved semantic corrections are checked independently by
 the option matrix rather than being disguised as original Studio behaviour.
+
+## Protected spacing reference
+
+`whitespace-reference.json` is captured by the same command from the same old
+Studio commit. Its 20 cases cover NBSP and narrow NBSP as HTML entities, numeric
+character references and literal Unicode, repeated NBSP, bold text and repeated
+ordinary spaces, each with and without a score column. Every input places the
+same text in both a general instruction and a code instruction.
+
+The tests compare original Studio JSON and every normalized DOCX part against
+both ESM and CommonJS exports and additionally assert the exact instruction text.
+The host installation comparison also runs all 20 cases in JSON and DOCX through
+both installed adapters against this independent reference. These cases extend
+the references without changing the original 32-case fixture.
