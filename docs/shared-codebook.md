@@ -108,10 +108,18 @@ Rollback: vorherige Bibliotheks-/Anwendungsversion; keine Datenmigration.
 * Vor Ausrollen bleiben visuelle Mehrseiten-DOCX-Abnahme und Host-Browserabläufe
   einschließlich Netzwerkprüfung verpflichtend.
 
-### Microsoft Word unter Windows
+### Microsoft Office
 
-Word unter Windows ist ein eigener Abnahmeweg. XML-Gleichheit und LibreOffice-
-Rendering ersetzen ihn nicht. Der Installationsvergleich legt künstliche Exporte
+Microsoft Office Web Viewer / Word hat am 13.10.2026 sieben ausschließlich
+synthetische Dokumente mit insgesamt 20 Seiten gerendert. Die Host-Browser-
+Downloads sind auf allen drei vollständigen Seiten pixelgleich. Die alten und
+neuen Studio-Rich-Text-Dokumente sind mit/ohne Scores in ihren sechs
+Seiteninhalten pixelgleich; die vereinbarte Fußzeile wird separat geprüft.
+Details und Grenzen: [Abnahmeprotokoll](./codebook-acceptance-2026-10-13.md).
+
+XML-Gleichheit und LibreOffice-Rendering allein ersetzen keinen Office-Nachweis.
+Für einen zusätzlichen Windows-Desktop-Word-Abnahmeweg legt der
+Installationsvergleich künstliche Exporte
 sechs DOCX-Dateien und `word-expectations.json` im Ausgabeverzeichnis ab: je Anwendung
 einen Filter-/Missing-0-Fall sowie Rich-Text-Fälle mit und ohne Score-Spalte. Die
 Rich-Text-Fälle werden zusätzlich direkt gegen die alte Studio-Referenz geprüft.
