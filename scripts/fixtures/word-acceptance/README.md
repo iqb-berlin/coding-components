@@ -28,3 +28,7 @@ and dependency versions. They support direct same-engine visual comparison.
 and mixed formula/list/image cases. Regenerate after `npm run build_cc` with
 `node scripts/create-codebook-editor-office-fixture.mjs`. Its executable contract
 is `scripts/codebook-editor-matrix.test.mjs` (384 cases, each ESM and CommonJS).
+
+`kodierbox-browser.docx` is the corresponding actual browser download produced
+by a real Redis generation job in Kodierbox. Its JSON companion and every
+normalized DOCX part match the Studio browser download exactly.
