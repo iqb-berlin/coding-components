@@ -18,3 +18,8 @@ Package SHA256: `dcee6cc39436baf91cf2558afedfbc202e044ca14dbf72c7bfdf4b381e5c0cc
 
 These files are inputs to visual acceptance, not proof that Office has rendered
 or passed them. Execution results are documented separately.
+
+`original-studio-scores.docx` and `original-studio-no-scores.docx` are generated
+from the immutable pre-harmonisation Studio renderer and adapter at
+`2504265721a59c7c65425072951ce82ab16f0fb8`, using the same synthetic rich corpus
+and dependency versions. They support direct same-engine visual comparison.
