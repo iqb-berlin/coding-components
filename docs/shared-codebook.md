@@ -128,3 +128,34 @@ Anschließend alle gerenderten Dokumente vollständig visuell prüfen: insbesond
 Spaltenbreiten, Umbrüche, Formeln, Bilder, Schriften und „Seite X von Y“.
 `visualAcceptanceComplete` bleibt bis zur tatsächlichen visuellen Abnahme false.
 Eine nicht ausgeführte Windows-Prüfung darf nicht als bestanden gemeldet werden.
+
+### Editor-/Player-Abgleich und Formatkombinationen
+
+Die Instruktionen des coding-components-Editors sind der Eingabevertrag des
+Codebook-Exports. Die Extension-Liste wurde mit Aspect Editor/Player bei
+`iqb-berlin/verona-modules-aspect@fb3f5982` abgeglichen. Der Export liest
+Kodierschemata (`manualInstruction`), nicht die vollständige Aspect-Aufgabe mit
+interaktiven Player-Elementen.
+
+`codebook-editor-matrix.test.mjs` prüft alle 384 Kombinationen aus vier
+Textmarkierungen (Fett, Kursiv, Unterstrichen, Durchgestrichen), drei gültigen
+Grundlinienzuständen, zwei Verschachtelungsreihenfolgen und vier Ausrichtungen.
+Jeder Fall prüft allgemeine und Code-Instruktion, geschützte und wiederholte
+Leerzeichen, Formatierungsgrenzen sowie identische ESM-/CommonJS-Dokumentteile.
+Diese Matrix ergänzt die 52 unabhängigen Alt-Studio-Referenzfälle.
+
+`node scripts/create-codebook-editor-office-fixture.mjs` erzeugt ein ausschließlich
+synthetisches Dokument mit allen 48 Markierungskombinationen sowie gemischten
+Formel-, Listen- und Bildfällen zur visuellen Office-Abnahme.
+
+Grenzen des bestehenden Studio-Renderers bleiben sichtbar: CSS-Listenstile,
+verschachtelte Listeneinrückungen, Bild-Floats und pro Textlauf wechselnde
+Farbe/Schriftgröße werden nicht vollständig wie im Browser abgebildet. Der
+Abgleich behauptet deshalb keine vollständige HTML-/CSS-Layouttreue.
+Aspect-spezifische Formelknoten (`aspect-nodeview-math-formula[formula]`) und
+interaktive Cloze-Knoten sind ein anderer Vertrag als
+`span.iqb-math-formula[data-latex]` bzw. `[[iqb-math:…]]` in Kodierinstruktionen.
+Der Aspect-Player rendert seine gespeicherten Formeln über
+`projects/common/utils/math-formula-markup.ts`; der Codebook-Export nutzt OMML.
+Ein vollständiger Aspect-Editor-/Player-Lauf ist damit nicht durch diese
+Codebook-Matrix ersetzt.

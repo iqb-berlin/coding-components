@@ -23,3 +23,8 @@ or passed them. Execution results are documented separately.
 from the immutable pre-harmonisation Studio renderer and adapter at
 `2504265721a59c7c65425072951ce82ab16f0fb8`, using the same synthetic rich corpus
 and dependency versions. They support direct same-engine visual comparison.
+
+`editor-combinations.docx` contains all 48 valid shared inline-mark combinations
+and mixed formula/list/image cases. Regenerate after `npm run build_cc` with
+`node scripts/create-codebook-editor-office-fixture.mjs`. Its executable contract
+is `scripts/codebook-editor-matrix.test.mjs` (384 cases, each ESM and CommonJS).
