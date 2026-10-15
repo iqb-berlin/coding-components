@@ -8,8 +8,7 @@
     "cheerio",
     "buffer",
     "image-size",
-    "mathml2omml",
-    "@iqb/responses"
+    "mathml2omml"
   ],
   "lib": {
     "entryFile": "src/public-api.ts"
