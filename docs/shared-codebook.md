@@ -1,5 +1,14 @@
 # Gemeinsames Codebook: Integrationsvertrag
 
+## Windows-Desktop-Word-Abnahme des aktuellen Paketstands
+
+Die [Abnahme vom 15.10.2026](codebook-word-windows-2026-10-15.md) bestätigt
+16 synthetische Dokumente mit 32 vollständig gesichteten Seiten in Word LTSC 2024
+(Build 16.0.17932.21000, 64 Bit). Alle sieben aktuellen Studio-/Kodierbox-Paare
+sind pixelgleich; die unveränderten alten Studio-Referenzen bleiben abgesehen
+von vereinbarter Kennzeichnung und dokumentierter 18pt-Korrektur erhalten.
+Der geprüfte Tarball ist der nachfolgend bezeichnete aktuelle SOLVER-Paketstand.
+
 ## Aktuelle SOLVER-Kompatibilität und Mindestversion
 
 Der [Nachtrag vom 15.10.2026](codebook-solver-compatibility-2026-10-15.md) erhält
@@ -151,8 +160,9 @@ Details und Grenzen: [Abnahmeprotokoll](./codebook-acceptance-2026-10-13.md).
 XML-Gleichheit und LibreOffice-Rendering allein ersetzen keinen Office-Nachweis.
 Für einen zusätzlichen Windows-Desktop-Word-Abnahmeweg legt der
 Installationsvergleich künstliche Exporte
-sechs DOCX-Dateien und `word-expectations.json` im Ausgabeverzeichnis ab: je Anwendung
-einen Filter-/Missing-0-Fall sowie Rich-Text-Fälle mit und ohne Score-Spalte. Die
+14 DOCX-Dateien und `word-expectations.json` im Ausgabeverzeichnis ab: je Anwendung
+einen Filter-/Missing-0-Fall, Rich-Text-Fälle mit und ohne Score-Spalte sowie
+vier Inlinebild-Fälle mit defekten und nachfolgenden gültigen Inhalten. Die
 Rich-Text-Fälle werden zusätzlich direkt gegen die alte Studio-Referenz geprüft.
 Auf einem Windows-Rechner mit Desktop-Word:
 
@@ -162,10 +172,12 @@ Auf einem Windows-Rechner mit Desktop-Word:
 
 Das Skript öffnet alle Dateien regulär und schreibgeschützt, aktualisiert Felder,
 prüft Textgleichheit, Seitenzahl, Tabellen, ungeteilte Zeilen, Bilder, Formeln und
-Fußzeilen und exportiert sechs PDFs. Es speichert Word-Version und Build im Ergebnis.
+Fußzeilen und exportiert 14 PDFs (mit optionalen alten Referenzen 16). Es speichert Word-Version und Build im Ergebnis.
 Anschließend alle gerenderten Dokumente vollständig visuell prüfen: insbesondere
 Spaltenbreiten, Umbrüche, Formeln, Bilder, Schriften und „Seite X von Y“.
 `visualAcceptanceComplete` bleibt bis zur tatsächlichen visuellen Abnahme false.
+Die [tatsächliche Windows-Abnahme](codebook-word-windows-2026-10-15.md) enthält
+auch die beiden alten Studio-Referenzen und einen vollständigen Wiederholungslauf.
 Eine nicht ausgeführte Windows-Prüfung darf nicht als bestanden gemeldet werden.
 
 ### Editor-/Player-Abgleich und Formatkombinationen
