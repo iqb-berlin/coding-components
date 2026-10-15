@@ -1,12 +1,15 @@
 // Runs real host preparation and adapters against in-memory persistence boundaries.
 // Does not replace an HTTP/browser/Redis acceptance run.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { createRequire, Module } from 'node:module';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { load } from 'cheerio';
 import { optionMatrix, selectionCorpus, missingCases, expectedSelection, defaults, referenceCorpus, referenceOptions } from './fixtures/codebook-synthetic.mjs';
 import { whitespaceReferenceCases, whitespaceReferenceUnits } from './fixtures/codebook-whitespace.mjs';
+import { inlineImageCases, inlineImageHtml, inlineImageUnits } from './fixtures/codebook-inline-images.mjs';
 import { docxParts, partHashes, originalStudioCompatibleParts } from './codebook-docx-test-utils.mjs';
 
 const [studioPath, boxPath, outputPath] = process.argv.slice(2);
@@ -30,6 +33,36 @@ const studio = resolve(studioPath);
 const box = resolve(boxPath);
 const output = resolve(outputPath);
 await mkdir(output, { recursive: true });
+// npm may retain old files when a local tarball keeps its name and version.
+// Verify actual installations before comparing exports, not just lockfile metadata.
+async function packageFiles(directory, prefix = '') {
+  const files = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    // ng-packagr excludes development-only nested manifests via .npmignore.
+    if (entry.name === '.npmignore' || (prefix && entry.name === 'package.json')) continue;
+    const relative = join(prefix, entry.name);
+    if (entry.isDirectory()) files.push(...await packageFiles(join(directory, entry.name), relative));
+    else files.push(relative);
+  }
+  return files;
+}
+const builtPackage = fileURLToPath(new URL('../dist/ngx-coding-components', import.meta.url));
+const builtFiles = await packageFiles(builtPackage);
+const artifacts = [];
+for (const root of [studio, box]) {
+  const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
+  const dependency = lock.packages['node_modules/@iqb/ngx-coding-components'];
+  assert.ok(dependency.resolved.startsWith('file:vendor/'), 'comparison requires the packed library artifact');
+  const tarball = await readFile(join(root, dependency.resolved.slice(5)));
+  const integrity = `sha512-${createHash('sha512').update(tarball).digest('base64')}`;
+  assert.equal(integrity, dependency.integrity, 'lock integrity must match the actual tarball');
+  artifacts.push(integrity);
+  for (const file of builtFiles) {
+    assert.deepEqual(await readFile(join(root, 'node_modules/@iqb/ngx-coding-components', file)),
+      await readFile(join(builtPackage, file)), `stale or different installed package file: ${root}/${file}`);
+  }
+}
+assert.equal(artifacts[0], artifacts[1], 'both installed artifacts must have the same integrity');
 const Studio = (await hostModule(studio, 'apps/api/src/app/classes/download-workspaces.class.ts', {
   '@studio-lite/shared-code': { isCurrentFromOrder: order => order === 0 } // unrelated metadata reports, never called here
 })).DownloadWorkspacesClass;
@@ -64,7 +97,7 @@ service.logger = { log() {}, warn() {}, error(...args) { throw new Error(args.jo
 let currentMissings = [];
 let comparisons = 0;
 const wordCases = [];
-async function compare(options, missings, save = false, suffix = '', reference = null) {
+async function compare(options, missings, save = false, suffix = '', reference = null, verify = null) {
   currentMissings = missings;
   const current = { ...options, missingsProfile: missings.length ? 'Synthetic profile' : '' };
   const ids = currentUnits.map(unit => unit.id);
@@ -75,7 +108,7 @@ async function compare(options, missings, save = false, suffix = '', reference =
   if (current.exportFormat === 'json') {
     assert.deepEqual(JSON.parse(a.toString()), JSON.parse(b.toString()), 'Studio preparation vs Box service + adapter');
     if (reference) assert.deepEqual(JSON.parse(a.toString()), reference.json, 'installed host vs original Studio JSON');
-    else assert.deepEqual(JSON.parse(a.toString())[0].variables.map(({ id, codes }) => ({ id, codes: codes.map(c => c.id) })), expectedSelection(rows, options));
+    else if (!verify) assert.deepEqual(JSON.parse(a.toString())[0].variables.map(({ id, codes }) => ({ id, codes: codes.map(c => c.id) })), expectedSelection(rows, options));
   } else {
     const aParts = await docxParts(a);
     const bParts = await docxParts(b);
@@ -90,6 +123,7 @@ async function compare(options, missings, save = false, suffix = '', reference =
         variableHeadings: $('w\\:pStyle').filter((_, e) => $(e).attr('w:val') === 'Heading2').length });
     }
   }
+  if (verify) await verify(a, current);
   if (save) {
     await writeFile(join(output, `studio${suffix}.${current.exportFormat}`), a);
     await writeFile(join(output, `kodierbox${suffix}.${current.exportFormat}`), b);
@@ -119,15 +153,40 @@ for (const entry of whitespaceReferenceCases()) {
   for (const exportFormat of ['json', 'docx']) await compare({ ...entry.options, exportFormat }, [], false, '', reference);
 }
 assert.equal(whitespaceCases, whitespaceReferences.length);
+let inlineImageExportPairs = 0;
+for (const entry of inlineImageCases) for (const location of ['general', 'code']) {
+  currentUnits = inlineImageUnits(entry, location);
+  for (const showScore of [false, true]) for (const exportFormat of ['json', 'docx']) {
+    await compare({ ...defaults, showScore, exportFormat }, [], entry.id === 'mixed',
+      `-inline-${entry.id}-${location}-${showScore ? 'scores' : 'no-scores'}`, null, async (buffer, options) => {
+        if (options.exportFormat === 'json') {
+          const [variable] = JSON.parse(buffer.toString())[0].variables;
+          assert.equal(variable.generalInstruction, location === 'general' ? inlineImageHtml(entry) : '');
+          assert.equal(variable.codes[0].description, location === 'code' ? inlineImageHtml(entry) : 'CODE_UNCHANGED');
+          assert.equal(variable.codes[0].id, '0');
+          if (showScore) assert.equal(variable.codes[0].score, '0');
+          else assert.equal('score' in variable.codes[0], false);
+        } else {
+          const parts = await docxParts(buffer);
+          const $ = load(parts['word/document.xml'], { xml: true });
+          const paragraphs = $('w\\:p').toArray().filter(p => $(p).find('w\\:t').text().startsWith('VOR'));
+          assert.equal(paragraphs.length, 1, 'installed host must retain surrounding instruction text');
+          const p = $(paragraphs[0]);
+          assert.equal(p.find('w\\:t').text(), `VOR${'HTML konnte nicht verarbeitet werden.'.repeat(entry.errors)}NACH`);
+          assert.equal(p.closest('w\\:tbl').length, location === 'code' ? 1 : 0);
+          assert.equal($('w\\:t').toArray().filter(node => $(node).text() === 'WEITER').length, 1);
+          assert.equal($('w\\:drawing').length, entry.images);
+          assert.equal(p.find('m\\:oMath').length, entry.formulas);
+        }
+      });
+    inlineImageExportPairs += 1;
+  }
+}
 await writeFile(join(output, 'word-expectations.json'), JSON.stringify({ cases: wordCases }, null, 2));
-const roots = [studio, box];
-const artifacts = await Promise.all(roots.map(async root => {
-  const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
-  return lock.packages['node_modules/@iqb/ngx-coding-components'].integrity;
-}));
-assert.equal(artifacts[0], artifacts[1], 'both installed artifacts must have the same integrity');
 await writeFile(join(output, 'installation-comparison.json'), JSON.stringify({ hostExportPairs: comparisons, optionCombinations: 768,
   missingCases: 3, formats: 2, originalStudioWhitespaceCases: whitespaceCases,
+  inlineImageCases: inlineImageCases.length, inlineImageExportPairs,
   identicalJson: true, identicalAllDocxParts: true, artifactIntegrity: artifacts[0],
+  identicalInstalledPackageFiles: true, installedPackageFiles: builtFiles.length,
   realHostAdapters: true, inMemoryRepositories: true, httpBrowserRedis: false, windowsWord: false }, null, 2));
 console.log(`PASS: ${comparisons} export pairs through real Studio and Box preparation/adapters.`);
