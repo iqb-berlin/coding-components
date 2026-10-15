@@ -44,7 +44,9 @@ describe('Responses compatibility through real Schemer and validation imports', 
 
   [
     ['STRING', 'CHEM_ELEMENT_SYMBOLS', 'Chemische Elementsymbole'],
-    ['JSON', 'CHEM_MOLECULE', 'Molekül mit Bild']
+    ['JSON', 'CHEM_MOLECULE', 'Molekül mit Bild'],
+    ['string', 'chem-element-symbols', 'Chemische Elementsymbole'],
+    ['json', 'chem-molecule', 'Molekül mit Bild']
   ].forEach(([type, format, text]) => {
     it(`recognizes the new chemistry format ${format}`, () => {
       expect(ToTextFactory.varInfoAsText(playerVariable(type, format)).join(' ')).toContain(text);
