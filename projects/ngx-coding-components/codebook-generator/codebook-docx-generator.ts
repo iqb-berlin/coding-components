@@ -453,8 +453,13 @@ export class CodebookDocxGenerator {
         return;
       }
       if (tagName === 'img') {
-        const fontPixels = (CodebookDocxGenerator.getFontSize(size) * 2) / 3;
-        children.push(CodebookDocxGenerator.createImageRun(element, imageWidth, fontPixels));
+        try {
+          const fontPixels = (CodebookDocxGenerator.getFontSize(size) * 2) / 3;
+          children.push(CodebookDocxGenerator.createImageRun(element, imageWidth, fontPixels));
+        } catch {
+          // An invalid image must not discard the surrounding instruction paragraph.
+          children.push(new TextRun({ text: 'HTML konnte nicht verarbeitet werden.', ...runStyle }));
+        }
         return;
       }
       if (tagName === 'br') {
