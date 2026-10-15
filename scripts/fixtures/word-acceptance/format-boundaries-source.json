@@ -1,0 +1,54 @@
+{
+  "html": "<p indent=\"0\" indentsize=\"0\" style=\"padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0px; min-height: 1em;\">Vor <span style=\"color: rgb(255, 0, 0); font-size: 24px;\">ROT</span> Schwarz <mark data-color=\"rgb(0, 255, 0)\" style=\"background-color: rgb(0, 255, 0); color: inherit;\">GRUEN</mark> Ende</p><h1>H1</h1><h2>H2</h2><h3>H3</h3><h4>H4</h4><ol style=\"list-style: upper-roman;\"><li indent=\"0\" indentsize=\"0\" style=\"padding-left: 0px;\"><p indent=\"0\" indentsize=\"0\" style=\"padding-left: 0px; text-indent: 0px; margin-bottom: 0px; margin-top: 0px; min-height: 1em;\">LISTE</p></li></ol><p indent=\"2\" indentsize=\"20\" style=\"padding-left: 40px; text-indent: -20px; margin-bottom: 0px; margin-top: 0px; min-height: 1em;\">EINRUECKUNG</p>",
+  "styles": [
+    {
+      "tag": "P",
+      "text": "Vor ROT Schwarz GRUEN Ende",
+      "font": "20px",
+      "indent": "0px",
+      "align": "start"
+    },
+    {
+      "tag": "H1",
+      "text": "H1",
+      "font": "20px",
+      "indent": "0px",
+      "align": "start"
+    },
+    {
+      "tag": "H2",
+      "text": "H2",
+      "font": "18px",
+      "indent": "0px",
+      "align": "start"
+    },
+    {
+      "tag": "H3",
+      "text": "H3",
+      "font": "16px",
+      "indent": "0px",
+      "align": "start"
+    },
+    {
+      "tag": "H4",
+      "text": "H4",
+      "font": "16px",
+      "indent": "0px",
+      "align": "start"
+    },
+    {
+      "tag": "OL",
+      "text": "LISTE",
+      "font": "20px",
+      "indent": "40px",
+      "align": "start"
+    },
+    {
+      "tag": "P",
+      "text": "EINRUECKUNG",
+      "font": "20px",
+      "indent": "40px",
+      "align": "start"
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Command } from '@tiptap/core';
-import { Transaction } from 'prosemirror-state';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -24,23 +23,17 @@ export const ParagraphExtension = Paragraph.extend({
   },
 
   addCommands() {
-    const setNodeIndentMarkup = (tr: Transaction, pos: number, newMargin: number): Transaction => {
-      const node = tr?.doc?.nodeAt(pos);
-      if (node) {
-        const nodeAttrs = { ...node.attrs, margin: newMargin };
-        return tr.setNodeMarkup(pos, node.type, nodeAttrs, node.marks);
-      }
-      return tr;
-    };
+    const { name } = this;
 
     const applyMargin: (newMargin: number) => () => Command =
       newMargin => () => ({ tr, state, dispatch }) => {
         const { selection } = state;
-        let transaction;
         tr.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
-          transaction = setNodeIndentMarkup(tr, pos, newMargin);
+          // Text nodes cannot receive node markup; only this paragraph owns margin.
+          if (node.type.name !== name) return;
+          tr.setNodeMarkup(pos, node.type, { ...node.attrs, margin: newMargin }, node.marks);
         });
-        dispatch?.(transaction);
+        dispatch?.(tr);
         return true;
       };
 

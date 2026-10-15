@@ -34,13 +34,13 @@ const IqbMathFormula = Node.create({
     return {
       latex: {
         default: '',
-        parseHTML: element => element.getAttribute('data-latex') || ''
+        parseHTML: element => element.getAttribute('data-latex') || element.getAttribute('formula') || ''
       }
     };
   },
 
   parseHTML() {
-    return [{ tag: 'span.iqb-math-formula[data-latex]' }];
+    return [{ tag: 'span.iqb-math-formula[data-latex]' }, { tag: 'aspect-nodeview-math-formula[formula]' }];
   },
 
   renderHTML({ HTMLAttributes }) {
