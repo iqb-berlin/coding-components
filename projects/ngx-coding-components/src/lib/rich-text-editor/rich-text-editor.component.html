@@ -79,7 +79,7 @@
       </mat-form-field>
       <mat-form-field class="dropdown" appearance="outline" [style.width.px]="90">
         <mat-label>Abstand</mat-label>
-        <mat-select matTooltip="Achtung: Gilt nur für zukünftig angelegte Absätze" [matTooltipShowDelay]="300"
+        <mat-select matTooltip="Absatzabstand" [matTooltipShowDelay]="300"
                     [value]="editor.getAttributes('paragraph')['margin']?.toString() || '0'"
                     (click)="$any($event).stopPropagation()" (valueChange)="applyParagraphStyle($event)">
           <mat-option value="0">0px</mat-option>

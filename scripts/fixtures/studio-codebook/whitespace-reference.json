@@ -1,0 +1,1183 @@
+{
+  "source": "iqb-berlin/studio-lite@2504265721a59c7c65425072951ce82ab16f0fb8",
+  "docx": "8.5.0",
+  "responses": "5.2.2",
+  "normalization": [
+    "footer date",
+    "IQB-Studio Codebook -> IQB Codebook",
+    "exclude docProps/core.xml timestamps",
+    "random media filenames in first-reference order; image bytes and relationships preserved"
+  ],
+  "cases": [
+    {
+      "id": "nbsp-named",
+      "html": "<p>10&nbsp;kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&nbsp;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&nbsp;kg</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d5f9f53a5031c8a9ddd1e3a34b7ee7736fc65b91bc282eddaf594b77cbfe1a0c",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-named",
+      "html": "<p>10&nbsp;kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&nbsp;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&nbsp;kg</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "c84f505c7595bf22b934aae1101ee06805d326f0f5c4796d3cf2132c93391312",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-decimal",
+      "html": "<p>10&#160;kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&#160;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&#160;kg</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d5f9f53a5031c8a9ddd1e3a34b7ee7736fc65b91bc282eddaf594b77cbfe1a0c",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-decimal",
+      "html": "<p>10&#160;kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&#160;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&#160;kg</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "c84f505c7595bf22b934aae1101ee06805d326f0f5c4796d3cf2132c93391312",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-hex",
+      "html": "<p>10&#xA0;kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&#xA0;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&#xA0;kg</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d5f9f53a5031c8a9ddd1e3a34b7ee7736fc65b91bc282eddaf594b77cbfe1a0c",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-hex",
+      "html": "<p>10&#xA0;kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&#xA0;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&#xA0;kg</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "c84f505c7595bf22b934aae1101ee06805d326f0f5c4796d3cf2132c93391312",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-literal",
+      "html": "<p>10 kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10 kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10 kg</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d5f9f53a5031c8a9ddd1e3a34b7ee7736fc65b91bc282eddaf594b77cbfe1a0c",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "nbsp-literal",
+      "html": "<p>10 kg</p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10 kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10 kg</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "c84f505c7595bf22b934aae1101ee06805d326f0f5c4796d3cf2132c93391312",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "narrow-nbsp-decimal",
+      "html": "<p>20&#8239;cm</p>",
+      "text": "20 cm",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>20&#8239;cm</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>20&#8239;cm</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "2fbb32bd9464923bcb49d0204245fa54a7f3bab9bf6091260c2ed413b48fa745",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "narrow-nbsp-decimal",
+      "html": "<p>20&#8239;cm</p>",
+      "text": "20 cm",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>20&#8239;cm</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>20&#8239;cm</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d22b462f11aa99bb4342156f65b68b5e73092a2abd7fbc728e840519384a9e76",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "narrow-nbsp-hex",
+      "html": "<p>20&#x202F;cm</p>",
+      "text": "20 cm",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>20&#x202F;cm</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>20&#x202F;cm</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "2fbb32bd9464923bcb49d0204245fa54a7f3bab9bf6091260c2ed413b48fa745",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "narrow-nbsp-hex",
+      "html": "<p>20&#x202F;cm</p>",
+      "text": "20 cm",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>20&#x202F;cm</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>20&#x202F;cm</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d22b462f11aa99bb4342156f65b68b5e73092a2abd7fbc728e840519384a9e76",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "narrow-nbsp-literal",
+      "html": "<p>20 cm</p>",
+      "text": "20 cm",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>20 cm</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>20 cm</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "2fbb32bd9464923bcb49d0204245fa54a7f3bab9bf6091260c2ed413b48fa745",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "narrow-nbsp-literal",
+      "html": "<p>20 cm</p>",
+      "text": "20 cm",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>20 cm</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>20 cm</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "d22b462f11aa99bb4342156f65b68b5e73092a2abd7fbc728e840519384a9e76",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "repeated-nbsp",
+      "html": "<p>10&nbsp;&nbsp;kg</p>",
+      "text": "10  kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&nbsp;&nbsp;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&nbsp;&nbsp;kg</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "98e0a6b2f6a6517823bde18586896aa2d7f7e726ca30c3ce400b22de7a34d00d",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "repeated-nbsp",
+      "html": "<p>10&nbsp;&nbsp;kg</p>",
+      "text": "10  kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>10&nbsp;&nbsp;kg</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>10&nbsp;&nbsp;kg</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "3895359b0adbabd51aaa6e49e1b5ed55c532cca9184318cfc32fd9f31e0bc4bd",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "formatted-nbsp",
+      "html": "<p><strong>10&nbsp;kg</strong></p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p><strong>10&nbsp;kg</strong></p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p><strong>10&nbsp;kg</strong></p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "38224679ebf17932f60df3476af6d166cb9ead25bed982aef11d90bca1c1250c",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "formatted-nbsp",
+      "html": "<p><strong>10&nbsp;kg</strong></p>",
+      "text": "10 kg",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p><strong>10&nbsp;kg</strong></p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p><strong>10&nbsp;kg</strong></p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "809580cfa42b32d2b96e75f046ecc9753c28a560e7090f8992754f346f1d61e8",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "repeated-spaces",
+      "html": "<p>Abstand  bleibt</p>",
+      "text": "Abstand  bleibt",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": false,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>Abstand  bleibt</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>Abstand  bleibt</p>"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "6648dae92f513a0a1a1e2f6e76cdcdb1bd5265853c9ae43b14f10e5f8ffa4040",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    },
+    {
+      "id": "repeated-spaces",
+      "html": "<p>Abstand  bleibt</p>",
+      "text": "Abstand  bleibt",
+      "options": {
+        "exportFormat": "docx",
+        "missingsProfile": "",
+        "hasOnlyManualCoding": false,
+        "hasClosedVars": false,
+        "hasOnlyVarsWithCodes": false,
+        "hasDerivedVars": true,
+        "hasGeneralInstructions": true,
+        "codeLabelToUpper": false,
+        "showScore": true,
+        "hideItemVarRelation": true,
+        "trainingRequirement": "all"
+      },
+      "json": [
+        {
+          "key": "SPACE",
+          "name": "Synthetische Abstände",
+          "variables": [
+            {
+              "id": "V",
+              "label": "Abstände",
+              "sourceType": "BASE",
+              "generalInstruction": "<p>Abstand  bleibt</p>",
+              "codes": [
+                {
+                  "id": "1",
+                  "label": "RICHTIG",
+                  "description": "<p>Abstand  bleibt</p>",
+                  "score": "1"
+                }
+              ]
+            }
+          ],
+          "missings": []
+        }
+      ],
+      "docxParts": {
+        "_rels/.rels": "641d22a23aa9eb550103a7a01471eaeda5e84c69413e6e03e7fd290b4811a756",
+        "[Content_Types].xml": "df5eb4247e8594a57c753483112f94648c5b3c162ca0219282d2fff19332bc95",
+        "docProps/app.xml": "579eba9a8d602575736c3880cf5b529aabbadee0e8cc0e4df8573db0ceadbd4b",
+        "docProps/custom.xml": "8ec73cc7ce297e42cc652a1d1884d4ffb18ffa0ba7a6502a36f8da90d1be61a1",
+        "word/_rels/document.xml.rels": "aa8797f9c50610a37b43a791788cb6fe01a8527573c99c09bc946fff7bc31db3",
+        "word/_rels/fontTable.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footer1.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/_rels/footnotes.xml.rels": "bf64631f0bc7bd46712fef822bcfb22e069fa5779e133980ca0c9d81f00efc09",
+        "word/comments.xml": "dd2d62f68c6fd01fc4d7d44081587af54ea3e135b9486cc44fa3c62d087adfec",
+        "word/document.xml": "dfecbaf8f9be0b973a6651243b6b4f543017cff17adc3655762cc6ed9fef0c51",
+        "word/fontTable.xml": "a746dbb577ec5d68983d659707c0750ca89d40b9d3316e31af331d5e1c736bad",
+        "word/footer1.xml": "30efed85f494baa349a2bb3df6b05b5dc032d5e912fc5e3aa5d8b293ceea2127",
+        "word/footnotes.xml": "5a340540bed5ec7a6a1087be13fb0a226151e22e28c43a57d6e5f02acd53ba02",
+        "word/numbering.xml": "d7283fe87395f6e1c8f2d7f9ece168d2fb35865df19c2ad0660b1390805433fe",
+        "word/settings.xml": "9f0ff5915faa60180bf7eb19e0db13633fb19c5cffce8d36c7b9a8387f067ad8",
+        "word/styles.xml": "c51ec0d97223a6b40d98f915b1886d85a909998d4fecdb66ce8bd9be8ef68582"
+      }
+    }
+  ]
+}
