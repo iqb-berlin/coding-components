@@ -67,7 +67,7 @@ for (const root of [studio, box]) {
   const libraryRequire = createRequire(join(root, 'node_modules/@iqb/ngx-coding-components/package.json'));
   const manifest = libraryRequire('./package.json');
   assert.equal(manifest.dependencies['@iqb/responses'], undefined, 'Responses must not be privately pinned by the library');
-  assert.ok(manifest.peerDependencies['@iqb/responses'], 'the host must supply the Responses peer');
+  assert.equal(manifest.peerDependencies['@iqb/responses'], '^5.3.1', 'the peer must exclude 5.3.0');
   assert.equal(libraryRequire.resolve('@iqb/responses'), hostRequire.resolve('@iqb/responses'),
     'Schemer, validation and generator must resolve the same Responses implementation as their host');
   assert.equal(hostRequire('@iqb/responses/package.json').version, responsesVersion, 'host must use the tested version');
@@ -77,6 +77,13 @@ for (const root of [studio, box]) {
   const variable = { id: 'V', type: 'STRING', format: 'CHEM_ELEMENT_SYMBOLS',
     multiple: false, nullable: false, values: [], valuePositionLabels: [] };
   assert.match(ToTextFactory.varInfoAsText(variable).join(' '), /Chemische Elementsymbole/);
+  for (const [type, format, expected] of [
+    ['string', 'chem-element-symbols', /Chemische Elementsymbole/],
+    ['json', 'chem-molecule', /Molekül mit Bild/]
+  ]) {
+    assert.match(ToTextFactory.varInfoAsText({ ...variable, type, format }).join(' '), expected,
+      'installed Responses must recognize chemistry formats from stored unit XML');
+  }
 }
 assert.equal(artifacts[0], artifacts[1], 'both installed artifacts must have the same integrity');
 const Studio = (await hostModule(studio, 'apps/api/src/app/classes/download-workspaces.class.ts', {
@@ -204,6 +211,7 @@ await writeFile(join(output, 'installation-comparison.json'), JSON.stringify({ h
   inlineImageCases: inlineImageCases.length, inlineImageExportPairs,
   identicalJson: true, identicalAllDocxParts: true, artifactIntegrity: artifacts[0],
   identicalInstalledPackageFiles: true, installedPackageFiles: builtFiles.length,
-  responsesVersion, responsesSharedWithHost: true, currentVariableInfoValidated: true,
+  responsesVersion, responsesPeerRange: '^5.3.1', responsesSharedWithHost: true,
+  currentVariableInfoValidated: true, storedChemistryFormatsRecognized: true,
   realHostAdapters: true, inMemoryRepositories: true, httpBrowserRedis: false, windowsWord: false }, null, 2));
 console.log(`PASS: ${comparisons} export pairs through real Studio and Box preparation/adapters.`);
