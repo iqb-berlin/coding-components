@@ -1,95 +1,203 @@
 param(
-  [Parameter(Mandatory = $true)][string]$Directory
+  [Parameter(Mandatory = $true)][string]$Directory,
+  [switch]$IncludeStudioReferences
 )
-# Run on Windows with desktop Microsoft Word installed. Opens copies read-only;
-# never saves changes to the DOCX sources. PDF and JSON are acceptance evidence,
-# not a replacement for inspecting the rendered pages.
+# Windows desktop Word acceptance for the staged synthetic codebook documents.
+# Sources are opened read-only, without OpenAndRepair, and never saved.
 $ErrorActionPreference = 'Stop'
-if ($env:OS -ne 'Windows_NT') { throw 'This check requires Microsoft Word on Windows.' }
-$folder = (Resolve-Path $Directory).Path
-$manifest = Get-Content (Join-Path $folder 'word-expectations.json') -Raw | ConvertFrom-Json
-if (@($manifest.cases).Count -ne 3) { throw 'Expected three Word acceptance cases.' }
-$suffixes = @($manifest.cases | ForEach-Object { $_.suffix } | Sort-Object -Unique)
-if (($suffixes -join ',') -ne ',-rich-no-scores,-rich-scores') { throw 'Unexpected Word acceptance cases.' }
-$word = $null
+if ($env:OS -ne 'Windows_NT') { throw 'Windows desktop Word is required.' }
+$folder = (Resolve-Path -LiteralPath $Directory).Path
+$expectations = Get-Content (Join-Path $folder 'word-expectations.json') -Raw | ConvertFrom-Json
+# Accept both the original three-case matrix and the seven-case inline-image matrix.
+$baseline = @('', '-rich-no-scores', '-rich-scores')
+$inline = @('-inline-mixed-code-no-scores', '-inline-mixed-code-scores',
+  '-inline-mixed-general-no-scores', '-inline-mixed-general-scores')
+$suffixes = @($expectations.cases | ForEach-Object { $_.suffix })
+$accepted = if ($suffixes.Count -eq 3) { $baseline } else { $baseline + $inline }
+if ($suffixes.Count -ne $accepted.Count -or
+    (Compare-Object ($suffixes | Sort-Object) ($accepted | Sort-Object))) {
+  throw 'Expected the complete three- or seven-case Word acceptance matrix.'
+}
+$files = @()
+foreach ($expected in $expectations.cases) {
+  foreach ($hostName in @('studio', 'kodierbox')) {
+    $name = "$hostName$($expected.suffix).docx"
+    $files += [pscustomobject]@{
+      file = $name; uiAlias = ('W{0:D2}.docx' -f ($files.Count + 1))
+      sha256 = (Get-FileHash -LiteralPath (Join-Path $folder $name) -Algorithm SHA256).Hash
+      kind = 'current-installed-host-export'; host = $hostName
+      case = $expected.suffix; expected = $expected
+    }
+  }
+}
+if ($IncludeStudioReferences) {
+  foreach ($scoreMode in @('scores', 'no-scores')) {
+    $name = "original-studio-$scoreMode.docx"
+    $expected = @($expectations.cases | Where-Object { $_.suffix -eq "-rich-$scoreMode" })[0]
+    $files += [pscustomobject]@{
+      file = $name; uiAlias = ('W{0:D2}.docx' -f ($files.Count + 1))
+      sha256 = (Get-FileHash -LiteralPath (Join-Path $folder $name) -Algorithm SHA256).Hash
+      kind = 'independent-pre-harmonization-studio-reference'; host = 'original-studio'
+      case = $expected.suffix; expected = $expected
+    }
+  }
+}
+$manifest = [pscustomobject]@{ files = $files }
+$output = Join-Path $folder ('WordResults' + (Get-Date -Format 'yyyyMMddHHmmss') + '-' + [guid]::NewGuid().ToString('N').Substring(0, 6))
+New-Item -ItemType Directory -Path $output | Out-Null
+function Write-Stage([string]$message) {
+  Add-Content -Path $progressFile -Value ((Get-Date -Format o) + ' ' + $message) -Encoding UTF8
+}
+$localInput = Join-Path $env:TEMP ('CodebookWord' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $localInput | Out-Null
+$progressFile = Join-Path $localInput 'progress.log'
+Write-Stage "Starting process $PID"
 $results = @()
+$word = $null
+$ownInstance = $false
+$failure = $null
 try {
   $word = New-Object -ComObject Word.Application
-  $word.Visible = $false
+  Write-Stage 'Created isolated Word instance'
+  # Refuse to operate on a COM instance containing the user's open documents.
+  if ($word.Documents.Count -ne 0) { throw 'Word instance already contains open documents; stopping.' }
+  $ownInstance = $true
+  $word.Visible = $true
   $word.DisplayAlerts = 0
   $word.AutomationSecurity = 3
-  foreach ($expected in $manifest.cases) {
-   foreach ($hostName in @('studio', 'kodierbox')) {
-    $name = "$hostName$($expected.suffix)"
+  foreach ($file in $manifest.files) {
     $document = $null
     try {
-      $path = Join-Path $folder "$name.docx"
+      [string]$source = Join-Path $folder $file.file
+      if ((Get-FileHash $source -Algorithm SHA256).Hash -ne $file.sha256) {
+        throw "Input checksum mismatch: $($file.uiAlias)"
+      }
+      [string]$path = Join-Path $localInput $file.uiAlias
+      Copy-Item -LiteralPath $source -Destination $path
+      Write-Stage "Opening $($file.uiAlias) from verified local copy"
       # ConfirmConversions=false, ReadOnly=true, AddToRecentFiles=false.
-      # Open normally; do not request Word's OpenAndRepair mode.
-      $document = $word.Documents.Open($path, $false, $true, $false)
+      # OpenAndRepair remains its default false; no repair fallback is used.
+      $confirmConversions = $false
+      $readOnly = $true
+      $addToRecentFiles = $false
+      $document = $word.Documents.Open([ref]$path, [ref]$confirmConversions, [ref]$readOnly, [ref]$addToRecentFiles)
+      Write-Stage "Opened $($file.uiAlias)"
       $document.Repaginate()
-      if ($document.Fields.Update() -ne 0) { throw "$name could not update all document fields." }
+      Write-Stage 'Repaginated'
+      if ($document.Fields.Update() -ne 0) { throw 'Failed to update document fields.' }
       foreach ($section in $document.Sections) {
         foreach ($footer in $section.Footers) {
-          if ($footer.Range.Fields.Update() -ne 0) { throw "$name could not update all footer fields." }
+          if ($footer.Range.Fields.Update() -ne 0) { throw 'Failed to update footer fields.' }
         }
       }
       $document.Repaginate()
+      Write-Stage 'Updated fields'
       $pages = $document.ComputeStatistics(2)
       $tables = $document.Tables.Count
       $images = $document.InlineShapes.Count
       $formulas = $document.OMaths.Count
       $headings = @($document.Paragraphs | Where-Object { $_.OutlineLevel -eq 2 }).Count
-      if ($pages -lt 2) { throw "$name must exercise multiple pages." }
-      if ($tables -ne $expected.tables) { throw "$name lost tables: $tables / $($expected.tables)" }
-      if ($images -ne $expected.images) { throw "$name lost images: $images / $($expected.images)" }
-      if ($formulas -ne $expected.formulas) { throw "$name lost equations: $formulas / $($expected.formulas)" }
-      if ($headings -ne $expected.variableHeadings) { throw "$name lost variable headings." }
-      foreach ($table in $document.Tables) {
-        if ($table.Columns.Count -ne $expected.columns) { throw "$name has an incorrect table column count." }
-        if ($table.Rows.AllowBreakAcrossPages -ne 0) { throw "$name allows code rows to split across pages." }
-      }
-      $footerText = $document.Sections.Item(1).Footers.Item(1).Range.Text
-      if (-not $footerText.Contains('IQB Codebook')) { throw "$name is missing the footer label." }
-      $footerFields = $document.Sections.Item(1).Footers.Item(1).Range.Fields
-      $pageFields = @($footerFields | Where-Object { $_.Type -eq 33 }) # wdFieldPage
-      $totalFields = @($footerFields | Where-Object { $_.Type -eq 26 }) # wdFieldNumPages
-      if ($pageFields.Count -ne 1 -or $totalFields.Count -ne 1) { throw "$name lost PAGE or NUMPAGES." }
-      if ([int]$totalFields[0].Result.Text.Trim() -ne $pages) { throw "$name has an incorrect total page field." }
-      $pageValue = [int]$pageFields[0].Result.Text.Trim()
-      if ($pageValue -lt 1 -or $pageValue -gt $pages) { throw "$name has an incorrect current page field." }
       $text = $document.Content.Text
-      if ($expected.hasMissingZero -and -not $text.Contains('0 Missing zero')) { throw "$name is missing Missing 0." }
-      $document.ExportAsFixedFormat((Join-Path $folder "$name-word-windows.pdf"), 17)
-      $results += [pscustomobject]@{
-        case = $expected.suffix; file = "$name.docx"; pages = $pages; tables = $tables; images = $images; formulas = $formulas
-        text = $text; footer = $footerText; wordVersion = $word.Version; wordBuild = $word.Build
+      $footerText = $document.Sections.Item(1).Footers.Item(1).Range.Text
+      Write-Stage "Collected counts: pages $pages tables $tables images $images formulas $formulas"
+      $expected = $file.expected
+      if ($tables -ne $expected.tables) { throw "Lost tables: $tables / $($expected.tables)" }
+      if ($images -ne $expected.images) { throw "Lost images: $images / $($expected.images)" }
+      if ($formulas -ne $expected.formulas) { throw "Lost equations: $formulas / $($expected.formulas)" }
+      if ($headings -ne $expected.variableHeadings) { throw 'Lost variable headings.' }
+      if (-not $file.case.Contains('-inline-') -and $pages -lt 2) { throw 'Multi-page coverage missing.' }
+      Write-Stage 'Validating tables'
+      for ($tableIndex = 1; $tableIndex -le $document.Tables.Count; $tableIndex++) {
+        $table = $document.Tables.Item($tableIndex)
+        if ($table.Columns.Count -ne $expected.columns) { throw 'Incorrect table column count.' }
+        if ($table.Rows.AllowBreakAcrossPages -ne 0) { throw 'Code rows can split across pages.' }
       }
+      Write-Stage 'Validated tables'
+      $footerLabel = if ($file.host -eq 'original-studio') { 'IQB-Studio Codebook' } else { 'IQB Codebook' }
+      if (-not $footerText.Contains($footerLabel)) { throw 'Footer label missing.' }
+      $footerFields = $document.Sections.Item(1).Footers.Item(1).Range.Fields
+      Write-Stage "Validating $($footerFields.Count) footer fields"
+      $pageFields = @()
+      $totalFields = @()
+      for ($fieldIndex = 1; $fieldIndex -le $footerFields.Count; $fieldIndex++) {
+        $field = $footerFields.Item($fieldIndex)
+        if ($field.Type -eq 33) { $pageFields += $field }
+        if ($field.Type -eq 26) { $totalFields += $field }
+      }
+      if ($pageFields.Count -ne 1 -or $totalFields.Count -ne 1) { throw 'PAGE / NUMPAGES missing.' }
+      if ([int]$totalFields[0].Result.Text.Trim() -ne $pages) { throw 'Incorrect total page field.' }
+      $pageValue = [int]$pageFields[0].Result.Text.Trim()
+      if ($pageValue -lt 1 -or $pageValue -gt $pages) { throw 'Incorrect current page field.' }
+      Write-Stage 'Validated page fields'
+      if ($expected.hasMissingZero -and -not $text.Contains('0 Missing zero')) { throw 'Missing 0 lost.' }
+      if ($file.case.Contains('-inline-')) {
+        foreach ($token in @('VOR', 'NACH', 'WEITER', 'HTML konnte nicht verarbeitet werden.')) {
+          if (-not $text.Contains($token)) { throw "Inline-image surrounding content lost: $token" }
+        }
+      }
+      $pdf = [IO.Path]::GetFileNameWithoutExtension($file.uiAlias) + '.pdf'
+      [string]$pdfPath = Join-Path $output $pdf
+      Write-Stage "Exporting $pdf"
+      $document.ExportAsFixedFormat($pdfPath, 17)
+      Write-Stage "Exported $pdf"
+      $results += [pscustomobject]@{
+        file = $file.file; alias = $file.uiAlias; kind = $file.kind; host = $file.host
+        case = $file.case; pages = $pages; tables = $tables; images = $images
+        formulas = $formulas; variableHeadings = $headings; text = $text; footer = $footerText
+        pdf = $pdf; wordVersion = $word.Version; wordBuild = $word.Build
+      }
+      Write-Host "PASS $($file.uiAlias) $pages pages $tables tables $images images $formulas equations"
     } finally {
       if ($null -ne $document) {
-        $document.Close(0)
+        $saveChanges = 0
+        $document.Close([ref]$saveChanges)
+        Write-Stage "Closed $($file.uiAlias) without saving"
         [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($document)
       }
     }
-   }
   }
-  foreach ($group in @($results | Group-Object -Property case)) {
-    $pair = $group.Group
-    if ($pair.Count -ne 2) { throw 'Missing host document in Word comparison.' }
-    if ($pair[0].text -cne $pair[1].text) { throw "$($group.Name): different content in Word." }
-    if ($pair[0].pages -ne $pair[1].pages) { throw "$($group.Name): different page counts in Word." }
-    if ($pair[0].footer -cne $pair[1].footer) { throw "$($group.Name): different footers in Word." }
+  foreach ($group in @($results | Where-Object { $_.kind -eq 'current-installed-host-export' } | Group-Object -Property case)) {
+    $pair = @($group.Group)
+    if ($pair.Count -ne 2) { throw 'Host pair missing.' }
+    if ($pair[0].text -cne $pair[1].text) { throw "Different host text: $($group.Name)" }
+    if ($pair[0].pages -ne $pair[1].pages) { throw "Different host page counts: $($group.Name)" }
+    if ($pair[0].footer -cne $pair[1].footer) { throw "Different host footers: $($group.Name)" }
   }
-  $report = [pscustomobject]@{
-    checkedAtUtc = [DateTime]::UtcNow.ToString('o'); platform = 'Windows desktop Word'
-    automatedChecksPassed = $true; visualAcceptanceComplete = $false
-    documents = @($results | Select-Object case,file,pages,tables,images,formulas,wordVersion,wordBuild)
-  }
-  $report | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $folder 'word-windows-result.json') -Encoding UTF8
-  Write-Output 'Word checks passed. Inspect all six PDFs for page breaks, fonts, formulas, images and page fields before visual acceptance.'
+} catch {
+  $failure = $_.Exception.ToString()
+  Write-Host $failure -ForegroundColor Red
 } finally {
   if ($null -ne $word) {
-    $word.Quit(0)
-    [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($word)
+    try {
+      if ($ownInstance) {
+        $saveChanges = 0
+        $word.Quit([ref]$saveChanges)
+      }
+    } catch {
+      $failure = "$failure`nWord cleanup: $($_.Exception)"
+    } finally {
+      [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($word)
+    }
   }
+  $hashesUnchanged = $true
+  foreach ($file in $manifest.files) {
+    if ((Get-FileHash (Join-Path $folder $file.file) -Algorithm SHA256).Hash -ne $file.sha256) {
+      $hashesUnchanged = $false
+    }
+  }
+  if (-not $hashesUnchanged) { $failure = "$failure`nSource checksums changed." }
+  $report = [pscustomobject]@{
+    checkedAtUtc = [DateTime]::UtcNow.ToString('o'); platform = 'Windows desktop Word'
+    automatedChecksPassed = ($null -eq $failure -and $results.Count -eq $manifest.files.Count -and $hashesUnchanged)
+    visualAcceptanceComplete = $false; inputHashesUnchanged = $hashesUnchanged
+    failure = $failure; documents = $results; inputs = $manifest
+  }
+  Copy-Item -LiteralPath $progressFile -Destination (Join-Path $output 'progress.log')
+  $pendingReport = Join-Path $output 'word-windows-result.pending.json'
+  $report | ConvertTo-Json -Depth 12 | Set-Content $pendingReport -Encoding UTF8
+  Move-Item -LiteralPath $pendingReport -Destination (Join-Path $output 'word-windows-result.json')
+  Write-Host "Evidence: $output"
+  Remove-Item -LiteralPath $localInput -Recurse -Force
 }
+if ($null -ne $failure) { throw $failure }
+Write-Host 'Automated checks complete. Visually inspect all Word PDFs before acceptance.'
