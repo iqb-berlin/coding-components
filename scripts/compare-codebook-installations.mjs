@@ -48,6 +48,8 @@ async function packageFiles(directory, prefix = '') {
 }
 const builtPackage = fileURLToPath(new URL('../dist/ngx-coding-components', import.meta.url));
 const builtFiles = await packageFiles(builtPackage);
+const testedLock = JSON.parse(await readFile(new URL('../package-lock.json', import.meta.url), 'utf8'));
+const responsesVersion = testedLock.packages['node_modules/@iqb/responses'].version;
 const artifacts = [];
 for (const root of [studio, box]) {
   const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
@@ -61,6 +63,20 @@ for (const root of [studio, box]) {
     assert.deepEqual(await readFile(join(root, 'node_modules/@iqb/ngx-coding-components', file)),
       await readFile(join(builtPackage, file)), `stale or different installed package file: ${root}/${file}`);
   }
+  const hostRequire = createRequire(join(root, 'package.json'));
+  const libraryRequire = createRequire(join(root, 'node_modules/@iqb/ngx-coding-components/package.json'));
+  const manifest = libraryRequire('./package.json');
+  assert.equal(manifest.dependencies['@iqb/responses'], undefined, 'Responses must not be privately pinned by the library');
+  assert.ok(manifest.peerDependencies['@iqb/responses'], 'the host must supply the Responses peer');
+  assert.equal(libraryRequire.resolve('@iqb/responses'), hostRequire.resolve('@iqb/responses'),
+    'Schemer, validation and generator must resolve the same Responses implementation as their host');
+  assert.equal(hostRequire('@iqb/responses/package.json').version, responsesVersion, 'host must use the tested version');
+  const { CodingSchemeFactory, ToTextFactory } = libraryRequire('@iqb/responses');
+  assert.deepEqual(CodingSchemeFactory.validate([{ id: 'V', type: 'NO_VALUE' }],
+    [{ id: 'V', sourceType: 'BASE_NO_VALUE', codes: [] }]), [], 'installed library must accept current NO_VALUE spelling');
+  const variable = { id: 'V', type: 'STRING', format: 'CHEM_ELEMENT_SYMBOLS',
+    multiple: false, nullable: false, values: [], valuePositionLabels: [] };
+  assert.match(ToTextFactory.varInfoAsText(variable).join(' '), /Chemische Elementsymbole/);
 }
 assert.equal(artifacts[0], artifacts[1], 'both installed artifacts must have the same integrity');
 const Studio = (await hostModule(studio, 'apps/api/src/app/classes/download-workspaces.class.ts', {
@@ -188,5 +204,6 @@ await writeFile(join(output, 'installation-comparison.json'), JSON.stringify({ h
   inlineImageCases: inlineImageCases.length, inlineImageExportPairs,
   identicalJson: true, identicalAllDocxParts: true, artifactIntegrity: artifacts[0],
   identicalInstalledPackageFiles: true, installedPackageFiles: builtFiles.length,
+  responsesVersion, responsesSharedWithHost: true, currentVariableInfoValidated: true,
   realHostAdapters: true, inMemoryRepositories: true, httpBrowserRedis: false, windowsWord: false }, null, 2));
 console.log(`PASS: ${comparisons} export pairs through real Studio and Box preparation/adapters.`);
