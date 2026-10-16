@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -60,7 +61,8 @@ export class CodeRulesComponent {
 
   constructor(
     public schemerService: SchemerService,
-    public editRuleReferenceDialog: MatDialog
+    public editRuleReferenceDialog: MatDialog,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   setCodeRulesChanged() {
@@ -105,6 +107,7 @@ export class CodeRulesComponent {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
+        this.changeDetector.markForCheck();
         if (dialogResult !== false && dialogResult !== undefined && dialogResult !== null) {
           ruleSet.valueArrayPos = dialogResult;
           this.setCodeRulesChanged();

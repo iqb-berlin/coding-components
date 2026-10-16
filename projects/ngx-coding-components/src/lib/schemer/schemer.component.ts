@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -99,6 +100,7 @@ export class SchemerComponent implements OnDestroy {
     this.varCodingChangedSubscription = value.varCodingChanged
       .pipe(debounceTime(300))
       .subscribe(() => {
+        this.changeDetector.markForCheck();
         this.updateVariableLists();
         if (!this.hasIdentifierConflict) {
           this.codingSchemeChanged.emit(this.schemerService.codingScheme);
@@ -155,7 +157,8 @@ export class SchemerComponent implements OnDestroy {
     private showCodingSchemeDialog: MatDialog,
     private selectVariableDialog: MatDialog,
     private editSourceParametersDialog: MatDialog,
-    private inputDialog: MatDialog
+    private inputDialog: MatDialog,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   private tr(
@@ -172,6 +175,7 @@ export class SchemerComponent implements OnDestroy {
   }
 
   updateVariableLists() {
+    this.changeDetector.markForCheck();
     const previousSelectedId = this.selectedCoding$.value?.id;
 
     if (this.schemerFacade.tryResolveIdentifierConflicts()) {
@@ -491,6 +495,7 @@ export class SchemerComponent implements OnDestroy {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
+        this.changeDetector.markForCheck();
         if (dialogResult && typeof dialogResult === 'object' && this.schemerService.codingScheme) {
           const timestamp = new Date().getTime();
           const dialogResultTyped: EditSourceParametersDialogData =
@@ -559,6 +564,7 @@ export class SchemerComponent implements OnDestroy {
         }
       );
       dialogRef.afterClosed().subscribe((variables: string[]) => {
+        this.changeDetector.markForCheck();
         let changed = false;
         if (variables && variables.length > 0) {
           if (this.schemerService && this.schemerService.codingScheme) {
@@ -600,6 +606,7 @@ export class SchemerComponent implements OnDestroy {
         data: dialogData
       });
       dialogRef.afterClosed().subscribe(result => {
+        this.changeDetector.markForCheck();
         if (typeof result === 'string') {
           const variableCodings =
             this.schemerService.codingScheme?.variableCodings;
@@ -662,6 +669,7 @@ export class SchemerComponent implements OnDestroy {
         }
       );
       dialogRef.afterClosed().subscribe((variables: string[]) => {
+        this.changeDetector.markForCheck();
         let changed = false;
         if (variables && variables.length > 0) {
           variables.forEach(v => {
@@ -739,6 +747,7 @@ export class SchemerComponent implements OnDestroy {
         }
       );
       dialogRef.afterClosed().subscribe((variables: string[]) => {
+        this.changeDetector.markForCheck();
         let changed = false;
         if (variables && variables.length > 0) {
           variables.forEach(v => {

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -137,13 +138,15 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     private confirmDialog: MatDialog,
     private generateCodingDialog: MatDialog,
     private messageDialog: MatDialog,
-    private editSourceParametersDialog: MatDialog
+    private editSourceParametersDialog: MatDialog,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.lastChangeFromSubscription = this.lastChangeFrom$
       .pipe(debounceTime(500))
       .subscribe(source => {
+        this.changeDetector.markForCheck();
         if (source !== 'init') {
           this.updateHasResidualAutoCode();
           this.updateHasIntendedIncompleteAutoCode();
@@ -204,6 +207,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         autoFocus: false
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
+        this.changeDetector.markForCheck();
         if (typeof dialogResult === 'string' && this.varCoding) {
           this.varCoding.manualInstruction = dialogResult;
           this.varCodingChanged.emit(this.varCoding);
@@ -232,6 +236,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         }
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
+        this.changeDetector.markForCheck();
         if (typeof dialogResult === 'string') {
           this.schemerService.setCodingToTextMode(
             dialogResult as CodingToTextMode
@@ -261,6 +266,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         });
         dialogRef.afterClosed().subscribe(result => {
+          this.changeDetector.markForCheck();
           if (result === true && this.schemerService.codingScheme) {
             if (this.varCoding && this.varCoding.sourceType === 'BASE') {
               this.schemerService.codingScheme.variableCodings =
@@ -313,6 +319,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         );
         dialogRef.afterClosed().subscribe(dialogResult => {
+          this.changeDetector.markForCheck();
           if (
             typeof dialogResult !== 'undefined' &&
             dialogResult !== false &&
@@ -396,6 +403,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         }
       });
       dialogRef.afterClosed().subscribe(result => {
+        this.changeDetector.markForCheck();
         if (result === true) this.performPasteSingleCode();
       });
       return;
@@ -494,6 +502,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
+        this.changeDetector.markForCheck();
         if (
           dialogResult && typeof dialogResult === 'object' &&
           this.varCoding
