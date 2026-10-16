@@ -2,7 +2,8 @@ const { defineConfig } = require('@playwright/test');
 
 module.exports = defineConfig({
   testDir: './e2e',
-  testMatch: 'schemer-responsive.spec.js',
+  testMatch: process.env.SCHEMER_ARTIFACT ? 'schemer-embedded.spec.js' :
+    ['schemer-responsive.spec.js', 'schemer-embedded.spec.js'],
   fullyParallel: true,
   workers: 2,
   use: {
@@ -12,7 +13,7 @@ module.exports = defineConfig({
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure'
   },
-  webServer: {
+  webServer: process.env.SCHEMER_ARTIFACT ? undefined : {
     command: 'npx ng serve schemer --host 127.0.0.1 --port 4210',
     url: 'http://127.0.0.1:4210',
     reuseExistingServer: !process.env.CI,
