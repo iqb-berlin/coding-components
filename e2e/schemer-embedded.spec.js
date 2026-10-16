@@ -18,6 +18,8 @@ test.afterEach(async ({ page }) => {
     requestAnimationFrame(() => requestAnimationFrame(resolve));
   }));
   expect(runtimeErrors.get(page)).toEqual([]);
+  const zones = await Promise.all(page.frames().map(frame => frame.evaluate(() => typeof window.Zone)));
+  expect(zones.every(value => value === 'undefined')).toBe(true);
 });
 
 const makeVariable = id => ({
@@ -92,6 +94,26 @@ test('embedded Schemer renders a later host update and its read-only role', asyn
   await expect(frame.locator('.var-list-entry')).toHaveText(['replacement']);
   await expect(frame.locator('.var-list-buttons button').first()).toBeDisabled();
   await expect(frame.locator('var-coding .variable-details input').first()).toBeDisabled();
+
+  const withoutRole = makeStart([makeVariable('refresh_without_role')]);
+  delete withoutRole.schemerConfig;
+  await page.evaluate(message => {
+    document.querySelector('iframe').contentWindow.postMessage(message, '*');
+  }, withoutRole);
+  await expect(frame.locator('.var-list-entry')).toHaveText(['refresh_without_role']);
+  await expect(frame.locator('var-coding .variable-details input').first()).toBeDisabled();
+
+  await page.evaluate(message => {
+    document.querySelector('iframe').contentWindow.postMessage(message, '*');
+  }, makeStart([makeVariable('replacement')], 'super'));
+  await expect(frame.locator('.var-list-buttons button').first()).toBeEnabled();
+  await expect(frame.locator('var-coding .variable-details input').first()).toBeEnabled();
+
+  await page.evaluate(message => {
+    document.querySelector('iframe').contentWindow.postMessage(message, '*');
+  }, makeStart([]));
+  await expect(frame.locator('.var-list-entry')).toHaveCount(0);
+  await expect(frame.getByText('Es sind keine Basis-Variablen definiert.', { exact: false })).toBeVisible();
 });
 
 test('embedded Schemer reports edited coding data back to the host session', async ({ page }) => {
@@ -258,3 +280,32 @@ test('embedded Schemer saves source selections in the migrated Material dialog',
     return coding ? { sourceType: coding.sourceType, sources: coding.deriveSources } : null;
   })).toEqual({ sourceType: 'SUM_SCORE', sources: ['response_1', 'response_2'] });
 });
+
+// SOLVER references deliberately use literal ${...} tokens.
+/* eslint-disable no-template-curly-in-string */
+[
+  { expression: 'sum([${response_1},1,2])', value: '3', result: '6' },
+  { expression: 'abs(complex(${response_1},4))', value: '3', result: '5' },
+  { expression: 'number(unit(${response_1},"cm"),"mm")', value: '3', result: '30' },
+  { expression: 'number(bignumber("0.1")+bignumber("0.2"))', value: '3', result: '0.3' },
+  { expression: 'ceil(${response_1})', value: '0.000000000000001', result: '0' },
+  { expression: '${response_1}==0 ? 1:0', value: '0.000000000000001', result: '1' }
+].forEach(({ expression, value, result }) => {
+  test(`embedded Schemer preserves full SOLVER semantics: ${expression}`, async ({ page }) => {
+    const frame = await loadEmbeddedSchemer(page);
+    await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+    await frame.locator('.var-list-buttons button').first().click();
+    const dialog = frame.getByRole('dialog');
+    await dialog.getByLabel('Name', { exact: true }).fill('SolverCheck');
+    await dialog.getByRole('combobox', { name: 'Quell-Variablen' }).click();
+    await frame.getByRole('option', { name: 'response_1', exact: true }).click();
+    await page.keyboard.press('Escape');
+    await dialog.getByRole('combobox', { name: 'Ableitungsmethode' }).click();
+    await frame.getByRole('option', { name: 'Mathematischer Ausdruck (Solver)', exact: true }).click();
+    await dialog.getByLabel('Ausdruck für Solver', { exact: true }).fill(expression);
+    await dialog.locator('.solver-test-values').getByLabel('response_1', { exact: true }).fill(value);
+    await dialog.getByRole('button', { name: 'Testen', exact: true }).click();
+    await expect(dialog.locator('.solver-test-result-ok')).toHaveText(`Ergebnis: ${result}`);
+  });
+});
+/* eslint-enable no-template-curly-in-string */
