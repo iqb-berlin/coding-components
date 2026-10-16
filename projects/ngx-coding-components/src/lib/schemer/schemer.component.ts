@@ -491,7 +491,7 @@ export class SchemerComponent implements OnDestroy {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false && this.schemerService.codingScheme) {
+        if (dialogResult && typeof dialogResult === 'object' && this.schemerService.codingScheme) {
           const timestamp = new Date().getTime();
           const dialogResultTyped: EditSourceParametersDialogData =
             dialogResult;
@@ -600,7 +600,7 @@ export class SchemerComponent implements OnDestroy {
         data: dialogData
       });
       dialogRef.afterClosed().subscribe(result => {
-        if (result !== false) {
+        if (typeof result === 'string') {
           const variableCodings =
             this.schemerService.codingScheme?.variableCodings;
           const identifierAnalysis = variableCodings ?

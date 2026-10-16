@@ -158,7 +158,7 @@ export class CodeRuleListComponent {
           autoFocus: false
         });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
+        if (dialogResult !== false && dialogResult !== undefined && dialogResult !== null) {
           rule.fragment = dialogResult;
           this.setCodeRulesChanged();
         }

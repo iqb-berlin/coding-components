@@ -559,6 +559,38 @@ describe('VarCodingComponent', () => {
     expect(component.varCoding).toBeNull();
   });
 
+  [undefined, null].forEach(result => {
+    it(`deactivateBaseVar preserves the entire coding on dismissal ${result}`, () => {
+      const first = CodingFactory.createCodingVariable('b1');
+      first.manualInstruction = '<p>Keep instruction</p>';
+      first.codes = [{
+        id: 0, type: 'FULL_CREDIT', score: 0, label: 'Keep code'
+      }];
+      const second = CodingFactory.createCodingVariable('b2');
+      component.varCoding = first;
+      schemerService.codingScheme!.variableCodings = [first, second];
+      const before = JSON.stringify(schemerService.codingScheme);
+      const emit = spyOn(component.varCodingChanged, 'emit');
+      dialogOpenSpy.and.returnValue({ afterClosed: () => of(result) });
+      component.deactivateBaseVar();
+      expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+      expect(component.varCoding).toBe(first);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it(`source parameters and instruction survive dismissed result ${result}`, () => {
+      component.varCoding = CodingFactory.createCodingVariable('b1');
+      component.varCoding.manualInstruction = 'Keep';
+      const before = JSON.stringify(component.varCoding);
+      const emit = spyOn(component.varCodingChanged, 'emit');
+      dialogOpenSpy.and.returnValue({ afterClosed: () => of(result) });
+      component.editSourceParameters();
+      component.editTextDialog_manualInstruction();
+      expect(JSON.stringify(component.varCoding)).toBe(before);
+      expect(emit).not.toHaveBeenCalled();
+    });
+  });
+
   it('deactivateBaseVar should do nothing when confirm dialog is cancelled', () => {
     const emitSpy = spyOn(component.varCodingChanged, 'emit');
     const createSpy = spyOn(CodingFactory, 'createBaseCodingVariable');

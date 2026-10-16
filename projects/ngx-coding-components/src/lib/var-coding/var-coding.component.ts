@@ -204,11 +204,9 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         autoFocus: false
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult !== 'undefined') {
-          if (dialogResult !== false && this.varCoding) {
-            this.varCoding.manualInstruction = dialogResult;
-            this.varCodingChanged.emit(this.varCoding);
-          }
+        if (typeof dialogResult === 'string' && this.varCoding) {
+          this.varCoding.manualInstruction = dialogResult;
+          this.varCodingChanged.emit(this.varCoding);
         }
       });
     }
@@ -263,7 +261,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         });
         dialogRef.afterClosed().subscribe(result => {
-          if (result !== false && this.schemerService.codingScheme) {
+          if (result === true && this.schemerService.codingScheme) {
             if (this.varCoding && this.varCoding.sourceType === 'BASE') {
               this.schemerService.codingScheme.variableCodings =
                 this.schemerService.codingScheme.variableCodings.filter(
@@ -497,8 +495,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
         if (
-          typeof dialogResult !== 'undefined' &&
-          dialogResult !== false &&
+          dialogResult && typeof dialogResult === 'object' &&
           this.varCoding
         ) {
           const {

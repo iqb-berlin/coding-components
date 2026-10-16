@@ -67,6 +67,19 @@ describe('CodeInstructionComponent', () => {
     expect(dialogOpenSpy).not.toHaveBeenCalled();
   });
 
+  [undefined, null].forEach(result => {
+    it(`keeps a code instruction on dismissed result ${result}`, () => {
+      component.code = {
+        id: 0, type: 'FULL_CREDIT', score: 0, label: '', manualInstruction: 'Keep'
+      };
+      const emit = spyOn(component.codeDataChanged, 'emit');
+      dialogOpenSpy.and.returnValue({ afterClosed: () => of(result) });
+      component.editTextDialog_manualInstruction();
+      expect(component.code.manualInstruction).toBe('Keep');
+      expect(emit).not.toHaveBeenCalled();
+    });
+  });
+
   it('editTextDialog_manualInstruction should update code and emit when dialog returns string', () => {
     component.code = {
       id: 1,

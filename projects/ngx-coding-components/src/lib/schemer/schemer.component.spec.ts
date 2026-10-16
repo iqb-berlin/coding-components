@@ -1270,6 +1270,32 @@ describe('SchemerComponent', () => {
     expect(editSourceParametersDialog.open).not.toHaveBeenCalled();
   });
 
+  [undefined, null].forEach(result => {
+    it(`addVarScheme ignores dismissed dialog result ${result}`, () => {
+      schemerService.userRole = 'RW_MAXIMAL';
+      schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
+      const emit = spyOn(component.codingSchemeChanged, 'emit');
+      editSourceParametersDialog.afterClosedValue = result;
+      component.addVarScheme();
+      expect(schemerService.codingScheme?.variableCodings).toEqual([]);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it(`renameVarScheme keeps the alias on dismissed dialog result ${result}`, () => {
+      const coding = CodingFactory.createCodingVariable('derived');
+      coding.sourceType = 'COPY_VALUE';
+      coding.alias = 'KeepAlias';
+      schemerService.setCodingScheme({ variableCodings: [coding] } as unknown as never);
+      component.selectedCoding$.next(coding);
+      inputDialog.afterClosedValue = result;
+      const emit = spyOn(component.codingSchemeChanged, 'emit');
+      component.renameVarScheme();
+      expect(coding.alias).toBe('KeepAlias');
+      expect(emit).not.toHaveBeenCalled();
+      expect(messageDialog.open).not.toHaveBeenCalled();
+    });
+  });
+
   it('addVarScheme should do nothing when dialog result is false', () => {
     schemerService.userRole = 'RW_MAXIMAL';
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);

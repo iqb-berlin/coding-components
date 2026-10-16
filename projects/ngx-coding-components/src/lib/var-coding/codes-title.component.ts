@@ -129,7 +129,7 @@ export class CodesTitleComponent {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
+        if (dialogResult && typeof dialogResult === 'object') {
           const dialogResultTyped: EditProcessingDialogData = dialogResult;
           if (this.fragmenting !== dialogResultTyped.fragmenting) {
             this.fragmenting = dialogResultTyped.fragmenting;

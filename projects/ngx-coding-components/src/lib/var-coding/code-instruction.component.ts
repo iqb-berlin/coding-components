@@ -134,11 +134,9 @@ export class CodeInstructionComponent {
         autoFocus: false
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (typeof dialogResult !== 'undefined') {
-          if (dialogResult !== false && this.code) {
-            this.code.manualInstruction = dialogResult;
-            this.codeDataChanged.emit(this.code);
-          }
+        if (typeof dialogResult === 'string' && this.code) {
+          this.code.manualInstruction = dialogResult;
+          this.codeDataChanged.emit(this.code);
         }
       });
     }

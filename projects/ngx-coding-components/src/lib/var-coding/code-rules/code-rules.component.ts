@@ -105,7 +105,7 @@ export class CodeRulesComponent {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
+        if (dialogResult !== false && dialogResult !== undefined && dialogResult !== null) {
           ruleSet.valueArrayPos = dialogResult;
           this.setCodeRulesChanged();
         }
