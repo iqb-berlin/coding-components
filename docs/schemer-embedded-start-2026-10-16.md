@@ -1,5 +1,10 @@
 # Schemer-Alpha: Basisvariablen im eingebetteten Betrieb
 
+**Späterer Stand:** Dieser Bericht beschreibt die damalige Teilstufe. Die vollständige
+Responses-ESM-/Zoneless-Umstellung ist in
+[responses-esm-zoneless-2026-10-16.md](responses-esm-zoneless-2026-10-16.md)
+dokumentiert.
+
 ## Fehler und Ursache
 
 Das veröffentlichte Schemer-HTML 2.9.0-alpha.1 bleibt nach einer gültigen
