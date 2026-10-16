@@ -1,4 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component, OnDestroy, OnInit, signal
+} from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
 import { CodingFactory } from '@iqb/responses/coding-factory';
@@ -24,16 +26,16 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
   template: `
     <iqb-schemer class="coder-body"
                  [class.standalone]="isStandalone"
-                 [varList]="varList"
-                 [codingScheme]="codings"
-                 [userRole]="userRole"
+                 [varList]="varList()"
+                 [codingScheme]="codings()"
+                 [userRole]="userRole()"
                  (codingSchemeChanged)="emitCodingSchemeChanged()"
     ></iqb-schemer>
     @if (isStandalone) {
       <schemer-standalone-menu
-        [varList]="varList"
-        [userRole]="userRole"
-        [codingScheme]="codings"
+        [varList]="varList()"
+        [userRole]="userRole()"
+        [codingScheme]="codings()"
         (userRoleChanged)="setUserRole($event)"
         (varListChanged)="setNewVarlist($event)"
         (codingSchemeChanged)="setNewCodingScheme($event)"
@@ -67,9 +69,9 @@ import { VeronaAPIService, VosStartCommand } from './verona-api.service';
 export class AppComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
   isStandalone: boolean = window === window.parent;
-  varList: VariableInfo[] = [];
-  codings: CodingScheme | null = null;
-  userRole: UserRoleType = 'RW_MAXIMAL';
+  readonly varList = signal<VariableInfo[]>([]);
+  readonly codings = signal<CodingScheme | null>(null);
+  readonly userRole = signal<UserRoleType>('RW_MAXIMAL');
   title = 'schemer';
   constructor(
     private veronaAPIService: VeronaAPIService,
@@ -82,7 +84,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.veronaAPIService.vosStartCommand
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((message: VosStartCommand) => {
-        this.varList = message.variables;
+        this.varList.set(message.variables);
+        let codings: CodingScheme;
         if (message.codingScheme) {
           const compareVersionResult = CodingScheme.checkVersion(message.codingScheme);
           if (compareVersionResult !== 'OK') {
@@ -106,59 +109,64 @@ export class AppComponent implements OnInit, OnDestroy {
               }
             });
           }
-          this.codings = new CodingScheme(message.codingScheme);
+          codings = new CodingScheme(message.codingScheme);
+          this.codings.set(codings);
           if (compareVersionResult !== 'OK') {
             this.emitCodingSchemeChanged();
           }
         } else {
-          this.codings = new CodingScheme([]);
+          codings = new CodingScheme([]);
+          this.codings.set(codings);
         }
-        this.varList.forEach(vi => {
+        message.variables.forEach(vi => {
           let codingForBaseVariable;
-          if (this.codings && this.codings.variableCodings) {
-            codingForBaseVariable = this.codings.variableCodings.find(v => v.id === vi.id);
+          if (codings.variableCodings) {
+            codingForBaseVariable = codings.variableCodings.find(v => v.id === vi.id);
           }
           if (codingForBaseVariable) {
             codingForBaseVariable.alias = vi.alias || vi.id;
-          } else if (this.codings) {
-            if (vi.type === 'no-value') {
-              const newNoValueBaseVar = CodingFactory.createBaseCodingVariable(vi.id, 'BASE_NO_VALUE');
-              if (vi.alias) newNoValueBaseVar.alias = vi.alias;
-              this.codings.variableCodings.push(newNoValueBaseVar);
-            } else {
-              const newBaseVar = CodingFactory.createCodingVariable(vi.id);
-              if (vi.alias) newBaseVar.alias = vi.alias;
-              this.codings.variableCodings.push(newBaseVar);
-            }
+          } else if (vi.type === 'no-value') {
+            const newNoValueBaseVar = CodingFactory.createBaseCodingVariable(vi.id, 'BASE_NO_VALUE');
+            if (vi.alias) newNoValueBaseVar.alias = vi.alias;
+            codings.variableCodings.push(newNoValueBaseVar);
+          } else {
+            const newBaseVar = CodingFactory.createCodingVariable(vi.id);
+            if (vi.alias) newBaseVar.alias = vi.alias;
+            codings.variableCodings.push(newBaseVar);
           }
         });
-        if (message.schemerConfig && message.schemerConfig.role && message.schemerConfig.role !== 'super') {
-          this.userRole = ['guest', 'commenter'].includes(message.schemerConfig.role) ? 'RO' : 'RW_MINIMAL';
+        const role = message.schemerConfig?.role;
+        if (role) {
+          let userRole: UserRoleType = 'RW_MAXIMAL';
+          if (role !== 'super') {
+            userRole = ['guest', 'commenter'].includes(role) ? 'RO' : 'RW_MINIMAL';
+          }
+          this.userRole.set(userRole);
         }
       });
   }
 
   emitCodingSchemeChanged() {
-    this.veronaAPIService.sendVosSchemeChangedNotification(this.codings);
+    this.veronaAPIService.sendVosSchemeChangedNotification(this.codings());
   }
 
   setNewVarlist(varList: VariableInfo[] | null) {
     if (varList) {
-      this.varList = varList;
+      this.varList.set(varList);
       const variableCodings: VariableCodingData[] = [];
-      this.varList.forEach(c => {
+      varList.forEach(c => {
         variableCodings.push(CodingFactory.createCodingVariable(c.id));
       });
-      this.codings = new CodingScheme(variableCodings);
+      this.codings.set(new CodingScheme(variableCodings));
     }
   }
 
   setNewCodingScheme(codings: CodingScheme | null) {
-    if (codings) this.codings = codings;
+    if (codings) this.codings.set(codings);
   }
 
   setUserRole(newRole: UserRoleType) {
-    this.userRole = newRole;
+    this.userRole.set(newRole);
   }
 
   ngOnDestroy(): void {
