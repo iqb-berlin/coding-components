@@ -1,5 +1,4 @@
-import 'zone.js';
-import { enableProdMode, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { enableProdMode, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { createCustomElement } from '@angular/elements';
@@ -17,9 +16,7 @@ if (environment.production) {
 (async () => {
   const app = await createApplication({
     providers: [
-      // Host messages and debounced edits still rely on Zone.js. Angular 21 otherwise
-      // defaults to zoneless rendering, leaving embedded start commands invisible.
-      provideZoneChangeDetection(),
+      provideZonelessChangeDetection(),
       provideAnimations(),
       provideHttpClient(),
       importProvidersFrom(

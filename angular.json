@@ -29,10 +29,7 @@
           "options": {
             "karmaConfig": "projects/ngx-coding-components/karma.conf.js",
             "tsConfig": "projects/ngx-coding-components/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "polyfills": []
           }
         }
       }
@@ -59,9 +56,7 @@
             "outputPath": "dist/coding-components-serve",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "preserveSymlinks": true,
             "inlineStyleLanguage": "scss",
@@ -129,10 +124,7 @@
         "test": {
           "builder": "ngx-build-plus:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": [],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -174,9 +166,7 @@
             "index": "projects/schemer/src/index.html",
             "tsConfig": "projects/schemer/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": [],
             "assets": [
               "projects/schemer/src/assets"
             ],
