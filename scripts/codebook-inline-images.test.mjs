@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { test } from 'node:test';
 import { load } from 'cheerio';
@@ -10,6 +11,31 @@ import { docxParts } from './codebook-docx-test-utils.mjs';
 const require = createRequire(import.meta.url);
 const commonjs = require('../dist/ngx-coding-components/cjs/codebook-generator.cjs');
 const errorText = 'HTML konnte nicht verarbeitet werden.';
+
+for (const [entryPoint, modulePath] of [
+  ['ESM', './dist/ngx-coding-components/fesm2022/iqb-ngx-coding-components-codebook-generator.mjs'],
+  ['CommonJS', './dist/ngx-coding-components/cjs/codebook-generator.cjs']
+]) {
+  test(`${entryPoint}: zero-length ICNS chunk cannot block DOCX generation`, () => {
+    // Isolate the synchronous parser so a vulnerable version fails within the timeout.
+    const result = spawnSync(process.execPath, ['--input-type=module', '-e', `
+      import assert from 'node:assert/strict';
+      import { defaults } from './scripts/fixtures/codebook-synthetic.mjs';
+      import { inlineImageUnits } from './scripts/fixtures/codebook-inline-images.mjs';
+      import { docxParts } from './scripts/codebook-docx-test-utils.mjs';
+      const { CodebookGenerator } = await import(${JSON.stringify(modulePath)});
+      const image = Buffer.from('69636e73000000106963303700000000', 'hex').toString('base64');
+      const entry = { imageHtml: '<img src="data:image/icns;base64,' + image + '">' };
+      const parts = await docxParts(await CodebookGenerator.generateCodebook(
+        inlineImageUnits(entry, 'general'), defaults, []));
+      const xml = parts['word/document.xml'];
+      assert.ok(xml.includes('VOR') && xml.includes('NACH'));
+      assert.ok(xml.includes(${JSON.stringify(errorText)}));
+    `], { encoding: 'utf8', timeout: 15000 });
+    assert.equal(result.error, undefined, 'image parsing must finish without blocking');
+    assert.equal(result.status, 0, result.stderr);
+  });
+}
 
 for (const [entryPoint, generator] of [['ESM', CodebookGenerator], ['CommonJS', commonjs.CodebookGenerator]]) {
   for (const location of ['general', 'code']) for (const showScore of [false, true]) {
