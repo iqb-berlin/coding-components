@@ -13,6 +13,24 @@ describe('CodeRuleListComponent', () => {
   let fixture: ComponentFixture<CodeRuleListComponent>;
   let dialogOpenSpy: jasmine.Spy;
 
+  [undefined, null].forEach(result => {
+    it(`keeps the first fragment reference on dismissed result ${result}`, () => {
+      const rule = { method: 'MATCH' as const, parameters: ['Keep'], fragment: 0 };
+      const emit = spyOn(component.codeRulesChanged, 'emit');
+      dialogOpenSpy.and.returnValue({ afterClosed: () => of(result) });
+      component.editFragmentReference(rule);
+      expect(rule.fragment).toBe(0);
+      expect(emit).not.toHaveBeenCalled();
+    });
+  });
+
+  it('accepts the first fragment reference as a confirmed result', () => {
+    const rule = { method: 'MATCH' as const, parameters: ['Keep'], fragment: 2 };
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(0) });
+    component.editFragmentReference(rule);
+    expect(rule.fragment).toBe(0);
+  });
+
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
       afterClosed: () => of(false)

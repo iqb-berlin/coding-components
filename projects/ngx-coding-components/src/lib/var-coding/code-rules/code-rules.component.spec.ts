@@ -118,6 +118,26 @@ describe('CodeRulesComponent', () => {
     expect(emitSpy).not.toHaveBeenCalled();
   });
 
+  [undefined, null].forEach(result => {
+    it(`keeps the first array position on dismissed result ${result}`, () => {
+      const reference = { valueArrayPos: 0, ruleOperatorAnd: false, rules: [] };
+      const emit = spyOn(component.codeRulesChanged, 'emit');
+      dialogOpenSpy.and.returnValue({ afterClosed: () => of(result) });
+      component.editArrayReference(reference);
+      expect(reference.valueArrayPos).toBe(0);
+      expect(emit).not.toHaveBeenCalled();
+    });
+  });
+
+  it('accepts the first array position as a confirmed result', () => {
+    const reference = { valueArrayPos: 2, ruleOperatorAnd: false, rules: [] };
+    const emit = spyOn(component.codeRulesChanged, 'emit');
+    dialogOpenSpy.and.returnValue({ afterClosed: () => of(0) });
+    component.editArrayReference(reference);
+    expect(reference.valueArrayPos).toBe(0);
+    expect(emit).toHaveBeenCalled();
+  });
+
   it('editArrayReference should not change valueArrayPos when dialog returns false', () => {
     const emitSpy = spyOn(component.codeRulesChanged, 'emit');
     const rs = { ruleOperatorAnd: false, rules: [] } as unknown as never;

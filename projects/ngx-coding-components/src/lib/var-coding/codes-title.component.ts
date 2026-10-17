@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -107,7 +108,8 @@ export class CodesTitleComponent {
 
   constructor(
     public schemerService: SchemerService,
-    private editProcessingDialog: MatDialog
+    private editProcessingDialog: MatDialog,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   sortCodes(event: MouseEvent) {
@@ -129,7 +131,8 @@ export class CodesTitleComponent {
         }
       );
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
+        this.changeDetector.markForCheck();
+        if (dialogResult && typeof dialogResult === 'object') {
           const dialogResultTyped: EditProcessingDialogData = dialogResult;
           if (this.fragmenting !== dialogResultTyped.fragmenting) {
             this.fragmenting = dialogResultTyped.fragmenting;

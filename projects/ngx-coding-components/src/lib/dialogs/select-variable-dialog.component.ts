@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component, OnInit, Inject, ViewChild
 } from '@angular/core';
 import {
@@ -69,7 +70,8 @@ export class SelectVariableDialogComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public selectData: SelectVariableDialogData,
-    public dialogRef: MatDialogRef<SelectVariableDialogComponent>
+    public dialogRef: MatDialogRef<SelectVariableDialogComponent>,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -87,6 +89,7 @@ export class SelectVariableDialogComponent implements OnInit {
     });
     setTimeout(() => {
       this.setSelectedValues();
+      this.changeDetector.markForCheck();
     }, 500);
   }
 

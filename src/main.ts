@@ -1,4 +1,4 @@
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -7,11 +7,11 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { SchemerTranslateLoader } from '@ngx-coding-components/translations/schemer-translate-loader';
 import { registerNgxCodingComponentsElements } from '@ngx-coding-components/elements/register-elements';
 import { AppComponent } from './app/app.component';
-import 'zone.js';
 
 (async () => {
   const app = await createApplication({
     providers: [
+      provideZonelessChangeDetection(),
       provideAnimations(),
       provideHttpClient(),
       TranslateService,

@@ -57,7 +57,9 @@ describe('RichTextEditorComponent', () => {
     const matDialog = {
       open: jasmine.createSpy('open').and.returnValue(dialogRef)
     } as unknown as MatDialog;
-    const component = new RichTextEditorComponent(matDialog);
+    const component = new RichTextEditorComponent(
+      matDialog, jasmine.createSpyObj('ChangeDetectorRef', ['markForCheck'])
+    );
 
     const commandSpyHost: CommandSpyHost = {
       focus: jasmine.createSpy('focus'),

@@ -318,11 +318,23 @@ TranslateModule.forRoot({
 })
 ```
 
-The `translations` secondary entry point contains only the translation loader
-and the German translation object. Importing from it does not pull the full
+The `translations` secondary entry point contains the translation loader,
+German dictionary and merge helpers. Importing from it does not pull the full
 component library into the application's initial bundle. Applications with an
 existing loader can merge `NGX_CODING_COMPONENTS_DE_TRANSLATIONS` into their
 own translations.
+
+The dictionary also includes the `codebook.*` labels, tooltips and selection
+counts used by `CodebookExportComponent`; no Studio translation file is needed.
+
+Configure `TranslateModule.forRoot` once at the application root. The components
+reuse that translation service. If your application loads its own dictionaries,
+recursively merge the library dictionary as defaults and apply application texts
+as overrides. Your own files only need application texts and intentional
+overrides; copying all library labels into them is unnecessary.
+The exported `mergeTranslations` helper performs that recursive merge without
+mutating either input. `selectTranslationsForLanguage` selects a locale, its
+base language, or the German fallback before applying application overrides.
 
 If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
 
