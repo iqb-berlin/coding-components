@@ -1042,7 +1042,10 @@ export class CodebookDocxGenerator {
       return Number.isFinite(amount) ? Math.round(amount * (value?.endsWith('pt') ? 20 : 15)) : undefined;
     };
     const listStart = (options?.listDepth || 0) * 600 + (options?.listIndent || 0);
-    const start = (pixels(styles['padding-left']) ?? (isListParagraph ? 0 : 100)) + listStart + (options?.quoteDepth || 0) * 600;
+    // The editor writes zero padding on unindented paragraphs. Preserve the same
+    // cell inset as paragraphs without that explicit, otherwise neutral style.
+    const paragraphStart = pixels(styles['padding-left']) || (isListParagraph ? 0 : 100);
+    const start = paragraphStart + listStart + (options?.quoteDepth || 0) * 600;
     const textIndent = pixels(styles['text-indent']) || 0;
     const indent = options?.marker ? { start, hanging: 300 } : {
       start,

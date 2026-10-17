@@ -8,7 +8,7 @@ import {
 } from '../dist/ngx-coding-components/fesm2022/iqb-ngx-coding-components-codebook-generator.mjs';
 import { defaults, image } from './fixtures/codebook-synthetic.mjs';
 import { docxParts } from './codebook-docx-test-utils.mjs';
-async function render(html) {
+async function render(html, options = {}) {
   const parts = await docxParts(
     await CodebookDocxGenerator.generateDocx(
       [
@@ -28,7 +28,7 @@ async function render(html) {
           ],
         },
       ],
-      defaults,
+      { ...defaults, ...options },
     ),
   );
   return load(parts['word/document.xml'], { xml: true });
@@ -122,6 +122,20 @@ test('paragraph spacing, indent and hanging indent survive editor serialization'
   assert.equal(p.find('w\\:spacing').attr('w:before'), '0');
   assert.equal(p.find('w\\:spacing').attr('w:after'), '150');
 });
+for (const showScore of [true, false]) {
+  for (const padding of ['0px', '0pt']) {
+    test(`unindented editor and plain paragraphs align with score=${showScore}, padding=${padding}`, async () => {
+      const $ = await render('<p>Verben</p>' +
+        `<p indent="0" indentsize="20" style="padding-left:${padding};text-indent:0px">` +
+        'Verben <span class="iqb-math-formula" data-latex="A \\cup B"></span></p>', { showScore });
+      const paragraphs = $('w\\:p').toArray().filter(p => $(p).text().startsWith('Verben'));
+      assert.equal(paragraphs.length, 2);
+      assert.deepEqual(paragraphs.map(p => $(p).find('w\\:ind').attr('w:start')), ['100', '100']);
+      assert.equal($(paragraphs[1]).find('m\\:oMath').length, 1);
+      assert.equal($(paragraphs[1]).find('m\\:oMath').text(), 'A∪B');
+    });
+  }
+}
 for (const [style, marker] of [
   ['decimal', '1.'],
   ['lower-latin', 'a.'],

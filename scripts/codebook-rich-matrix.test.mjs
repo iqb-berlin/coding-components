@@ -81,7 +81,8 @@ for (const source of ['aspect', 'coding-components']) {
           assert.equal(run(' NORMAL ').find('w\\:color').attr('w:val'), '000000', entry.id);
           assert.equal(run(' ENDE').find('w\\:shd').attr('w:fill'), 'FFFFFF', entry.id);
         } else if (entry.group === 'paragraph-layout') {
-          assert.equal(p.find('w\\:ind').attr('w:start'), String(expected.indent * 300), entry.id);
+          const paragraphStart = expected.indent === 0 ? 100 : expected.indent * 300;
+          assert.equal(p.find('w\\:ind').attr('w:start'), String(paragraphStart), entry.id);
           assert.equal(p.find('w\\:ind').attr('w:hanging'), expected.hanging ? '300' : undefined, entry.id);
           assert.equal(p.find('w\\:spacing').attr('w:after'), String(expected.margin * 15), entry.id);
         } else if (entry.group === 'list-styles-depth') {
