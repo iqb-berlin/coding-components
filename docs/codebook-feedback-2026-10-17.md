@@ -1,7 +1,7 @@
 # Codebook: Korrekturen zur Testrückmeldung vom 17.10.2026
 
 Die Prüfung und Korrektur basieren auf dem Quellstand von PR #251 nach der
-Übernahme von #252 (`a5db665`). Es gibt keine Versionsanhebung, kein neues
+Übernahme von #252 (`a5db665`). Es gibt keine Anhebung der Releaseversionen, kein neues
 Alpha-Paket und keine Veröffentlichung. Frühere Release-Artefakte bleiben
 unverändert und enthalten diese Korrekturen noch nicht.
 
@@ -22,7 +22,7 @@ unverändert und enthalten diese Korrekturen noch nicht.
 
 Die unabhängige alte Studio-Referenz stammt aus
 `2504265721a59c7c65425072951ce82ab16f0fb8`. Ein synthetischer Vergleich mit
-diesem Generator und dem tatsächlich in Studio eingecheckten Paket
+diesem Generator und dem zuvor in Studio eingecheckten Paket
 `4.1.0-alpha.1` bestätigt: Der alte Export und der korrigierte Generator setzen
 beide unindentiere Absätze auf 100 Twips. Das bisherige Alpha-Paket setzte den
 expliziten Null-Einzug auf 0 und verursachte damit den Versatz. Die unveränderten
@@ -30,7 +30,7 @@ Referenzdateien wurden nicht neu erzeugt.
 
 ## Lokale Prüfung
 
-- 575 Bibliotheks- und 6 Schemer-Tests mit Coverage erfolgreich.
+- 582 Bibliotheks- und 6 Schemer-Tests mit Coverage erfolgreich.
 - 1.291 Codebook-Generator-/Vertragstests erfolgreich.
 - Bibliotheksbuild erfolgreich; Lint ohne Fehler bei 19 verbleibenden Warnungen.
 - Chrome-Prüfung der gebauten Codebook-Komponente mit Studio-Material-Theme bei
@@ -41,13 +41,18 @@ Referenzdateien wurden nicht neu erzeugt.
 
 ## Studio-Einbindung und offene Rückmeldung
 
-Studio PR #1728 verweist weiterhin auf den eingecheckten Tarball
-`vendor/iqb-ngx-coding-components-4.1.0-alpha.1.tgz`; dessen SHA-256 ist
-`cb85078662e8fe4490aa90001e369db059571da73ec73a1457a7ffb89d49f296`.
+Studio PR #1728 und Kodierbox PR #1041 übernehmen den korrigierten
+Entwicklungsbuild `4.1.0-dev.ff15d6d` aus Quellcommit
+`ff15d6d882417db26bc81fc88a09074eab74d57d`. Der gemeinsame Tarball hat SHA-256
+`e67c04e07762350cb4ee3b1a70a36bcde0f2ba1c24df1f5a40000346d34fd112`.
 `npm ci` installiert diesen Stand ohne separate manuelle Paketinstallation.
-Quelländerungen in coding-components aktualisieren diesen Tarball nicht.
-Für einen erneuten vollständigen Studio-Test muss der korrigierte
-Bibliotheksbuild ausdrücklich übernommen werden.
+Beide Host-Loader führen Bibliotheksvorgaben und eigene Texte rekursiv zusammen;
+die kopierten `codebook.*`-Standardtexte entfallen aus den Anwendungsdateien.
+Die gemeinsamen Hilfen `mergeTranslations` und `selectTranslationsForLanguage`
+sind ebenfalls exportiert. Beide Hosts verwenden ihren bestehenden Root-Dienst.
+Die Integrationsberichte der Host-PRs dokumentieren deren aktuelle Prüfungen;
+die 4.694 installierten Exportpaare bleiben identisch. Quelländerungen hier
+aktualisieren weiterhin keine bereits veröffentlichten Alpha-Dateien.
 
 Studio lädt den Kodierreiter über ein separates Schemer-HTML im iframe.
 Die Version dieses HTMLs ist für die gemeldeten Screenshots unbekannt. Die

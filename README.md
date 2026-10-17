@@ -318,8 +318,8 @@ TranslateModule.forRoot({
 })
 ```
 
-The `translations` secondary entry point contains only the translation loader
-and the German translation object. Importing from it does not pull the full
+The `translations` secondary entry point contains the translation loader,
+German dictionary and merge helpers. Importing from it does not pull the full
 component library into the application's initial bundle. Applications with an
 existing loader can merge `NGX_CODING_COMPONENTS_DE_TRANSLATIONS` into their
 own translations.
