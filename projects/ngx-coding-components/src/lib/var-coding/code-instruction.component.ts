@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -116,7 +117,8 @@ export class CodeInstructionComponent {
   constructor(
     private sanitizer: DomSanitizer,
     public translateService: TranslateService,
-    public editTextDialog: MatDialog
+    public editTextDialog: MatDialog,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   editTextDialog_manualInstruction(): void {
@@ -134,6 +136,7 @@ export class CodeInstructionComponent {
         autoFocus: false
       });
       dialogRef.afterClosed().subscribe(dialogResult => {
+        this.changeDetector.markForCheck();
         if (typeof dialogResult === 'string' && this.code) {
           this.code.manualInstruction = dialogResult;
           this.codeDataChanged.emit(this.code);

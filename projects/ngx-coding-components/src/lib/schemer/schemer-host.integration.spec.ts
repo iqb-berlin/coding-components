@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -12,7 +12,7 @@ import { SchemerComponent } from './schemer.component';
 
 @Component({
   template: `
-    @if (showSchemer) {
+    @if (showSchemer()) {
       <iqb-schemer
         [varList]="varList"
         [codingScheme]="codingScheme"
@@ -23,7 +23,7 @@ import { SchemerComponent } from './schemer.component';
   imports: [SchemerComponent]
 })
 class SchemerHostComponent {
-  showSchemer = true;
+  readonly showSchemer = signal(true);
   varList = [{
     id: 'base',
     alias: 'Base',
@@ -54,7 +54,7 @@ describe('Schemer host lifecycle integration', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(SchemerHostComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   const getSchemer = (): SchemerComponent => fixture.debugElement
@@ -65,18 +65,18 @@ describe('Schemer host lifecycle integration', () => {
     .query(By.directive(VarCodingComponent))
     .componentInstance as VarCodingComponent;
 
-  it('should display a selected coding immediately after rebuilding its host', () => {
+  it('should display a selected coding immediately after rebuilding its host', async () => {
     const firstSchemer = getSchemer();
     expect(firstSchemer.selectedCoding$.getValue()?.id).toBe('base');
     expect(getVarCoding().varCoding?.id).toBe('base');
 
-    fixture.componentInstance.showSchemer = false;
-    fixture.detectChanges();
+    fixture.componentInstance.showSchemer.set(false);
+    await fixture.whenStable();
     expect(fixture.debugElement.query(By.directive(SchemerComponent)))
       .toBeNull();
 
-    fixture.componentInstance.showSchemer = true;
-    fixture.detectChanges();
+    fixture.componentInstance.showSchemer.set(true);
+    await fixture.whenStable();
 
     const rebuiltSchemer = getSchemer();
     expect(rebuiltSchemer).not.toBe(firstSchemer);

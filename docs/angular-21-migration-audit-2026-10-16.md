@@ -1,5 +1,10 @@
 # Angular-21-Migration: Prüfung vom 16.10.2026
 
+**Späterer Stand:** Dieser Bericht beschreibt die damalige Teilstufe. Die vollständige
+Responses-ESM-/Zoneless-Umstellung ist in
+[responses-esm-zoneless-2026-10-16.md](responses-esm-zoneless-2026-10-16.md)
+dokumentiert.
+
 **Urteil:** Die bestätigten Migrationsfehler sind im lokalen Prüfstand behoben.
 Die unten aufgeführten Laufzeit-, Build- und Vertragstests bestehen. Dies ist
 keine Aussage über ein bereits veröffentlichtes Release oder Deployment.

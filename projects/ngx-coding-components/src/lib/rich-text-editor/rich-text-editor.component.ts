@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component, EventEmitter, Input, Output,
   AfterViewInit, OnChanges, SimpleChanges
 } from '@angular/core';
@@ -112,7 +113,10 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
     extensions: this.defaultExtensions
   });
 
-  constructor(private editFormulaDialog: MatDialog) {}
+  constructor(
+    private editFormulaDialog: MatDialog,
+    private changeDetector: ChangeDetectorRef
+  ) {}
 
   ngAfterViewInit(): void {
     this.editor.commands.focus();
@@ -246,6 +250,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
         this.editor.commands.insertBlockImage({ src: mediaSrc });
       }
     }
+    this.changeDetector.markForCheck();
   }
 
   toggleBlockquote(): void {
@@ -263,6 +268,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
     });
 
     dialogRef.afterClosed().subscribe(dialogResult => {
+      this.changeDetector.markForCheck();
       if (typeof dialogResult === 'string' && normalizeFormulaLatex(dialogResult)) {
         this.editor.chain()
           .insertIqbMathFormula(normalizeFormulaLatex(dialogResult))
@@ -288,6 +294,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
     });
 
     dialogRef.afterClosed().subscribe(dialogResult => {
+      this.changeDetector.markForCheck();
       if (typeof dialogResult === 'string' && normalizeFormulaLatex(dialogResult)) {
         const transaction = this.editor.state.tr.setNodeMarkup(position, null, {
           latex: normalizeFormulaLatex(dialogResult)

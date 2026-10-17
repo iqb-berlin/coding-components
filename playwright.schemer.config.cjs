@@ -8,6 +8,7 @@ module.exports = defineConfig({
   workers: 2,
   use: {
     browserName: 'chromium',
+    channel: process.env.PLAYWRIGHT_CHANNEL,
     headless: !!process.env.CI,
     baseURL: 'http://127.0.0.1:4210',
     screenshot: 'only-on-failure',

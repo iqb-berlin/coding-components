@@ -1,10 +1,9 @@
 /* eslint-disable max-classes-per-file */
-import { fakeAsync, tick } from '@angular/core/testing';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { of, Subject } from 'rxjs';
+import { firstValueFrom, of, Subject } from 'rxjs';
 import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 import { FileService } from '../services/file.service';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
@@ -94,7 +93,8 @@ describe('SchemerComponent', () => {
       dialog as unknown as never,
       selectVariableDialog as unknown as never,
       editSourceParametersDialog as unknown as never,
-      inputDialog as unknown as never
+      inputDialog as unknown as never,
+      jasmine.createSpyObj('ChangeDetectorRef', ['markForCheck'])
     );
   });
 
@@ -305,8 +305,8 @@ describe('SchemerComponent', () => {
     expect(component.selectedCoding$.getValue()).toBeNull();
   });
 
-  it('varCodingElement setter should subscribe when var-coding appears after conflict recovery', fakeAsync(() => {
-    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+  it('varCodingElement setter should subscribe when var-coding appears after conflict recovery', async () => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit').and.callThrough();
     const changes$ = new Subject<VariableCodingData | null>();
 
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
@@ -316,13 +316,14 @@ describe('SchemerComponent', () => {
       varCodingChanged: changes$.asObservable()
     } as unknown as VarCodingComponent;
 
+    const changed = firstValueFrom(component.codingSchemeChanged);
     changes$.next(null);
-    tick(300);
+    await changed;
 
     expect(schemerFacade.tryResolveIdentifierConflicts).toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalledWith(schemerService.codingScheme);
     changes$.complete();
-  }));
+  });
 
   it('ngOnDestroy should reset duplicate resolution state', () => {
     component.ngOnDestroy();
