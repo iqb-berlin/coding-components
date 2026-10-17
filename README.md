@@ -324,6 +324,9 @@ component library into the application's initial bundle. Applications with an
 existing loader can merge `NGX_CODING_COMPONENTS_DE_TRANSLATIONS` into their
 own translations.
 
+The dictionary also includes the `codebook.*` labels, tooltips and selection
+counts used by `CodebookExportComponent`; no Studio translation file is needed.
+
 If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
 
 ---

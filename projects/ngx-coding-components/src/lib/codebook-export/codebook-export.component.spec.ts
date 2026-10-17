@@ -1,7 +1,9 @@
 import { SimpleChange } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateLoader, TranslateModule, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 import { CodebookExportComponent } from '../../../codebook-export/codebook-export.component';
+import { NgxCodingComponentsTranslateLoader } from '../translations/ngx-coding-components.translate-loader';
 
 describe('Studio codebook selection contract', () => {
   let component: CodebookExportComponent;
@@ -115,6 +117,7 @@ describe('codebook checkbox accessibility', () => {
     expect(inputs[1].getAttribute('aria-label')).toBe('TASK');
     fixture.destroy();
   });
+
   it('keeps task checkbox controls inside their header and data cells', async () => {
     await TestBed.configureTestingModule({
       imports: [CodebookExportComponent, TranslateModule.forRoot()]
@@ -131,6 +134,34 @@ describe('codebook checkbox accessibility', () => {
       expect(control.left).toBeGreaterThanOrEqual(bounds.left);
       expect(control.right).toBeLessThanOrEqual(bounds.right);
     });
+    fixture.destroy();
+  });
+});
+
+describe('codebook translations', () => {
+  it('renders German labels and counts with the library loader alone', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CodebookExportComponent, TranslateModule.forRoot({
+        loader: { provide: TranslateLoader, useClass: NgxCodingComponentsTranslateLoader }
+      })]
+    }).compileComponents();
+    await firstValueFrom(TestBed.inject(TranslateService).use('de'));
+    const fixture = TestBed.createComponent(CodebookExportComponent);
+    fixture.componentRef.setInput('availableUnits', [
+      { unitId: 1, key: 'A', unitName: 'Aufgabe A' },
+      { unitId: 2, key: 'B', unitName: 'Aufgabe B' }
+    ]);
+    fixture.componentRef.setInput('selectedUnitIds', [1, 2]);
+    fixture.componentRef.setInput('workspaceChanges', true);
+    await fixture.whenStable();
+    const text = fixture.nativeElement.innerText as string;
+    expect(text).toContain('Codebook exportieren');
+    expect(text).toContain('Erhöhter Schulungsbedarf');
+    expect(text).toContain('2 Aufgaben ausgewählt');
+    expect(text).toContain('Änderungen im Arbeitsbereich müssen erst noch gespeichert werden!');
+    expect(text).toContain('Exportieren');
+    expect(text).toContain('Abbrechen');
+    expect(text).not.toMatch(/codebook\.[\w.-]+/);
     fixture.destroy();
   });
 });
