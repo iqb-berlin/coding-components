@@ -327,6 +327,12 @@ own translations.
 The dictionary also includes the `codebook.*` labels, tooltips and selection
 counts used by `CodebookExportComponent`; no Studio translation file is needed.
 
+Configure `TranslateModule.forRoot` once at the application root. The components
+reuse that translation service. If your application loads its own dictionaries,
+recursively merge the library dictionary as defaults and apply application texts
+as overrides. Your own files only need application texts and intentional
+overrides; copying all library labels into them is unnecessary.
+
 If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
 
 ---
