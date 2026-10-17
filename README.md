@@ -332,6 +332,9 @@ reuse that translation service. If your application loads its own dictionaries,
 recursively merge the library dictionary as defaults and apply application texts
 as overrides. Your own files only need application texts and intentional
 overrides; copying all library labels into them is unnecessary.
+The exported `mergeTranslations` helper performs that recursive merge without
+mutating either input. `selectTranslationsForLanguage` selects a locale, its
+base language, or the German fallback before applying application overrides.
 
 If your app already has `TranslateModule` configured, you usually do not need a second root configuration; just make sure translations include the keys used by these components.
 

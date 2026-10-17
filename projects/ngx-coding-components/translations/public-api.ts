@@ -2,6 +2,9 @@ import { TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import deTranslations from './de.json';
 
+export { mergeTranslations, selectTranslationsForLanguage } from './translation-utils';
+export type { TranslationMap } from './translation-utils';
+
 export const NGX_CODING_COMPONENTS_DE_TRANSLATIONS:
 Record<string, unknown> = deTranslations;
 
