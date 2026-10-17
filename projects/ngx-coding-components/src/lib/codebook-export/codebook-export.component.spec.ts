@@ -115,4 +115,22 @@ describe('codebook checkbox accessibility', () => {
     expect(inputs[1].getAttribute('aria-label')).toBe('TASK');
     fixture.destroy();
   });
+  it('keeps task checkbox controls inside their header and data cells', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CodebookExportComponent, TranslateModule.forRoot()]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CodebookExportComponent);
+    fixture.componentRef.setInput('availableUnits', [{ unitId: 1, key: 'TASK', unitName: 'Aufgabe' }]);
+    await fixture.whenStable();
+    const cells: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.mat-column-select'));
+    expect(cells.length).toBe(2);
+    cells.forEach(cell => {
+      const checkbox = cell.querySelector('.mdc-checkbox') as HTMLElement;
+      const bounds = cell.getBoundingClientRect();
+      const control = checkbox.getBoundingClientRect();
+      expect(control.left).toBeGreaterThanOrEqual(bounds.left);
+      expect(control.right).toBeLessThanOrEqual(bounds.right);
+    });
+    fixture.destroy();
+  });
 });

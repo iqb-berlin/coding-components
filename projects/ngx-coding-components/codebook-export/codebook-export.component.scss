@@ -37,7 +37,8 @@ mat-select {
 .fx-row-space-between-stretch > .fx-column-start-stretch { flex: 1; min-width: 320px; }
 mat-table { width: 100%; max-height: 55vh; overflow: auto; }
 mat-form-field { width: 100%; }
-.mat-column-select { flex: 0 0 48px; }
+// Leave room for Material's cell padding and the complete checkbox control.
+.mat-column-select { flex: 0 0 80px; }
 @media (max-width: 760px) {
   .fx-row-space-between-stretch { flex-direction: column; }
   .settings { margin-left: 0; min-width: 0; }
