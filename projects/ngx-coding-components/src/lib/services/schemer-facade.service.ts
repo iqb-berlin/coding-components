@@ -1,9 +1,16 @@
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { Subject } from 'rxjs';
+import { DialogContext } from './dialog-context';
 import { SchemerService } from './schemer.service';
 import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
+import { ResolveOrphanCodingsDialogComponent } from '../dialogs/resolve-orphan-codings-dialog.component';
+import {
+  getOrphanCodingResolutionPlan,
+  resolveOrphanCodings
+} from './orphan-coding-resolution';
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +18,11 @@ import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
 export class SchemerFacadeService {
   private resolvingIdentifierConflicts = false;
   private dismissedIdentifierConflictSignature: string | null = null;
-  private identifierConflictResolutionGeneration = 0;
-  private identifierConflictDialogRef: MatDialogRef<ResolveIdentifierConflictsDialogComponent> | null = null;
+  // Content snapshots are checked separately so in-place host updates can reopen recovery.
+  private readonly dialogContext = new DialogContext(() => []);
+
+  private readonly identifierConflictChanges = new Subject<boolean>();
+  readonly identifierConflictChanges$ = this.identifierConflictChanges.asObservable();
 
   constructor(
     private schemerService: SchemerService,
@@ -24,12 +34,9 @@ export class SchemerFacadeService {
   }
 
   resetIdentifierConflictResolutionState(): void {
-    this.identifierConflictResolutionGeneration += 1;
     this.resolvingIdentifierConflicts = false;
     this.dismissedIdentifierConflictSignature = null;
-    const dialogRef = this.identifierConflictDialogRef;
-    this.identifierConflictDialogRef = null;
-    dialogRef?.close?.();
+    this.dialogContext.invalidate();
   }
 
   tryResolveIdentifierConflicts(): boolean {
@@ -39,10 +46,7 @@ export class SchemerFacadeService {
     );
 
     if (!analysis.hasProblems) {
-      if (
-        this.resolvingIdentifierConflicts ||
-        this.identifierConflictDialogRef
-      ) {
+      if (this.resolvingIdentifierConflicts) {
         this.resetIdentifierConflictResolutionState();
       } else {
         this.dismissedIdentifierConflictSignature = null;
@@ -60,24 +64,53 @@ export class SchemerFacadeService {
 
     this.resolvingIdentifierConflicts = true;
 
-    const generation = this.identifierConflictResolutionGeneration;
-    const dialogRef = this.dialog.open(
+    const scheme = this.schemerService.codingScheme;
+    const snapshot = JSON.stringify([this.schemerService.varList, scheme?.variableCodings]);
+    const plan = getOrphanCodingResolutionPlan(this.schemerService.varList, scheme?.variableCodings || []);
+    const canResolve = plan.conflicts.length > 0 && plan.problems.length === 0;
+    const dialogRef = canResolve ? this.dialog.open(ResolveOrphanCodingsDialogComponent, {
+      width: '850px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      disableClose: true,
+      data: {
+        conflicts: structuredClone(plan.conflicts),
+        canEdit: () => this.schemerService.userRole !== 'RO'
+      }
+    }) : this.dialog.open(
       ResolveIdentifierConflictsDialogComponent,
       {
         width: '850px',
         disableClose: true,
         data: {
-          analysis
+          analysis,
+          ...(plan.problems.length ? { recoveryProblems: plan.problems } : {})
         }
       }
     );
-    this.identifierConflictDialogRef = dialogRef;
-
-    dialogRef.afterClosed().subscribe(() => {
-      if (generation !== this.identifierConflictResolutionGeneration) return;
-
-      this.identifierConflictDialogRef = null;
+    this.dialogContext.afterClosed(dialogRef).subscribe(result => {
       this.resolvingIdentifierConflicts = false;
+      if (canResolve && result && Array.isArray(result.decisions) && Array.isArray(result.discardedIds)) {
+        const currentSnapshot = JSON.stringify([
+          this.schemerService.varList, this.schemerService.codingScheme?.variableCodings
+        ]);
+        if (scheme !== this.schemerService.codingScheme || currentSnapshot !== snapshot) {
+          this.dismissedIdentifierConflictSignature = null;
+          this.identifierConflictChanges.next(false);
+          return;
+        }
+        if (scheme && this.schemerService.userRole !== 'RO') {
+          const resolved = resolveOrphanCodings(
+            this.schemerService.varList, scheme.variableCodings, result.decisions, result.discardedIds
+          );
+          if (resolved) {
+            scheme.variableCodings = resolved;
+            this.dismissedIdentifierConflictSignature = null;
+            this.identifierConflictChanges.next(true);
+            return;
+          }
+        }
+      }
       const currentAnalysis = analyzeVariableIdentifiers(
         this.schemerService.varList,
         this.schemerService.codingScheme?.variableCodings || []

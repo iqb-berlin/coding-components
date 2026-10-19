@@ -19,6 +19,7 @@ import {
 
 export interface ResolveIdentifierConflictsDialogData {
   analysis: SchemerIdentifierAnalysis;
+  recoveryProblems?: string[];
 }
 
 interface ValidationErrorGroup {
@@ -61,6 +62,9 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
     <h1 mat-dialog-title>Ungültige Variablenbezeichner</h1>
 
     <mat-dialog-content>
+      @for (problem of data.recoveryProblems || []; track $index) {
+        <p role="alert">{{ problem }}</p>
+      }
       <p>
         Die Variablenbezeichner können nicht übernommen werden. Bitte
         korrigiere die betroffenen Einträge an der jeweils angegebenen Quelle

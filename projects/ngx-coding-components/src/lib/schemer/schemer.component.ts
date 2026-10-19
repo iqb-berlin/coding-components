@@ -116,7 +116,10 @@ export class SchemerComponent implements OnDestroy {
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: CodingScheme | null) {
-    if (value !== this.codingScheme) this.dialogContext.invalidate();
+    if (value !== this.codingScheme) {
+      this.dialogContext.invalidate();
+      this.schemerFacade.resetIdentifierConflictResolutionState();
+    }
     this.schemerService.setCodingScheme(value);
     this.updateVariableLists();
   }
@@ -135,6 +138,7 @@ export class SchemerComponent implements OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varList(value: any) {
     this.dialogContext.invalidate();
+    this.schemerFacade.resetIdentifierConflictResolutionState();
     this.schemerService.setVarList([]);
     if (value) {
       this.schemerService.setVarList(parseVarListInput(value));
@@ -153,6 +157,7 @@ export class SchemerComponent implements OnDestroy {
   problems: CodingSchemeValidationProblem[] = [];
   hasIdentifierConflict = false;
   varCodingChangedSubscription: Subscription | null = null;
+  private identifierConflictSubscription: Subscription;
 
   constructor(
     private translateService: TranslateService,
@@ -165,7 +170,17 @@ export class SchemerComponent implements OnDestroy {
     private editSourceParametersDialog: MatDialog,
     private inputDialog: MatDialog,
     private changeDetector: ChangeDetectorRef
-  ) {}
+  ) {
+    this.identifierConflictSubscription = this.schemerFacade.identifierConflictChanges$.subscribe(changed => {
+      this.updateVariableLists();
+      if (changed && !this.hasIdentifierConflict) this.codingSchemeChanged.emit(this.schemerService.codingScheme);
+    });
+  }
+
+  resolveIdentifierConflicts(): void {
+    this.schemerFacade.resetIdentifierConflictResolutionState();
+    this.updateVariableLists();
+  }
 
   private tr(
     key: string, // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -842,6 +857,7 @@ export class SchemerComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.dialogContext.destroy();
+    this.identifierConflictSubscription.unsubscribe();
     if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
     this.schemerFacade.resetIdentifierConflictResolutionState();
   }
