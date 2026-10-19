@@ -138,6 +138,83 @@ describe('orphan coding resolution', () => {
 
   [
     {
+      sources: ['other', 'other', 'old-radio'],
+      expectedSources: ['other', 'other', 'new-radio'],
+      expectedScore: 12,
+      expectedCode: 7,
+      expectedConcat: '3_3_1'
+    },
+    {
+      sources: ['other', 'old-radio', 'other', 'new-radio'],
+      expectedSources: ['other', 'new-radio', 'other'],
+      expectedScore: 12,
+      expectedCode: 7,
+      expectedConcat: '3_1_3'
+    },
+    {
+      sources: ['new-radio', 'other', 'old-radio', 'other'],
+      expectedSources: ['new-radio', 'other', 'other'],
+      expectedScore: 12,
+      expectedCode: 7,
+      expectedConcat: '1_3_3'
+    },
+    {
+      sources: ['old-radio', 'old-radio', 'other'],
+      expectedSources: ['new-radio', 'new-radio', 'other'],
+      expectedScore: 9,
+      expectedCode: 5,
+      expectedConcat: '1_1_3'
+    },
+    {
+      sources: ['old-radio', 'other', 'new-radio', 'new-radio'],
+      expectedSources: ['new-radio', 'other', 'new-radio'],
+      expectedScore: 9,
+      expectedCode: 5,
+      expectedConcat: '1_3_1'
+    },
+    {
+      sources: ['new-radio', 'other', 'old-radio', 'old-radio'],
+      expectedSources: ['new-radio', 'other', 'new-radio'],
+      expectedScore: 9,
+      expectedCode: 5,
+      expectedConcat: '1_3_1'
+    }
+  ].forEach(({
+    sources, expectedSources, expectedScore, expectedCode, expectedConcat
+  }) => {
+    [
+      { sourceType: 'SUM_SCORE', expectedValue: expectedScore },
+      { sourceType: 'SUM_CODE', expectedValue: expectedCode },
+      { sourceType: 'CONCAT_CODE', expectedValue: expectedConcat }
+    ].forEach(({ sourceType, expectedValue }) => {
+      it(`preserves existing source multiplicity and order for ${sourceType}: ${sources.join(', ')}`, () => {
+        const calculation: VariableCodingData = {
+          ...derived(),
+          sourceType: sourceType as VariableCodingData['sourceType'],
+          deriveSources: sources
+        };
+        const target = { ...CodingFactory.createCodingVariable('new-radio'), alias: '01' };
+        const other = CodingFactory.createCodingVariable('other');
+        const codings = [previous(), target, other, calculation];
+        const before = JSON.stringify(codings);
+        const result = resolveOrphanCodings([variable(), variable('other', 'other')], codings, ['TRANSFER'])!;
+        const resolved = result.find(coding => coding.id === 'derived')!;
+        expect(resolved.deriveSources).toEqual(expectedSources);
+        expect(CodingSchemeFactory.deriveValue(result, resolved, [
+          {
+            id: 'new-radio', value: 2, code: 1, score: 2, status: 'CODING_COMPLETE'
+          },
+          {
+            id: 'other', value: 3, code: 3, score: 5, status: 'CODING_COMPLETE'
+          }
+        ])).toEqual(jasmine.objectContaining({ value: expectedValue, status: 'VALUE_CHANGED' }));
+        expect(JSON.stringify(codings)).toBe(before);
+      });
+    });
+  });
+
+  [
+    {
       expression: '${Response} + 10 * ${response}',
       expectedExpression: '${response} + 10 * ${Other}',
       expectedValue: 52

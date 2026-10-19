@@ -180,7 +180,18 @@ export const resolveOrphanCodings = (
     // START_EMPTY intentionally leaves the old ID in place. Validation exposes
     // the missing source, and the derived coding stays editable for repair.
     if (coding.deriveSources?.some(source => replacements.has(source))) {
-      coding.deriveSources = [...new Set(coding.deriveSources.map(source => replacements.get(source)?.id || source))];
+      const originalSourceCounts = new Map<string, number>();
+      const resolvedSourceCounts = new Map<string, number>();
+      coding.deriveSources = coding.deriveSources.flatMap(source => {
+        const targetId = replacements.get(source)?.id || source;
+        const sourceCount = (originalSourceCounts.get(source) || 0) + 1;
+        originalSourceCounts.set(source, sourceCount);
+        // Coalesce only occurrences introduced by different IDs converging.
+        // Existing repetitions keep their multiplicity and relative order.
+        if (sourceCount <= (resolvedSourceCounts.get(targetId) || 0)) return [];
+        resolvedSourceCounts.set(targetId, sourceCount);
+        return [targetId];
+      });
     }
     if (coding.sourceType === 'SOLVER' && coding.sourceParameters?.solverExpression) {
       const expression = remapSolverExpression(
