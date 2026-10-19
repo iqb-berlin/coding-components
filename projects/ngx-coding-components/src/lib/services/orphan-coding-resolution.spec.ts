@@ -209,7 +209,7 @@ describe('orphan coding resolution', () => {
     ]).value).toBe(52);
   });
 
-  it('does not rewrite dependent formulas or deduplicate sources for START_EMPTY', () => {
+  it('keeps removed references and source lists but preserves surviving SOLVER identities for START_EMPTY', () => {
     const other = { ...CodingFactory.createCodingVariable('response'), alias: 'Other' };
     const calculation = derived();
     calculation.deriveSources = ['old-radio', 'response', 'response'];
@@ -219,7 +219,72 @@ describe('orphan coding resolution', () => {
       [{ ...previous(), alias: 'Response' }, other, calculation],
       ['START_EMPTY']
     )!;
-    expect(result.find(coding => coding.id === 'derived')).toEqual(calculation);
+    expect(result.find(coding => coding.id === 'derived')).toEqual({
+      ...calculation,
+      sourceParameters: { ...calculation.sourceParameters, solverExpression: '${Response} + 10 * ${Other}' }
+    });
+  });
+
+  ['${response} + 1', '${ response[0]:0:INC } + 1'].forEach(expression => {
+    it(`preserves an unrelated SOLVER source when starting empty: ${expression}`, () => {
+      const other = { ...CodingFactory.createCodingVariable('response'), alias: 'Other', fragmenting: '(.*)' };
+      const calculation = derived('response');
+      calculation.sourceParameters!.solverExpression = expression;
+      const codings = [{ ...previous(), alias: 'Response' }, other, calculation];
+      const before = JSON.stringify(codings);
+      const responses = [{ id: 'response', value: '5', status: 'VALUE_CHANGED' as const }];
+      expect(CodingSchemeFactory.deriveValue(codings, calculation, responses).value).toBe(6);
+
+      const result = resolveOrphanCodings(
+        [variable('new-radio', 'response'), variable('response', 'Other')], codings, ['START_EMPTY']
+      )!;
+      const resolved = result.find(coding => coding.id === 'derived')!;
+      expect(resolved.deriveSources).toEqual(['response']);
+      expect(resolved.sourceParameters?.solverExpression).toBe(expression.replace('response', 'Other'));
+      expect(CodingSchemeFactory.deriveValue(result, resolved, responses))
+        .toEqual(jasmine.objectContaining({ value: 6, status: 'VALUE_CHANGED' }));
+      expect(JSON.stringify(codings)).toBe(before);
+    });
+  });
+
+  (['TRANSFER', 'START_EMPTY'] as const).forEach(decision => {
+    it(`accounts for every new host variable before preserving SOLVER sources during ${decision}`, () => {
+      const other = { ...CodingFactory.createCodingVariable('other'), alias: 'OtherSource' };
+      const calculation = derived('other');
+      calculation.sourceParameters!.solverExpression = '${other} + 1';
+      const variables = [
+        variable(), variable('other', 'OtherSource'), variable('additional', 'other'),
+        { ...variable('caption', 'Caption'), type: 'no-value' as const }
+      ];
+      const result = resolveOrphanCodings(variables, [previous(), other, calculation], [decision])!;
+      expect(result.find(coding => coding.id === 'additional')).toEqual(jasmine.objectContaining({
+        alias: 'other', sourceType: 'BASE'
+      }));
+      expect(result.find(coding => coding.id === 'caption')).toEqual(jasmine.objectContaining({
+        alias: 'Caption', sourceType: 'BASE_NO_VALUE'
+      }));
+      const resolved = result.find(coding => coding.id === 'derived')!;
+      expect(resolved.sourceParameters?.solverExpression).toBe('${OtherSource} + 1');
+      expect(CodingSchemeFactory.deriveValue(result, resolved, [
+        { id: 'other', value: 5, status: 'VALUE_CHANGED' }
+      ])).toEqual(jasmine.objectContaining({ value: 6, status: 'VALUE_CHANGED' }));
+    });
+  });
+
+  it('preserves alias lookup when the surviving source has no stored alias during START_EMPTY', () => {
+    const other = { ...CodingFactory.createCodingVariable('response'), alias: undefined };
+    const calculation = derived('response');
+    calculation.sourceParameters!.solverExpression = '${response} + 1';
+    const result = resolveOrphanCodings(
+      [variable('new-radio', 'response'), variable('response', 'Other')],
+      [{ ...previous(), alias: 'Response' }, other, calculation],
+      ['START_EMPTY']
+    )!;
+    const resolved = result.find(coding => coding.id === 'derived')!;
+    expect(resolved.sourceParameters?.solverExpression).toBe('${Other} + 1');
+    expect(CodingSchemeFactory.deriveValue(result, resolved, [
+      { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+    ]).value).toBe(6);
   });
 
   it('keeps dependent codings untouched for START_EMPTY and exposes their missing source', () => {

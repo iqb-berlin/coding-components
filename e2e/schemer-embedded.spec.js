@@ -397,6 +397,72 @@ test('recovered coding and immediate edits survive the host save and reopen', as
   await expect(reopened.locator('var-coding .variable-details input').first()).toHaveValue('Recovered and edited');
 });
 
+[
+  { decision: 'TRANSFER', button: 'Kodierung übernehmen' },
+  { decision: 'START_EMPTY', button: 'Neu beginnen und alte Kodierung löschen' }
+].forEach(({ decision, button }) => {
+  test(
+    `orphan recovery preserves shadowed SOLVER sources across Verona save and reopen with ${decision}`,
+    async ({ page }) => {
+      const start = makeOrphanStart();
+      start.variables = [
+        { ...makeVariable('current'), alias: 'response', type: 'number' },
+        { ...makeVariable('response'), alias: 'Other', type: 'number' },
+        { ...makeVariable('caption'), alias: 'Caption', type: 'no-value' }
+      ];
+      const scheme = JSON.parse(start.codingScheme);
+      scheme.variableCodings[0].alias = 'Response';
+      const calculation = scheme.variableCodings[1];
+      calculation.deriveSources = ['old-radio', 'response'];
+      // The two literal references identify different sources before recovery.
+      // eslint-disable-next-line no-template-curly-in-string
+      calculation.sourceParameters.solverExpression = '${Response} + 10 * ${response}';
+      scheme.variableCodings.push({
+        id: 'response', alias: 'Other', sourceType: 'BASE', codeModel: 'RULES_ONLY', codes: []
+      }, {
+        ...calculation,
+        id: 'unrelated',
+        alias: 'Unrelated',
+        deriveSources: ['response'],
+        // eslint-disable-next-line no-template-curly-in-string
+        sourceParameters: { processing: [], solverExpression: '${response} + 1' }
+      });
+      start.codingScheme = JSON.stringify(scheme);
+      const frame = await loadEmbeddedSchemer(page, start);
+      await frame.getByRole('button', { name: button, exact: true }).click();
+      await expect(frame.getByRole('dialog')).toHaveCount(0);
+      const saved = await page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
+      const persisted = JSON.parse(saved);
+      expect(persisted.variableCodings.find(coding => coding.id === 'caption').sourceType).toBe('BASE_NO_VALUE');
+      const unrelated = persisted.variableCodings.find(coding => coding.id === 'unrelated');
+      // eslint-disable-next-line no-template-curly-in-string
+      expect(unrelated.sourceParameters.solverExpression).toBe('${Other} + 1');
+      expect(CodingSchemeFactory.deriveValue(persisted.variableCodings, unrelated, [
+        { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+      ])).toMatchObject({ value: 6, status: 'VALUE_CHANGED' });
+      const recovered = persisted.variableCodings.find(coding => coding.id === 'derived');
+      if (decision === 'TRANSFER') {
+        expect(CodingSchemeFactory.deriveValue(persisted.variableCodings, recovered, [
+          { id: 'current', value: 2, status: 'VALUE_CHANGED' },
+          { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+        ])).toMatchObject({ value: 52, status: 'VALUE_CHANGED' });
+      } else {
+        expect(recovered.deriveSources).toEqual(['old-radio', 'response']);
+      }
+
+      const reopened = await loadEmbeddedSchemer(page, { ...start, codingScheme: saved });
+      await expect(reopened.getByRole('dialog')).toHaveCount(0);
+      await reopened.locator('.var-list-entry').filter({ hasText: 'Unrelated' }).click();
+      await expect(reopened.locator('.missing-source-notice')).toHaveCount(0);
+      await reopened.locator('var-coding .variable-details button').first().click();
+      await reopened.getByRole('textbox', { name: 'Other', exact: true }).fill('5');
+      await reopened.getByRole('button', { name: 'Testen', exact: true }).click();
+      await expect(reopened.locator('.solver-test-result-ok')).toContainText('6');
+    }
+  );
+});
+
 test('orphan recovery saves a converging aggregate source only once and keeps it after reopen', async ({ page }) => {
   const start = makeOrphanStart();
   const scheme = JSON.parse(start.codingScheme);

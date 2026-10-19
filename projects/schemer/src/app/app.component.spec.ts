@@ -2,6 +2,8 @@ import { Subject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { CodingFactory, CodingSchemeFactory } from '@iqb/responses';
+import { resolveOrphanCodings } from '@ngx-coding-components/services/orphan-coding-resolution';
 import { AppComponent } from './app.component';
 import { VeronaAPIService, VosStartCommand } from './verona-api.service';
 
@@ -74,5 +76,62 @@ describe('AppComponent Verona start commands', () => {
       { id: 'answer', sourceType: 'BASE' }
     ]);
     expect(component.userRole()).toBe('RW_MAXIMAL');
+  });
+
+  (['TRANSFER', 'START_EMPTY'] as const).forEach(decision => {
+    it(`preserves the original source namespace through a Verona orphan recovery with ${decision}`, () => {
+      const source = { ...CodingFactory.createCodingVariable('response'), alias: 'Other' };
+      const orphan = {
+        ...CodingFactory.createCodingVariable('old'), alias: 'Response', codes: [{ id: 1, score: 2 }]
+      };
+      const calculation = {
+        ...CodingFactory.createCodingVariable('derived'),
+        alias: 'Result',
+        sourceType: 'SOLVER' as const,
+        deriveSources: ['old', 'response'],
+        sourceParameters: {
+          processing: [],
+          // eslint-disable-next-line no-template-curly-in-string
+          solverExpression: '${Response} + 10 * ${response}'
+        }
+      };
+      const unrelated = {
+        ...calculation,
+        id: 'unrelated',
+        alias: 'Unrelated',
+        deriveSources: ['response'],
+        // eslint-disable-next-line no-template-curly-in-string
+        sourceParameters: { processing: [], solverExpression: '${response} + 1' }
+      };
+      const original = [orphan, source, calculation, unrelated];
+      starts.next({
+        type: 'vosStartCommand',
+        sessionId: 'orphan-with-shadowed-source',
+        variables: [
+          { ...createVariable('current', 'number'), alias: 'response' },
+          { ...createVariable('response', 'number'), alias: 'Other' },
+          { ...createVariable('caption', 'no-value'), alias: 'Caption' }
+        ],
+        codingScheme: JSON.stringify({ version: '3.5', variableCodings: original })
+      });
+
+      const loaded = component.codings()!.variableCodings;
+      expect(loaded).toEqual(original);
+      const resolved = resolveOrphanCodings(component.varList(), loaded, [decision])!;
+      expect(resolved.find(coding => coding.id === 'caption')?.sourceType).toBe('BASE_NO_VALUE');
+      const unaffected = resolved.find(coding => coding.id === 'unrelated')!;
+      expect(CodingSchemeFactory.deriveValue(resolved, unaffected, [
+        { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+      ])).toEqual(jasmine.objectContaining({ value: 6, status: 'VALUE_CHANGED' }));
+      if (decision === 'TRANSFER') {
+        expect(CodingSchemeFactory.deriveValue(resolved, resolved.find(coding => coding.id === 'derived')!, [
+          { id: 'current', value: 2, status: 'VALUE_CHANGED' },
+          { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+        ])).toEqual(jasmine.objectContaining({ value: 52, status: 'VALUE_CHANGED' }));
+      } else {
+        expect(resolved.find(coding => coding.id === 'derived')?.deriveSources).toEqual(['old', 'response']);
+      }
+      expect(loaded).toEqual(original);
+    });
   });
 });

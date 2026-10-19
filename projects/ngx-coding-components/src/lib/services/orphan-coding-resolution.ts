@@ -42,7 +42,9 @@ const isFreshTarget = (coding: VariableCodingData): boolean => (
 );
 
 const createTarget = (variable: VariableInfo): VariableCodingData => ({
-  ...CodingFactory.createCodingVariable(variable.id),
+  ...(variable.type === 'no-value' ?
+    CodingFactory.createBaseCodingVariable(variable.id, 'BASE_NO_VALUE') :
+    CodingFactory.createCodingVariable(variable.id)),
   alias: publicName(variable),
   ...(variable.page === undefined ? {} : { page: variable.page })
 });
@@ -166,10 +168,12 @@ export const resolveOrphanCodings = (
     if (decisions[index] === 'TRANSFER') replacements.set(conflict.previous.id, conflict.current);
   });
   const resolved = result.filter(coding => !removedIds.has(coding.id));
-  // The editor refreshes active aliases from the host after recovery as well.
+  // Build the complete host namespace before preserving SOLVER references.
+  // Later editor initialization must not introduce another alias that shadows a source ID.
   variables.forEach(variable => {
     const coding = resolved.find(candidate => candidate.id === variable.id);
     if (coding) coding.alias = publicName(variable);
+    else resolved.push(createTarget(variable));
   });
   let canPreserveReferences = true;
   resolved.forEach(coding => {
@@ -178,7 +182,7 @@ export const resolveOrphanCodings = (
     if (coding.deriveSources?.some(source => replacements.has(source))) {
       coding.deriveSources = [...new Set(coding.deriveSources.map(source => replacements.get(source)?.id || source))];
     }
-    if (replacements.size && coding.sourceType === 'SOLVER' && coding.sourceParameters?.solverExpression) {
+    if (coding.sourceType === 'SOLVER' && coding.sourceParameters?.solverExpression) {
       const expression = remapSolverExpression(
         coding.sourceParameters.solverExpression,
         codings,

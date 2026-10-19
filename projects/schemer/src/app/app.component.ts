@@ -10,6 +10,7 @@ import {
   SchemerStandaloneMenuComponent
 } from '@ngx-coding-components/schemer-standalone-menu.component';
 import { UserRoleType } from '@ngx-coding-components/services/schemer.service';
+import { analyzeVariableIdentifiers } from '@ngx-coding-components/services/schemer-identifier-validation';
 import {
   MessageDialogComponent,
   MessageDialogData, MessageType
@@ -119,23 +120,27 @@ export class AppComponent implements OnInit, OnDestroy {
           codings = new CodingScheme([]);
           this.codings.set(codings);
         }
-        variables.forEach(vi => {
-          let codingForBaseVariable;
-          if (codings.variableCodings) {
-            codingForBaseVariable = codings.variableCodings.find(v => v.id === vi.id);
-          }
-          if (codingForBaseVariable) {
-            codingForBaseVariable.alias = vi.alias || vi.id;
-          } else if (vi.type === 'no-value') {
-            const newNoValueBaseVar = CodingFactory.createBaseCodingVariable(vi.id, 'BASE_NO_VALUE');
-            if (vi.alias) newNoValueBaseVar.alias = vi.alias;
-            codings.variableCodings.push(newNoValueBaseVar);
-          } else {
-            const newBaseVar = CodingFactory.createCodingVariable(vi.id);
-            if (vi.alias) newBaseVar.alias = vi.alias;
-            codings.variableCodings.push(newBaseVar);
-          }
-        });
+        // Recovery needs the original alias namespace to identify each SOLVER source.
+        // The conflict resolution applies the host variables after the user's decision.
+        if (!analyzeVariableIdentifiers(variables, codings.variableCodings).hasProblems) {
+          variables.forEach(vi => {
+            let codingForBaseVariable;
+            if (codings.variableCodings) {
+              codingForBaseVariable = codings.variableCodings.find(v => v.id === vi.id);
+            }
+            if (codingForBaseVariable) {
+              codingForBaseVariable.alias = vi.alias || vi.id;
+            } else if (vi.type === 'no-value') {
+              const newNoValueBaseVar = CodingFactory.createBaseCodingVariable(vi.id, 'BASE_NO_VALUE');
+              if (vi.alias) newNoValueBaseVar.alias = vi.alias;
+              codings.variableCodings.push(newNoValueBaseVar);
+            } else {
+              const newBaseVar = CodingFactory.createCodingVariable(vi.id);
+              if (vi.alias) newBaseVar.alias = vi.alias;
+              codings.variableCodings.push(newBaseVar);
+            }
+          });
+        }
         const role = message.schemerConfig?.role;
         if (role) {
           let userRole: UserRoleType = 'RW_MAXIMAL';
