@@ -10,7 +10,7 @@
           matInput
           [(ngModel)]="varCoding.label"
           [disabled]="schemerService.userRole === 'RO'"
-          (change)="lastChangeFrom$.next('label')"
+          (ngModelChange)="lastChangeFrom$.next('label')"
         />
       </mat-form-field>
       <mat-form-field>
@@ -19,7 +19,7 @@
           matInput
           [(ngModel)]="varCoding.page"
           [disabled]="schemerService.userRole === 'RO'"
-          (change)="lastChangeFrom$.next('page')"
+          (ngModelChange)="lastChangeFrom$.next('page')"
           [matTooltip]="'page.tooltip' | translate"
         />
       </mat-form-field>

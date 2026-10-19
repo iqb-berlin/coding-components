@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, Output
+  Component, EventEmitter, Input, Output, OnChanges, OnDestroy
 } from '@angular/core';
 import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
@@ -14,6 +14,7 @@ import {
 } from '@iqbspecs/coding-scheme';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { FileService } from './services/file.service';
+import { DialogContext } from './services/dialog-context';
 import { UserRoleType } from './services/schemer.service';
 
 @Component({
@@ -85,7 +86,19 @@ import { UserRoleType } from './services/schemer.service';
     TranslateModule
   ]
 })
-export class SchemerStandaloneMenuComponent {
+export class SchemerStandaloneMenuComponent implements OnChanges, OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [
+    this.codingScheme, this.varList, this.userRole
+  ]);
+
+  ngOnChanges(): void {
+    this.dialogContext.invalidate();
+  }
+
+  ngOnDestroy(): void {
+    this.dialogContext.destroy();
+  }
+
   @Input() codingScheme: CodingScheme | null = null;
   @Input() varList: VariableInfo[] = [];
   @Input() userRole: UserRoleType = 'RW_MAXIMAL';
@@ -105,12 +118,17 @@ export class SchemerStandaloneMenuComponent {
   }
 
   async loadVariables(): Promise<void> {
-    this.varList = JSON.parse(await FileService.loadFile(['.json']));
+    const isCurrent = this.dialogContext.capture();
+    const variables = JSON.parse(await FileService.loadFile(['.json']));
+    if (!isCurrent()) return;
+    this.varList = variables;
     this.varListChanged.emit(this.varList);
   }
 
   async loadCodingScheme(): Promise<void> {
+    const isCurrent = this.dialogContext.capture();
     const codingsParsed = JSON.parse(await FileService.loadFile(['.json']));
+    if (!isCurrent()) return;
     let variableCodings = [];
     if (Array.isArray(codingsParsed?.variableCodings)) {
       variableCodings = codingsParsed.variableCodings;

@@ -252,6 +252,105 @@ test('embedded Schemer reports edited coding data back to the host session', asy
   })).toEqual({ sessionId: 'embedded-regression', label: 'Edited response label' });
 });
 
+test('embedded Schemer hands off the latest input before a host save without waiting for blur', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('.add-code-actions button').first().click();
+  await expect.poll(() => page.evaluate(() => window.received.some(message => (
+    message.type === 'vosSchemeChangedNotification'
+    && JSON.parse(message.codingScheme).variableCodings[0].codes.length === 1
+  )))).toBe(true);
+  await page.evaluate(() => {
+    const save = document.createElement('button');
+    save.id = 'host-save';
+    save.textContent = 'Host save';
+    save.addEventListener('click', () => {
+      window.savedScheme = window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme;
+    });
+    document.body.prepend(save);
+  });
+  await frame.locator('var-coding .variable-details input').first().fill('Latest input before host save');
+  await page.locator('#host-save').click();
+  const saved = await page.evaluate(() => window.savedScheme);
+  expect(JSON.parse(saved).variableCodings[0].label).toBe('Latest input before host save');
+  const reopened = await loadEmbeddedSchemer(page, {
+    ...makeStart([makeVariable('response_1'), makeVariable('response_2')]), codingScheme: saved
+  });
+  await expect(reopened.locator('var-coding .variable-details input').first())
+    .toHaveValue('Latest input before host save');
+});
+
+test('embedded Schemer cancels an instruction dialog when the host changes task', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('var-coding .manual-instruction button').first().click();
+  await frame.locator('.ProseMirror').fill('Instruction for previous task only');
+  await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'), {
+    ...makeStart([makeVariable('next_task')]), sessionId: 'next-task'
+  });
+  await expect(frame.locator('.var-list-entry')).toHaveText(['next_task']);
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+  await expect(frame.locator('var-coding .instructions')).not.toContainText('Instruction for previous task only');
+  const label = frame.locator('var-coding .variable-details input').first();
+  await label.fill('Next task remains editable');
+  await expect.poll(() => page.evaluate(() => {
+    const message = window.received.filter(m => m.type === 'vosSchemeChangedNotification').at(-1);
+    return message && { sessionId: message.sessionId, codings: JSON.parse(message.codingScheme).variableCodings };
+  })).toMatchObject({
+    sessionId: 'next-task',
+    codings: [{ id: 'next_task', label: 'Next task remains editable', manualInstruction: '' }]
+  });
+});
+
+test('embedded Schemer cancels deactivation when the host changes task', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('.coding-actions button').filter({
+    has: frame.locator('mat-icon').getByText('cancel', { exact: true })
+  }).click();
+  await expect(frame.getByRole('dialog')).toBeVisible();
+  await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'), {
+    ...makeStart([makeVariable('next_1'), makeVariable('next_2')]), sessionId: 'next-task'
+  });
+  await expect(frame.locator('.var-list-entry')).toHaveText(['next_1', 'next_2']);
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+  await frame.locator('var-coding .variable-details input').first().fill('Still active');
+  await expect.poll(() => page.evaluate(() => {
+    const message = window.received.filter(m => m.type === 'vosSchemeChangedNotification').at(-1);
+    return message ? JSON.parse(message.codingScheme).variableCodings.map(coding => coding.sourceType) : [];
+  })).toEqual(['BASE', 'BASE']);
+});
+
+test('embedded Schemer closes nested formula dialogs when their task is replaced', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('var-coding .manual-instruction button').first().click();
+  await frame.locator('aspect-rich-text-editor button').filter({
+    has: frame.locator('mat-icon').getByText('functions', { exact: true })
+  }).click();
+  await expect(frame.getByRole('dialog')).toHaveCount(2);
+  await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'), {
+    ...makeStart([makeVariable('next_task')]), sessionId: 'next-task'
+  });
+  await expect(frame.locator('.var-list-entry')).toHaveText(['next_task']);
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+});
+
+test('embedded Schemer rejects pending dialog edits after the host revokes write access', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('var-coding .manual-instruction button').first().click();
+  await frame.locator('.ProseMirror').fill('Must not be applied after read-only transition');
+  await page.evaluate(
+    message => document.querySelector('iframe').contentWindow.postMessage(message, '*'),
+    makeStart([makeVariable('response_1'), makeVariable('response_2')], 'guest')
+  );
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+  await expect(frame.locator('var-coding .variable-details input').first()).toBeDisabled();
+  await expect(frame.locator('var-coding .instructions')).not.toContainText('Must not be applied');
+});
+
 test('embedded Schemer restores copied codes after reopening without interrupting rendering', async ({ page }) => {
   const frame = await loadEmbeddedSchemer(page);
   await expect(frame.locator('.var-list-entry')).toHaveCount(2);

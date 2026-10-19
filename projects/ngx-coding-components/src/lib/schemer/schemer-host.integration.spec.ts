@@ -85,4 +85,13 @@ describe('Schemer host lifecycle integration', () => {
     expect(fixture.nativeElement.querySelector('.var-list-entry.selected'))
       .not.toBeNull();
   });
+
+  it('reports a typed value before blur, save or navigation can read an older scheme', () => {
+    let reported: string | undefined;
+    getSchemer().codingSchemeChanged.subscribe(scheme => { reported = JSON.stringify(scheme); });
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('var-coding .variable-details input');
+    input.value = 'Immediate input';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(reported).toContain('Immediate input');
+  });
 });

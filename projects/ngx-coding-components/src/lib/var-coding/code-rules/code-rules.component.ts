@@ -1,4 +1,5 @@
 import {
+  OnChanges, OnDestroy,
   ChangeDetectorRef,
   Component,
   EventEmitter,
@@ -23,6 +24,7 @@ import {
   RuleSet
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { DialogContext } from '../../services/dialog-context';
 import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
@@ -52,7 +54,19 @@ import { CodeRuleListComponent } from './code-rule-list.component';
     CodeRuleListComponent
   ]
 })
-export class CodeRulesComponent {
+export class CodeRulesComponent implements OnChanges, OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [
+    this.schemerService.codingScheme, this.schemerService.userRole, this.code
+  ]);
+
+  ngOnChanges(): void {
+    this.dialogContext.invalidate();
+  }
+
+  ngOnDestroy(): void {
+    this.dialogContext.destroy();
+  }
+
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
   @Input() varInfo: VariableInfo | undefined;
@@ -106,7 +120,7 @@ export class CodeRulesComponent {
           autoFocus: false
         }
       );
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (dialogResult !== false && dialogResult !== undefined && dialogResult !== null) {
           ruleSet.valueArrayPos = dialogResult;

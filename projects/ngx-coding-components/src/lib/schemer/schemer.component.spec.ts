@@ -880,6 +880,24 @@ describe('SchemerComponent', () => {
     expect(loadSpy).not.toHaveBeenCalled();
   });
 
+  it('ignores a file import that finishes after the host replaces the scheme', async () => {
+    schemerService.setCodingScheme({ variableCodings: [] });
+    let resolveFile!: (value: string) => void;
+    spyOn(FileService, 'loadFile').and.returnValue(new Promise(resolve => { resolveFile = resolve; }));
+    const emit = spyOn(component.codingSchemeChanged, 'emit');
+    const pending = component.importVariable();
+    const replacement = { variableCodings: [CodingFactory.createCodingVariable('next_task')] };
+    schemerService.setCodingScheme(replacement);
+    resolveFile(JSON.stringify({
+      type: 'iqb-variable-export',
+      version: 1,
+      variableCoding: CodingFactory.createCodingVariable('previous_task_import')
+    }));
+    await pending;
+    expect(replacement.variableCodings.map(coding => coding.id)).toEqual(['next_task']);
+    expect(emit).not.toHaveBeenCalled();
+  });
+
   it('importVariable should show error when no scheme', async () => {
     schemerService.userRole = 'RW_MAXIMAL';
     schemerService.setCodingScheme(null);

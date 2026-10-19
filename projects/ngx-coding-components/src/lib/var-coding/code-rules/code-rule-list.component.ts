@@ -1,4 +1,5 @@
 import {
+  OnChanges, OnDestroy,
   ChangeDetectorRef,
   Component, EventEmitter, Input, Output
 } from '@angular/core';
@@ -17,6 +18,7 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatDivider } from '@angular/material/divider';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CodingRule, RuleMethod, RuleSet } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { DialogContext } from '../../services/dialog-context';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService } from '../../services/schemer.service';
 import {
@@ -57,7 +59,19 @@ string => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><pat
     FormsModule, MatButton, MatFormField, MatInput, RuleReferencePipe, MatButtonToggle, MatButtonToggleGroup,
     MatMenu, MatMenuItem, MatMenuTrigger, MatCard, MatCardContent, MatDivider]
 })
-export class CodeRuleListComponent {
+export class CodeRuleListComponent implements OnChanges, OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [
+    this.schemerService.codingScheme, this.schemerService.userRole, this.ruleSet
+  ]);
+
+  ngOnChanges(): void {
+    this.dialogContext.invalidate();
+  }
+
+  ngOnDestroy(): void {
+    this.dialogContext.destroy();
+  }
+
   @Output() codeRulesChanged = new EventEmitter<void>();
   @Output() deleteRuleSetRequested = new EventEmitter<void>();
   @Input() ruleSet?: RuleSet;
@@ -159,7 +173,7 @@ export class CodeRuleListComponent {
           },
           autoFocus: false
         });
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (dialogResult !== false && dialogResult !== undefined && dialogResult !== null) {
           rule.fragment = dialogResult;

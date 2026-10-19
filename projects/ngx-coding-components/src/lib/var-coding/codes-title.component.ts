@@ -1,4 +1,5 @@
 import {
+  OnChanges, OnDestroy,
   ChangeDetectorRef,
   Component, EventEmitter, Input, Output
 } from '@angular/core';
@@ -12,6 +13,7 @@ import {
   CodeData,
   ProcessingParameterType
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { DialogContext } from '../services/dialog-context';
 import { SchemerService } from '../services/schemer.service';
 import {
   EditProcessingDialogComponent,
@@ -96,7 +98,19 @@ import {
     MatIconButton
   ]
 })
-export class CodesTitleComponent {
+export class CodesTitleComponent implements OnChanges, OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [
+    this.schemerService.codingScheme, this.schemerService.userRole, this.codeList, this.processing, this.fragmenting
+  ]);
+
+  ngOnChanges(): void {
+    this.dialogContext.invalidate();
+  }
+
+  ngOnDestroy(): void {
+    this.dialogContext.destroy();
+  }
+
   @Output() processingChanged = new EventEmitter<string[]>();
   @Output() fragmentingChanged = new EventEmitter<string>();
   @Output() codeListChanged = new EventEmitter<CodeData[]>();
@@ -130,7 +144,7 @@ export class CodesTitleComponent {
           }
         }
       );
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (dialogResult && typeof dialogResult === 'object') {
           const dialogResultTyped: EditProcessingDialogData = dialogResult;

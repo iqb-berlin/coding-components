@@ -1,7 +1,7 @@
 import {
   ChangeDetectorRef,
   Component, EventEmitter, Input, Output,
-  AfterViewInit, OnChanges, SimpleChanges
+  AfterViewInit, OnChanges, OnDestroy, SimpleChanges
 } from '@angular/core';
 import { Editor } from '@tiptap/core';
 import { Underline } from '@tiptap/extension-underline';
@@ -41,6 +41,7 @@ import { BulletListExtension } from './extensions/bullet-list';
 import { OrderedListExtension } from './extensions/ordered-list';
 import { BlockImage } from './extensions/block-image';
 import { FileService } from '../services/file.service';
+import { DialogContext } from '../services/dialog-context';
 import { ComboButtonComponent } from './combo-button.component';
 import { FormulaEditDialogComponent } from './formula-edit-dialog.component';
 import IqbMathFormula from './extensions/iqb-math-formula';
@@ -58,7 +59,8 @@ import { renderManualInstructionMath } from './manual-instruction-math';
     MatMenuTrigger, MatMenu, MatButton, TiptapEditorDirective
   ]
 })
-export class RichTextEditorComponent implements AfterViewInit, OnChanges {
+export class RichTextEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [this.editor]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @Input() content!: string | Record<string, any>;
   @Input() defaultFontSize!: number;
@@ -124,6 +126,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['content']) {
+      if (this.content !== this.editorContent) this.dialogContext.invalidate();
       if (typeof this.content === 'string') {
         this.editorContent = renderManualInstructionMath(this.content);
       } else {
@@ -236,7 +239,9 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
   }
 
   async insertBlockImage(alignment: 'none' | 'right' | 'left'): Promise<void> {
+    const isCurrent = this.dialogContext.capture();
     const mediaSrc = await FileService.loadImage();
+    if (!isCurrent()) return;
     switch (alignment) {
       case 'left': {
         this.editor.commands.insertBlockImage({ src: mediaSrc, style: 'float: left; margin-right: 10px;' });
@@ -267,7 +272,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
       autoFocus: false
     });
 
-    dialogRef.afterClosed().subscribe(dialogResult => {
+    this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
       this.changeDetector.markForCheck();
       if (typeof dialogResult === 'string' && normalizeFormulaLatex(dialogResult)) {
         this.editor.chain()
@@ -293,7 +298,7 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
       autoFocus: false
     });
 
-    dialogRef.afterClosed().subscribe(dialogResult => {
+    this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
       this.changeDetector.markForCheck();
       if (typeof dialogResult === 'string' && normalizeFormulaLatex(dialogResult)) {
         const transaction = this.editor.state.tr.setNodeMarkup(position, null, {
@@ -302,5 +307,9 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges {
         this.editor.view.dispatch(transaction);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.dialogContext.destroy();
   }
 }
