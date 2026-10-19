@@ -6,8 +6,10 @@ These are local, unchanged schema snapshots for browser message validation:
   [Schemer tag 3.2.0](https://github.com/verona-interfaces/schemer/blob/86cb276b7eebc42331390cc43c18369ef8695a19/schemerapi.yaml).
 - `variable-info-1.3.json` is the referenced JSON Schema from
   [Variable Info tag 1.3](https://github.com/verona-interfaces/variable-info/blob/3a9519162642afc9dee0de2d10ee39e24e12200c/variable-info.schema.json).
+- `variable-info-2.1.json` is the unchanged IQB JSON Schema from
+  [Variable Info 2.1](https://github.com/iqb-specifications/variable-info/blob/2072eb58c56dfa3869e00e2990e53cd354cc386b/variable-info.schema.json).
 
-Both sources are published under CC0-1.0. The original external variable-schema
+These sources are published under CC0-1.0. The original external variable-schema
 URL is registered with Ajv locally, so the tests do not fetch schemas at runtime.
 The `date-time` format is validated by `ajv-formats`. The API's `byte` annotation
 is accepted as a serialized string, matching its plain XML example and the
@@ -24,3 +26,8 @@ with variables/role/scheme, edits returned under the same session, later unit
 updates and read-only roles. They also check the API's optional start fields and
 the rule that missing or empty session IDs must not be processed. Packed-HTML
 runs additionally check the metadata actually delivered to the host.
+
+The VariableInfo compatibility cases separately validate minimal 2.1 variables
+and the existing API 3.2 envelope. They exercise both spellings through the real
+generator, runtime coding and host save. This additive support does not advertise
+API 4.0 or migrate the public TypeScript interfaces; those belong to issue #259.

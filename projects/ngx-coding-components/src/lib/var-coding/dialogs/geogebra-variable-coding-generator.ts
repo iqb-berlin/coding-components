@@ -1,10 +1,11 @@
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { normalizeVariableInfoFormat } from '@iqb/responses';
 
 export type GeoGebraCodingMode = 'numeric' | 'angle' | 'point' | 'boolean' | 'text';
 
 export const isGeoGebraVariableInfo = (
   varInfo: VariableInfo | null | undefined
-): boolean => varInfo?.format === 'ggb-variable';
+): boolean => !!varInfo && normalizeVariableInfoFormat(varInfo.format) === 'GGB_VARIABLE';
 
 const geoGebraNumberPattern = '([-+]?\\d+(?:[.,]\\d+)?)';
 // GeoGebra uses a decimal point and commas between Cartesian coordinates.

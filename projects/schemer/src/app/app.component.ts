@@ -4,6 +4,7 @@ import {
 import { Subject, takeUntil } from 'rxjs';
 
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { normalizeVariableInfoType } from '@iqb/responses';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -130,7 +131,7 @@ export class AppComponent implements OnInit, OnDestroy {
             }
             if (codingForBaseVariable) {
               codingForBaseVariable.alias = vi.alias || vi.id;
-            } else if (vi.type === 'no-value') {
+            } else if (normalizeVariableInfoType(vi.type) === 'NO_VALUE') {
               const newNoValueBaseVar = CodingFactory.createBaseCodingVariable(vi.id, 'BASE_NO_VALUE');
               if (vi.alias) newNoValueBaseVar.alias = vi.alias;
               codings.variableCodings.push(newNoValueBaseVar);

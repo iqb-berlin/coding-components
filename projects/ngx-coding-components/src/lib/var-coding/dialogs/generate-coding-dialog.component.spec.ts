@@ -75,6 +75,116 @@ describe('GenerateCodingDialogComponent', () => {
     });
   });
 
+  describe('VariableInfo spelling compatibility', () => {
+    ['boolean', 'BOOLEAN'].forEach(type => {
+      [[], ['false']].forEach(selected => {
+        it(`generates boolean rules for ${type} with selection ${JSON.stringify(selected)}`, () => {
+          const variable = JSON.parse(JSON.stringify({
+            id: 'flag', type, values: [{ value: true }, { value: false }]
+          }));
+          const { component, schemerService, dialogRef } = createComponent(variable);
+          component.selectedOptions = selected;
+          allowCodeCreation(schemerService);
+          component.generateButtonClick();
+          const coding = (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData;
+          expect(coding.codes?.find(code => code.type === 'FULL_CREDIT')?.ruleSets?.[0].rules)
+            .toEqual([{ method: selected.length ? 'IS_FALSE' : 'IS_TRUE', parameters: [] }]);
+        });
+      });
+    });
+
+    [
+      { type: 'string', format: '', model: 'simple-input' },
+      { type: 'integer', format: '', model: 'integer' },
+      { type: 'number', format: 'ggb-variable', model: 'integer' },
+      { type: 'string', format: 'ggb-variable', model: 'simple-input' },
+      { type: 'boolean', format: 'ggb-variable', model: 'geogebra-boolean' },
+      { type: 'json', format: 'math-table', model: 'math-table' },
+      { type: 'string', format: 'chem-element-symbols', model: 'simple-input' },
+      { type: 'json', format: 'chem-molecule', model: 'none' },
+      {
+        type: 'string', format: '', multiple: true, model: 'simple-input'
+      },
+      {
+        type: 'boolean', format: '', multiple: true, model: 'boolean-multi'
+      },
+      {
+        type: 'boolean', format: '', values: [{ value: true }, { value: false }], model: 'single-choice-some'
+      }
+    ].forEach(scenario => {
+      it(`generates identical codings for both spellings of ${JSON.stringify(scenario)}`, () => {
+        const generate = (current: boolean) => {
+          const payload = {
+            id: 'v1',
+            type: current ? scenario.type.toUpperCase() : scenario.type,
+            format: current ? scenario.format.toUpperCase().replace(/-/g, '_') : scenario.format,
+            multiple: scenario.multiple,
+            values: scenario.values,
+            page: 'legacy-page',
+            visualAnchor: 'legacy-anchor',
+            customExtension: { keep: true }
+          };
+          const original = JSON.stringify(payload);
+          const variable: VariableInfo = JSON.parse(original);
+          const { component, schemerService, dialogRef } = createComponent(variable);
+          const originalInput = JSON.stringify(component.varInfo);
+          expect(component.generationModel).toBe(scenario.model);
+          expect(component.variableInfoText.join(' ')).not.toContain('unbekannt');
+          component.numericMatch = '2';
+          component.selectedOption = 'correct';
+          component.selectedOptions = ['true'];
+          component.mathTableExpectedResult = '3';
+          allowCodeCreation(schemerService);
+          component.generateButtonClick();
+          expect(JSON.stringify(variable)).toBe(original);
+          expect(JSON.stringify(component.varInfo)).toBe(originalInput);
+          return (dialogRef.close as jasmine.Spy).calls.mostRecent().args[0] as VariableCodingData | null;
+        };
+
+        const legacy = generate(false);
+        const current = generate(true);
+        expect(current).toEqual(legacy);
+        if (scenario.model !== 'none') {
+          expect(current?.codes?.some(code => code.type === 'FULL_CREDIT')).toBeTrue();
+        }
+        if (scenario.values) {
+          expect(current?.codes?.find(code => code.type === 'FULL_CREDIT')?.ruleSets?.[0].rules)
+            .toEqual([{ method: 'IS_TRUE', parameters: [] }]);
+        }
+      });
+    });
+
+    ['STRING', 'INTEGER', 'NUMBER', 'BOOLEAN', 'ATTACHMENT', 'JSON', 'NO_VALUE', 'CODED'].forEach(type => {
+      it(`accepts a minimal ${type} payload without adding optional fields to the input`, () => {
+        const variable: VariableInfo = JSON.parse(JSON.stringify({ id: 'minimal', type }));
+        const { translateService, schemerService, dialogRef } = createComponent();
+        const component = new GenerateCodingDialogComponent(variable, translateService, schemerService, dialogRef);
+        expect(component.variableInfoText.length).toBeGreaterThan(0);
+        expect(variable).toEqual(JSON.parse(JSON.stringify({ id: 'minimal', type })));
+      });
+    });
+
+    ['STRING', 'BOOLEAN'].forEach(type => {
+      it(`accepts multiple ${type} values without optional position labels`, () => {
+        const variable: VariableInfo = JSON.parse(JSON.stringify({ id: 'minimal', type, multiple: true }));
+        const { translateService, schemerService, dialogRef } = createComponent();
+        const component = new GenerateCodingDialogComponent(variable, translateService, schemerService, dialogRef);
+        expect(component.positionLabels).toEqual([]);
+        expect(component.selectedArrayPos).toBe('ANY_OPEN');
+      });
+    });
+
+    it('keeps unknown types and formats unchanged and visible', () => {
+      const variable: VariableInfo = JSON.parse(JSON.stringify({ id: 'future', type: 'CUSTOM', format: 'FUTURE' }));
+      const { component } = createComponent(variable);
+      expect(component.generationModel).toBe('none');
+      expect(component.variableInfoText.join(' ')).toContain('unbekannt "CUSTOM"');
+      expect(component.variableInfoText.join(' ')).toContain('unbekannt "FUTURE"');
+      expect(variable.type as string).toBe('CUSTOM');
+      expect(variable.format as string).toBe('FUTURE');
+    });
+  });
+
   it('constructor should set generationModel to single-choice-many when values > 20 ' +
     'and set elseMethod based on valuesComplete', () => {
     const values = Array.from({ length: 21 }).map((_, i) => ({

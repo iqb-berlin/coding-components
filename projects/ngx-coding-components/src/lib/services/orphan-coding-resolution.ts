@@ -1,4 +1,5 @@
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { normalizeVariableInfoType } from '@iqb/responses';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
@@ -35,8 +36,6 @@ const samePublicName = (
   second: { id: string; alias?: string }
 ): boolean => publicName(first).toLowerCase() === publicName(second).toLowerCase();
 
-const isNoValueType = (type: string): boolean => type === 'no-value' || type === 'NO_VALUE';
-
 // Fresh base codings use RULES_ONLY; the orphan cleanup deliberately also
 // preserves empty codings with a non-default, user-selected coding model.
 const isFreshTarget = (coding: VariableCodingData): boolean => (
@@ -49,7 +48,7 @@ const isFreshTarget = (coding: VariableCodingData): boolean => (
 );
 
 const createTarget = (variable: VariableInfo): VariableCodingData => ({
-  ...(isNoValueType(variable.type) ?
+  ...(normalizeVariableInfoType(variable.type) === 'NO_VALUE' ?
     CodingFactory.createBaseCodingVariable(variable.id, 'BASE_NO_VALUE') :
     CodingFactory.createCodingVariable(variable.id)),
   alias: publicName(variable),
@@ -73,7 +72,7 @@ export const getOrphanCodingResolutionPlan = (
     if (!candidates.length) return;
     const name = publicName(current);
     const targets = codings.filter(coding => coding.id === current.id);
-    if (isNoValueType(current.type) || targets.length > 1 ||
+    if (normalizeVariableInfoType(current.type) === 'NO_VALUE' || targets.length > 1 ||
       (targets.length === 1 && !isFreshTarget(targets[0]))) {
       plan.problems.push(`Die aktuelle Variable „${name}“ kann nicht automatisch ersetzt werden: ` +
         'Sie besitzt bereits eigene Einstellungen oder ist keine aktive Basisvariable.');

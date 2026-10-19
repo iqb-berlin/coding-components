@@ -2,7 +2,8 @@ import { Injectable, signal } from '@angular/core';
 import {
   CodingSchemeFactory,
   CodingSchemeProblem,
-  CodingToTextMode
+  CodingToTextMode,
+  normalizeVariableInfoType
 } from '@iqb/responses';
 import {
   CodeData,
@@ -343,6 +344,6 @@ export class SchemerService {
 
   isProtectedBaseVariable(varCoding: VariableCodingData | null | undefined): boolean {
     if (!varCoding || varCoding.sourceType !== 'BASE') return false;
-    return this.varList.some(v => v.id === varCoding.id && v.type !== 'no-value');
+    return this.varList.some(v => v.id === varCoding.id && normalizeVariableInfoType(v.type) !== 'NO_VALUE');
   }
 }

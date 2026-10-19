@@ -8,7 +8,7 @@
 <mat-dialog-content>
   @if (varInfo) {
   <div>
-    @for (info of ToTextFactory.varInfoAsText(varInfo); track info) {
+    @for (info of variableInfoText; track info) {
     <p>{{ info }}</p>
     }
   </div>

@@ -1,14 +1,18 @@
+/* Browser interactions in a scenario must run sequentially. */
+/* eslint-disable no-await-in-loop, no-restricted-syntax */
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
-const { CodingSchemeFactory } = require('@iqb/responses');
+const { CodingFactory, CodingSchemeFactory } = require('@iqb/responses');
 const veronaSchema = require('./fixtures/verona/schemer-3.2.0.json');
 const variableSchema = require('./fixtures/verona/variable-info-1.3.json');
+const variableInfo21Schema = require('./fixtures/verona/variable-info-2.1.json');
 const studioStart = require('./fixtures/verona/studio-start-command.json');
 
 const ajv = new Ajv({ strict: false, allErrors: true });
 addFormats(ajv, ['date-time']);
+const validateVariableInfo21 = ajv.compile(variableInfo21Schema);
 // The API examples use plain serialized schemes for this AsyncAPI annotation.
 ajv.addFormat('byte', true);
 ajv.addSchema(variableSchema, 'https://w3id.org/iqb/spec/variable-info/1.3');
@@ -101,8 +105,18 @@ const makeOrphanStart = (sessionId = 'orphan-recovery', currentId = 'current') =
   })
 });
 
-async function loadEmbeddedSchemer(page, start = makeStart([makeVariable('response_1'), makeVariable('response_2')])) {
-  expectVeronaMessage(start);
+async function loadEmbeddedSchemer(
+  page,
+  start = makeStart([makeVariable('response_1'), makeVariable('response_2')]),
+  { variableInfo21 = false } = {}
+) {
+  // The message envelope remains API 3.2; 2.1 variable payloads are an additive compatibility feature.
+  expectVeronaMessage(variableInfo21 ? { ...start, variables: [] } : start);
+  if (variableInfo21) {
+    start.variables.forEach(variable => {
+      expect(validateVariableInfo21(variable), JSON.stringify(validateVariableInfo21.errors)).toBe(true);
+    });
+  }
   if (process.env.SCHEMER_ARTIFACT) {
     const artifact = await fs.readFile(process.env.SCHEMER_ARTIFACT, 'utf8');
     await page.route('**/schemer-artifact.html', route => route.fulfill({
@@ -132,6 +146,80 @@ async function loadEmbeddedSchemer(page, start = makeStart([makeVariable('respon
     .some(message => message.type === 'vosReadyNotification'))).toBe(true);
   return page.frameLocator('iframe[title="Embedded Schemer"]');
 }
+
+[false, true].forEach(current => {
+  const version = current ? '2.1 minimal' : '1.x';
+  test(`VariableInfo ${version} preserves states and generates usable codings`, async ({ page }) => {
+    const input = [
+      { id: 'state', type: 'NO_VALUE' },
+      { id: 'answer', type: 'STRING' },
+      { id: 'count', type: 'INTEGER' },
+      { id: 'geo', type: 'NUMBER', format: 'GGB_VARIABLE' },
+      { id: 'table', type: 'JSON', format: 'MATH_TABLE' },
+      { id: 'element', type: 'STRING', format: 'CHEM_ELEMENT_SYMBOLS' },
+      { id: 'molecule', type: 'JSON', format: 'CHEM_MOLECULE' }
+    ];
+    const variables = current ? input : input.map(variable => ({
+      ...makeVariable(variable.id),
+      type: variable.type.toLowerCase().replace(/_/g, '-'),
+      format: (variable.format || '').toLowerCase().replace(/_/g, '-')
+    }));
+    const start = makeStart(variables);
+    // The lowercase chemistry spellings are compatibility extensions outside the 1.3 schema.
+    if (!current) {
+      expectVeronaMessage(makeStart(variables.filter(variable => !variable.format.startsWith('chem-'))));
+    }
+    const frame = await loadEmbeddedSchemer(page, current ? start : makeStart([]), { variableInfo21: current });
+    if (!current) {
+      await page.evaluate(message => {
+        document.querySelector('iframe').contentWindow.postMessage(message, '*');
+      }, start);
+    }
+    await expect(frame.locator('.var-list-entry')).toHaveText([
+      'answer', 'count', 'element', 'geo', 'molecule', 'table'
+    ]);
+    const scenarios = [
+      { id: 'answer', expected: 'correct', response: 'correct' },
+      { id: 'count', expected: '2', response: 2 },
+      { id: 'geo', expected: '2', response: 'A = 2' },
+      { id: 'table', expected: '3', response: JSON.stringify([{ rowType: 'result', cells: [{ value: '3' }] }]) },
+      { id: 'element', expected: 'H', response: 'H' }
+    ];
+    for (const scenario of scenarios) {
+      await frame.locator('.var-list-entry').getByText(scenario.id, { exact: true }).click();
+      await frame.getByRole('button', {
+        description: 'Variableninformation / Kodierung generieren', exact: true
+      }).click();
+      const dialog = frame.getByRole('dialog');
+      await expect(dialog).not.toContainText('unbekannt');
+      if (['answer', 'element'].includes(scenario.id)) {
+        await dialog.locator('textarea').fill(scenario.expected);
+      } else {
+        await dialog.getByRole('textbox').first().fill(scenario.expected);
+      }
+      await dialog.getByRole('button', { name: 'Generiere Kodierung', exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      await expect.poll(() => page.evaluate(id => {
+        const changed = window.received.filter(message => message.type === 'vosSchemeChangedNotification').at(-1);
+        return changed && JSON.parse(changed.codingScheme).variableCodings
+          .find(variable => variable.id === id)?.codes?.length;
+      }, scenario.id)).toBeGreaterThan(0);
+      const scheme = await page.evaluate(() => JSON.parse(window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme));
+      expect(scheme.variableCodings.find(variable => variable.id === 'state').sourceType).toBe('BASE_NO_VALUE');
+      const coding = scheme.variableCodings.find(variable => variable.id === scenario.id);
+      expect(CodingFactory.code({ id: scenario.id, value: scenario.response, status: 'VALUE_CHANGED' }, coding).code)
+        .toBe(coding.codes.find(code => code.type === 'FULL_CREDIT').id);
+    }
+    await frame.locator('.var-list-entry').getByText('molecule', { exact: true }).click();
+    await frame.getByRole('button', {
+      description: 'Variableninformation / Kodierung generieren', exact: true
+    }).click();
+    await expect(frame.getByRole('dialog')).toContainText('Molekül mit Bild (JSON)');
+    await expect(frame.getByRole('dialog')).not.toContainText('unbekannt');
+    await frame.getByRole('dialog').getByRole('button', { name: 'Schließen', exact: true }).click();
+  });
+});
 
 test('Verona 3.2 metadata and edited schemes follow the published message contract', async ({ page }) => {
   const frame = await loadEmbeddedSchemer(page, studioStart);
