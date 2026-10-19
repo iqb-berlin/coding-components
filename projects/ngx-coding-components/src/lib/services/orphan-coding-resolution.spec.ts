@@ -18,6 +18,10 @@ describe('orphan coding resolution', () => {
     valuePositionLabels: [],
     page: 'current-page'
   });
+  // Host payloads also use VariableInfo 2.x spelling, beyond the public 1.x type.
+  const noValueVariable = (type: string, id = 'new-radio', alias = '01'): VariableInfo => (
+    JSON.parse(JSON.stringify({ ...variable(id, alias), type }))
+  );
   const previous = (): VariableCodingData => ({
     ...CodingFactory.createCodingVariable('old-radio'),
     alias: '01',
@@ -348,6 +352,37 @@ describe('orphan coding resolution', () => {
     });
   });
 
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    it(`rejects recovery onto a ${type} host variable with or without a fresh target`, () => {
+      const variables = [noValueVariable(type)];
+      const target = { ...CodingFactory.createCodingVariable('new-radio'), alias: '01' };
+      [[previous(), derived()], [previous(), target, derived()]].forEach(codings => {
+        const before = JSON.stringify({ variables, codings });
+        const plan = getOrphanCodingResolutionPlan(variables, codings);
+        expect(plan.conflicts).toEqual([]);
+        expect(plan.problems.length).toBe(1);
+        expect(resolveOrphanCodings(variables, codings, ['TRANSFER'])).toBeNull();
+        expect(resolveOrphanCodings(variables, codings, ['START_EMPTY'])).toBeNull();
+        expect(JSON.stringify({ variables, codings })).toBe(before);
+      });
+    });
+
+    (['TRANSFER', 'START_EMPTY'] as const).forEach(decision => {
+      it(`keeps an additional ${type} host variable deactivated after ${decision} and serialization`, () => {
+        const variables = [variable(), noValueVariable(type, 'caption', 'Caption')];
+        const codings = [previous()];
+        const before = JSON.stringify({ variables, codings });
+        const result = resolveOrphanCodings(variables, codings, [decision])!;
+        const persisted: VariableCodingData[] = JSON.parse(JSON.stringify(result));
+        expect(persisted.find(coding => coding.id === 'caption')).toEqual(jasmine.objectContaining({
+          alias: 'Caption', sourceType: 'BASE_NO_VALUE', codes: [], page: 'current-page'
+        }));
+        expect(CodingSchemeFactory.validate(variables, persisted).filter(problem => problem.breaking)).toEqual([]);
+        expect(JSON.stringify({ variables, codings })).toBe(before);
+      });
+    });
+  });
+
   it('preserves alias lookup when the surviving source has no stored alias during START_EMPTY', () => {
     const other = { ...CodingFactory.createCodingVariable('response'), alias: undefined };
     const calculation = derived('response');
@@ -423,10 +458,9 @@ describe('orphan coding resolution', () => {
       .find(coding => coding.id === 'new-radio')?.codes).toEqual([]);
   });
 
-  it('leaves genuine active duplicates, duplicate technical IDs and NO_VALUE conflicts diagnostic-only', () => {
+  it('leaves genuine active duplicates and duplicate technical IDs diagnostic-only', () => {
     expect(resolveOrphanCodings([variable(), variable('second')], [previous()], ['TRANSFER'])).toBeNull();
     expect(resolveOrphanCodings([variable()], [previous(), previous()], ['TRANSFER'])).toBeNull();
-    expect(resolveOrphanCodings([{ ...variable(), type: 'no-value' }], [previous()], ['TRANSFER'])).toBeNull();
     expect(resolveOrphanCodings([variable('old-radio')], [previous()], ['TRANSFER'])).toBeNull();
   });
 

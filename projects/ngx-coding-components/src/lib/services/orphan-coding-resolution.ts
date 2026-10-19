@@ -35,6 +35,8 @@ const samePublicName = (
   second: { id: string; alias?: string }
 ): boolean => publicName(first).toLowerCase() === publicName(second).toLowerCase();
 
+const isNoValueType = (type: string): boolean => type === 'no-value' || type === 'NO_VALUE';
+
 // Fresh base codings use RULES_ONLY; the orphan cleanup deliberately also
 // preserves empty codings with a non-default, user-selected coding model.
 const isFreshTarget = (coding: VariableCodingData): boolean => (
@@ -47,7 +49,7 @@ const isFreshTarget = (coding: VariableCodingData): boolean => (
 );
 
 const createTarget = (variable: VariableInfo): VariableCodingData => ({
-  ...(variable.type === 'no-value' ?
+  ...(isNoValueType(variable.type) ?
     CodingFactory.createBaseCodingVariable(variable.id, 'BASE_NO_VALUE') :
     CodingFactory.createCodingVariable(variable.id)),
   alias: publicName(variable),
@@ -71,7 +73,7 @@ export const getOrphanCodingResolutionPlan = (
     if (!candidates.length) return;
     const name = publicName(current);
     const targets = codings.filter(coding => coding.id === current.id);
-    if (current.type === 'no-value' || targets.length > 1 ||
+    if (isNoValueType(current.type) || targets.length > 1 ||
       (targets.length === 1 && !isFreshTarget(targets[0]))) {
       plan.problems.push(`Die aktuelle Variable „${name}“ kann nicht automatisch ersetzt werden: ` +
         'Sie besitzt bereits eigene Einstellungen oder ist keine aktive Basisvariable.');
