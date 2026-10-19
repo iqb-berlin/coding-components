@@ -35,6 +35,7 @@ import {
 import { Response } from '@iqbspecs/response/response.interface';
 import { CodingFactory, CodingSchemeFactory } from '@iqb/responses';
 import { SchemerService } from '../../services/schemer.service';
+import { sourceProcessingLabelKey } from '../../services/source-processing-label';
 import {
   isValidVariableIdentifier
 } from '../../services/variable-identifier-validation';
@@ -397,12 +398,18 @@ export class EditSourceParametersDialog {
         'TO_NUMBER',
         'TO_LOWER_CASE'
       ],
-      CONCAT_CODE: ['SORT']
+      CONCAT_CODE: ['SORT', 'TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL'],
+      SUM_CODE: ['TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL'],
+      SUM_SCORE: ['TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL']
     };
 
     this.possibleDeriveProcessing =
       processingOptions[this.data.sourceType] || [];
     this.clearSolverTestResult();
+  }
+
+  processingLabelKey(processingId: SourceProcessingType): string {
+    return sourceProcessingLabelKey(processingId, this.data.sourceType);
   }
 
   alterProcessing(processingId: SourceProcessingType, checked: boolean): void {

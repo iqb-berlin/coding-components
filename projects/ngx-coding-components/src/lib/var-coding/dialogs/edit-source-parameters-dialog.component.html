@@ -48,9 +48,12 @@
       @for (p of possibleDeriveProcessing; track p) {
         <mat-checkbox [checked]="data.sourceParameters.processing?.includes(p)"
           (change)="alterProcessing(p, $event.checked)">
-          {{ 'derive-processing.' + p | translate }}
+          {{ processingLabelKey(p) | translate }}
         </mat-checkbox>
       }
+    }
+    @if (data.sourceType === 'SUM_SCORE' || data.sourceType === 'SUM_CODE' || data.sourceType === 'CONCAT_CODE') {
+      <p role="note">{{ 'derive-processing.partial-credit-help' | translate }}</p>
     }
     @if (data.sourceType === 'SOLVER') {
       <mat-form-field class="solver-expression-field">

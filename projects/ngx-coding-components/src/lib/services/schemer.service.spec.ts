@@ -1,6 +1,7 @@
 import {
   CodeData,
   CodeType,
+  SourceProcessingType,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
@@ -417,6 +418,26 @@ describe('SchemerService', () => {
       expect(values.length).toBeGreaterThanOrEqual(2);
     });
 
+    it('should retain four-source CONCAT_CODE combinations when partial credit is enabled', () => {
+      const sources: VariableCodingData[] = ['a', 'b', 'c', 'd'].map(id => ({
+        id,
+        sourceType: 'BASE',
+        codes: [{ id: 0, type: 'NO_CREDIT', score: 0 }, { id: 1, type: 'FULL_CREDIT', score: 1 }]
+      }));
+      service.setCodingScheme({ variableCodings: sources } as unknown as never);
+      const derived: VariableCodingData = {
+        id: 'partial', sourceType: 'CONCAT_CODE', deriveSources: sources.map(source => source.id)
+      };
+      expect(service.getVarInfoByCoding(derived)?.values.length).toBe(16);
+      derived.sourceParameters = { processing: ['TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL'] };
+      const values = service.getVarInfoByCoding(derived)?.values.map(value => value.value);
+      expect(values?.length).toBe(80);
+      expect(values).toContain('1_1_1_1');
+      expect(values).toContain('1_1_1_x');
+      expect(values).toContain('0_x_x_x');
+      expect(values).not.toContain('x_x_x_x');
+    });
+
     it('should return CONCAT_CODE info with empty values list when combinations exceed limit', () => {
       const manyCodes = Array.from({ length: 10 }).map((_, idx) => ({
         id: idx + 1,
@@ -445,6 +466,27 @@ describe('SchemerService', () => {
       expect(info?.id).toBe('cc2');
       expect(info?.type).toBe('string');
       expect((info as unknown as { values: unknown[] }).values.length).toBe(0);
+    });
+
+    ['TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL'].forEach(option => {
+      it(`should include partial CONCAT_CODE values for ${option} without inventing x_x`, () => {
+        const source: VariableCodingData = {
+          id: 'zero', sourceType: 'BASE', codes: [{ id: 0, type: 'NO_CREDIT', score: 0 }]
+        };
+        service.setCodingScheme({ variableCodings: [source, { ...source, id: 'other' }] } as unknown as never);
+        const info = service.getVarInfoByCoding({
+          id: 'partial',
+          sourceType: 'CONCAT_CODE',
+          deriveSources: ['zero', 'other'],
+          sourceParameters: { processing: [option as SourceProcessingType] }
+        });
+        const values = info?.values.map(v => v.value);
+        expect(values).toContain('0_x');
+        expect(values).toContain('x_0');
+        expect(values).toContain('0_0');
+        expect(values).not.toContain('x_x');
+        expect(source.codes).toEqual([{ id: 0, type: 'NO_CREDIT', score: 0 }]);
+      });
     });
 
     it(

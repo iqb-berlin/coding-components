@@ -28,6 +28,15 @@ describe('VarCodingComponent', () => {
   let setCodingToTextModeSpy: jasmine.Spy;
   let isProtectedBaseVariableSpy: jasmine.Spy;
 
+  it('describes CONCAT_CODE partials with x in the saved parameter summary', () => {
+    component.varCoding = { id: 'derived', sourceType: 'CONCAT_CODE', codes: [] };
+    expect(component.processingLabelKey('TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL'))
+      .toBe('derive-processing.TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL_CONCAT_CODE');
+    component.varCoding = { id: 'derived', sourceType: 'SUM_SCORE', codes: [] };
+    expect(component.processingLabelKey('TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL'))
+      .toBe('derive-processing.TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL');
+  });
+
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
       afterClosed: () => of(false)
@@ -66,6 +75,7 @@ describe('VarCodingComponent', () => {
             varList: [],
             codingScheme: { variableCodings: [{ id: 'b1', sourceType: 'BASE' }, { id: 'b2', sourceType: 'BASE' }] },
             codingToTextMode: 'EXTENDED',
+            getVarInfoByCoding: jasmine.createSpy('getVarInfoByCoding').and.returnValue(undefined),
             addCode: addCodeSpy,
             canPasteSingleCodeInto: canPasteSpy,
             getPasteSingleCodeWarningKeys: getPasteWarningsSpy,
@@ -730,6 +740,38 @@ describe('VarCodingComponent', () => {
         hasContent ? existing : MATH_TABLE_GENERAL_MANUAL_INSTRUCTION
       );
     });
+  });
+
+  it('editSourceParameters should refresh generation values immediately after enabling partial credit', () => {
+    const bases: VariableCodingData[] = ['b1', 'b2'].map(id => ({
+      id, sourceType: 'BASE', codes: [{ id: 0, type: 'RESIDUAL_AUTO', score: 0 }]
+    }));
+    const derived: VariableCodingData = {
+      id: 'derived',
+      alias: 'derived',
+      sourceType: 'CONCAT_CODE',
+      deriveSources: ['b1', 'b2'],
+      sourceParameters: { processing: [] },
+      codes: []
+    };
+    const actualService = new SchemerService();
+    const scheme = { variableCodings: [...bases, derived] };
+    actualService.setCodingScheme(scheme as never);
+    (schemerService as unknown as { codingScheme: typeof scheme }).codingScheme = scheme;
+    schemerService.getVarInfoByCoding = coding => actualService.getVarInfoByCoding(coding);
+    component.varCoding = derived;
+    component.updateVarInfo();
+    expect(component.varInfo?.values.map(value => value.value)).toEqual(['0_0']);
+    dialogOpenSpy.and.returnValue({
+      afterClosed: () => of({
+        selfAlias: 'derived',
+        sourceType: 'CONCAT_CODE',
+        deriveSources: ['b1', 'b2'],
+        sourceParameters: { processing: ['TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL'] }
+      })
+    });
+    component.editSourceParameters();
+    expect(component.varInfo?.values.map(value => value.value)).toEqual(['0_0', '0_x', 'x_0']);
   });
 
   it('editSourceParameters should apply dialog result and emit', () => {

@@ -57,6 +57,28 @@ Additionally, this library exports multiple dialogs and helpers (see “Public A
 
 # Installation (Angular)
 
+## Partial credit (Schemer 2.9.0)
+
+In the source/derivation parameters of `SUM_SCORE`, `SUM_CODE` and `CONCAT_CODE`,
+two independent options allow displayed source responses or empty invalid source
+responses to contribute to a partially answered task. Both are disabled by
+default. They require at least one regularly coded answer; completely
+unprocessed tasks retain their original status, and pending coding is deferred.
+
+The contribution is `0` for sums and `x` for concatenated codes (`0_x`, distinct
+from `0_0`). Only `null`, empty text and an empty list count as empty invalid
+answers; `false` and `0` remain values. Original source responses are preserved.
+The options, descriptions and `x` combinations survive scheme import/export.
+Existing SOLVER policies are unchanged.
+
+This feature requires the coordinated releases `@iqbspecs/coding-scheme@3.5.0`
+and `@iqb/responses@5.4.0`. The prepared lockfile identifies the locally built
+release tarballs; these versions must be published before a fresh registry-based
+`npm ci` can succeed. Publish the specification first, then responses, and then
+build/release the Schemer and Angular library. Refresh lockfile integrity if the
+published tarballs differ from the prepared artifacts. Local verification uses
+the built packages from sibling `coding-scheme` and `responses` checkouts.
+
 ## Schemer viewport support
 
 The Schemer supports container widths of **320 CSS pixels and above**, including

@@ -146,7 +146,9 @@ describe('EditSourceParametersDialog', () => {
 
   it('updatePossibleDeriveProcessing should set options based on sourceType', () => {
     const dialog = createDialog({ sourceType: 'CONCAT_CODE' });
-    expect(dialog.possibleDeriveProcessing).toEqual(['SORT']);
+    expect(dialog.possibleDeriveProcessing).toEqual([
+      'SORT', 'TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL'
+    ]);
 
     (dialog.data as unknown as { sourceType: string }).sourceType = 'UNIQUE_VALUES';
     dialog.updatePossibleDeriveProcessing();
@@ -155,6 +157,24 @@ describe('EditSourceParametersDialog', () => {
     (dialog.data as unknown as { sourceType: string }).sourceType = 'SOLVER';
     dialog.updatePossibleDeriveProcessing();
     expect(dialog.possibleDeriveProcessing).toEqual([]);
+  });
+
+  ['SUM_SCORE', 'SUM_CODE', 'CONCAT_CODE'].forEach(sourceType => {
+    it(`should offer opt-in partial credit for ${sourceType} and preserve the original on cancel`, () => {
+      const original = { processing: [] as string[] };
+      const dialog = createDialog({ sourceType, sourceParameters: original });
+      const option: SourceProcessingType = 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL';
+      expect(dialog.data.sourceParameters.processing).toEqual([]);
+      expect(dialog.possibleDeriveProcessing).toContain(option);
+      expect(dialog.processingLabelKey(option)).toBe(
+        `derive-processing.${option}${sourceType === 'CONCAT_CODE' ? '_CONCAT_CODE' : ''}`
+      );
+      dialog.alterProcessing(option, true);
+      expect(dialog.data.sourceParameters.processing).toEqual([option]);
+      expect(original.processing).toEqual([]);
+      dialog.alterProcessing(option, false);
+      expect(dialog.data.sourceParameters.processing).toEqual([]);
+    });
   });
 
   it('updatePossibleNewSources should exclude selfAlias and BASE_NO_VALUE and set selectedSources', () => {

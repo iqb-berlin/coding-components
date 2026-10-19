@@ -39,6 +39,11 @@
     "TAKE_DISPLAYED_AS_VALUE_CHANGED": "Displayed = value changed",
     "TAKE_NOT_REACHED_AS_VALUE_CHANGED": "Not reached = value changed",
     "TAKE_EMPTY_AS_VALID": "Empty response value is valid",
+    "TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL": "Treat displayed source responses as 0 after processing has started",
+    "TAKE_EMPTY_AS_ZERO_IF_PARTIAL": "Treat empty invalid source responses as 0 after processing has started",
+    "TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL_CONCAT_CODE": "Replace displayed source responses with x after processing has started",
+    "TAKE_EMPTY_AS_ZERO_IF_PARTIAL_CONCAT_CODE": "Replace empty invalid source responses with x after processing has started",
+    "partial-credit-help": "Replacement applies only within this derivation and requires at least one regularly coded response. Entirely unprocessed responses or only empty invalid responses are not scored automatically. Pending codings remain pending. Empty means null, empty text or an empty list; false and 0 are not empty responses.",
     "SORT": "Sort values",
     "SOLVER_EXPRESSION": "Expression for solver",
     "solver-source-warning": {
