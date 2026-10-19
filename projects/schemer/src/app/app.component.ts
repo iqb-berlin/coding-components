@@ -84,7 +84,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.veronaAPIService.vosStartCommand
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((message: VosStartCommand) => {
-        this.varList.set(message.variables);
+        const variables = message.variables || [];
+        this.varList.set(variables);
         let codings: CodingScheme;
         if (message.codingScheme) {
           const compareVersionResult = CodingScheme.checkVersion(message.codingScheme);
@@ -118,7 +119,7 @@ export class AppComponent implements OnInit, OnDestroy {
           codings = new CodingScheme([]);
           this.codings.set(codings);
         }
-        message.variables.forEach(vi => {
+        variables.forEach(vi => {
           let codingForBaseVariable;
           if (codings.variableCodings) {
             codingForBaseVariable = codings.variableCodings.find(v => v.id === vi.id);

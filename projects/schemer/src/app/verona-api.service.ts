@@ -21,7 +21,7 @@ export interface VariableInfoShort {
 })
 export class VeronaAPIService {
   sessionID: string = '';
-  metadata: Record<string, string> = {};
+  metadata: Record<string, unknown> = {};
   private _vosStartCommand = new Subject<VosStartCommand>();
 
   // eslint-disable-next-line class-methods-use-this
@@ -38,13 +38,16 @@ export class VeronaAPIService {
       });
   }
 
-  private handleMessage(messageData: VosStartCommand): void {
-    if (messageData.type === 'vosStartCommand') {
-      this.sessionID = messageData.sessionId;
-      this._vosStartCommand.next(messageData as VosStartCommand);
-    } else if (['webpackOk', 'webpackClose'].indexOf(messageData.type) < 0) {
+  private handleMessage(messageData: unknown): void {
+    if (!messageData || typeof messageData !== 'object' || !('type' in messageData)) return;
+    const message = messageData as VosStartCommand;
+    if (message.type === 'vosStartCommand') {
+      if (typeof message.sessionId !== 'string' || !message.sessionId.trim()) return;
+      this.sessionID = message.sessionId;
+      this._vosStartCommand.next(message);
+    } else if (['webpackOk', 'webpackClose'].indexOf(message.type) < 0) {
       // eslint-disable-next-line no-console
-      console.warn('Unknown message type:', messageData.type);
+      console.warn('Unknown message type:', message.type);
     }
   }
 
@@ -58,14 +61,15 @@ export class VeronaAPIService {
     }
   }
 
-  sendVosReadyNotification(metaData: Record<string, string>): void {
+  sendVosReadyNotification(metaData: Record<string, unknown>): void {
     this.send({
       type: 'vosReadyNotification',
-      ...metaData
+      metadata: JSON.stringify(metaData)
     });
   }
 
   sendVosSchemeChangedNotification(scheme: CodingScheme | null): void {
+    if (!this.sessionID) return;
     const newScheme = {
       variableCodings: scheme ? scheme.variableCodings : [],
       version: `${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`
@@ -73,7 +77,7 @@ export class VeronaAPIService {
     this.send(<VosSchemeChangedData>{
       type: 'vosSchemeChangedNotification',
       sessionId: this.sessionID,
-      timeStamp: String(Date.now()),
+      timeStamp: new Date().toISOString(),
       codingScheme: JSON.stringify(newScheme),
       codingSchemeType: `iqb@${CodingSchemeVersionMajor}.${CodingSchemeVersionMinor}`,
       variables: scheme ? scheme.variableCodings.map((c: VariableCodingData) => <VariableInfoShort>{
@@ -91,8 +95,8 @@ export class VeronaAPIService {
 }
 
 export interface VosStartCommandConfig {
-  directDownloadUrl: string,
-  role: 'guest' | 'commenter' | 'developer' | 'maintainer' | 'super';
+  directDownloadUrl?: string,
+  role?: 'guest' | 'commenter' | 'developer' | 'maintainer' | 'super';
 }
 
 export interface VosStartCommand {
@@ -100,8 +104,8 @@ export interface VosStartCommand {
   sessionId: string,
   codingScheme?: string,
   codingSchemeType?: string,
-  variables: VariableInfo[],
-  schemerConfig: VosStartCommandConfig
+  variables?: VariableInfo[],
+  schemerConfig?: VosStartCommandConfig
 }
 
 export interface VosSchemeChangedData {
