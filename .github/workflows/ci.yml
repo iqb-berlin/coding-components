@@ -54,7 +54,7 @@ jobs:
         run: npm ci
 
       - name: Production dependency audit
-        run: npm audit --omit=dev --audit-level=high
+        run: npm run audit:prod
 
   lint-and-test:
     runs-on: ubuntu-latest

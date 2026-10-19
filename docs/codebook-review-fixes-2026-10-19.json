@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-19",
+  "reviewedPr": 251,
+  "reviewedHead": "10dd9d7c050a0bf74d8ef6844b1414f9cda27103",
+  "branch": "fix-codebook-review-findings",
+  "implementationCommits": {
+    "generator": "e74003e",
+    "ui": "e859e78"
+  },
+  "correctedReviewFindings": [
+    { "number": 6, "change": "Formelspeicher als Map mit maximal 256 Einträgen und Verdrängung des ältesten Eintrags." },
+    { "number": 7, "change": "Erzeugte Regeltexte werden als Klartext escaped; manuelle Rich-Text-Instruktionen bleiben erhalten." },
+    { "number": 8, "change": "Manuelle Bildinstruktionen werden MIME-unabhängig erkannt. Für in dieser DOCX-Version nicht unterstützte Raster-/Vektorformate bleibt ein sichtbarer Fehler statt einer entfernten Variable oder defekten Word-Grafik." },
+    { "number": 9, "change": "Angeforderte Missing-Profil-ID bleibt bis zur Lieferung beziehungsweise dem Abschluss des Ladens erhalten." },
+    { "number": 11, "change": "Visuell leere Instruktionen erzeugen keine zusätzlichen Absätze; sichtbare Leerzeichen innerhalb von Text bleiben erhalten." },
+    { "number": 12, "change": "Aufgaben-Vorauswahl übersteht initial leere Inputs und Lade-Refreshes. Ein abgeschlossenes leeres Ergebnis wird weiterhin validiert." },
+    { "number": 17, "change": "Editor-LaTeX wird unverändert übernommen; ausschließlich Legacy-Token werden einmal URI-dekodiert." },
+    { "number": 20, "change": "Formelnamen wie constructor oder toString kollidieren durch den Map-Speicher nicht mit Objekt-Prototypen." },
+    { "number": 21, "change": "Alle Exportoptionen sind bei loading oder busy gesperrt, einschließlich Missing-Profil und Formatwahl." },
+    { "number": 22, "change": "Alle ausgelieferten Bibliotheks-Laufzeitpakete sind im Root-Produktionsgraphen. Ein Regressionstest sichert deren Auditabdeckung ab." },
+    { "number": 26, "change": "Hoch-/Tiefstellung wird auf OMML-Läufe und Steuereigenschaften übertragen, ohne die unformatierte Cachefassung zu verändern." },
+    { "number": 27, "change": "Einseitig angegebene Bilddimensionen erhalten das intrinsische Seitenverhältnis; explizite Breite und Höhe werden berücksichtigt." },
+    { "number": 28, "change": "Leere Legacy-Formel-Token gelten nicht als sichtbare manuelle Instruktionen." },
+    { "number": 29, "change": "Legacy-LaTeX wird vor dem Einfügen in HTML-Attribute escaped, einschließlich kaufmännischem Und und Anführungszeichen." },
+    { "number": 30, "change": "Arrayförmige Codeeinträge werden mit einem benannten Schemafehler und Aufgabenkennung abgewiesen." }
+  ],
+  "withdrawnReviewFinding": {
+    "number": 31,
+    "reason": "Die ursprüngliche Reproduktion enthielt eine falsche Erwartung. Der Generator verwendet ToTextFactory.codeAsText mit SIMPLE; Responses 5.3.1 erzeugt den Text Keine Regeln definiert. nur im EXTENDED-Modus. Das behauptete Entfernen dieses Textes ist im getesteten Produktionspfad nicht reproduzierbar.",
+    "behavior": "Keine neue Standardbeschreibung eingeführt. Ein dauerhafter Test erhält den bestehenden SIMPLE-Vertrag."
+  },
+  "validation": {
+    "freshInstall": "npm ci --ignore-scripts --no-audit --no-fund",
+    "libraryBuild": "passed",
+    "codebookTests": { "passed": 1341, "failed": 0, "newRegressionCases": 50 },
+    "newCasesAgainstOldHostPackage": { "passed": 14, "failed": 36 },
+    "oldHostPackageSha256": "e67c04e07762350cb4ee3b1a70a36bcde0f2ba1c24df1f5a40000346d34fd112",
+    "angularLibraryTests": { "passed": 589, "failed": 0 },
+    "standaloneSchemerTests": { "passed": 6, "failed": 0 },
+    "schemerChromeBrowserTests": { "passed": 21, "failed": 0 },
+    "additionalCodebookChromeCases": { "passed": 3, "failed": 0, "javascriptErrors": 0 },
+    "schemaTests": { "passed": 1, "failed": 0 },
+    "ajvTests": { "passed": 2, "failed": 0 },
+    "legacyNodeTypeResolution": "passed",
+    "productionDependencyCoverageTest": "passed",
+    "productionAudit": { "high": 0, "critical": 0, "low": 1, "gate": "passed at audit-level=high" },
+    "lint": { "errors": 0, "remainingWarnings": 16 },
+    "dependencyVersionResolutionIntegrityChanges": 0,
+    "packagesNowIncludedInProductionGraph": 53,
+    "independentStudioAndWordFixtures": "unchanged"
+  },
+  "boundaries": {
+    "newRemoteCi": "not run; changes are local",
+    "hostPackagesUpdated": false,
+    "newRealHttpDatabaseQueueAcceptance": false,
+    "newMicrosoftWordAcceptance": false,
+    "originalFailure": "Schemer-HTML version and original file unknown per user",
+    "releaseVersionsChanged": false,
+    "pushed": false,
+    "merged": false,
+    "released": false,
+    "deployed": false
+  }
+}

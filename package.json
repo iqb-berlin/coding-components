@@ -19,7 +19,7 @@
     "npm_publish_elements": "cd dist/coding-components-elements && npm publish --access public",
     "lint": "eslint -c .eslintrc.cjs src projects e2e --ext .ts,.js --cache --ignore-pattern '**/karma.conf.js'",
     "lint:fix": "eslint -c .eslintrc.cjs src projects e2e --ext .ts,.js --fix --cache --ignore-pattern '**/karma.conf.js'",
-    "audit:prod": "npm audit --omit=dev",
+    "audit:prod": "npm run test:production-dependencies && npm audit --omit=dev --audit-level=high",
     "test:ajv-override": "node --test scripts/ajv-override.test.js",
     "validate:scheme": "node scripts/validate-coding-scheme.js",
     "test": "npm run test:cc && npm run test:schemer",
@@ -33,7 +33,8 @@
     "test:coverage": "npm run test:cc:coverage && npm run test:schemer:coverage",
     "test:scheme": "node --test scripts/validate-coding-scheme.test.js",
     "test:codebook": "node --test scripts/codebook-contract.test.mjs scripts/codebook-matrix.test.mjs scripts/codebook-whitespace.test.mjs scripts/codebook-editor-matrix.test.mjs scripts/codebook-rich-layout.test.mjs scripts/codebook-rich-matrix.test.mjs scripts/codebook-docx-test-utils.test.mjs scripts/codebook-inline-images.test.mjs scripts/codebook-regressions.test.mjs",
-    "test:schemer:responsive": "playwright test --config playwright.schemer.config.cjs"
+    "test:schemer:responsive": "playwright test --config playwright.schemer.config.cjs",
+    "test:production-dependencies": "node --test scripts/production-dependencies.test.mjs"
   },
   "dependencies": {
     "@angular/animations": "^21.2.23",
@@ -57,7 +58,12 @@
     "mathjs": "^15.2.0",
     "prosemirror-state": "^1.4.4",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "buffer": "6.0.3",
+    "cheerio": "1.1.2",
+    "docx": "8.5.0",
+    "image-size": "2.0.3",
+    "mathml2omml": "0.5.0"
   },
   "peerDependencies": {
     "@tiptap/core": "^2.23.1",
@@ -126,14 +132,10 @@
     "@types/node": "^20.4.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "buffer": "^6.0.3",
-    "cheerio": "^1.1.2",
-    "docx": "^8.5.0",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-plugin-import": "^2.32.0",
-    "image-size": "2.0.3",
     "iqb-dev-components": "^1.4.1",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
@@ -141,7 +143,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "mathml2omml": "^0.5.0",
     "ng-packagr": "^21.2.7",
     "ngx-build-plus": "^20.0.0",
     "ngx-tiptap": "^12.0.0",
