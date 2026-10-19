@@ -28,6 +28,15 @@ describe('VarCodingComponent', () => {
   let setCodingToTextModeSpy: jasmine.Spy;
   let isProtectedBaseVariableSpy: jasmine.Spy;
 
+  it('describes CONCAT_CODE partials with x in the saved parameter summary', () => {
+    component.varCoding = { id: 'derived', sourceType: 'CONCAT_CODE', codes: [] };
+    expect(component.processingLabelKey('TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL'))
+      .toBe('derive-processing.TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL_CONCAT_CODE');
+    component.varCoding = { id: 'derived', sourceType: 'SUM_SCORE', codes: [] };
+    expect(component.processingLabelKey('TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL'))
+      .toBe('derive-processing.TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL');
+  });
+
   beforeEach(async () => {
     dialogOpenSpy = jasmine.createSpy('open').and.returnValue({
       afterClosed: () => of(false)

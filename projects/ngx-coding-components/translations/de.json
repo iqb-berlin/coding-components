@@ -278,6 +278,11 @@
     "TAKE_DISPLAYED_AS_VALUE_CHANGED": "Angezeigt = Wert geändert",
     "TAKE_NOT_REACHED_AS_VALUE_CHANGED": "Nicht erreicht = Wert geändert",
     "TAKE_EMPTY_AS_VALID": "Leerer Antwortwert ist gültig",
+    "TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL": "Angezeigte Quellantworten bei begonnener Bearbeitung als 0 werten",
+    "TAKE_EMPTY_AS_ZERO_IF_PARTIAL": "Leere ungültige Quellantworten bei begonnener Bearbeitung als 0 werten",
+    "TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL_CONCAT_CODE": "Angezeigte Quellantworten bei begonnener Bearbeitung durch x ersetzen",
+    "TAKE_EMPTY_AS_ZERO_IF_PARTIAL_CONCAT_CODE": "Leere ungültige Quellantworten bei begonnener Bearbeitung durch x ersetzen",
+    "partial-credit-help": "Der Ersatz erfolgt nur innerhalb dieser Ableitung und setzt mindestens eine regulär kodierte Teilantwort voraus. Vollständig unbearbeitete oder ausschließlich leere ungültige Antworten werden nicht automatisch bewertet. Ausstehende Kodierungen bleiben ausstehend. Als leer gelten null, leerer Text und leere Listen; false und 0 sind keine leeren Antworten.",
     "SORT": "Sortiere Werte",
     "SOLVER_EXPRESSION": "Ausdruck für Solver",
     "solver-source-warning": {

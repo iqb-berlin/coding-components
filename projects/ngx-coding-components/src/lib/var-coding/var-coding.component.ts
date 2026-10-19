@@ -34,6 +34,7 @@ import { MatDivider } from '@angular/material/divider';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import {
   VariableCodingData,
+  SourceProcessingType,
   CodeType
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
@@ -42,6 +43,7 @@ import {
   ConfirmDialogData
 } from '../dialogs/confirm-dialog.component';
 import { SchemerService } from '../services/schemer.service';
+import { sourceProcessingLabelKey } from '../services/source-processing-label';
 import { ensureResidualAutoManualInstruction } from '../services/schemer-code-ops';
 import {
   GenerateCodingDialogComponent,
@@ -483,6 +485,10 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           MessageType.warning
       }
     });
+  }
+
+  processingLabelKey(processingId: SourceProcessingType): string {
+    return sourceProcessingLabelKey(processingId, this.varCoding?.sourceType);
   }
 
   editSourceParameters() {

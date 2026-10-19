@@ -170,20 +170,26 @@ export class SchemerService {
       }
     } else if (varCoding.sourceType === 'CONCAT_CODE') {
       if (varCoding.deriveSources && varCoding.deriveSources.length > 0) {
-        const codes: (number | 'INVALID' | 'INTENDED_INCOMPLETE')[][] = [];
+        const codes: (number | 'INVALID' | 'INTENDED_INCOMPLETE' | 'x')[][] = [];
+        const partialCredit = varCoding.sourceParameters?.processing?.some(p => (
+          p === 'TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL' || p === 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL'
+        ));
         let totalCodesCount = 0;
         varCoding.deriveSources.forEach((s: string) => {
           if (this.codingScheme) {
             const coding = this.codingScheme.variableCodings.find(
               v => v.id === s
             );
-            codes.push(coding ? (coding.codes || []).map(c => c.id) : []);
-            totalCodesCount += coding ? (coding.codes || []).length : 0;
+            const sourceCodes: (number | 'INVALID' | 'INTENDED_INCOMPLETE' | 'x')[] =
+              coding ? (coding.codes || []).map(c => c.id) : [];
+            totalCodesCount += sourceCodes.length;
+            if (coding && partialCredit) sourceCodes.push('x');
+            codes.push(sourceCodes);
           }
         });
         let resultArray: string[] = [];
         if (totalCodesCount < 10) {
-          codes.forEach((c: (number | 'INVALID' | 'INTENDED_INCOMPLETE')[]) => {
+          codes.forEach(c => {
             if (resultArray.length > 0) {
               resultArray = resultArray.flatMap(oldEntry => c
                 .filter(cEntry => cEntry !== null)
@@ -197,6 +203,13 @@ export class SchemerService {
                 .map(cEntry => cEntry.toString(10));
             }
           });
+        }
+        if (partialCredit) {
+          resultArray = resultArray.filter(value => value.split(DeriveConcatDelimiter).some(code => code !== 'x'));
+          if (varCoding.sourceParameters?.processing?.includes('SORT')) {
+            resultArray = [...new Set(resultArray.map(value => value.split(DeriveConcatDelimiter)
+              .sort().join(DeriveConcatDelimiter)))];
+          }
         }
         return <VariableInfo>{
           id: varCoding.id,

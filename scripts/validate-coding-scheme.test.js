@@ -38,6 +38,18 @@ test('validates one coding-scheme file and reports schema errors', async t => {
   }));
   assert.equal(await validateScheme(schemeFile, output), 0);
   assert.match(messages.at(-1), /valid against schema/);
+  fs.writeFileSync(schemeFile, JSON.stringify({
+    version: schemaVersion,
+    variableCodings: [{
+      id: 'derived',
+      sourceType: 'CONCAT_CODE',
+      deriveSources: ['a', 'b'],
+      sourceParameters: {
+        processing: ['TAKE_DISPLAYED_AS_ZERO_IF_PARTIAL', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL']
+      }
+    }]
+  }));
+  assert.equal(await validateScheme(schemeFile, output), 0);
   assert.equal(
     await validateScheme('sample-data/coding-scheme-valid.json', output),
     0
