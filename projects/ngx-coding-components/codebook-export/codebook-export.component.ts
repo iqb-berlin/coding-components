@@ -61,6 +61,8 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   selection: number[] = [];
   filter = '';
   contentOptions = { ...DEFAULT_CODEBOOK_OPTIONS };
+  private unitsLoaded = false;
+  private profilesLoaded = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['showGroupColumn']) {
@@ -73,15 +75,27 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
       ))) as unknown as CodeBookContentSetting;
     }
     if (changes['availableUnits']) {
+      this.unitsLoaded ||= this.availableUnits.length > 0 || !changes['availableUnits'].firstChange;
       this.dataSource.data = this.availableUnits;
       this.dataSource.filterPredicate = (unit, filter) => [unit.key, unit.unitName, this.showGroupColumn ? unit.groupName || '' : '']
         .some(value => value.toLowerCase().includes(filter));
       this.dataSource.sortingDataAccessor = (unit, column) => ({ key: unit.key, name: unit.unitName, group: unit.groupName || '' }[column] || '');
     }
-    if (changes['missingsProfiles'] && !this.missingsProfiles.some(profile => profile.id === this.selectedMissingsProfileId)) {
+    if (changes['missingsProfiles']) {
+      this.profilesLoaded ||= this.missingsProfiles.length > 0 || !changes['missingsProfiles'].firstChange;
+    }
+    // An initial empty input can precede async data. An explicit completed load
+    // also makes an empty result authoritative, including after a refresh.
+    if (changes['loading'] && !changes['loading'].firstChange && !this.loading) {
+      this.unitsLoaded = true;
+      this.profilesLoaded = true;
+    }
+    if (!this.loading && this.profilesLoaded &&
+      !this.missingsProfiles.some(profile => profile.id === this.selectedMissingsProfileId)) {
       this.selectedMissingsProfileId = 0;
     }
     if (changes['selectedUnitIds']) this.selection = [...this.selectedUnitIds];
+    if (this.loading || !this.unitsLoaded) return;
     const validIds = new Set(this.availableUnits.filter(unit => !unit.disabled).map(unit => unit.unitId));
     const validSelection = this.selection.filter(id => validIds.has(id));
     if (validSelection.length !== this.selection.length) {
@@ -98,7 +112,10 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   }
 
   get exportDisabled(): boolean {
-    return !this.selection.length || this.loading || this.busy || this.workspaceChanges;
+    const profilePending = this.selectedMissingsProfileId !== 0 &&
+      !this.missingsProfiles.some(profile => profile.id === this.selectedMissingsProfileId);
+    return !this.unitsLoaded || !this.selection.length || profilePending ||
+      this.loading || this.busy || this.workspaceChanges;
   }
 
   applyFilter(): void { this.dataSource.filter = this.filter.trim().toLowerCase(); }

@@ -94,6 +94,84 @@ describe('Studio codebook selection contract', () => {
     expect(emit).toHaveBeenCalledOnceWith([1]);
   });
 
+  it('retains preselection until initially empty async inputs arrive', () => {
+    component = new CodebookExportComponent();
+    component.selectedUnitIds = [7];
+    component.selectedMissingsProfileId = 8;
+    const emit = spyOn(component.selectionChanged, 'emit');
+    component.ngOnChanges({
+      selectedUnitIds: new SimpleChange(undefined, [7], true),
+      selectedMissingsProfileId: new SimpleChange(undefined, 8, true),
+      availableUnits: new SimpleChange(undefined, [], true),
+      missingsProfiles: new SimpleChange(undefined, [], true)
+    });
+    expect(component.exportDisabled).toBeTrue();
+    expect(emit).not.toHaveBeenCalled();
+    component.availableUnits = [{ unitId: 7, key: 'U', unitName: 'Aufgabe' }];
+    component.ngOnChanges({ availableUnits: new SimpleChange([], component.availableUnits, false) });
+    expect(component.selection).toEqual([7]);
+    expect(component.selectedMissingsProfileId).toBe(8);
+    expect(component.exportDisabled).toBeTrue();
+    component.missingsProfiles = [{ id: 8, label: 'Profil' }];
+    component.ngOnChanges({ missingsProfiles: new SimpleChange([], component.missingsProfiles, false) });
+    expect(component.selectedMissingsProfileId).toBe(8);
+    expect(component.exportDisabled).toBeFalse();
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('keeps selection through a loading refresh and validates an authoritative empty result', () => {
+    component.toggleAll();
+    component.selectedMissingsProfileId = 8;
+    component.missingsProfiles = [{ id: 8, label: 'Profil' }];
+    component.ngOnChanges({ missingsProfiles: new SimpleChange([], component.missingsProfiles, false) });
+    const emit = spyOn(component.selectionChanged, 'emit');
+    component.loading = true;
+    component.availableUnits = [];
+    component.missingsProfiles = [];
+    component.ngOnChanges({
+      loading: new SimpleChange(false, true, false),
+      availableUnits: new SimpleChange([], [], false),
+      missingsProfiles: new SimpleChange([], [], false)
+    });
+    expect(component.selection).toEqual([1, 2]);
+    expect(component.selectedMissingsProfileId).toBe(8);
+    expect(emit).not.toHaveBeenCalled();
+    component.loading = false;
+    component.ngOnChanges({ loading: new SimpleChange(true, false, false) });
+    expect(component.selection).toEqual([]);
+    expect(component.selectedMissingsProfileId).toBe(0);
+    expect(emit).toHaveBeenCalledOnceWith([]);
+    expect(component.exportDisabled).toBeTrue();
+  });
+
+  it('restores selection after a loading refresh delivers the same task', () => {
+    component.selectedUnitIds = [1];
+    component.ngOnChanges({ selectedUnitIds: new SimpleChange([], [1], false) });
+    const emit = spyOn(component.selectionChanged, 'emit');
+    component.loading = true;
+    component.availableUnits = [];
+    component.ngOnChanges({
+      loading: new SimpleChange(false, true, false), availableUnits: new SimpleChange([], [], false)
+    });
+    component.availableUnits = [{ unitId: 1, key: 'A', unitName: 'Alpha' }];
+    component.loading = false;
+    component.ngOnChanges({
+      availableUnits: new SimpleChange([], component.availableUnits, false),
+      loading: new SimpleChange(true, false, false)
+    });
+    expect(component.selection).toEqual([1]);
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('validates a later explicitly empty profile list after an initially pending profile', () => {
+    component = new CodebookExportComponent();
+    component.selectedMissingsProfileId = 8;
+    component.ngOnChanges({ missingsProfiles: new SimpleChange(undefined, [], true) });
+    expect(component.selectedMissingsProfileId).toBe(8);
+    component.ngOnChanges({ missingsProfiles: new SimpleChange([], [], false) });
+    expect(component.selectedMissingsProfileId).toBe(0);
+  });
+
   it('blocks export for empty selection, loading, busy and unsaved changes', () => {
     const emit = spyOn(component.exportRequested, 'emit');
     component.exportCodingBook(); component.toggle(component.availableUnits[0]);
@@ -105,6 +183,57 @@ describe('Studio codebook selection contract', () => {
 });
 
 describe('codebook checkbox accessibility', () => {
+  it('retains bound IDs when initially empty inputs arrive later without rebinding the IDs', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CodebookExportComponent, TranslateModule.forRoot()]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CodebookExportComponent);
+    const emit = spyOn(fixture.componentInstance.selectionChanged, 'emit');
+    fixture.componentRef.setInput('availableUnits', []);
+    fixture.componentRef.setInput('missingsProfiles', []);
+    fixture.componentRef.setInput('selectedUnitIds', [7]);
+    fixture.componentRef.setInput('selectedMissingsProfileId', 8);
+    fixture.componentRef.setInput('loading', false);
+    await fixture.whenStable();
+    expect(emit).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.exportDisabled).toBeTrue();
+    fixture.componentRef.setInput('availableUnits', [{ unitId: 7, key: 'U', unitName: 'Aufgabe' }]);
+    fixture.componentRef.setInput('missingsProfiles', [{ id: 8, label: 'Profil' }]);
+    await fixture.whenStable();
+    expect(fixture.componentInstance.selection).toEqual([7]);
+    expect(fixture.componentInstance.selectedMissingsProfileId).toBe(8);
+    expect(fixture.componentInstance.exportDisabled).toBeFalse();
+    expect(fixture.nativeElement.querySelector('mat-row input').checked).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.select-missings-profile').textContent).toContain('Profil');
+    expect(emit).not.toHaveBeenCalled();
+    fixture.destroy();
+  });
+
+  (['loading', 'busy'] as const).forEach(state => {
+    it(`locks all export options while ${state} and enables them again afterwards`, async () => {
+      await TestBed.configureTestingModule({
+        imports: [CodebookExportComponent, TranslateModule.forRoot()]
+      }).compileComponents();
+      const fixture = TestBed.createComponent(CodebookExportComponent);
+      fixture.componentRef.setInput('availableUnits', [{ unitId: 1, key: 'TASK', unitName: 'Aufgabe' }]);
+      fixture.componentRef.setInput(state, true);
+      await fixture.whenStable();
+      const controls = () => Array.from(fixture.nativeElement.querySelectorAll(
+        'input[type="checkbox"], input[type="radio"]'
+      )) as HTMLInputElement[];
+      expect(controls().length).toBe(12);
+      expect(controls().every(input => input.disabled)).toBeTrue();
+      const selects: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('mat-select'));
+      expect(selects.length).toBe(2);
+      expect(selects.every(select => select.getAttribute('aria-disabled') === 'true')).toBeTrue();
+      fixture.componentRef.setInput(state, false);
+      await fixture.whenStable();
+      expect(controls().every(input => !input.disabled)).toBeTrue();
+      expect(selects.every(select => select.getAttribute('aria-disabled') === 'false')).toBeTrue();
+      fixture.destroy();
+    });
+  });
+
   it('labels the actual checkbox inputs for assistive technology', async () => {
     await TestBed.configureTestingModule({
       imports: [CodebookExportComponent, TranslateModule.forRoot()]
