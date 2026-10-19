@@ -457,9 +457,16 @@ test('recovered coding and immediate edits survive the host save and reopen', as
       await reopened.locator('.var-list-entry').filter({ hasText: 'Unrelated' }).click();
       await expect(reopened.locator('.missing-source-notice')).toHaveCount(0);
       await reopened.locator('var-coding .variable-details button').first().click();
-      await reopened.getByRole('textbox', { name: 'Other', exact: true }).fill('5');
-      await reopened.getByRole('button', { name: 'Testen', exact: true }).click();
-      await expect(reopened.locator('.solver-test-result-ok')).toContainText('6');
+      const sourceDialog = reopened.getByRole('dialog');
+      const sourceName = sourceDialog.getByRole('textbox', { name: 'Name', exact: true });
+      // Wait for Material's delayed initial focus before typing into another field.
+      await expect(sourceName).toBeFocused();
+      const sourceValue = sourceDialog.getByRole('textbox', { name: 'Other', exact: true });
+      await sourceValue.fill('5');
+      await expect(sourceValue).toHaveValue('5');
+      await expect(sourceName).toHaveValue('Unrelated');
+      await sourceDialog.getByRole('button', { name: 'Testen', exact: true }).click();
+      await expect(sourceDialog.locator('.solver-test-result-ok')).toContainText('6');
     }
   );
 });
