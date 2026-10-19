@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-16",
+  "status": "source_changes_for_pull_requests",
+  "versionBumps": false,
+  "responses": {
+    "installed": "5.3.1",
+    "installedNativeEsm": false,
+    "esmPullRequest": "https://github.com/iqb-berlin/responses/pull/138",
+    "esmSourceCommit": "8f77414",
+    "esmSourceBase": "565e7df",
+    "dependencyUpdatePendingRegularRelease": true
+  },
+  "htmlBytes": {
+    "publishedComparison": 4845727,
+    "currentBranchWithPublishedResponses": 4270157,
+    "previousLocalEsmIntegrationExperiment": 3846981
+  },
+  "currentSavingsBytes": 575570,
+  "currentSavingsPercent": 11.88,
+  "zone": {
+    "rootPackageAbsent": true,
+    "bundleInputAbsent": true,
+    "browserGlobalAbsent": true,
+    "angularOptionalPeerMetadataRetained": true
+  },
+  "tests": {
+    "responsesUnit": 366,
+    "responsesSolverPairs": 234,
+    "publishedReference": "5.3.1",
+    "goldenFixtures": 75,
+    "libraryUnit": 573,
+    "schemerUnit": 6,
+    "codebookContracts": 1287,
+    "developmentBrowser": 21,
+    "temporaryHtmlBrowser": 14
+  },
+  "lint": {
+    "errors": 0,
+    "existingWarnings": 20
+  },
+  "releaseCreated": false,
+  "releaseArtifactsCommitted": false,
+  "limits": [
+    "Remote CI must be checked separately",
+    "No merge, registry publication or deployment",
+    "No new local .NET, Word, Safari or Firefox acceptance"
+  ]
+}

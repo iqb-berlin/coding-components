@@ -54,7 +54,7 @@ jobs:
         run: npm ci
 
       - name: Production dependency audit
-        run: npm audit --omit=dev --audit-level=high
+        run: npm run audit:prod
 
   lint-and-test:
     runs-on: ubuntu-latest
@@ -78,6 +78,9 @@ jobs:
         env:
           CI: true
         run: npm run test:coverage
+
+      - name: Build shared library and verify codebook contracts
+        run: npm run build_cc && npm run test:codebook
 
       - name: Coding-scheme validation script
         run: npm run test:scheme

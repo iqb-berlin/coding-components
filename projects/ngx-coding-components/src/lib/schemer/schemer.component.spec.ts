@@ -1,10 +1,9 @@
 /* eslint-disable max-classes-per-file */
-import { fakeAsync, tick } from '@angular/core/testing';
 import { CodingSchemeFactory, CodingSchemeProblem } from '@iqb/responses';
 import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import { of, Subject } from 'rxjs';
+import { firstValueFrom, of, Subject } from 'rxjs';
 import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 import { FileService } from '../services/file.service';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
@@ -94,7 +93,8 @@ describe('SchemerComponent', () => {
       dialog as unknown as never,
       selectVariableDialog as unknown as never,
       editSourceParametersDialog as unknown as never,
-      inputDialog as unknown as never
+      inputDialog as unknown as never,
+      jasmine.createSpyObj('ChangeDetectorRef', ['markForCheck'])
     );
   });
 
@@ -305,8 +305,8 @@ describe('SchemerComponent', () => {
     expect(component.selectedCoding$.getValue()).toBeNull();
   });
 
-  it('varCodingElement setter should subscribe when var-coding appears after conflict recovery', fakeAsync(() => {
-    const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
+  it('varCodingElement setter should subscribe when var-coding appears after conflict recovery', async () => {
+    const emitSpy = spyOn(component.codingSchemeChanged, 'emit').and.callThrough();
     const changes$ = new Subject<VariableCodingData | null>();
 
     schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
@@ -316,13 +316,14 @@ describe('SchemerComponent', () => {
       varCodingChanged: changes$.asObservable()
     } as unknown as VarCodingComponent;
 
+    const changed = firstValueFrom(component.codingSchemeChanged);
     changes$.next(null);
-    tick(300);
+    await changed;
 
     expect(schemerFacade.tryResolveIdentifierConflicts).toHaveBeenCalled();
     expect(emitSpy).toHaveBeenCalledWith(schemerService.codingScheme);
     changes$.complete();
-  }));
+  });
 
   it('ngOnDestroy should reset duplicate resolution state', () => {
     component.ngOnDestroy();
@@ -1268,6 +1269,32 @@ describe('SchemerComponent', () => {
     schemerService.setCodingScheme(null);
     component.addVarScheme();
     expect(editSourceParametersDialog.open).not.toHaveBeenCalled();
+  });
+
+  [undefined, null].forEach(result => {
+    it(`addVarScheme ignores dismissed dialog result ${result}`, () => {
+      schemerService.userRole = 'RW_MAXIMAL';
+      schemerService.setCodingScheme({ variableCodings: [] } as unknown as never);
+      const emit = spyOn(component.codingSchemeChanged, 'emit');
+      editSourceParametersDialog.afterClosedValue = result;
+      component.addVarScheme();
+      expect(schemerService.codingScheme?.variableCodings).toEqual([]);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it(`renameVarScheme keeps the alias on dismissed dialog result ${result}`, () => {
+      const coding = CodingFactory.createCodingVariable('derived');
+      coding.sourceType = 'COPY_VALUE';
+      coding.alias = 'KeepAlias';
+      schemerService.setCodingScheme({ variableCodings: [coding] } as unknown as never);
+      component.selectedCoding$.next(coding);
+      inputDialog.afterClosedValue = result;
+      const emit = spyOn(component.codingSchemeChanged, 'emit');
+      component.renameVarScheme();
+      expect(coding.alias).toBe('KeepAlias');
+      expect(emit).not.toHaveBeenCalled();
+      expect(messageDialog.open).not.toHaveBeenCalled();
+    });
   });
 
   it('addVarScheme should do nothing when dialog result is false', () => {

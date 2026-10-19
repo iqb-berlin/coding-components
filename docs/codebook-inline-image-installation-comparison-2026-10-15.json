@@ -1,0 +1,18 @@
+{
+  "hostExportPairs": 4694,
+  "optionCombinations": 768,
+  "missingCases": 3,
+  "formats": 2,
+  "originalStudioWhitespaceCases": 20,
+  "inlineImageCases": 5,
+  "inlineImageExportPairs": 40,
+  "identicalJson": true,
+  "identicalAllDocxParts": true,
+  "artifactIntegrity": "sha512-lWKtd2Kpd94e48pefxidp4XXwe/AE/3KVRqQQpJAZxW+acbT+CuJDY0jEJS1pQ9MG6h5lQMZTa7KtiCTGd+yJQ==",
+  "identicalInstalledPackageFiles": true,
+  "installedPackageFiles": 20,
+  "realHostAdapters": true,
+  "inMemoryRepositories": true,
+  "httpBrowserRedis": false,
+  "windowsWord": false
+}

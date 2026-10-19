@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component, EventEmitter, Input, Output
 } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -81,7 +82,8 @@ export class CodeRuleListComponent {
     public schemerService: SchemerService,
     public editRuleReferenceDialog: MatDialog,
     private iconRegistry: MatIconRegistry,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private changeDetector: ChangeDetectorRef
   ) {
     const icons = [
       { name: 'match-word', svg: asSvg(MATCH_WORD_SVG) },
@@ -158,7 +160,8 @@ export class CodeRuleListComponent {
           autoFocus: false
         });
       dialogRef.afterClosed().subscribe(dialogResult => {
-        if (dialogResult !== false) {
+        this.changeDetector.markForCheck();
+        if (dialogResult !== false && dialogResult !== undefined && dialogResult !== null) {
           rule.fragment = dialogResult;
           this.setCodeRulesChanged();
         }

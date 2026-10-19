@@ -74,6 +74,21 @@ describe('CodesTitleComponent', () => {
     expect(schemerService.sortCodes).not.toHaveBeenCalled();
   });
 
+  [undefined, null].forEach(result => {
+    it(`preserves processing and fragmenting on dismissed result ${result}`, () => {
+      component.fragmenting = 'Keep';
+      component.processing = [];
+      const fragment = spyOn(component.fragmentingChanged, 'emit');
+      const processing = spyOn(component.processingChanged, 'emit');
+      dialogOpenSpy.and.returnValue({ afterClosed: () => of(result) });
+      component.editProcessingAndFragments();
+      expect(component.fragmenting).toBe('Keep');
+      expect(component.processing).toEqual([]);
+      expect(fragment).not.toHaveBeenCalled();
+      expect(processing).not.toHaveBeenCalled();
+    });
+  });
+
   it('editProcessingAndFragments should update fragmenting and processing and emit', () => {
     schemerService.userRole = 'RW_MAXIMAL';
     component.fragmenting = 'old';

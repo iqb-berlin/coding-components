@@ -1,7 +1,6 @@
 import { SourceType, VariableSourceParameters, SourceProcessingType } from
   '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { TranslateService } from '@ngx-translate/core';
-import { fakeAsync, tick } from '@angular/core/testing';
 import { EditSourceParametersDialog, EditSourceParametersDialogData } from './edit-source-parameters-dialog.component';
 import { SchemerService } from '../../services/schemer.service';
 
@@ -404,7 +403,7 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.solverSourceWarning).toBeNull();
   });
 
-  it('insertSolverSourceReference should insert the selected source at the cursor', fakeAsync(() => {
+  it('insertSolverSourceReference should insert the selected source at the cursor', async () => {
     const dialog = createDialog({
       selfAlias: 'D',
       sourceType: 'SOLVER',
@@ -416,16 +415,16 @@ describe('EditSourceParametersDialog', () => {
     input.setSelectionRange(6, 6);
 
     dialog.insertSolverSourceReference({ id: 'v1', label: 'V1' }, input);
-    tick();
+    await new Promise(resolve => { setTimeout(resolve); });
 
     expect(dialog.data.sourceParameters.solverExpression).toBe(
       `round(${solverRef('V1')} + 1)`
     );
     expect(input.selectionStart).toBe(11);
     expect(input.selectionEnd).toBe(11);
-  }));
+  });
 
-  it('insertSolverSourceReference should replace the selected expression range', fakeAsync(() => {
+  it('insertSolverSourceReference should replace the selected expression range', async () => {
     const dialog = createDialog({
       selfAlias: 'D',
       sourceType: 'SOLVER',
@@ -437,13 +436,13 @@ describe('EditSourceParametersDialog', () => {
     input.setSelectionRange(4, 15);
 
     dialog.insertSolverSourceReference({ id: 'v2', label: 'V2' }, input);
-    tick();
+    await new Promise(resolve => { setTimeout(resolve); });
 
     expect(dialog.data.sourceParameters.solverExpression).toBe(
       `1 + ${solverRef('V2')}`
     );
     expect(dialog.solverTestResult).toBeNull();
-  }));
+  });
 
   it('getSolverSourceReference should expose the inserted reference syntax', () => {
     const dialog = createDialog({

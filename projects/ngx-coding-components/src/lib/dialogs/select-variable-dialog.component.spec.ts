@@ -15,7 +15,9 @@ describe('SelectVariableDialogComponent', () => {
       ...overrides
     };
 
-    const component = new SelectVariableDialogComponent(selectData, dialogRef);
+    const component = new SelectVariableDialogComponent(
+      selectData, dialogRef, jasmine.createSpyObj('ChangeDetectorRef', ['markForCheck'])
+    );
 
     return { component, dialogRef, selectData };
   };
