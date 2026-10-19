@@ -40,6 +40,7 @@ describe('SchemerComponent', () => {
   };
 
   let schemerFacade: {
+    identifierConflictChanges$: Subject<boolean>;
     tryResolveIdentifierConflicts: jasmine.Spy;
     resetIdentifierConflictResolutionState: jasmine.Spy;
   };
@@ -80,6 +81,7 @@ describe('SchemerComponent', () => {
     };
 
     schemerFacade = {
+      identifierConflictChanges$: new Subject<boolean>(),
       tryResolveIdentifierConflicts: jasmine.createSpy('tryResolveIdentifierConflicts').and.returnValue(false),
       resetIdentifierConflictResolutionState: jasmine.createSpy('resetIdentifierConflictResolutionState')
     };
@@ -116,6 +118,41 @@ describe('SchemerComponent', () => {
     expect(component.hasIdentifierConflict).toBeTrue();
     expect(component.basicVariables).toEqual([]);
     expect(component.selectedCoding$.getValue()).toBeNull();
+  });
+
+  it('refreshes the editor and emits a scheme only for a committed recovery', () => {
+    schemerService.setVarList([{
+      id: 'current',
+      alias: 'response',
+      type: 'string',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: []
+    } as VariableInfo]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        { ...CodingFactory.createCodingVariable('current'), alias: 'response' },
+        {
+          ...CodingFactory.createCodingVariable('derived'),
+          alias: 'sum',
+          sourceType: 'SUM_SCORE',
+          deriveSources: ['removed']
+        }
+      ]
+    });
+    const emit = spyOn(component.codingSchemeChanged, 'emit');
+    schemerFacade.identifierConflictChanges$.next(false);
+    expect(emit).not.toHaveBeenCalled();
+    schemerFacade.identifierConflictChanges$.next(true);
+    expect(component.hasIdentifierConflict).toBeFalse();
+    expect(component.derivedVariables.map(coding => coding.id)).toEqual(['derived']);
+    expect(component.codingStatus['derived']).toBe('ERROR');
+    expect(emit).toHaveBeenCalledOnceWith(schemerService.codingScheme as never);
+    component.ngOnDestroy();
+    schemerFacade.identifierConflictChanges$.next(true);
+    expect(emit).toHaveBeenCalledTimes(1);
   });
 
   it('updateVariableLists should not mutate codingScheme while an identifier conflict is active', () => {
