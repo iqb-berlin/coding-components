@@ -1,4 +1,5 @@
-import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+// eslint-disable-next-line import/extensions -- NodeNext needs the extension in emitted declarations.
+import type { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface.js';
 
 /**
  * Item metadata for codebook
