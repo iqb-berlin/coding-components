@@ -116,6 +116,14 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     return this._varCoding;
   }
 
+  get missingSources(): string[] {
+    const scheme = this.schemerService.codingScheme;
+    if (!this.varCoding || !scheme || this.varCoding.sourceType === 'BASE' ||
+      this.varCoding.sourceType === 'BASE_NO_VALUE') return [];
+    const availableIds = new Set(scheme.variableCodings.map(coding => coding.id));
+    return (this.varCoding.deriveSources || []).filter(source => !availableIds.has(source));
+  }
+
   private static hasManualInstructionContent(html: string): boolean {
     const template = document.createElement('template');
     template.innerHTML = html;

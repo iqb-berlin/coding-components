@@ -2,6 +2,13 @@
 <div class="fx-flex-fill">&nbsp;</div>
 } @if (varCoding) {
 <div class="fx-column-space-between-stretch" [style.padding]="'10px'">
+  @if (missingSources.length) {
+    <div role="alert" class="missing-source-notice">
+      <b>Fehlende Quellen: {{ missingSources.join(', ') }}</b>
+      <p>Diese Kodierung bleibt erhalten. Bitte wähle über
+        „{{ 'derive-processing.prompt' | translate }}“ die passenden Quellvariablen aus.</p>
+    </div>
+  }
   <div class="editor-header fx-row-start-stretch fx-gap-10">
     <div class="variable-details fx-column-start-stretch fx-gap-10">
       <mat-form-field>

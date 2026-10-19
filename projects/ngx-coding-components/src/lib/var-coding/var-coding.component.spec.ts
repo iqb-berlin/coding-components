@@ -76,6 +76,7 @@ describe('VarCodingComponent', () => {
             codingScheme: { variableCodings: [{ id: 'b1', sourceType: 'BASE' }, { id: 'b2', sourceType: 'BASE' }] },
             codingToTextMode: 'EXTENDED',
             getVarInfoByCoding: jasmine.createSpy('getVarInfoByCoding').and.returnValue(undefined),
+            getBaseVarsList: jasmine.createSpy('getBaseVarsList').and.returnValue([]),
             addCode: addCodeSpy,
             canPasteSingleCodeInto: canPasteSpy,
             getPasteSingleCodeWarningKeys: getPasteWarningsSpy,
@@ -83,6 +84,7 @@ describe('VarCodingComponent', () => {
             pasteSingleCode: pasteSpy,
             sortCodes: sortCodesSpy,
             getVariableAliasById: getAliasSpy,
+            getVariableAliasByIdListString: (ids: string[]) => ids.join(', '),
             setCodingToTextMode: setCodingToTextModeSpy,
             isProtectedBaseVariable: isProtectedBaseVariableSpy
           }
@@ -112,6 +114,30 @@ describe('VarCodingComponent', () => {
 
     expect(component.varCoding?.manualInstruction).toBe('');
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  it('shows missing sources without changing the dependent coding or hiding its editor', () => {
+    const coding: VariableCodingData = {
+      id: 'derived',
+      alias: 'sum',
+      sourceType: 'SUM_SCORE',
+      deriveSources: ['removed', 'b1'],
+      manualInstruction: 'Keep these instructions',
+      codes: []
+    };
+    fixture.componentRef.setInput('varCoding', coding);
+    fixture.detectChanges();
+    expect(component.missingSources).toEqual(['removed']);
+    expect(fixture.nativeElement.querySelector('.missing-source-notice').textContent).toContain('removed');
+    expect(fixture.nativeElement.querySelector('.editor-header')).not.toBeNull();
+    expect(coding.deriveSources).toEqual(['removed', 'b1']);
+    expect(coding.manualInstruction).toBe('Keep these instructions');
+  });
+
+  it('does not claim sources are missing when a standalone coding has no complete scheme context', () => {
+    Object.defineProperty(schemerService, 'codingScheme', { value: null });
+    component.varCoding = { id: 'derived', sourceType: 'COPY_VALUE', deriveSources: ['external-source'] };
+    expect(component.missingSources).toEqual([]);
   });
 
   it('varCoding setter should add default manualInstruction to SOLVER RESIDUAL_AUTO codes', () => {
