@@ -104,7 +104,8 @@ const remapSolverExpression = (
   codings: VariableCodingData[],
   replacements: Map<string, VariableInfo>
 ): string => expression.replace(/\$\{([^{}]+)\}/g, (token, content: string) => {
-  const match = content.match(/^(\s*)([0-9A-Za-z_-]+)([\s\S]*)$/);
+  // Legacy technical IDs may contain commas, which SOLVER also accepts.
+  const match = content.match(/^(\s*)([0-9A-Za-z_,-]+)([\s\S]*)$/);
   if (!match) return token;
   const [, leadingSpace, reference, suffix] = match;
   // SOLVER resolves aliases before technical IDs. Preserve that precedence.

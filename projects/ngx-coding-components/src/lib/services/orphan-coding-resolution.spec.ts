@@ -69,12 +69,14 @@ describe('orphan coding resolution', () => {
     expect(old.codes![0].manualInstruction).toBe('<p>Vollständige Anweisung</p>');
   });
 
-  it('remaps technical SOLVER tokens including fragments and value policies', () => {
-    const calculation = derived();
-    calculation.sourceParameters!.solverExpression = '${ old-radio[0]:0:INC } + ${01}';
-    const result = resolveOrphanCodings([variable()], [previous(), calculation], ['TRANSFER'])!;
-    expect(result.find(coding => coding.id === 'derived')?.sourceParameters?.solverExpression)
-      .toBe('${ 01[0]:0:INC } + ${01}');
+  ['old-radio', 'old,radio'].forEach(source => {
+    it(`remaps SOLVER source ${source} including fragments and value policies`, () => {
+      const calculation = derived(source);
+      calculation.sourceParameters!.solverExpression = `\u0024{ ${source}[0]:0:INC } + \u0024{01}`;
+      const result = resolveOrphanCodings([variable()], [{ ...previous(), id: source }, calculation], ['TRANSFER'])!;
+      expect(result.find(coding => coding.id === 'derived')?.sourceParameters?.solverExpression)
+        .toBe('${ 01[0]:0:INC } + ${01}');
+    });
   });
 
   it('remaps legacy technical SOLVER IDs containing commas supported by the runtime', () => {
@@ -85,6 +87,7 @@ describe('orphan coding resolution', () => {
     calculation.sourceParameters!.solverExpression = '${old,radio} + 1';
     const result = resolveOrphanCodings([variable()], [old, calculation], ['TRANSFER'])!;
     const resolvedCalculation = result.find(coding => coding.id === 'derived')!;
+    expect(resolvedCalculation.sourceParameters?.solverExpression).toBe('${01} + 1');
     const responses = [{ id: 'new-radio', value: 2, status: 'VALUE_CHANGED' as const }];
     expect(CodingSchemeFactory.deriveValue(result, resolvedCalculation, responses))
       .toEqual(jasmine.objectContaining({ value: 3 }));
