@@ -42,7 +42,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData
 } from '../dialogs/confirm-dialog.component';
-import { SchemerService } from '../services/schemer.service';
+import { SchemerService, UserRoleType } from '../services/schemer.service';
 import { DialogContext } from '../services/dialog-context';
 import { sourceProcessingLabelKey } from '../services/source-processing-label';
 import { ensureResidualAutoManualInstruction } from '../services/schemer-code-ops';
@@ -103,6 +103,7 @@ import { validateVariableCodingChange } from '../services/schemer-identifier-val
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
+  @Input() userRole: UserRoleType = 'RW_MAXIMAL';
   _varCoding: VariableCodingData | null = null;
   private readonly dialogContext = new DialogContext(() => [
     this.schemerService.codingScheme, this.schemerService.userRole, this.varCoding
@@ -162,8 +163,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ngOnChanges(changes: SimpleChanges) {
+    if (changes['userRole']) this.dialogContext.invalidate();
     this.updateVarInfo();
   }
 

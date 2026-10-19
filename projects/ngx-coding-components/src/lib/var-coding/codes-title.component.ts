@@ -14,7 +14,7 @@ import {
   ProcessingParameterType
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { DialogContext } from '../services/dialog-context';
-import { SchemerService } from '../services/schemer.service';
+import { SchemerService, UserRoleType } from '../services/schemer.service';
 import {
   EditProcessingDialogComponent,
   EditProcessingDialogData
@@ -116,6 +116,7 @@ export class CodesTitleComponent implements OnChanges, OnDestroy {
   @Output() codeListChanged = new EventEmitter<CodeData[]>();
   @Output() pasteRequested = new EventEmitter<void>();
   @Input() codeList: CodeData[] | undefined;
+  @Input() userRole: UserRoleType = 'RW_MAXIMAL';
   @Input() fragmenting? = '';
   @Input() processing: ProcessingParameterType[] | undefined;
   @Input() canPaste = false;

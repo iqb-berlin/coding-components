@@ -30,7 +30,7 @@ import {
   SelectCodeRuleReferenceDialogData
 } from '../../dialogs/select-code-rule-reference-dialog.component';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
-import { SchemerService } from '../../services/schemer.service';
+import { SchemerService, UserRoleType } from '../../services/schemer.service';
 import { CodeRuleListComponent } from './code-rule-list.component';
 
 @Component({
@@ -69,6 +69,7 @@ export class CodeRulesComponent implements OnChanges, OnDestroy {
 
   @Output() codeRulesChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
+  @Input() userRole: UserRoleType = 'RW_MAXIMAL';
   @Input() varInfo: VariableInfo | undefined;
   @Input() fragmentMode: boolean | undefined;
   @ViewChild(MatTabGroup) ruleSetElement: MatTabGroup | undefined;

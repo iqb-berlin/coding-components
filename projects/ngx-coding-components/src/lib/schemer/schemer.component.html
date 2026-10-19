@@ -176,6 +176,7 @@
   }
   <var-coding
     [varCoding]="selectedCoding$ | async"
+    [userRole]="schemerService.userRole"
     class="var-coding-container fx-flex-row-100"
   ></var-coding>
   }

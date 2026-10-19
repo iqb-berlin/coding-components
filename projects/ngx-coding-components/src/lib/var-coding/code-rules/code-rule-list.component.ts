@@ -20,7 +20,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { CodingRule, RuleMethod, RuleSet } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { DialogContext } from '../../services/dialog-context';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
-import { SchemerService } from '../../services/schemer.service';
+import { SchemerService, UserRoleType } from '../../services/schemer.service';
 import {
   SelectCodeRuleReferenceDialogComponent,
   SelectCodeRuleReferenceDialogData
@@ -75,6 +75,7 @@ export class CodeRuleListComponent implements OnChanges, OnDestroy {
   @Output() codeRulesChanged = new EventEmitter<void>();
   @Output() deleteRuleSetRequested = new EventEmitter<void>();
   @Input() ruleSet?: RuleSet;
+  @Input() userRole: UserRoleType = 'RW_MAXIMAL';
   @Input() fragmentMode: boolean = false;
   @Input() arrayMode: boolean = false;
   @Input() canDeleteRuleSet: boolean = false;
