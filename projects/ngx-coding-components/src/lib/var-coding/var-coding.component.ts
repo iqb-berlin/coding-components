@@ -557,6 +557,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           });
 
           this.applySolverResidualAutoInstructionDefault();
+          this.updateVarInfo();
           this.varCodingChanged.emit(this.varCoding);
         }
       });
