@@ -72,13 +72,30 @@ const makeOrphanStart = (sessionId = 'orphan-recovery', currentId = 'current') =
   codingScheme: JSON.stringify({
     version: '3.5',
     variableCodings: [{
-      id: 'old-radio', alias: '01', sourceType: 'BASE', codeModel: 'MANUAL_AND_RULES',
-      manualInstruction: '<p>Original instructions</p>', processing: [], fragmenting: '',
-      codes: [{ id: 1, score: 2, type: 'FULL_CREDIT', manualInstruction: '<p>Keep code instruction</p>',
-        ruleSets: [{ rules: [{ method: 'NUMERIC_MATCH', parameters: ['2'] }] }] }]
+      id: 'old-radio',
+      alias: '01',
+      sourceType: 'BASE',
+      codeModel: 'MANUAL_AND_RULES',
+      manualInstruction: '<p>Original instructions</p>',
+      processing: [],
+      fragmenting: '',
+      codes: [{
+        id: 1,
+        score: 2,
+        type: 'FULL_CREDIT',
+        manualInstruction: '<p>Keep code instruction</p>',
+        ruleSets: [{ rules: [{ method: 'NUMERIC_MATCH', parameters: ['2'] }] }]
+      }]
     }, {
-      id: 'derived', alias: 'sum', sourceType: 'SOLVER', deriveSources: ['old-radio'],
-      sourceParameters: { processing: [], solverExpression: '${01} + 1' }, codeModel: 'RULES_ONLY', codes: []
+      id: 'derived',
+      alias: 'sum',
+      sourceType: 'SOLVER',
+      deriveSources: ['old-radio'],
+      // SOLVER placeholders are serialized literally in Verona start messages.
+      // eslint-disable-next-line no-template-curly-in-string
+      sourceParameters: { processing: [], solverExpression: '${01} + 1' },
+      codeModel: 'RULES_ONLY',
+      codes: []
     }]
   })
 });
@@ -302,8 +319,10 @@ test('embedded Schemer hands off the latest input before a host save without wai
 test('orphan recovery is discarded when the host switches to another conflicting task', async ({ page }) => {
   const frame = await loadEmbeddedSchemer(page, makeOrphanStart());
   await expect(frame.getByRole('dialog')).toContainText('Alte Kodierung übernehmen?');
-  await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'),
-    makeOrphanStart('second-orphan-task', 'second-current'));
+  await page.evaluate(
+    message => document.querySelector('iframe').contentWindow.postMessage(message, '*'),
+    makeOrphanStart('second-orphan-task', 'second-current')
+  );
   await frame.locator('app-root').evaluate(() => new Promise(resolve => {
     requestAnimationFrame(() => requestAnimationFrame(resolve));
   }));
@@ -361,9 +380,13 @@ test('recovered coding and immediate edits survive the host save and reopen', as
   await page.locator('#host-save').click();
   const saved = await page.evaluate(() => window.savedScheme);
   expect(JSON.parse(saved).variableCodings).toEqual(expect.arrayContaining([
-    expect.objectContaining({ id: 'current', label: 'Recovered and edited', codes: [
-      expect.objectContaining({ score: 2, manualInstruction: '<p>Keep code instruction</p>' })
-    ] }),
+    expect.objectContaining({
+      id: 'current',
+      label: 'Recovered and edited',
+      codes: [
+        expect.objectContaining({ score: 2, manualInstruction: '<p>Keep code instruction</p>' })
+      ]
+    }),
     expect.objectContaining({ id: 'derived', deriveSources: ['current'] })
   ]));
   expect(JSON.parse(saved).variableCodings).toHaveLength(2);
