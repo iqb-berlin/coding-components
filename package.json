@@ -32,7 +32,7 @@
     "test:schemer:coverage": "ng test schemer --watch=false --browsers=ChromeHeadless --code-coverage",
     "test:coverage": "npm run test:cc:coverage && npm run test:schemer:coverage",
     "test:scheme": "node --test scripts/validate-coding-scheme.test.js",
-    "test:codebook": "node --test scripts/codebook-contract.test.mjs scripts/codebook-matrix.test.mjs scripts/codebook-whitespace.test.mjs scripts/codebook-editor-matrix.test.mjs scripts/codebook-rich-layout.test.mjs scripts/codebook-rich-matrix.test.mjs scripts/codebook-docx-test-utils.test.mjs scripts/codebook-inline-images.test.mjs scripts/codebook-regressions.test.mjs",
+    "test:codebook": "node --test scripts/codebook-contract.test.mjs scripts/codebook-matrix.test.mjs scripts/codebook-whitespace.test.mjs scripts/codebook-editor-matrix.test.mjs scripts/codebook-rich-layout.test.mjs scripts/codebook-rich-matrix.test.mjs scripts/codebook-docx-test-utils.test.mjs scripts/codebook-inline-images.test.mjs scripts/codebook-regressions.test.mjs scripts/codebook-type-resolution.test.mjs",
     "test:schemer:responsive": "playwright test --config playwright.schemer.config.cjs",
     "test:production-dependencies": "node --test scripts/production-dependencies.test.mjs"
   },
