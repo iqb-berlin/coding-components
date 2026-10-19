@@ -221,6 +221,37 @@ test('embedded Schemer reports edited coding data back to the host session', asy
   })).toEqual({ sessionId: 'embedded-regression', label: 'Edited response label' });
 });
 
+test('embedded Schemer restores copied codes after reopening without interrupting rendering', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('.add-code-actions button').first().click();
+  await expect(frame.locator('single-code')).toHaveCount(1);
+  await frame.locator('single-code .copy-code').click();
+
+  // Studio replaces the iframe when reopening the module; sessionStorage survives that navigation.
+  await page.reload();
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await expect(frame.locator('codes-title h2')).toHaveText('Codes');
+  const paste = frame.locator('codes-title button').filter({
+    has: frame.locator('mat-icon').getByText('content_paste', { exact: true })
+  });
+  await expect(paste).toBeEnabled();
+  await paste.click();
+  await expect(frame.locator('single-code')).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => {
+    const changed = window.received.filter(message => message.type === 'vosSchemeChangedNotification').at(-1);
+    return changed ? JSON.parse(changed.codingScheme).variableCodings[0].codes[0]?.type : null;
+  })).toBe('FULL_CREDIT');
+
+  const label = frame.locator('var-coding .variable-details input').first();
+  await label.fill('Edited after clipboard restoration');
+  await label.press('Tab');
+  await expect.poll(() => page.evaluate(() => {
+    const changed = window.received.filter(message => message.type === 'vosSchemeChangedNotification').at(-1);
+    return changed ? JSON.parse(changed.codingScheme).variableCodings[0].label : null;
+  })).toBe('Edited after clipboard restoration');
+});
+
 test('embedded Schemer preserves value and no-value variables from a Studio unit', async ({ page }) => {
   const variables = process.env.STUDIO_VARIABLES_FILE
     ? JSON.parse(await fs.readFile(process.env.STUDIO_VARIABLES_FILE, 'utf8'))

@@ -103,7 +103,7 @@ export class SchemerService {
   allVariableIds: string[] = [];
   ruleMethodParameterCount = RuleMethodParameterCount;
   private readonly _userRole = signal<UserRoleType>('RW_MAXIMAL');
-  private readonly _copiedCode = signal<CodeData | null>(null);
+  private readonly _copiedCode = signal<CodeData | null>(readCopiedCodeFromStorage());
   private readonly _codingToTextMode = signal<CodingToTextMode>('EXTENDED');
 
   orderOfCodeTypes: CodeType[] = [
@@ -329,12 +329,7 @@ export class SchemerService {
   }
 
   private getCopiedCode(): CodeData | null {
-    const copiedCode = this._copiedCode();
-    if (copiedCode) return copiedCode;
-
-    const storedCode = readCopiedCodeFromStorage();
-    if (storedCode) this._copiedCode.set(storedCode);
-    return storedCode;
+    return this._copiedCode();
   }
 
   getBaseVarsList() {

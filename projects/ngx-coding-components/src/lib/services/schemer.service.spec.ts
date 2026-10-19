@@ -1,3 +1,4 @@
+import { computed } from '@angular/core';
 import {
   CodeData,
   CodeType,
@@ -88,6 +89,27 @@ describe('SchemerService', () => {
 
       expect(freshService.copiedCode?.label).toBe('from-storage');
       expect(freshService.canPasteSingleCodeInto([])).toBeTrue();
+    });
+
+    it('should read a restored clipboard in a reactive context without writing signals', () => {
+      service.copySingleCode({
+        id: 1,
+        type: 'FULL_CREDIT',
+        label: 'from-storage',
+        score: 1,
+        ruleSets: []
+      } as CodeData);
+      const freshService = new SchemerService();
+      const clipboardState = computed(() => ({
+        canPaste: freshService.canPasteSingleCodeInto([]),
+        label: freshService.copiedCode?.label
+      }));
+
+      expect(clipboardState()).toEqual({ canPaste: true, label: 'from-storage' });
+
+      freshService.setCopiedCode(null);
+      expect(clipboardState()).toEqual({ canPaste: false, label: undefined });
+      expect(new SchemerService().copiedCode).toBeNull();
     });
 
     it('canPasteSingleCodeInto should block when nothing copied or user is RO', () => {
