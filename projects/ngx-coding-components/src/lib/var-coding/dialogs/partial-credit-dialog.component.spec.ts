@@ -50,7 +50,8 @@ describe('rendered partial-credit source parameters', () => {
       expect(fixture.componentInstance.data.sourceParameters.processing).toEqual([]);
       fixture.componentInstance.data.sourceType = 'SOLVER';
       fixture.componentInstance.updatePossibleDeriveProcessing();
-      fixture.detectChanges();
+      fixture.changeDetectorRef.markForCheck();
+      await fixture.whenStable();
       expect(element.querySelectorAll('mat-checkbox').length).toBe(0);
       fixture.destroy();
     });
