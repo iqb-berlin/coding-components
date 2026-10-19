@@ -6,7 +6,7 @@ The underlying data specifications are maintained in:
 
 - **Coding scheme spec**: `@iqbspecs/coding-scheme`
 - **Response spec**: `@iqbspecs/response`
-- **Variable info spec**: `@iqbspecs/variable-info`
+- **Variable info spec**: [`@iqbspecs/variable-info`](https://iqb-specifications.github.io/concepts/plugins/variable-info.html)
 - **Coding engine / helpers**: `@iqb/responses`
 
 [IQB Specifications on GitHub](https://github.com/iqb-specifications/)
@@ -71,13 +71,10 @@ answers; `false` and `0` remain values. Original source responses are preserved.
 The options, descriptions and `x` combinations survive scheme import/export.
 Existing SOLVER policies are unchanged.
 
-This feature requires the coordinated releases `@iqbspecs/coding-scheme@3.5.0`
-and `@iqb/responses@5.4.0`. The prepared lockfile identifies the locally built
-release tarballs; these versions must be published before a fresh registry-based
-`npm ci` can succeed. Publish the specification first, then responses, and then
-build/release the Schemer and Angular library. Refresh lockfile integrity if the
-published tarballs differ from the prepared artifacts. Local verification uses
-the built packages from sibling `coding-scheme` and `responses` checkouts.
+This feature requires `@iqbspecs/coding-scheme@3.5.0` and
+`@iqb/responses@5.4.0`, both published on npm. The lockfile resolves published
+registry packages; a fresh `npm ci` installs the release dependencies without
+local sibling checkouts or prepared tarballs.
 
 ## Schemer viewport support
 
@@ -453,16 +450,19 @@ The steps to publish a new release of the library:
 
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/iqb-berlin/coding-components)
 
-The `schemer` UI is also published as a [Verona](https://verona-interfaces.github.io) module.
+The `schemer` UI is also published as a
+[Schemer plugin](https://iqb-specifications.github.io/concepts/plugins/schemer.html).
 
-Schemer 2.9.0 uses the [Verona Schemer 3.2.0 message contract](https://github.com/verona-interfaces/schemer/tree/3.2.0)
+Schemer 2.9.0 uses the [Verona Schemer 3.2.0 message contract](https://github.com/iqb-specifications/plugin-schemer/tree/3.2.0)
 with Variable Info 1.x. The wrapper's `apiVersion` identifies this communication
 contract, independently of the Coding-Scheme 3.5 format stored in `codingScheme`.
 Ready notifications carry the JSON-LD object as a JSON string in `metadata`;
 scheme-change notifications use ISO timestamps and the active host session.
 Start commands require a non-empty session ID; omitted variables default to an
-empty list and configuration is optional. The Studio `role` extension and the
-existing `variables` extension on scheme-change notifications remain supported.
+empty list and configuration is optional. Incoming messages are accepted only
+from the direct parent window, including hosts with an opaque origin. Messages
+from other frames or without a sender are ignored. The Studio `role` extension
+and the existing `variables` extension on scheme-change notifications remain supported.
 The module does not currently emit shared-parameter updates or coding dependencies.
 
 The browser suite validates messages against fixed local copies of the official
