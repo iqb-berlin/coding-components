@@ -4,6 +4,7 @@ import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-id
 import { SchemerFacadeService } from './schemer-facade.service';
 import { SchemerService } from './schemer.service';
 import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
+import { ResolveOrphanCodingsDialogComponent } from '../dialogs/resolve-orphan-codings-dialog.component';
 
 describe('SchemerFacadeService', () => {
   let schemerService: SchemerService;
@@ -17,6 +18,111 @@ describe('SchemerFacadeService', () => {
   });
 
   const createService = () => new SchemerFacadeService(schemerService, dialog);
+
+  const prepareRecovery = () => {
+    schemerService.setVarList([{ id: 'current', alias: 'response', type: 'string' } as never]);
+    schemerService.setCodingScheme({
+      variableCodings: [
+        {
+          id: 'previous', alias: 'response', sourceType: 'BASE', codes: [{ id: 1, score: 2 }]
+        },
+        {
+          id: 'derived', alias: 'result', sourceType: 'COPY_VALUE', deriveSources: ['previous']
+        }
+      ]
+    } as never);
+    const afterClosed = new Subject<unknown>();
+    (dialog.open as jasmine.Spy).and.returnValue({
+      close: jasmine.createSpy('close'),
+      afterClosed: () => afterClosed.asObservable()
+    });
+    const service = createService();
+    const changes = jasmine.createSpy('changes');
+    service.identifierConflictChanges$.subscribe(changes);
+    const before = JSON.stringify(schemerService.codingScheme);
+    service.tryResolveIdentifierConflicts();
+    return {
+      service, afterClosed, changes, before
+    };
+  };
+
+  it('offers explicit recovery for one orphan and commits a transfer exactly once', () => {
+    const { afterClosed, changes } = prepareRecovery();
+    expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(ResolveOrphanCodingsDialogComponent);
+    expect(schemerService.codingScheme?.variableCodings[0].id).toBe('previous');
+    afterClosed.next(['TRANSFER']);
+    afterClosed.complete();
+    expect(schemerService.codingScheme?.variableCodings.map(coding => coding.id)).toEqual(['derived', 'current']);
+    expect(schemerService.codingScheme?.variableCodings[0].deriveSources).toEqual(['current']);
+    expect(changes).toHaveBeenCalledOnceWith(true);
+  });
+
+  it('cancels recovery without changing or emitting a scheme', () => {
+    const { afterClosed, changes, before } = prepareRecovery();
+    afterClosed.next(undefined);
+    afterClosed.complete();
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('preserves derived codings and their old source when starting empty', () => {
+    const { afterClosed, changes } = prepareRecovery();
+    afterClosed.next(['START_EMPTY']);
+    expect(schemerService.codingScheme?.variableCodings[0].deriveSources).toEqual(['previous']);
+    expect(schemerService.codingScheme?.variableCodings.find(coding => coding.id === 'current')?.codes).toEqual([]);
+    expect(changes).toHaveBeenCalledOnceWith(true);
+  });
+
+  it('rechecks read-only rights at commit time', () => {
+    const { afterClosed, changes, before } = prepareRecovery();
+    const data = (dialog.open as jasmine.Spy).calls.mostRecent().args[1].data;
+    expect(data.canEdit()).toBeTrue();
+    schemerService.setUserRole('RO');
+    expect(data.canEdit()).toBeFalse();
+    afterClosed.next(['TRANSFER']);
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('rejects a stale choice even when only coding content changed', () => {
+    const { afterClosed, changes } = prepareRecovery();
+    schemerService.codingScheme!.variableCodings[0].manualInstruction = 'A later host update';
+    const updated = JSON.stringify(schemerService.codingScheme);
+    afterClosed.next(['TRANSFER']);
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(updated);
+    expect(changes).toHaveBeenCalledOnceWith(false);
+  });
+
+  it('rejects a choice from a replaced scheme with otherwise identical contents', () => {
+    const { afterClosed, changes, before } = prepareRecovery();
+    schemerService.setCodingScheme(JSON.parse(before));
+    afterClosed.next(['TRANSFER']);
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+    expect(changes).toHaveBeenCalledOnceWith(false);
+  });
+
+  it('does not apply a recovery result after the component has reset its dialog', () => {
+    const {
+      service, afterClosed, changes, before
+    } = prepareRecovery();
+    service.resetIdentifierConflictResolutionState();
+    afterClosed.next(['TRANSFER']);
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  it('diagnoses multiple old candidates instead of offering a destructive choice', () => {
+    const { service, afterClosed } = prepareRecovery();
+    afterClosed.next(undefined);
+    schemerService.codingScheme!.variableCodings.push({
+      id: 'even-older', alias: 'response', sourceType: 'BASE', codes: [{ id: 2 }]
+    });
+    service.resetIdentifierConflictResolutionState();
+    service.tryResolveIdentifierConflicts();
+    const call = (dialog.open as jasmine.Spy).calls.mostRecent();
+    expect(call.args[0]).toBe(ResolveIdentifierConflictsDialogComponent);
+    expect(call.args[1].data.recoveryProblems.join(' ')).toContain('mehrere alte Kodierungen');
+  });
 
   it('tryResolveIdentifierConflicts should keep blocking while already resolving', () => {
     const service = createService();
