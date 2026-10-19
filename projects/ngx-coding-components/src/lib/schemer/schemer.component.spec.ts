@@ -8,6 +8,9 @@ import { MessageDialogComponent } from '../dialogs/message-dialog.component';
 import { FileService } from '../services/file.service';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SchemerComponent } from './schemer.component';
+import { SchemerFacadeService } from '../services/schemer-facade.service';
+import { SchemerService } from '../services/schemer.service';
+import { ResolveOrphanCodingsDialogComponent } from '../dialogs/resolve-orphan-codings-dialog.component';
 
 class FakeTranslateService {
   // eslint-disable-next-line class-methods-use-this
@@ -23,6 +26,77 @@ class FakeMatDialog {
     afterClosed: () => of(this.afterClosedValue)
   }));
 }
+
+describe('SchemerComponent orphan recovery integration', () => {
+  it('emits and reopens a recovery without changing the identity of SOLVER sources', () => {
+    const service = new SchemerService();
+    const closed = new Subject<unknown>();
+    const dialog = {
+      open: jasmine.createSpy('open').and.returnValue({
+        close: jasmine.createSpy('close'), afterClosed: () => closed.asObservable()
+      })
+    };
+    const facade = new SchemerFacadeService(service, dialog as never);
+    const component = new SchemerComponent(
+      new FakeTranslateService() as never,
+      service,
+      facade,
+      dialog as never,
+      dialog as never,
+      dialog as never,
+      dialog as never,
+      dialog as never,
+      dialog as never,
+      jasmine.createSpyObj('ChangeDetectorRef', ['markForCheck'])
+    );
+    const variable = (id: string, alias: string): VariableInfo => ({
+      id,
+      alias,
+      type: 'number',
+      format: '',
+      multiple: false,
+      nullable: false,
+      values: [],
+      valuePositionLabels: []
+    });
+    const original: VariableCodingData[] = [
+      { ...CodingFactory.createCodingVariable('old'), alias: 'Response', manualInstruction: 'Keep this' },
+      { ...CodingFactory.createCodingVariable('response'), alias: 'Other' },
+      {
+        ...CodingFactory.createCodingVariable('derived'),
+        alias: 'Result',
+        sourceType: 'SOLVER',
+        deriveSources: ['old', 'response'],
+        sourceParameters: {
+          processing: [],
+          // eslint-disable-next-line no-template-curly-in-string
+          solverExpression: '${Response} + 10 * ${response}'
+        }
+      }
+    ];
+    component.varList = [variable('current', 'response'), variable('response', 'Other')];
+    component.codingScheme = { variableCodings: original } as never;
+    expect(component.hasIdentifierConflict).toBeTrue();
+    expect(dialog.open.calls.mostRecent().args[0]).toBe(ResolveOrphanCodingsDialogComponent);
+    expect(service.codingScheme!.variableCodings.some(c => c.id === 'current')).toBeFalse();
+    const emitted = spyOn(component.codingSchemeChanged, 'emit');
+    closed.next(['TRANSFER']);
+    closed.complete();
+    expect(component.hasIdentifierConflict).toBeFalse();
+    expect(emitted).toHaveBeenCalledOnceWith(service.codingScheme);
+    expect(component.problems.filter(problem => problem.breaking)).toEqual([]);
+    const persisted = JSON.parse(JSON.stringify(emitted.calls.mostRecent().args[0]));
+    component.codingScheme = persisted;
+    expect(component.hasIdentifierConflict).toBeFalse();
+    expect(dialog.open).toHaveBeenCalledTimes(1);
+    const calculation = persisted.variableCodings.find((coding: VariableCodingData) => coding.id === 'derived');
+    expect(CodingSchemeFactory.deriveValue(persisted.variableCodings, calculation, [
+      { id: 'current', value: 2, status: 'VALUE_CHANGED' },
+      { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+    ])).toEqual(jasmine.objectContaining({ value: 52, status: 'VALUE_CHANGED' }));
+    component.ngOnDestroy();
+  });
+});
 
 describe('SchemerComponent', () => {
   let component: SchemerComponent;

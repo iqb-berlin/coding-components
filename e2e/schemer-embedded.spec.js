@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
+const { CodingSchemeFactory } = require('@iqb/responses');
 const veronaSchema = require('./fixtures/verona/schemer-3.2.0.json');
 const variableSchema = require('./fixtures/verona/variable-info-1.3.json');
 const studioStart = require('./fixtures/verona/studio-start-command.json');
@@ -394,6 +395,32 @@ test('recovered coding and immediate edits survive the host save and reopen', as
   await expect(reopened.getByRole('dialog')).toHaveCount(0);
   await reopened.locator('.var-list-entry').filter({ hasText: '01' }).click();
   await expect(reopened.locator('var-coding .variable-details input').first()).toHaveValue('Recovered and edited');
+});
+
+test('orphan recovery saves a converging aggregate source only once and keeps it after reopen', async ({ page }) => {
+  const start = makeOrphanStart();
+  const scheme = JSON.parse(start.codingScheme);
+  Object.assign(scheme.variableCodings[1], {
+    sourceType: 'SUM_SCORE', deriveSources: ['old-radio', 'current'], sourceParameters: { processing: [] }
+  });
+  start.codingScheme = JSON.stringify(scheme);
+  const frame = await loadEmbeddedSchemer(page, start);
+  await frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true }).click();
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+  const saved = await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
+  const persisted = JSON.parse(saved);
+  const calculation = persisted.variableCodings.find(coding => coding.id === 'derived');
+  expect(calculation.deriveSources).toEqual(['current']);
+  expect(CodingSchemeFactory.deriveValue(persisted.variableCodings, calculation, [
+    {
+      id: 'current', value: 2, code: 1, score: 2, status: 'CODING_COMPLETE'
+    }
+  ])).toMatchObject({ value: 2, status: 'VALUE_CHANGED' });
+  const reopened = await loadEmbeddedSchemer(page, { ...start, codingScheme: saved });
+  await expect(reopened.getByRole('dialog')).toHaveCount(0);
+  await reopened.locator('.var-list-entry').filter({ hasText: 'sum' }).click();
+  await expect(reopened.locator('.missing-source-notice')).toHaveCount(0);
 });
 
 test('starting empty preserves dependants and saves the manually repaired source', async ({ page }) => {

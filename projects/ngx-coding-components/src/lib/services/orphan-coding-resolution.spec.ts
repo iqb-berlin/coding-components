@@ -104,6 +104,124 @@ describe('orphan coding resolution', () => {
       .toBe('${old-radio} + ${01}');
   });
 
+  [
+    { sourceType: 'SUM_SCORE', expectedValue: 7 },
+    { sourceType: 'SUM_CODE', expectedValue: 4 },
+    { sourceType: 'CONCAT_CODE', expectedValue: '3_1' }
+  ].forEach(({ sourceType, expectedValue }) => {
+    [['old-radio', 'new-radio'], ['new-radio', 'old-radio']].forEach(sources => {
+      it(`counts a recovered source once for ${sourceType} with source order ${sources.join(', ')}`, () => {
+        const calculation: VariableCodingData = {
+          ...derived(),
+          sourceType: sourceType as VariableCodingData['sourceType'],
+          deriveSources: ['other', ...sources]
+        };
+        const target = { ...CodingFactory.createCodingVariable('new-radio'), alias: '01' };
+        const other = CodingFactory.createCodingVariable('other');
+        const codings = [previous(), target, other, calculation];
+        const before = JSON.stringify(codings);
+        const result = resolveOrphanCodings([variable(), variable('other', 'other')], codings, ['TRANSFER'])!;
+        const resolved = result.find(coding => coding.id === 'derived')!;
+        expect(resolved.deriveSources).toEqual(['other', 'new-radio']);
+        expect(CodingSchemeFactory.deriveValue(result, resolved, [
+          {
+            id: 'new-radio', value: 2, code: 1, score: 2, status: 'CODING_COMPLETE'
+          },
+          {
+            id: 'other', value: 3, code: 3, score: 5, status: 'CODING_COMPLETE'
+          }
+        ])).toEqual(jasmine.objectContaining({ value: expectedValue, status: 'VALUE_CHANGED' }));
+        expect(JSON.stringify(codings)).toBe(before);
+      });
+    });
+  });
+
+  [
+    {
+      expression: '${Response} + 10 * ${response}',
+      expectedExpression: '${response} + 10 * ${Other}',
+      expectedValue: 52
+    },
+    {
+      expression: '${ Response[0]:0:INC } + 10 * ${response[0]:0:INC}',
+      expectedExpression: '${ response[0]:0:INC } + 10 * ${Other[0]:0:INC}',
+      expectedValue: 52
+    },
+    {
+      expression: '${Response} + 10 * ${response} + ${Response}',
+      expectedExpression: '${response} + 10 * ${Other} + ${response}',
+      expectedValue: 54
+    }
+  ].forEach(({ expression, expectedExpression, expectedValue }) => {
+    it(`preserves every SOLVER source identity when the recovered alias shadows a technical ID: ${expression}`, () => {
+      const old = { ...previous(), alias: 'Response' };
+      const other = { ...CodingFactory.createCodingVariable('response'), alias: 'Other', fragmenting: '(.*)' };
+      const calculation = derived();
+      calculation.deriveSources = ['old-radio', 'response'];
+      calculation.sourceParameters!.solverExpression = expression;
+      const codings = [old, other, calculation];
+      const before = JSON.stringify(codings);
+      expect(CodingSchemeFactory.deriveValue(codings, calculation, [
+        { id: 'old-radio', value: '2', status: 'VALUE_CHANGED' },
+        { id: 'response', value: '5', status: 'VALUE_CHANGED' }
+      ]).value).toBe(expectedValue);
+      const result = resolveOrphanCodings(
+        [variable('new-radio', 'response'), variable('response', 'Other')], codings, ['TRANSFER']
+      )!;
+      const resolved = result.find(coding => coding.id === 'derived')!;
+      expect(resolved.sourceParameters?.solverExpression).toBe(expectedExpression);
+      expect(resolved.deriveSources).toEqual(['new-radio', 'response']);
+      expect(CodingSchemeFactory.deriveValue(result, resolved, [
+        { id: 'new-radio', value: '2', status: 'VALUE_CHANGED' },
+        { id: 'response', value: '5', status: 'VALUE_CHANGED' }
+      ])).toEqual(jasmine.objectContaining({ value: expectedValue, status: 'VALUE_CHANGED' }));
+      expect(JSON.stringify(codings)).toBe(before);
+    });
+  });
+
+  it('preserves unrelated source lists and formula spelling during a transfer', () => {
+    const other = { ...CodingFactory.createCodingVariable('other'), alias: 'Other' };
+    const calculation = derived('other');
+    calculation.deriveSources = ['other', 'other'];
+    calculation.sourceParameters!.solverExpression = '${ other } + ${Other}';
+    const result = resolveOrphanCodings(
+      [variable(), variable('other', 'Other')], [previous(), other, calculation], ['TRANSFER']
+    )!;
+    expect(result.find(coding => coding.id === 'derived')).toEqual(calculation);
+  });
+
+  it('uses the authoritative host alias when an unchanged source has no stored alias', () => {
+    const other = { ...CodingFactory.createCodingVariable('response'), alias: undefined };
+    const calculation = derived();
+    calculation.deriveSources = ['old-radio', 'response'];
+    calculation.sourceParameters!.solverExpression = '${Response} + 10 * ${response}';
+    const result = resolveOrphanCodings(
+      [variable('new-radio', 'response'), variable('response', 'Other')],
+      [{ ...previous(), alias: 'Response' }, other, calculation],
+      ['TRANSFER']
+    )!;
+    const resolved = result.find(coding => coding.id === 'derived')!;
+    expect(result.find(coding => coding.id === 'response')?.alias).toBe('Other');
+    expect(resolved.sourceParameters?.solverExpression).toBe('${response} + 10 * ${Other}');
+    expect(CodingSchemeFactory.deriveValue(result, resolved, [
+      { id: 'new-radio', value: 2, status: 'VALUE_CHANGED' },
+      { id: 'response', value: 5, status: 'VALUE_CHANGED' }
+    ]).value).toBe(52);
+  });
+
+  it('does not rewrite dependent formulas or deduplicate sources for START_EMPTY', () => {
+    const other = { ...CodingFactory.createCodingVariable('response'), alias: 'Other' };
+    const calculation = derived();
+    calculation.deriveSources = ['old-radio', 'response', 'response'];
+    calculation.sourceParameters!.solverExpression = '${Response} + 10 * ${response}';
+    const result = resolveOrphanCodings(
+      [variable('new-radio', 'response'), variable('response', 'Other')],
+      [{ ...previous(), alias: 'Response' }, other, calculation],
+      ['START_EMPTY']
+    )!;
+    expect(result.find(coding => coding.id === 'derived')).toEqual(calculation);
+  });
+
   it('keeps dependent codings untouched for START_EMPTY and exposes their missing source', () => {
     const calculation = derived();
     const result = resolveOrphanCodings([variable()], [previous(), calculation], ['START_EMPTY'])!;

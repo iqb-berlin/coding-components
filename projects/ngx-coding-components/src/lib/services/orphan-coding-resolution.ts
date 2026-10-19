@@ -99,21 +99,42 @@ export const getOrphanCodingResolutionPlan = (
   return plan;
 };
 
+// Match the runtime's alias-first lookup, including technical IDs as fallback.
+const getSolverSourceId = (reference: string, codings: VariableCodingData[]): string => (
+  codings.find(coding => coding.alias === reference)?.id || reference
+);
+
 const remapSolverExpression = (
   expression: string,
   codings: VariableCodingData[],
+  resolvedCodings: VariableCodingData[],
   replacements: Map<string, VariableInfo>
-): string => expression.replace(/\$\{([^{}]+)\}/g, (token, content: string) => {
-  // Legacy technical IDs may contain commas, which SOLVER also accepts.
-  const match = content.match(/^(\s*)([0-9A-Za-z_,-]+)([\s\S]*)$/);
-  if (!match) return token;
-  const [, leadingSpace, reference, suffix] = match;
-  // SOLVER resolves aliases before technical IDs. Preserve that precedence.
-  const sourceId = codings.find(coding => coding.alias === reference)?.id || reference;
-  const replacement = replacements.get(sourceId);
-  if (!replacement) return token;
-  return `\u0024{${leadingSpace}${publicName(replacement)}${suffix}}`;
-});
+): string | null => {
+  let canPreserveReferences = true;
+  const resolvedExpression = expression.replace(/\$\{([^{}]+)\}/g, (token, content: string) => {
+    // Legacy technical IDs may contain commas, which SOLVER also accepts.
+    const match = content.match(/^(\s*)([0-9A-Za-z_,-]+)([\s\S]*)$/);
+    if (!match) return token;
+    const [, leadingSpace, reference, suffix] = match;
+    const sourceId = getSolverSourceId(reference, codings);
+    const targetId = replacements.get(sourceId)?.id || sourceId;
+    if (getSolverSourceId(reference, resolvedCodings) === targetId) return token;
+
+    const target = resolvedCodings.find(coding => coding.id === targetId);
+    // START_EMPTY deliberately leaves references to the removed source for manual repair.
+    if (!target) return token;
+    // A new alias can also shadow an unchanged technical ID in another token.
+    const targetReference = [publicName(target), target.id].find(candidate => (
+      getSolverSourceId(candidate, resolvedCodings) === targetId
+    ));
+    if (!targetReference) {
+      canPreserveReferences = false;
+      return token;
+    }
+    return `\u0024{${leadingSpace}${targetReference}${suffix}}`;
+  });
+  return canPreserveReferences ? resolvedExpression : null;
+};
 
 /** Build a new array; callers must recheck their snapshot before committing it. */
 export const resolveOrphanCodings = (
@@ -145,17 +166,28 @@ export const resolveOrphanCodings = (
     if (decisions[index] === 'TRANSFER') replacements.set(conflict.previous.id, conflict.current);
   });
   const resolved = result.filter(coding => !removedIds.has(coding.id));
+  // The editor refreshes active aliases from the host after recovery as well.
+  variables.forEach(variable => {
+    const coding = resolved.find(candidate => candidate.id === variable.id);
+    if (coding) coding.alias = publicName(variable);
+  });
+  let canPreserveReferences = true;
   resolved.forEach(coding => {
     // START_EMPTY intentionally leaves the old ID in place. Validation exposes
     // the missing source, and the derived coding stays editable for repair.
-    coding.deriveSources = coding.deriveSources?.map(source => replacements.get(source)?.id || source);
-    if (coding.sourceType === 'SOLVER' && coding.sourceParameters?.solverExpression) {
-      coding.sourceParameters.solverExpression = remapSolverExpression(
+    if (coding.deriveSources?.some(source => replacements.has(source))) {
+      coding.deriveSources = [...new Set(coding.deriveSources.map(source => replacements.get(source)?.id || source))];
+    }
+    if (replacements.size && coding.sourceType === 'SOLVER' && coding.sourceParameters?.solverExpression) {
+      const expression = remapSolverExpression(
         coding.sourceParameters.solverExpression,
         codings,
+        resolved,
         replacements
       );
+      if (expression === null) canPreserveReferences = false;
+      else coding.sourceParameters.solverExpression = expression;
     }
   });
-  return analyzeVariableIdentifiers(variables, resolved).hasProblems ? null : resolved;
+  return !canPreserveReferences || analyzeVariableIdentifiers(variables, resolved).hasProblems ? null : resolved;
 };
