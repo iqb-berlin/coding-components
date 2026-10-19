@@ -15,6 +15,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingFactory } from '@iqb/responses/coding-factory';
+import { normalizeVariableInfoType } from '@iqb/responses';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -240,7 +241,7 @@ export class SchemerComponent implements OnDestroy {
           .map(bv => bv.id);
       this.schemerService.varList
         .filter(
-          vi => allBaseVariableIds.indexOf(vi.id) < 0 && vi.type !== 'no-value'
+          vi => allBaseVariableIds.indexOf(vi.id) < 0 && normalizeVariableInfoType(vi.type) !== 'NO_VALUE'
         )
         .forEach(vi => {
           const found = this.schemerService.codingScheme?.variableCodings.find(
@@ -717,10 +718,15 @@ export class SchemerComponent implements OnDestroy {
                 const existingVariableInfo = this.schemerService.varList.find(
                   vi => vi.id === targetCoding.id
                 );
-                if (existingVariableInfo?.type === 'no-value') {
+                const referenceType = existingVariableInfo?.type || this.schemerService.varList[0]?.type;
+                // Preserve the entry's spelling; the public VariableInfo type still describes 1.x.
+                const stringType = (
+                  referenceType && referenceType === referenceType.toUpperCase() ? 'STRING' : 'string'
+                ) as VariableInfo['type'];
+                if (existingVariableInfo && normalizeVariableInfoType(existingVariableInfo.type) === 'NO_VALUE') {
                   existingVariableInfo.alias =
                     targetCoding.alias || targetCoding.id;
-                  existingVariableInfo.type = 'string';
+                  existingVariableInfo.type = stringType;
                   existingVariableInfo.format = '';
                   existingVariableInfo.multiple = true;
                   existingVariableInfo.nullable = true;
@@ -730,7 +736,7 @@ export class SchemerComponent implements OnDestroy {
                   this.schemerService.varList.push({
                     id: targetCoding.id,
                     alias: targetCoding.alias || targetCoding.id,
-                    type: 'string',
+                    type: stringType,
                     format: '',
                     multiple: true,
                     nullable: true,

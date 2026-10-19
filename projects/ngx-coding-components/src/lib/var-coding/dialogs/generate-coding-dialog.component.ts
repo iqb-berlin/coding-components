@@ -37,7 +37,7 @@ import {
   RuleSet,
   VariableCodingData
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
-import { ToTextFactory } from '@iqb/responses';
+import { normalizeVariableInfoType, ToTextFactory } from '@iqb/responses';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { SchemerService } from '../../services/schemer.service';
 import {
@@ -134,7 +134,7 @@ export class GenerateCodingDialogComponent {
   | 'geogebra-boolean'
   | 'math-table';
 
-  protected readonly ToTextFactory = ToTextFactory;
+  variableInfoText: string[] = [];
   selectedOption: string = '';
   selectedOptions: string[] = [];
   positionLabels: string[] = [];
@@ -182,6 +182,9 @@ export class GenerateCodingDialogComponent {
       return;
     }
 
+    this.variableInfoText = ToTextFactory.varInfoAsText({ ...varInfo, values: varInfo.values || [] });
+    const variableType = normalizeVariableInfoType(varInfo.type);
+
     if (isMathTableVariableInfo(varInfo)) {
       this.generationModel = 'math-table';
       this.elseMethod = 'auto';
@@ -196,7 +199,7 @@ export class GenerateCodingDialogComponent {
 
       if (varInfo.multiple) {
         this.generationModel = 'multi-choice';
-        this.positionLabels = varInfo.valuePositionLabels;
+        this.positionLabels = varInfo.valuePositionLabels || [];
       } else {
         this.generationModel =
           varInfo.values.length > 20 ?
@@ -213,42 +216,42 @@ export class GenerateCodingDialogComponent {
       return;
     }
 
-    if (varInfo.multiple && varInfo.type === 'boolean') {
+    if (varInfo.multiple && variableType === 'BOOLEAN') {
       this.elseMethod = 'auto';
       this.generationModel = 'boolean-multi';
-      this.positionLabels = varInfo.valuePositionLabels;
+      this.positionLabels = varInfo.valuePositionLabels || [];
       this.booleanMultiSelections = (this.positionLabels || []).map(
         () => false
       );
       return;
     }
 
-    if (varInfo.multiple && varInfo.type === 'string') {
+    if (varInfo.multiple && variableType === 'STRING') {
       this.elseMethod = 'instruction';
       this.generationModel = 'simple-input';
-      this.positionLabels = varInfo.valuePositionLabels;
+      this.positionLabels = varInfo.valuePositionLabels || [];
       this.selectedArrayPos = this.positionLabels.length > 0 ? 0 : 'ANY_OPEN';
       return;
     }
 
     if (!varInfo.multiple) {
       this.elseMethod = 'auto';
-      switch (varInfo.type) {
-        case 'integer':
+      switch (variableType) {
+        case 'INTEGER':
           this.generationModel = 'integer';
           break;
-        case 'number':
+        case 'NUMBER':
           if (this.isGeoGebraVariable) {
             this.generationModel = 'integer';
           }
           break;
-        case 'string':
+        case 'STRING':
           if (this.isGeoGebraVariable) {
             this.textAsNumeric = true;
           }
           this.generationModel = 'simple-input';
           break;
-        case 'boolean':
+        case 'BOOLEAN':
           if (this.isGeoGebraVariable) {
             this.generationModel = 'geogebra-boolean';
           }
@@ -926,7 +929,7 @@ export class GenerateCodingDialogComponent {
             parameters: [this.selectedOption || '']
           });
         } else if (this.selectedOptions.length > 0) {
-          if (this.varInfo.type === 'boolean') {
+          if (normalizeVariableInfoType(this.varInfo.type) === 'BOOLEAN') {
             this.selectedOptions.forEach(s => {
               fullCreditRules.push({
                 method: s === 'true' ? 'IS_TRUE' : 'IS_FALSE',
@@ -941,7 +944,7 @@ export class GenerateCodingDialogComponent {
               });
             });
           }
-        } else if (this.varInfo.type === 'boolean') {
+        } else if (normalizeVariableInfoType(this.varInfo.type) === 'BOOLEAN') {
           fullCreditRules.push({
             method: 'IS_TRUE',
             parameters: []

@@ -16,6 +16,23 @@ describe('Responses compatibility through real Schemer and validation imports', 
     it(`accepts ${type} for BASE_NO_VALUE without a false blocking source error`, () => {
       expect(validateCodingScheme([playerVariable(type)], [noValueCoding])).toEqual([]);
     });
+
+    it(`keeps ${type} unprotected when activated as a BASE coding`, () => {
+      const service = new SchemerService();
+      const variables = [playerVariable(type)];
+      service.setVarList(variables);
+      expect(service.isProtectedBaseVariable({ ...noValueCoding, sourceType: 'BASE' })).toBeFalse();
+      expect(service.varList).toBe(variables);
+      expect(service.varList[0].type as string).toBe(type);
+    });
+  });
+
+  ['string', 'STRING', 'integer', 'INTEGER', 'CUSTOM'].forEach(type => {
+    it(`continues to protect a BASE coding supplied by the host as ${type}`, () => {
+      const service = new SchemerService();
+      service.setVarList([playerVariable(type)]);
+      expect(service.isProtectedBaseVariable({ id: 'V', sourceType: 'BASE' })).toBeTrue();
+    });
   });
 
   [

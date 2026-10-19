@@ -32,6 +32,27 @@ describe('AppComponent Verona start commands', () => {
 
   afterEach(() => component.ngOnDestroy());
 
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    it(`classifies ${type} and minimal input identically without rewriting host variables`, () => {
+      const payload = [
+        {
+          id: 'state', type, page: 'old-page', visualAnchor: 'old-anchor', extension: { keep: true }
+        },
+        { id: 'answer', type: 'INTEGER' }
+      ];
+      const variables: VariableInfo[] = JSON.parse(JSON.stringify(payload));
+      starts.next({ type: 'vosStartCommand', sessionId: 'spelling', variables });
+      expect(component.codings()?.variableCodings.map(variable => ({
+        id: variable.id, sourceType: variable.sourceType
+      }))).toEqual([
+        { id: 'state', sourceType: 'BASE_NO_VALUE' },
+        { id: 'answer', sourceType: 'BASE' }
+      ]);
+      expect(component.varList()).toBe(variables);
+      expect(variables).toEqual(JSON.parse(JSON.stringify(payload)));
+    });
+  });
+
   it('accepts a start command containing only the required session', () => {
     starts.next({ type: 'vosStartCommand', sessionId: 'minimal-session' });
 

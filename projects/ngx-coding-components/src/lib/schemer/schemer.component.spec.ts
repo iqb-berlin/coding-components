@@ -1547,6 +1547,55 @@ describe('SchemerComponent', () => {
     expect(emitSpy).toHaveBeenCalled();
   });
 
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    it(`does not add ${type} as an active base variable on a host update`, () => {
+      const variables = JSON.parse(JSON.stringify([{ id: 'state', type }, { id: 'answer', type: 'INTEGER' }]));
+      schemerService.setCodingScheme({ variableCodings: [] });
+      schemerService.setVarList(variables);
+      component.updateVariableLists();
+      expect(schemerService.codingScheme?.variableCodings.map(coding => coding.id)).toEqual(['answer']);
+      expect(schemerService.varList).toBe(variables);
+      expect(schemerService.varList[0].type as string).toBe(type);
+    });
+
+    it(`activates ${type} using its original spelling and preserves extension fields`, () => {
+      schemerService.setCodingScheme({
+        variableCodings: [{
+          id: 'state', alias: 'State', sourceType: 'BASE_NO_VALUE', codes: []
+        }]
+      });
+      const original = {
+        id: 'state', type, page: 'p1', visualAnchor: 'anchor', custom: { keep: true }
+      };
+      const variable: VariableInfo = JSON.parse(JSON.stringify(original));
+      schemerService.setVarList([variable]);
+      selectVariableDialog.afterClosedValue = ['State'];
+      component.activateBaseNoValueVars();
+      expect(schemerService.codingScheme?.variableCodings[0].sourceType).toBe('BASE');
+      expect(variable.type as string).toBe(type === 'NO_VALUE' ? 'STRING' : 'string');
+      expect(variable).toEqual(jasmine.objectContaining({
+        page: original.page,
+        visualAnchor: original.visualAnchor,
+        custom: original.custom,
+        multiple: true,
+        nullable: true,
+        values: [],
+        valuePositionLabels: []
+      }));
+      expect(component.problems.filter(problem => problem.breaking)).toEqual([]);
+    });
+  });
+
+  it('uses the surrounding list spelling when activation needs a synthetic variable', () => {
+    schemerService.setCodingScheme({
+      variableCodings: [{ id: 'state', sourceType: 'BASE_NO_VALUE', codes: [] }]
+    });
+    schemerService.setVarList(JSON.parse(JSON.stringify([{ id: 'answer', type: 'STRING' }])));
+    selectVariableDialog.afterClosedValue = ['state'];
+    component.activateBaseNoValueVars();
+    expect(schemerService.varList.find(variable => variable.id === 'state')?.type as string).toBe('STRING');
+  });
+
   it('activateBaseNoValueVars should switch selected BASE_NO_VALUE vars to BASE and emit', () => {
     const emitSpy = spyOn(component.codingSchemeChanged, 'emit');
     const updateSpy = spyOn(component, 'updateVariableLists').and.callThrough();

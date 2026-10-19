@@ -91,6 +91,22 @@ describe('schemer-code-ops', () => {
   });
 
   describe('getPasteSingleCodeWarningKeys', () => {
+    ['integer', 'INTEGER', 'number', 'NUMBER', 'boolean', 'BOOLEAN', 'string', 'STRING', 'CUSTOM'].forEach(type => {
+      it(`checks numeric and boolean paste compatibility for ${type}`, () => {
+        const variable = JSON.parse(JSON.stringify({ id: 'target', type }));
+        const numeric: CodeData = {
+          id: 1, ruleSets: [{ rules: [{ method: 'NUMERIC_MATCH', parameters: ['2'] }] }]
+        };
+        const boolean: CodeData = { id: 2, ruleSets: [{ rules: [{ method: 'IS_TRUE' }] }] };
+        expect(getPasteSingleCodeWarningKeys(numeric, undefined, variable)).toEqual(
+          ['integer', 'INTEGER', 'number', 'NUMBER'].includes(type) ? [] : ['code.paste-warning.numeric-rule']
+        );
+        expect(getPasteSingleCodeWarningKeys(boolean, undefined, variable)).toEqual(
+          ['boolean', 'BOOLEAN'].includes(type) ? [] : ['code.paste-warning.boolean-rule']
+        );
+      });
+    });
+
     it('should warn when copied rules reference incompatible target structures', () => {
       const copied: CodeData = {
         id: 1,

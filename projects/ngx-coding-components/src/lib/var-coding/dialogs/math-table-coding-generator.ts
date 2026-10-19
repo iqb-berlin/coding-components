@@ -3,6 +3,7 @@ import {
   CodingRule
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { normalizeVariableInfoFormat, normalizeVariableInfoType } from '@iqb/responses';
 
 export type MathTableGenerationMode = 'result-auto' | 'manual';
 
@@ -17,7 +18,8 @@ export const MATH_TABLE_MANUAL_CODE_INSTRUCTIONS: Partial<Record<CodeType, strin
 };
 
 export const isMathTableVariableInfo = (varInfo: VariableInfo | null | undefined): boolean => (
-  varInfo?.type === 'json' && varInfo.format === 'math-table'
+  !!varInfo && normalizeVariableInfoType(varInfo.type) === 'JSON' &&
+  normalizeVariableInfoFormat(varInfo.format) === 'MATH_TABLE'
 );
 
 export const normaliseMathTableExpectedResult = (value: string): string => (

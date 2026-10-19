@@ -6,6 +6,7 @@ import {
   RuleSet
 } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { normalizeVariableInfoType } from '@iqb/responses';
 
 export type UserRoleType = 'RO' | 'RW_MINIMAL' | 'RW_MAXIMAL';
 
@@ -91,13 +92,13 @@ export const getPasteSingleCodeWarningKeys = (
   if (
     hasNumericRule &&
     targetVarInfo &&
-    !['integer', 'number'].includes(targetVarInfo.type)
+    !['INTEGER', 'NUMBER'].includes(normalizeVariableInfoType(targetVarInfo.type))
   ) {
     warningKeys.add('code.paste-warning.numeric-rule');
   }
 
   const hasBooleanRule = rules.some(rule => booleanRuleMethods.includes(rule.method));
-  if (hasBooleanRule && targetVarInfo && targetVarInfo.type !== 'boolean') {
+  if (hasBooleanRule && targetVarInfo && normalizeVariableInfoType(targetVarInfo.type) !== 'BOOLEAN') {
     warningKeys.add('code.paste-warning.boolean-rule');
   }
 

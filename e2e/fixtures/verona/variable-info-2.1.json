@@ -1,0 +1,104 @@
+{
+  "$id": "verona-variable-info@2.1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Infos of a base variable to support link to item and coding",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[0-9A-Za-z_-]+$",
+      "description": "Identifier for the variable"
+    },
+    "alias": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[0-9A-Za-z_-]+$",
+      "description": "Alternative identifier for the variable"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "STRING",
+        "INTEGER",
+        "NUMBER",
+        "BOOLEAN",
+        "ATTACHMENT",
+        "JSON",
+        "NO_VALUE",
+        "CODED"
+      ],
+      "description": "Data type of the variable value"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "TEXT_SELECTION",
+        "IMAGE",
+        "CAPTURE_IMAGE",
+        "AUDIO",
+        "GGB_FILE",
+        "NON_NEGATIVE",
+        "LATEX",
+        "MATH_ML",
+        "MATH_TABLE",
+        "MATH_TEXT_MIX",
+        "GGB_VARIABLE",
+        "CHEM_ELEMENT_SYMBOLS",
+        "CHEM_MOLECULE",
+        ""
+      ],
+      "description": "Data type format"
+    },
+    "multiple": {
+      "type": "boolean",
+      "default": false,
+      "description": "Can the value be of type Array?"
+    },
+    "nullable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Can the value be null?"
+    },
+    "values": {
+      "type": "array",
+      "description": "List of possible values",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "valuePositionLabels": {
+      "type": "array",
+      "description": "Labels of the positions if the value is of type array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "valuesComplete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Are the given values all possible values?"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type"
+  ]
+}
