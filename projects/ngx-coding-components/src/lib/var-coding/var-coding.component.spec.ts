@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 
 import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { CodingFactory } from '@iqb/responses/coding-factory';
@@ -112,6 +112,58 @@ describe('VarCodingComponent', () => {
 
     expect(component.varCoding?.manualInstruction).toBe('');
     expect(emitSpy).toHaveBeenCalledWith(component.varCoding);
+  });
+
+  it('reports input changes immediately instead of dropping them on teardown', () => {
+    component.varCoding = CodingFactory.createCodingVariable('a');
+    const emit = spyOn(component.varCodingChanged, 'emit');
+    component.lastChangeFrom$.next('label');
+    expect(emit).toHaveBeenCalledOnceWith(component.varCoding);
+  });
+
+  it('closes a pending instruction dialog when the selected coding changes', () => {
+    const result = new Subject<string>();
+    const close = jasmine.createSpy('close');
+    dialogOpenSpy.and.returnValue({ afterClosed: () => result, close });
+    const first = CodingFactory.createCodingVariable('first');
+    const second = CodingFactory.createCodingVariable('second');
+    component.varCoding = first;
+    component.editTextDialog_manualInstruction();
+    component.varCoding = second;
+    result.next('<p>Only for first</p>');
+    expect(close).toHaveBeenCalled();
+    expect(first.manualInstruction).toBe('');
+    expect(second.manualInstruction).toBe('');
+  });
+
+  it('ignores a deactivation confirmation after the host replaces the scheme', () => {
+    const result = new Subject<boolean>();
+    dialogOpenSpy.and.returnValue({ afterClosed: () => result, close: jasmine.createSpy('close') });
+    const first = CodingFactory.createCodingVariable('first');
+    Object.assign(schemerService, {
+      codingScheme: { variableCodings: [first, CodingFactory.createCodingVariable('other')] }
+    });
+    component.varCoding = first;
+    component.deactivateBaseVar();
+    const second = CodingFactory.createCodingVariable('second');
+    const replacement = { variableCodings: [second, CodingFactory.createCodingVariable('another')] };
+    Object.assign(schemerService, { codingScheme: replacement });
+    component.varCoding = second;
+    const emit = spyOn(component.varCodingChanged, 'emit');
+    result.next(true);
+    expect(replacement.variableCodings).toContain(second);
+    expect(second.sourceType).toBe('BASE');
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('ignores a pending instruction result after write access is revoked', () => {
+    const result = new Subject<string>();
+    dialogOpenSpy.and.returnValue({ afterClosed: () => result, close: jasmine.createSpy('close') });
+    component.varCoding = CodingFactory.createCodingVariable('first');
+    component.editTextDialog_manualInstruction();
+    Object.assign(schemerService, { userRole: 'RO' });
+    result.next('<p>Late write</p>');
+    expect(component.varCoding.manualInstruction).toBe('');
   });
 
   it('varCoding setter should add default manualInstruction to SOLVER RESIDUAL_AUTO codes', () => {

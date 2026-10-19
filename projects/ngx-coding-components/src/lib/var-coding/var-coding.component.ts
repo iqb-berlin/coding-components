@@ -13,7 +13,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { CodingSchemeProblem, CodingToTextMode } from '@iqb/responses';
-import { BehaviorSubject, debounceTime, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import {
   MatCard,
   MatCardSubtitle,
@@ -42,7 +42,8 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData
 } from '../dialogs/confirm-dialog.component';
-import { SchemerService } from '../services/schemer.service';
+import { SchemerService, UserRoleType } from '../services/schemer.service';
+import { DialogContext } from '../services/dialog-context';
 import { sourceProcessingLabelKey } from '../services/source-processing-label';
 import { ensureResidualAutoManualInstruction } from '../services/schemer-code-ops';
 import {
@@ -102,10 +103,16 @@ import { validateVariableCodingChange } from '../services/schemer-identifier-val
 })
 export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   @Output() varCodingChanged = new EventEmitter<VariableCodingData | null>();
+  @Input() userRole: UserRoleType = 'RW_MAXIMAL';
   _varCoding: VariableCodingData | null = null;
+  private readonly dialogContext = new DialogContext(() => [
+    this.schemerService.codingScheme, this.schemerService.userRole, this.varCoding
+  ]);
+
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varCoding(value: VariableCodingData | null) {
+    if (value !== this._varCoding) this.dialogContext.invalidate();
     this._varCoding = value;
     this.applySolverResidualAutoInstructionDefault();
     this.updateHasResidualAutoCode();
@@ -146,7 +153,6 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit() {
     this.lastChangeFromSubscription = this.lastChangeFrom$
-      .pipe(debounceTime(500))
       .subscribe(source => {
         this.changeDetector.markForCheck();
         if (source !== 'init') {
@@ -157,8 +163,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
       });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ngOnChanges(changes: SimpleChanges) {
+    if (changes['userRole']) this.dialogContext.invalidate();
     this.updateVarInfo();
   }
 
@@ -208,7 +214,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
         },
         autoFocus: false
       });
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (typeof dialogResult === 'string' && this.varCoding) {
           this.varCoding.manualInstruction = dialogResult;
@@ -237,7 +243,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           mode: this.schemerService.codingToTextMode
         }
       });
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (typeof dialogResult === 'string') {
           this.schemerService.setCodingToTextMode(
@@ -267,7 +273,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             showCancel: true
           }
         });
-        dialogRef.afterClosed().subscribe(result => {
+        this.dialogContext.afterClosed(dialogRef).subscribe(result => {
           this.changeDetector.markForCheck();
           if (result === true && this.schemerService.codingScheme) {
             if (this.varCoding && this.varCoding.sourceType === 'BASE') {
@@ -320,7 +326,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
             data: this.varInfo
           }
         );
-        dialogRef.afterClosed().subscribe(dialogResult => {
+        this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
           this.changeDetector.markForCheck();
           if (
             typeof dialogResult !== 'undefined' &&
@@ -404,7 +410,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           showCancel: true
         }
       });
-      dialogRef.afterClosed().subscribe(result => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(result => {
         this.changeDetector.markForCheck();
         if (result === true) this.performPasteSingleCode();
       });
@@ -507,7 +513,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
           }
         }
       );
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (
           dialogResult && typeof dialogResult === 'object' &&
@@ -565,6 +571,7 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnDestroy(): void {
+    this.dialogContext.destroy();
     if (this.lastChangeFromSubscription !== null) this.lastChangeFromSubscription.unsubscribe();
   }
 }

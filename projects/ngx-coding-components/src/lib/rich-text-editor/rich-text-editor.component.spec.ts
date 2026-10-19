@@ -1,4 +1,5 @@
 import { Editor } from '@tiptap/core';
+import { SimpleChange } from '@angular/core';
 import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { RichTextEditorComponent } from './rich-text-editor.component';
@@ -122,6 +123,42 @@ describe('RichTextEditorComponent', () => {
     const { component, commands } = createComponentWithFakeEditor();
     component.ngAfterViewInit();
     expect(commands.focus).toHaveBeenCalled();
+  });
+
+  it('ignores an image that finishes loading after its editor is destroyed', async () => {
+    const { component, commands } = createComponentWithFakeEditor();
+    let resolveImage!: (value: string) => void;
+    spyOn(FileService, 'loadImage').and.returnValue(new Promise(resolve => { resolveImage = resolve; }));
+    const pending = component.insertBlockImage('none');
+    component.ngOnDestroy();
+    resolveImage('data:image/png;base64,late');
+    await pending;
+    expect(commands.insertBlockImage).not.toHaveBeenCalled();
+  });
+
+  it('keeps a pending image when ordinary typing echoes through the two-way binding', async () => {
+    const { component, commands } = createComponentWithFakeEditor();
+    let resolveImage!: (value: string) => void;
+    spyOn(FileService, 'loadImage').and.returnValue(new Promise(resolve => { resolveImage = resolve; }));
+    const pending = component.insertBlockImage('none');
+    component.onContentChanged('Typed while loading');
+    component.content = 'Typed while loading';
+    component.ngOnChanges({ content: new SimpleChange('', component.content, false) });
+    resolveImage('data:image/png;base64,current');
+    await pending;
+    expect(commands.insertBlockImage).toHaveBeenCalledWith({ src: 'data:image/png;base64,current' });
+  });
+
+  it('ignores an image when the editor receives replacement content while loading', async () => {
+    const { component, commands } = createComponentWithFakeEditor();
+    let resolveImage!: (value: string) => void;
+    spyOn(FileService, 'loadImage').and.returnValue(new Promise(resolve => { resolveImage = resolve; }));
+    const pending = component.insertBlockImage('none');
+    component.content = 'Replacement document';
+    component.ngOnChanges({ content: new SimpleChange('', component.content, false) });
+    resolveImage('data:image/png;base64,old');
+    await pending;
+    expect(commands.insertBlockImage).not.toHaveBeenCalled();
   });
 
   it('toggleBold/toggleItalic/toggleUnderline should use chain and run', () => {

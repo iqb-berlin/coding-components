@@ -9,7 +9,6 @@ import {
 } from '@angular/core';
 import {
   BehaviorSubject,
-  debounceTime,
   firstValueFrom,
   Subscription
 } from 'rxjs';
@@ -31,6 +30,7 @@ import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interf
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { CodingSchemeDialogComponent } from '../dialogs/coding-scheme-dialog.component';
 import { SchemerService, UserRoleType } from '../services/schemer.service';
+import { DialogContext } from '../services/dialog-context';
 import { FileService } from '../services/file.service';
 import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
@@ -90,6 +90,10 @@ import {
   ]
 })
 export class SchemerComponent implements OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [
+    this.schemerService.codingScheme, this.schemerService.userRole, this.selectedCoding$.value
+  ]);
+
   @ViewChild(VarCodingComponent)
   set varCodingElement(value: VarCodingComponent | undefined) {
     this.varCodingChangedSubscription?.unsubscribe();
@@ -98,7 +102,6 @@ export class SchemerComponent implements OnDestroy {
     if (!value) return;
 
     this.varCodingChangedSubscription = value.varCodingChanged
-      .pipe(debounceTime(300))
       .subscribe(() => {
         this.changeDetector.markForCheck();
         this.updateVariableLists();
@@ -113,6 +116,7 @@ export class SchemerComponent implements OnDestroy {
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: CodingScheme | null) {
+    if (value !== this.codingScheme) this.dialogContext.invalidate();
     this.schemerService.setCodingScheme(value);
     this.updateVariableLists();
   }
@@ -123,12 +127,14 @@ export class SchemerComponent implements OnDestroy {
 
   @Input()
   set userRole(value: UserRoleType) {
+    if (value !== this.schemerService.userRole) this.dialogContext.invalidate();
     this.schemerService.setUserRole(value);
   }
 
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varList(value: any) {
+    this.dialogContext.invalidate();
     this.schemerService.setVarList([]);
     if (value) {
       this.schemerService.setVarList(parseVarListInput(value));
@@ -323,6 +329,7 @@ export class SchemerComponent implements OnDestroy {
   }
 
   selectVarScheme(coding: VariableCodingData | null = null) {
+    if (coding !== this.selectedCoding$.value) this.dialogContext.invalidate();
     this.selectedCoding$.next(coding);
   }
 
@@ -357,7 +364,9 @@ export class SchemerComponent implements OnDestroy {
       }
     );
 
-    const selectedAliases = await firstValueFrom(dialogRef.afterClosed());
+    const selectedAliases = await firstValueFrom(
+      this.dialogContext.afterClosed(dialogRef), { defaultValue: undefined }
+    );
     const selectedAlias =
       Array.isArray(selectedAliases) && selectedAliases.length > 0 ?
         selectedAliases[0] :
@@ -396,8 +405,10 @@ export class SchemerComponent implements OnDestroy {
       return;
     }
 
+    const isCurrent = this.dialogContext.capture();
     try {
       const parsed = JSON.parse(await FileService.loadFile(['.json']));
+      if (!isCurrent()) return;
       if (
         !parsed ||
         parsed.type !== 'iqb-variable-export' ||
@@ -440,8 +451,8 @@ export class SchemerComponent implements OnDestroy {
             showCancel: true
           }
         });
-        const confirmed = await firstValueFrom(confirmRef.afterClosed());
-        if (!confirmed) return;
+        const confirmed = await firstValueFrom(this.dialogContext.afterClosed(confirmRef), { defaultValue: undefined });
+        if (!confirmed || !isCurrent()) return;
         this.schemerService.codingScheme.variableCodings.splice(
           existingIndex,
           1,
@@ -454,6 +465,7 @@ export class SchemerComponent implements OnDestroy {
       this.updateVariableLists();
       this.codingSchemeChanged.emit(this.schemerService.codingScheme);
     } catch (e) {
+      if (!isCurrent()) return;
       this.messageDialog.open(MessageDialogComponent, {
         width: '450px',
         data: <MessageDialogData>{
@@ -494,7 +506,7 @@ export class SchemerComponent implements OnDestroy {
           }
         }
       );
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (dialogResult && typeof dialogResult === 'object' && this.schemerService.codingScheme) {
           const timestamp = new Date().getTime();
@@ -563,7 +575,7 @@ export class SchemerComponent implements OnDestroy {
           data: dialogData
         }
       );
-      dialogRef.afterClosed().subscribe((variables: string[]) => {
+      this.dialogContext.afterClosed(dialogRef).subscribe((variables: string[]) => {
         this.changeDetector.markForCheck();
         let changed = false;
         if (variables && variables.length > 0) {
@@ -605,7 +617,7 @@ export class SchemerComponent implements OnDestroy {
         width: '400px',
         data: dialogData
       });
-      dialogRef.afterClosed().subscribe(result => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(result => {
         this.changeDetector.markForCheck();
         if (typeof result === 'string') {
           const variableCodings =
@@ -668,7 +680,7 @@ export class SchemerComponent implements OnDestroy {
           data: dialogData
         }
       );
-      dialogRef.afterClosed().subscribe((variables: string[]) => {
+      this.dialogContext.afterClosed(dialogRef).subscribe((variables: string[]) => {
         this.changeDetector.markForCheck();
         let changed = false;
         if (variables && variables.length > 0) {
@@ -746,7 +758,7 @@ export class SchemerComponent implements OnDestroy {
           data: dialogData
         }
       );
-      dialogRef.afterClosed().subscribe((variables: string[]) => {
+      this.dialogContext.afterClosed(dialogRef).subscribe((variables: string[]) => {
         this.changeDetector.markForCheck();
         let changed = false;
         if (variables && variables.length > 0) {
@@ -800,7 +812,7 @@ export class SchemerComponent implements OnDestroy {
           data: this.problems
         }
       );
-      dialogRef.afterClosed().subscribe();
+      this.dialogContext.afterClosed(dialogRef).subscribe();
     }
   }
 
@@ -829,6 +841,7 @@ export class SchemerComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.dialogContext.destroy();
     if (this.varCodingChangedSubscription !== null) this.varCodingChangedSubscription.unsubscribe();
     this.schemerFacade.resetIdentifierConflictResolutionState();
   }

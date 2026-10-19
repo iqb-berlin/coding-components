@@ -1,4 +1,5 @@
 import {
+  OnChanges, OnDestroy,
   ChangeDetectorRef,
   Component, EventEmitter, Input, Output
 } from '@angular/core';
@@ -14,6 +15,7 @@ import {
   MatCardContent
 } from '@angular/material/card';
 import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { DialogContext } from '../services/dialog-context';
 import { RichTextEditDialogComponent } from '../rich-text-editor/rich-text-edit-dialog.component';
 import { UserRoleType } from '../services/schemer.service';
 import { renderManualInstructionMath } from '../rich-text-editor/manual-instruction-math';
@@ -106,7 +108,19 @@ import { renderManualInstructionMath } from '../rich-text-editor/manual-instruct
     TranslateModule
   ]
 })
-export class CodeInstructionComponent {
+export class CodeInstructionComponent implements OnChanges, OnDestroy {
+  private readonly dialogContext = new DialogContext(() => [
+    this.code, this.userRole
+  ]);
+
+  ngOnChanges(): void {
+    this.dialogContext.invalidate();
+  }
+
+  ngOnDestroy(): void {
+    this.dialogContext.destroy();
+  }
+
   @Output() codeDataChanged = new EventEmitter<CodeData>();
   @Input() code: CodeData | undefined;
   @Input() userRole: UserRoleType = 'RO';
@@ -135,7 +149,7 @@ export class CodeInstructionComponent {
         },
         autoFocus: false
       });
-      dialogRef.afterClosed().subscribe(dialogResult => {
+      this.dialogContext.afterClosed(dialogRef).subscribe(dialogResult => {
         this.changeDetector.markForCheck();
         if (typeof dialogResult === 'string' && this.code) {
           this.code.manualInstruction = dialogResult;

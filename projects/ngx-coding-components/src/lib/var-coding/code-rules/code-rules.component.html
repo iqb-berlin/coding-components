@@ -43,6 +43,7 @@
       </div>
       <code-rule-list
         [fragmentMode]="fragmentMode || false"
+        [userRole]="schemerService.userRole"
         [ruleSet]="ruleSet"
         class="fx-flex-fill code-rule-list"
         [arrayMode]="(varInfo && varInfo.multiple) || false"
