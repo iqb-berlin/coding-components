@@ -4,7 +4,7 @@ import type {
   BookVariable, CodeBookContentSetting, CodebookUnitDto, CodeInfo, Missing, UnitPropertiesForCodebook
 } from '@iqb/ngx-coding-components/codebook-models';
 import { CodebookGenerationError } from './codebook-generation-error';
-import { hasCodebookManualInstruction } from './manual-instruction';
+import { escapeCodebookHtml, hasCodebookManualInstruction } from './manual-instruction';
 
 export class CodebookGenerator {
   static getCodebookData(units: UnitPropertiesForCodebook[], options: CodeBookContentSetting, missings: Missing[]): CodebookUnitDto[] {
@@ -14,7 +14,8 @@ export class CodebookGenerator {
         try {
           const data = JSON.parse(unit.scheme);
           if (!Array.isArray(data.variableCodings) || data.variableCodings.some((variable: VariableCodingData) => !variable || typeof variable.id !== 'string' ||
-            (variable.codes !== undefined && (!Array.isArray(variable.codes) || variable.codes.some(code => !code || typeof code !== 'object'))))) {
+            (variable.codes !== undefined && (!Array.isArray(variable.codes) ||
+              variable.codes.some(code => !code || typeof code !== 'object' || Array.isArray(code)))))) {
             throw new Error('Ungültige variableCodings');
           }
           variables = new CodingScheme(unit.scheme).variableCodings;
@@ -80,8 +81,9 @@ export class CodebookGenerator {
     try {
       const text = ToTextFactory.codeAsText(code, 'SIMPLE');
       const rules = options.hasOnlyManualCoding && !options.hasClosedVars ? '' :
-        (text.ruleSetDescriptions || []).filter(rule => rule !== 'Keine Regeln definiert.' || !code.manualInstruction)
-          .map(rule => `<p>${rule}</p>`).join('');
+        (text.ruleSetDescriptions || [])
+          .filter(rule => rule !== 'Keine Regeln definiert.' || !code.manualInstruction)
+          .map(rule => `<p>${escapeCodebookHtml(rule)}</p>`).join('');
       const result: CodeInfo = { id: `${code.id}`, label: options.codeLabelToUpper ? text.label.toUpperCase() : text.label, description: `${rules}${code.manualInstruction || ''}` };
       if (options.showScore) result.score = `${text.score}`;
       return result;

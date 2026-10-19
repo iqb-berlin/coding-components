@@ -44,6 +44,7 @@ import { imageSize } from 'image-size';
 import katex from 'katex';
 import { mml2omml } from 'mathml2omml';
 import { WebColors } from './web-colors';
+import { hasCodebookManualInstruction, normalizeCodebookMathTokens } from './manual-instruction';
 // Type-only, like every deep import into a package: were it ever emitted as a runtime require,
 // an `exports` map in that package would kill the boot -- see the swagger import in
 // setting.controller.ts.
@@ -58,7 +59,8 @@ type InstructionParagraph = {
 };
 
 export class CodebookDocxGenerator {
-  private static ommlCache: Record<string, string> = {};
+  private static readonly maxCachedFormulas = 256;
+  private static readonly ommlCache = new Map<string, string>();
 
   static async generateDocx(
     codingBookUnits: CodebookUnitDto[],
@@ -438,7 +440,7 @@ export class CodebookDocxGenerator {
       if ((tagName === 'span' && element.attribs?.['class']?.split(/\s+/).includes('iqb-math-formula')) ||
           tagName === 'aspect-nodeview-math-formula') {
         const storedLatex = element.attribs?.['data-latex'] || element.attribs?.['formula'] || '';
-        const latex = CodebookDocxGenerator.decodeLatex(storedLatex).trim();
+        const latex = storedLatex.trim();
         if (latex) {
           const mathStyle: IRunOptions = {
             ...formatting,
@@ -482,6 +484,11 @@ export class CodebookDocxGenerator {
   private static getImageSize(imageBuffer: Buffer): { width: number; height: number } {
     const size = imageSize(imageBuffer as unknown as Uint8Array);
     if (!size.width || !size.height) throw new Error('Ungültige Bildgröße');
+    // This docx version embeds raster images. Preserve unsupported instructions
+    // with the existing visible error instead of creating a broken Word image.
+    if (!['png', 'jpg', 'gif', 'bmp', 'tiff'].includes(size.type || '')) {
+      throw new Error('Nicht unterstütztes Bildformat');
+    }
     return { width: size.width, height: size.height };
   }
 
@@ -530,11 +537,12 @@ export class CodebookDocxGenerator {
     const imageBuffer = Buffer.from(source.substring(source.indexOf(',') + 1), 'base64');
     const actual = CodebookDocxGenerator.getImageSize(imageBuffer);
     const styles = CodebookDocxGenerator.inlineStyles(elem);
-    let height = actual.height;
-    if (styles['height'] === '1em') height = fontPixels;
-    else if (/^\d+(\.\d+)?px$/.test(styles['height'] || '')) height = parseFloat(styles['height']);
-    const width = /^\d+(\.\d+)?px$/.test(styles['width'] || '') ?
-      parseFloat(styles['width']) : (actual.width * height) / actual.height;
+    const specifiedWidth = /^\d+(\.\d+)?px$/.test(styles['width'] || '') ? parseFloat(styles['width']) : undefined;
+    let specifiedHeight: number | undefined;
+    if (styles['height'] === '1em') specifiedHeight = fontPixels;
+    else if (/^\d+(\.\d+)?px$/.test(styles['height'] || '')) specifiedHeight = parseFloat(styles['height']);
+    const width = specifiedWidth ?? (actual.width * (specifiedHeight ?? actual.height)) / actual.height;
+    const height = specifiedHeight ?? (actual.height * width) / actual.width;
     const side = styles['float'];
     return new ImageRun({
       data: imageBuffer,
@@ -600,30 +608,28 @@ export class CodebookDocxGenerator {
     return CodebookDocxGenerator.stripFromLeadingEmptyParagraph(html);
   }
 
-  private static decodeLatex(latex: string): string {
-    if (!latex) return '';
-    try {
-      return decodeURIComponent(latex);
-    } catch {
-      return latex;
-    }
-  }
-
   private static latexToOmml(latex: string, style?: IRunOptions): ImportedXmlComponent | null {
     const trimmed = latex.trim();
     if (!trimmed) return null;
     try {
-      if (!CodebookDocxGenerator.ommlCache[trimmed]) {
+      let cached = CodebookDocxGenerator.ommlCache.get(trimmed);
+      if (cached === undefined) {
         const mathml = katex.renderToString(trimmed, {
           output: 'mathml',
           throwOnError: false,
           strict: 'ignore'
         });
-        CodebookDocxGenerator.ommlCache[trimmed] = CodebookDocxGenerator.normalizeStretchyBars(
+        cached = CodebookDocxGenerator.normalizeStretchyBars(
           mathml, mml2omml(mathml)
         );
+        // Bound process-wide storage; a later export can regenerate an evicted formula.
+        if (CodebookDocxGenerator.ommlCache.size >= CodebookDocxGenerator.maxCachedFormulas) {
+          const oldest = CodebookDocxGenerator.ommlCache.keys().next().value;
+          if (oldest !== undefined) CodebookDocxGenerator.ommlCache.delete(oldest);
+        }
+        CodebookDocxGenerator.ommlCache.set(trimmed, cached);
       }
-      const omml = CodebookDocxGenerator.styleMathRuns(CodebookDocxGenerator.ommlCache[trimmed], style);
+      const omml = CodebookDocxGenerator.styleMathRuns(cached, style);
       return CodebookDocxGenerator.unwrapImportedXmlRoot(
         ImportedXmlComponent.fromXmlString(
           CodebookDocxGenerator.sanitizeOmmlXml(omml)
@@ -672,6 +678,9 @@ export class CodebookDocxGenerator {
     if (style.italics) properties['i'] = {};
     if (style.underline) properties['u'] = { 'w:val': 'single' };
     if (style.strike) properties['strike'] = {};
+    if (style.superScript || style.subScript) {
+      properties['vertAlign'] = { 'w:val': style.superScript ? 'superscript' : 'subscript' };
+    }
     if (style.size !== 20) {
       properties['sz'] = { 'w:val': String(style.size) };
       properties['szCs'] = { 'w:val': String(style.size) };
@@ -694,7 +703,7 @@ export class CodebookDocxGenerator {
         runProperties.append(`<w:${name}/>`);
         runProperties.children(`w\\:${name}`).last().attr(attributes);
       });
-      const order = ['b', 'bCs', 'i', 'iCs', 'strike', 'color', 'sz', 'szCs', 'u', 'shd'];
+      const order = ['b', 'bCs', 'i', 'iCs', 'strike', 'color', 'sz', 'szCs', 'u', 'shd', 'vertAlign'];
       const children = runProperties.children().toArray().sort((a, b) => (
         order.indexOf(a.name.substring(2)) - order.indexOf(b.name.substring(2))
       ));
@@ -808,17 +817,6 @@ export class CodebookDocxGenerator {
       .replace(/>/g, '&gt;');
   }
 
-  private static normalizeMathTokens(html: string): string {
-    return html.replace(
-      /\[\[iqb-math:([\s\S]*?)]]/g,
-      (_, encodedFormula: string) => {
-        const latex = this.decodeLatex(encodedFormula);
-        const escapedLatex = latex.replace(/"/g, '&quot;');
-        return `<span class="iqb-math-formula" data-latex="${escapedLatex}"></span>`;
-      }
-    );
-  }
-
   /** Put loose text and inline marks into paragraphs without duplicating existing blocks. */
   private static wrapInlineParagraphs(cheerioAPI: cheerio.CheerioAPI, parent: AnyNode): void {
     let inlineNodes: AnyNode[] = [];
@@ -849,13 +847,14 @@ export class CodebookDocxGenerator {
     contentSetting: CodeBookContentSetting
   ) {
     if (!html.trim()) return [];
-    const normalizedHtml = CodebookDocxGenerator.normalizeMathTokens(html);
+    const normalizedHtml = normalizeCodebookMathTokens(html);
     const blockHtml = /<(p|h[1-4]|img|hr|ul|ol)\b/i.test(normalizedHtml) ? normalizedHtml : `<p>${normalizedHtml}</p>`;
     const cheerioAPI = cheerio.load(
       CodebookDocxGenerator.prepareHtml(blockHtml),
       null,
       false
     );
+    if (!hasCodebookManualInstruction(normalizedHtml) && !cheerioAPI('hr').length) return [];
     CodebookDocxGenerator.wrapInlineParagraphs(cheerioAPI, cheerioAPI.root()[0]);
     const elements: Paragraph[] = [];
     type Context = {
