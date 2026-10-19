@@ -48,7 +48,7 @@ describe('orphan coding resolution', () => {
     const plan = getOrphanCodingResolutionPlan([variable('new-radio', 'response')], [old, derived()]);
     expect(plan.problems).toEqual([]);
     expect(plan.conflicts.length).toBe(1);
-    expect(plan.conflicts[0].previous).toBe(old);
+    expect(plan.conflicts[0].candidates).toEqual([old]);
     expect(plan.conflicts[0].dependents.map(coding => coding.id)).toEqual(['derived']);
   });
 
@@ -396,8 +396,31 @@ describe('orphan coding resolution', () => {
   it('does not select arbitrarily between multiple previous codings', () => {
     const codings = [previous(), { ...previous(), id: 'even-older' }];
     const plan = getOrphanCodingResolutionPlan([variable()], codings);
-    expect(plan.problems.join(' ')).toContain('mehrere alte Kodierungen');
+    expect(plan.problems).toEqual([]);
+    expect(plan.conflicts[0].candidates).toEqual(codings);
     expect(resolveOrphanCodings([variable()], codings, ['TRANSFER'])).toBeNull();
+  });
+
+  it('transfers only the manually retained orphan and preserves dependents of discarded candidates for repair', () => {
+    const older = { ...previous(), id: 'older', manualInstruction: 'Older coding' };
+    const discardedDependent = { ...derived('older'), id: 'discarded-dependent', alias: 'DiscardedDependent' };
+    const codings = [previous(), older, derived(), discardedDependent];
+    const before = JSON.stringify(codings);
+    const result = resolveOrphanCodings([variable()], codings, ['TRANSFER'], ['older'])!;
+    expect(result.find(coding => coding.id === 'new-radio')?.manualInstruction).toBe(previous().manualInstruction);
+    expect(result.find(coding => coding.id === 'derived')?.deriveSources).toEqual(['new-radio']);
+    expect(result.find(coding => coding.id === 'discarded-dependent')).toEqual(discardedDependent);
+    expect(result.some(coding => ['old-radio', 'older'].includes(coding.id))).toBeFalse();
+    expect(JSON.stringify(codings)).toBe(before);
+  });
+
+  it('rejects missing, duplicate, unrelated and excessive discard choices', () => {
+    const codings = [previous(), { ...previous(), id: 'older' }, derived()];
+    [[], ['unknown'], ['derived'], ['older', 'older'], ['old-radio', 'older']].forEach(discarded => {
+      expect(resolveOrphanCodings([variable()], codings, ['TRANSFER'], discarded)).toBeNull();
+    });
+    expect(resolveOrphanCodings([variable()], codings, ['START_EMPTY'], ['old-radio'])!
+      .find(coding => coding.id === 'new-radio')?.codes).toEqual([]);
   });
 
   it('leaves genuine active duplicates, duplicate technical IDs and NO_VALUE conflicts diagnostic-only', () => {

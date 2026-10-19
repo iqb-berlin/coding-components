@@ -50,7 +50,7 @@ describe('SchemerFacadeService', () => {
     const { afterClosed, changes } = prepareRecovery();
     expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(ResolveOrphanCodingsDialogComponent);
     expect(schemerService.codingScheme?.variableCodings[0].id).toBe('previous');
-    afterClosed.next(['TRANSFER']);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
     afterClosed.complete();
     expect(schemerService.codingScheme?.variableCodings.map(coding => coding.id)).toEqual(['derived', 'current']);
     expect(schemerService.codingScheme?.variableCodings[0].deriveSources).toEqual(['current']);
@@ -67,7 +67,7 @@ describe('SchemerFacadeService', () => {
 
   it('preserves derived codings and their old source when starting empty', () => {
     const { afterClosed, changes } = prepareRecovery();
-    afterClosed.next(['START_EMPTY']);
+    afterClosed.next({ decisions: ['START_EMPTY'], discardedIds: [] });
     expect(schemerService.codingScheme?.variableCodings[0].deriveSources).toEqual(['previous']);
     expect(schemerService.codingScheme?.variableCodings.find(coding => coding.id === 'current')?.codes).toEqual([]);
     expect(changes).toHaveBeenCalledOnceWith(true);
@@ -79,7 +79,7 @@ describe('SchemerFacadeService', () => {
     expect(data.canEdit()).toBeTrue();
     schemerService.setUserRole('RO');
     expect(data.canEdit()).toBeFalse();
-    afterClosed.next(['TRANSFER']);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
     expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
     expect(changes).not.toHaveBeenCalled();
   });
@@ -88,7 +88,7 @@ describe('SchemerFacadeService', () => {
     const { afterClosed, changes } = prepareRecovery();
     schemerService.codingScheme!.variableCodings[0].manualInstruction = 'A later host update';
     const updated = JSON.stringify(schemerService.codingScheme);
-    afterClosed.next(['TRANSFER']);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
     expect(JSON.stringify(schemerService.codingScheme)).toBe(updated);
     expect(changes).toHaveBeenCalledOnceWith(false);
   });
@@ -96,7 +96,7 @@ describe('SchemerFacadeService', () => {
   it('rejects a choice from a replaced scheme with otherwise identical contents', () => {
     const { afterClosed, changes, before } = prepareRecovery();
     schemerService.setCodingScheme(JSON.parse(before));
-    afterClosed.next(['TRANSFER']);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
     expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
     expect(changes).toHaveBeenCalledOnceWith(false);
   });
@@ -106,12 +106,12 @@ describe('SchemerFacadeService', () => {
       service, afterClosed, changes, before
     } = prepareRecovery();
     service.resetIdentifierConflictResolutionState();
-    afterClosed.next(['TRANSFER']);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
     expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
     expect(changes).not.toHaveBeenCalled();
   });
 
-  it('diagnoses multiple old candidates instead of offering a destructive choice', () => {
+  it('offers manual cleanup for multiple old candidates and commits only the explicit choice', () => {
     const { service, afterClosed } = prepareRecovery();
     afterClosed.next(undefined);
     schemerService.codingScheme!.variableCodings.push({
@@ -120,8 +120,29 @@ describe('SchemerFacadeService', () => {
     service.resetIdentifierConflictResolutionState();
     service.tryResolveIdentifierConflicts();
     const call = (dialog.open as jasmine.Spy).calls.mostRecent();
-    expect(call.args[0]).toBe(ResolveIdentifierConflictsDialogComponent);
-    expect(call.args[1].data.recoveryProblems.join(' ')).toContain('mehrere alte Kodierungen');
+    expect(call.args[0]).toBe(ResolveOrphanCodingsDialogComponent);
+    expect(call.args[1].data.conflicts[0].candidates.map((coding: { id: string }) => coding.id))
+      .toEqual(['previous', 'even-older']);
+    const before = JSON.stringify(schemerService.codingScheme);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+  });
+
+  it('applies explicit orphan deletions and transfer together while preserving missing dependent sources', () => {
+    const { service, afterClosed, changes } = prepareRecovery();
+    afterClosed.next(undefined);
+    schemerService.codingScheme!.variableCodings.push({
+      id: 'even-older', alias: 'response', sourceType: 'BASE', codes: [{ id: 2 }]
+    });
+    service.resetIdentifierConflictResolutionState();
+    service.tryResolveIdentifierConflicts();
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: ['previous'] });
+    expect(schemerService.codingScheme!.variableCodings.map(coding => coding.id)).toEqual(['derived', 'current']);
+    expect(schemerService.codingScheme!.variableCodings.find(coding => coding.id === 'current')?.codes)
+      .toEqual([{ id: 2 }]);
+    expect(schemerService.codingScheme!.variableCodings.find(coding => coding.id === 'derived')?.deriveSources)
+      .toEqual(['previous']);
+    expect(changes).toHaveBeenCalledOnceWith(true);
   });
 
   it('tryResolveIdentifierConflicts should keep blocking while already resolving', () => {

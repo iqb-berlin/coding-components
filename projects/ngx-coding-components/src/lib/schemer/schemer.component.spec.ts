@@ -80,7 +80,7 @@ describe('SchemerComponent orphan recovery integration', () => {
     expect(dialog.open.calls.mostRecent().args[0]).toBe(ResolveOrphanCodingsDialogComponent);
     expect(service.codingScheme!.variableCodings.some(c => c.id === 'current')).toBeFalse();
     const emitted = spyOn(component.codingSchemeChanged, 'emit');
-    closed.next(['TRANSFER']);
+    closed.next({ decisions: ['TRANSFER'], discardedIds: [] });
     closed.complete();
     expect(component.hasIdentifierConflict).toBeFalse();
     expect(emitted).toHaveBeenCalledOnceWith(service.codingScheme);

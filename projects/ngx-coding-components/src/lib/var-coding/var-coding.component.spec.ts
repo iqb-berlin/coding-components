@@ -192,6 +192,21 @@ describe('VarCodingComponent', () => {
     expect(component.missingSources).toEqual([]);
   });
 
+  it('explains that a missing SOLVER source also requires checking formula references and the calculation', () => {
+    fixture.componentRef.setInput('varCoding', {
+      id: 'derived',
+      sourceType: 'SOLVER',
+      deriveSources: ['removed'],
+      codes: [],
+      // eslint-disable-next-line no-template-curly-in-string
+      sourceParameters: { processing: [], solverExpression: '${removed} + 1' }
+    });
+    fixture.detectChanges();
+    const notice = fixture.nativeElement.querySelector('.missing-source-notice').textContent;
+    expect(notice).toContain('Formelausdruck');
+    expect(notice).toContain('Testen');
+  });
+
   it('varCoding setter should add default manualInstruction to SOLVER RESIDUAL_AUTO codes', () => {
     component.varCoding = {
       id: 'v1',

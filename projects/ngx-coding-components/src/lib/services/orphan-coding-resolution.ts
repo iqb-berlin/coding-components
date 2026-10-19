@@ -10,9 +10,14 @@ import { validateVariableList } from './variable-identifier-validation';
 export type OrphanCodingDecision = 'TRANSFER' | 'START_EMPTY';
 
 export interface OrphanCodingConflict {
-  previous: VariableCodingData;
+  candidates: VariableCodingData[];
   current: VariableInfo;
   dependents: VariableCodingData[];
+}
+
+export interface OrphanCodingResolution {
+  decisions: OrphanCodingDecision[];
+  discardedIds: string[];
 }
 
 export interface OrphanCodingResolutionPlan {
@@ -49,7 +54,7 @@ const createTarget = (variable: VariableInfo): VariableCodingData => ({
   ...(variable.page === undefined ? {} : { page: variable.page })
 });
 
-/** Only offer recovery when every identifier conflict has an unambiguous repair. */
+/** Offer recovery only for orphan groups that can be resolved without overwriting current work. */
 export const getOrphanCodingResolutionPlan = (
   variables: VariableInfo[],
   codings: VariableCodingData[]
@@ -65,11 +70,6 @@ export const getOrphanCodingResolutionPlan = (
     const candidates = orphans.filter(orphan => samePublicName(orphan, current));
     if (!candidates.length) return;
     const name = publicName(current);
-    if (candidates.length !== 1) {
-      plan.problems.push(`Für „${name}“ gibt es mehrere alte Kodierungen. Eine eindeutige Auswahl ist nicht möglich.`);
-      return;
-    }
-    const previous = candidates[0];
     const targets = codings.filter(coding => coding.id === current.id);
     if (current.type === 'no-value' || targets.length > 1 ||
       (targets.length === 1 && !isFreshTarget(targets[0]))) {
@@ -77,22 +77,22 @@ export const getOrphanCodingResolutionPlan = (
         'Sie besitzt bereits eigene Einstellungen oder ist keine aktive Basisvariable.');
       return;
     }
-    if (typeof previous.id !== 'string' ||
+    if (candidates.some(previous => typeof previous.id !== 'string' ||
       variables.some(variable => variable.id.toLowerCase() === previous.id.toLowerCase()) ||
       codings.filter(coding => typeof coding.id === 'string' &&
-        coding.id.toLowerCase() === previous.id.toLowerCase()).length !== 1) {
+        coding.id.toLowerCase() === previous.id.toLowerCase()).length !== 1)) {
       plan.problems.push(`Die technische ID der alten Kodierung „${name}“ ist nicht eindeutig.`);
       return;
     }
     plan.conflicts.push({
-      previous,
+      candidates,
       current,
-      dependents: codings.filter(coding => coding.deriveSources?.includes(previous.id))
+      dependents: codings.filter(coding => candidates.some(previous => coding.deriveSources?.includes(previous.id)))
     });
   });
 
   if (plan.conflicts.length) {
-    const previousCodings = new Set(plan.conflicts.map(conflict => conflict.previous));
+    const previousCodings = new Set(plan.conflicts.flatMap(conflict => conflict.candidates));
     const remaining = codings.filter(coding => !previousCodings.has(coding));
     if (analyzeVariableIdentifiers(variables, remaining).hasProblems) {
       plan.problems.push('Weitere ungültige Variablenbezeichner müssen zuerst an ihrer Quelle korrigiert werden.');
@@ -142,20 +142,28 @@ const remapSolverExpression = (
 export const resolveOrphanCodings = (
   variables: VariableInfo[],
   codings: VariableCodingData[],
-  decisions: OrphanCodingDecision[]
+  decisions: OrphanCodingDecision[],
+  discardedIds: string[] = []
 ): VariableCodingData[] | null => {
   const plan = getOrphanCodingResolutionPlan(variables, codings);
   if (plan.problems.length || !plan.conflicts.length || decisions.length !== plan.conflicts.length ||
     decisions.some(decision => decision !== 'TRANSFER' && decision !== 'START_EMPTY')) return null;
 
+  const removedIds = new Set(plan.conflicts.flatMap(conflict => conflict.candidates.map(candidate => candidate.id)));
+  if (new Set(discardedIds).size !== discardedIds.length || discardedIds.some(id => !removedIds.has(id))) return null;
+  const selected = plan.conflicts.map(conflict => (
+    conflict.candidates.filter(candidate => !discardedIds.includes(candidate.id))
+  ));
+  if (selected.some(candidates => candidates.length !== 1)) return null;
+
   const result = structuredClone(codings);
-  const removedIds = new Set(plan.conflicts.map(conflict => conflict.previous.id));
   const replacements = new Map<string, VariableInfo>();
   plan.conflicts.forEach((conflict, index) => {
+    const previous = selected[index][0];
     const targetIndex = result.findIndex(coding => coding.id === conflict.current.id);
     const existingTarget = targetIndex < 0 ? createTarget(conflict.current) : result[targetIndex];
     const target = decisions[index] === 'TRANSFER' ? {
-      ...structuredClone(conflict.previous),
+      ...structuredClone(previous),
       id: conflict.current.id,
       alias: publicName(conflict.current),
       page: conflict.current.page ?? existingTarget.page
@@ -165,7 +173,7 @@ export const resolveOrphanCodings = (
     };
     if (targetIndex < 0) result.push(target);
     else result[targetIndex] = target;
-    if (decisions[index] === 'TRANSFER') replacements.set(conflict.previous.id, conflict.current);
+    if (decisions[index] === 'TRANSFER') replacements.set(previous.id, conflict.current);
   });
   const resolved = result.filter(coding => !removedIds.has(coding.id));
   // Build the complete host namespace before preserving SOLVER references.

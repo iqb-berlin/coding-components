@@ -7,6 +7,10 @@
       <b>Fehlende Quellen: {{ missingSources.join(', ') }}</b>
       <p>Diese Kodierung bleibt erhalten. Bitte wähle über
         „{{ 'derive-processing.prompt' | translate }}“ die passenden Quellvariablen aus.</p>
+      @if (varCoding.sourceType === 'SOLVER') {
+        <p>Prüfe dort auch die Variablenverweise im Formelausdruck. Ersetze Verweise auf gelöschte
+          Variablen durch die passenden aktuellen Variablen und prüfe die Berechnung mit „Testen“.</p>
+      }
     </div>
   }
   <div class="editor-header fx-row-start-stretch fx-gap-10">

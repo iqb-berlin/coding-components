@@ -116,7 +116,10 @@ export class SchemerComponent implements OnDestroy {
   @Input()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set codingScheme(value: CodingScheme | null) {
-    if (value !== this.codingScheme) this.dialogContext.invalidate();
+    if (value !== this.codingScheme) {
+      this.dialogContext.invalidate();
+      this.schemerFacade.resetIdentifierConflictResolutionState();
+    }
     this.schemerService.setCodingScheme(value);
     this.updateVariableLists();
   }
@@ -135,6 +138,7 @@ export class SchemerComponent implements OnDestroy {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set varList(value: any) {
     this.dialogContext.invalidate();
+    this.schemerFacade.resetIdentifierConflictResolutionState();
     this.schemerService.setVarList([]);
     if (value) {
       this.schemerService.setVarList(parseVarListInput(value));

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { Subject } from 'rxjs';
+import { DialogContext } from './dialog-context';
 import { SchemerService } from './schemer.service';
 import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
@@ -17,9 +18,8 @@ import {
 export class SchemerFacadeService {
   private resolvingIdentifierConflicts = false;
   private dismissedIdentifierConflictSignature: string | null = null;
-  private identifierConflictResolutionGeneration = 0;
-  private identifierConflictDialogRef: MatDialogRef<ResolveIdentifierConflictsDialogComponent> |
-  MatDialogRef<ResolveOrphanCodingsDialogComponent> | null = null;
+  // Content snapshots are checked separately so in-place host updates can reopen recovery.
+  private readonly dialogContext = new DialogContext(() => []);
 
   private readonly identifierConflictChanges = new Subject<boolean>();
   readonly identifierConflictChanges$ = this.identifierConflictChanges.asObservable();
@@ -34,12 +34,9 @@ export class SchemerFacadeService {
   }
 
   resetIdentifierConflictResolutionState(): void {
-    this.identifierConflictResolutionGeneration += 1;
     this.resolvingIdentifierConflicts = false;
     this.dismissedIdentifierConflictSignature = null;
-    const dialogRef = this.identifierConflictDialogRef;
-    this.identifierConflictDialogRef = null;
-    dialogRef?.close?.();
+    this.dialogContext.invalidate();
   }
 
   tryResolveIdentifierConflicts(): boolean {
@@ -49,10 +46,7 @@ export class SchemerFacadeService {
     );
 
     if (!analysis.hasProblems) {
-      if (
-        this.resolvingIdentifierConflicts ||
-        this.identifierConflictDialogRef
-      ) {
+      if (this.resolvingIdentifierConflicts) {
         this.resetIdentifierConflictResolutionState();
       } else {
         this.dismissedIdentifierConflictSignature = null;
@@ -70,7 +64,6 @@ export class SchemerFacadeService {
 
     this.resolvingIdentifierConflicts = true;
 
-    const generation = this.identifierConflictResolutionGeneration;
     const scheme = this.schemerService.codingScheme;
     const snapshot = JSON.stringify([this.schemerService.varList, scheme?.variableCodings]);
     const plan = getOrphanCodingResolutionPlan(this.schemerService.varList, scheme?.variableCodings || []);
@@ -78,6 +71,7 @@ export class SchemerFacadeService {
     const dialogRef = canResolve ? this.dialog.open(ResolveOrphanCodingsDialogComponent, {
       width: '850px',
       maxWidth: '95vw',
+      maxHeight: '95vh',
       disableClose: true,
       data: {
         conflicts: structuredClone(plan.conflicts),
@@ -94,14 +88,9 @@ export class SchemerFacadeService {
         }
       }
     );
-    this.identifierConflictDialogRef = dialogRef;
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (generation !== this.identifierConflictResolutionGeneration) return;
-
-      this.identifierConflictDialogRef = null;
+    this.dialogContext.afterClosed(dialogRef).subscribe(result => {
       this.resolvingIdentifierConflicts = false;
-      if (canResolve && Array.isArray(result)) {
+      if (canResolve && result && Array.isArray(result.decisions) && Array.isArray(result.discardedIds)) {
         const currentSnapshot = JSON.stringify([
           this.schemerService.varList, this.schemerService.codingScheme?.variableCodings
         ]);
@@ -111,7 +100,9 @@ export class SchemerFacadeService {
           return;
         }
         if (scheme && this.schemerService.userRole !== 'RO') {
-          const resolved = resolveOrphanCodings(this.schemerService.varList, scheme.variableCodings, result);
+          const resolved = resolveOrphanCodings(
+            this.schemerService.varList, scheme.variableCodings, result.decisions, result.discardedIds
+          );
           if (resolved) {
             scheme.variableCodings = resolved;
             this.dismissedIdentifierConflictSignature = null;

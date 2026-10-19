@@ -318,19 +318,19 @@ test('embedded Schemer hands off the latest input before a host save without wai
 });
 
 test('orphan recovery is discarded when the host switches to another conflicting task', async ({ page }) => {
-  const frame = await loadEmbeddedSchemer(page, makeOrphanStart());
+  const start = makeOrphanStart();
+  const scheme = JSON.parse(start.codingScheme);
+  scheme.variableCodings.push({ ...scheme.variableCodings[0], id: 'older-radio' });
+  start.codingScheme = JSON.stringify(scheme);
+  const frame = await loadEmbeddedSchemer(page, start);
   await expect(frame.getByRole('dialog')).toContainText('Alte Kodierung übernehmen?');
+  await frame.locator('.coding-summary').filter({ hasText: 'Alte technische ID: old-radio' })
+    .getByRole('button', { name: 'Alte Kodierung zum Löschen vormerken', exact: true }).click();
   await page.evaluate(
     message => document.querySelector('iframe').contentWindow.postMessage(message, '*'),
     makeOrphanStart('second-orphan-task', 'second-current')
   );
-  await frame.locator('app-root').evaluate(() => new Promise(resolve => {
-    requestAnimationFrame(() => requestAnimationFrame(resolve));
-  }));
-  // A choice for the previous snapshot must be discarded before asking about the new task.
-  await frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true }).click();
-  await expect(frame.getByRole('dialog')).toHaveCount(1);
-  await expect(frame.getByRole('dialog')).toContainText('second-current');
+  await expect(frame.getByRole('dialog')).toHaveText([/second-current/]);
   expect(await page.evaluate(() => window.received
     .filter(message => message.type === 'vosSchemeChangedNotification'))).toEqual([]);
   await frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true }).click();
@@ -353,6 +353,7 @@ test('orphan recovery cannot write after the host revokes access', async ({ page
   await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'), {
     ...start, schemerConfig: { role: 'guest' }
   });
+  await expect(frame.getByRole('dialog')).toHaveText([/Du hast nur Leserechte/]);
   await expect(frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true })).toBeDisabled();
   await expect(frame.getByRole('button', { name: 'Neu beginnen und alte Kodierung löschen', exact: true }))
     .toBeDisabled();
@@ -491,10 +492,15 @@ test('orphan recovery saves a converging aggregate source only once and keeps it
 
 test('starting empty preserves dependants and saves the manually repaired source', async ({ page }) => {
   const start = makeOrphanStart();
+  const original = JSON.parse(start.codingScheme);
+  // eslint-disable-next-line no-template-curly-in-string
+  original.variableCodings[1].sourceParameters.solverExpression = '${old-radio} + 1';
+  start.codingScheme = JSON.stringify(original);
   const frame = await loadEmbeddedSchemer(page, start);
   await frame.getByRole('button', { name: 'Neu beginnen und alte Kodierung löschen', exact: true }).click();
   await frame.locator('.var-list-entry').filter({ hasText: 'sum' }).click();
   await expect(frame.locator('.missing-source-notice')).toContainText('old-radio');
+  await expect(frame.locator('.missing-source-notice')).toContainText('Formelausdruck');
   const reset = await page.evaluate(() => JSON.parse(window.received
     .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme));
   expect(reset.variableCodings).toEqual(expect.arrayContaining([
@@ -506,14 +512,66 @@ test('starting empty preserves dependants and saves the manually repaired source
   await frame.getByRole('combobox').first().click();
   await frame.getByRole('option', { name: '01', exact: true }).click();
   await page.keyboard.press('Escape');
+  // eslint-disable-next-line no-template-curly-in-string
+  await frame.locator('.solver-expression-field input').fill('${01} + 1');
+  await frame.getByRole('textbox', { name: '01', exact: true }).fill('2');
+  await frame.getByRole('button', { name: 'Testen', exact: true }).click();
+  await expect(frame.locator('.solver-test-result-ok')).toContainText('3');
   await frame.getByRole('button', { name: 'Speichern', exact: true }).click();
   await expect(frame.locator('.missing-source-notice')).toHaveCount(0);
   const saved = await page.evaluate(() => window.received
     .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
   expect(JSON.parse(saved).variableCodings.find(coding => coding.id === 'derived').deriveSources).toEqual(['current']);
+  const persisted = JSON.parse(saved).variableCodings;
+  expect(CodingSchemeFactory.deriveValue(persisted, persisted.find(coding => coding.id === 'derived'), [
+    { id: 'current', value: 2, status: 'VALUE_CHANGED' }
+  ])).toMatchObject({ value: 3, status: 'VALUE_CHANGED' });
   const reopened = await loadEmbeddedSchemer(page, { ...start, codingScheme: saved });
   await reopened.locator('.var-list-entry').filter({ hasText: 'sum' }).click();
   await expect(reopened.locator('.missing-source-notice')).toHaveCount(0);
+});
+
+test('multiple old codings support manual cleanup, cancellation and explicit transfer', async ({ page }) => {
+  const start = makeOrphanStart();
+  const scheme = JSON.parse(start.codingScheme);
+  scheme.variableCodings.push({
+    ...scheme.variableCodings[0], id: 'older-radio', manualInstruction: '<p>Selected older instructions</p>'
+  });
+  start.codingScheme = JSON.stringify(scheme);
+  const frame = await loadEmbeddedSchemer(page, start);
+  const transfer = frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true });
+  const old = frame.locator('.coding-summary').filter({ hasText: 'Alte technische ID: old-radio' });
+  await expect(transfer).toBeDisabled();
+  await expect(frame.locator('details, pre')).toHaveCount(0);
+  await old.getByRole('button', { name: 'Alte Kodierung zum Löschen vormerken', exact: true }).click();
+  await expect(transfer).toBeEnabled();
+  await old.getByRole('button', { name: 'Rückgängig', exact: true }).click();
+  await expect(transfer).toBeDisabled();
+  await old.getByRole('button', { name: 'Alte Kodierung zum Löschen vormerken', exact: true }).click();
+  await frame.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+  expect(await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification'))).toEqual([]);
+  await frame.getByRole('button', { name: 'Konflikte prüfen', exact: true }).click();
+  await expect(transfer).toBeDisabled();
+  await page.locator('iframe').evaluate(element => element.setAttribute('style', 'width:375px;height:600px'));
+  await expect.poll(async () => (await frame.getByRole('dialog').boundingBox())?.width ?? Infinity)
+    .toBeLessThanOrEqual(375);
+  await old.getByRole('button', { name: 'Alte Kodierung zum Löschen vormerken', exact: true }).click();
+  await transfer.click();
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+  const changes = await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification'));
+  expect(changes).toHaveLength(1);
+  const saved = changes[0].codingScheme;
+  expect(JSON.parse(saved).variableCodings).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: 'current', manualInstruction: '<p>Selected older instructions</p>' }),
+    expect.objectContaining({ id: 'derived', deriveSources: ['old-radio'] })
+  ]));
+  expect(JSON.parse(saved).variableCodings).toHaveLength(2);
+  const reopened = await loadEmbeddedSchemer(page, { ...start, codingScheme: saved });
+  await expect(reopened.getByRole('dialog')).toHaveCount(0);
+  await reopened.locator('.var-list-entry').filter({ hasText: 'sum' }).click();
+  await expect(reopened.locator('.missing-source-notice')).toContainText('old-radio');
 });
 
 test('embedded Schemer cancels an instruction dialog when the host changes task', async ({ page }) => {
