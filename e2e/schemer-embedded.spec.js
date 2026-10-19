@@ -1,5 +1,28 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
+const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
+const veronaSchema = require('./fixtures/verona/schemer-3.2.0.json');
+const variableSchema = require('./fixtures/verona/variable-info-1.3.json');
+const studioStart = require('./fixtures/verona/studio-start-command.json');
+
+const ajv = new Ajv({ strict: false, allErrors: true });
+addFormats(ajv, ['date-time']);
+// The API examples use plain serialized schemes for this AsyncAPI annotation.
+ajv.addFormat('byte', true);
+ajv.addSchema(variableSchema, 'https://w3id.org/iqb/spec/variable-info/1.3');
+ajv.addSchema(veronaSchema, 'verona-schemer-3.2.0');
+const validateMessage = Object.fromEntries(Object.entries(veronaSchema.channels).map(([type, channel]) => [
+  type,
+  ajv.compile({
+    $ref: `verona-schemer-3.2.0#/channels/${type}/${channel.publish ? 'publish' : 'subscribe'}/message/payload`
+  })
+]));
+
+function expectVeronaMessage(message) {
+  const validate = validateMessage[message.type];
+  expect(validate(message), JSON.stringify(validate.errors)).toBe(true);
+}
 
 const runtimeErrors = new WeakMap();
 test.beforeEach(({ page }) => {
@@ -43,6 +66,7 @@ const makeStart = (variables, role = 'super') => ({
 });
 
 async function loadEmbeddedSchemer(page, start = makeStart([makeVariable('response_1'), makeVariable('response_2')])) {
+  expectVeronaMessage(start);
   if (process.env.SCHEMER_ARTIFACT) {
     const artifact = await fs.readFile(process.env.SCHEMER_ARTIFACT, 'utf8');
     await page.route('**/schemer-artifact.html', route => route.fulfill({
@@ -61,15 +85,80 @@ async function loadEmbeddedSchemer(page, start = makeStart([makeVariable('respon
           if (event.source !== frame.contentWindow) return;
           window.received.push(event.data);
           if (event.data.type === 'vosReadyNotification') {
-            setTimeout(() => frame.contentWindow.postMessage(${JSON.stringify(start)}, '*'), 100);
+            frame.contentWindow.postMessage(${JSON.stringify(start)}, '*');
           }
         });
       </script>
     </body></html>`
   }));
   await page.goto('/studio-host.html');
+  await expect.poll(() => page.evaluate(() => window.received
+    .some(message => message.type === 'vosReadyNotification'))).toBe(true);
   return page.frameLocator('iframe');
 }
+
+test('Verona 3.2 metadata and edited schemes follow the published message contract', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page, studioStart);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  const ready = await page.evaluate(() => window.received.find(message => message.type === 'vosReadyNotification'));
+  expectVeronaMessage(ready);
+  const metadata = JSON.parse(ready.metadata);
+  if (process.env.SCHEMER_ARTIFACT) {
+    expect(metadata.apiVersion).toBe(veronaSchema.info.version);
+    expect(metadata['@type']).toBe('schemer');
+  }
+  const wrapper = await fs.readFile('projects/schemer/src/html_wrapper/index.html', 'utf8');
+  const advertised = JSON.parse(wrapper.match(/<script[^>]*id="meta_data"[^>]*>([\s\S]*?)<\/script>/)[1]);
+  expect(advertised.apiVersion).toBe(veronaSchema.info.version);
+
+  const label = frame.locator('var-coding .variable-details input').first();
+  await label.fill('Verona contract edit');
+  await label.press('Tab');
+  await expect.poll(() => page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1)?.codingScheme))
+    .toContain('Verona contract edit');
+  const changed = await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1));
+  expectVeronaMessage(changed);
+  expect(changed.sessionId).toBe('embedded-regression');
+  expect(changed.codingSchemeType).toBe('iqb@3.5');
+  expect(JSON.parse(changed.codingScheme).version).toBe('3.5');
+});
+
+test('a minimal Verona start can be followed by a Studio update', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page, { type: 'vosStartCommand', sessionId: 'minimal-host' });
+  await expect(frame.getByText('Es sind keine Basis-Variablen definiert.', { exact: false })).toBeVisible();
+  const update = { ...makeStart([makeVariable('later_variable')]), sessionId: 'minimal-host' };
+  await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'), update);
+  await expect(frame.locator('.var-list-entry')).toHaveText(['later_variable']);
+  const label = frame.locator('var-coding .variable-details input').first();
+  await label.fill('Loaded after minimal start');
+  await label.press('Tab');
+  await expect.poll(() => page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1)?.codingScheme))
+    .toContain('Loaded after minimal start');
+  const changed = await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1));
+  expectVeronaMessage(changed);
+  expect(changed.sessionId).toBe('minimal-host');
+});
+
+test('invalid start sessions cannot replace a loaded Studio scheme', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await page.evaluate(message => {
+    const target = document.querySelector('iframe').contentWindow;
+    target.postMessage({ ...message, sessionId: '' }, '*');
+    target.postMessage({ ...message, sessionId: null }, '*');
+    const withoutSession = { ...message };
+    delete withoutSession.sessionId;
+    target.postMessage(withoutSession, '*');
+  }, makeStart([makeVariable('invalid_replacement')]));
+  await frame.locator('app-root').evaluate(() => new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
+  await expect(frame.locator('.var-list-entry')).toHaveText(['response_1', 'response_2']);
+});
 
 test('embedded Schemer displays host variables without a user interaction', async ({ page }) => {
   const errors = [];
