@@ -94,7 +94,7 @@ async function loadEmbeddedSchemer(page, start = makeStart([makeVariable('respon
   await page.goto('/studio-host.html');
   await expect.poll(() => page.evaluate(() => window.received
     .some(message => message.type === 'vosReadyNotification'))).toBe(true);
-  return page.frameLocator('iframe');
+  return page.frameLocator('iframe[title="Embedded Schemer"]');
 }
 
 test('Verona 3.2 metadata and edited schemes follow the published message contract', async ({ page }) => {
@@ -158,6 +158,37 @@ test('invalid start sessions cannot replace a loaded Studio scheme', async ({ pa
     requestAnimationFrame(() => requestAnimationFrame(resolve));
   }));
   await expect(frame.locator('.var-list-entry')).toHaveText(['response_1', 'response_2']);
+});
+
+test('a sibling frame cannot replace host data or the active session', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveText(['response_1', 'response_2']);
+  await frame.locator('app-root').evaluate(() => {
+    window.foreignStartReceived = false;
+    window.addEventListener('message', event => {
+      if (event.data?.sessionId === 'foreign-session') window.foreignStartReceived = true;
+    });
+  });
+  await page.evaluate(message => {
+    const sibling = document.createElement('iframe');
+    sibling.title = 'Untrusted sibling';
+    sibling.srcdoc = `<script>parent.frames[0].postMessage(${JSON.stringify(message)}, '*');</script>`;
+    document.body.appendChild(sibling);
+  }, { ...makeStart([makeVariable('foreign_variable')], 'guest'), sessionId: 'foreign-session' });
+  await expect.poll(() => frame.locator('app-root').evaluate(() => window.foreignStartReceived)).toBe(true);
+  await frame.locator('app-root').evaluate(() => new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
+  await expect(frame.locator('.var-list-entry')).toHaveText(['response_1', 'response_2']);
+  const label = frame.locator('var-coding .variable-details input').first();
+  await label.fill('Host session preserved');
+  await label.press('Tab');
+  await expect.poll(() => page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1)?.codingScheme))
+    .toContain('Host session preserved');
+  const changed = await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1));
+  expect(changed.sessionId).toBe('embedded-regression');
 });
 
 test('embedded Schemer displays host variables without a user interaction', async ({ page }) => {

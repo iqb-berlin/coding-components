@@ -40,6 +40,7 @@ describe('VeronaAPIService', () => {
     });
 
     window.dispatchEvent(new MessageEvent('message', {
+      source: window.parent,
       data: {
         type: 'vosStartCommand',
         sessionId: 's1',
@@ -47,6 +48,55 @@ describe('VeronaAPIService', () => {
         schemerConfig: { directDownloadUrl: '', role: 'super' }
       }
     }));
+  });
+
+  ['missing', 'self', 'child'].forEach(sender => {
+    it(`should ignore a start command from ${sender} instead of the host`, () => {
+      const service = TestBed.inject(VeronaAPIService);
+      const start = jasmine.createSpy('start');
+      service.sessionID = 'active-session';
+      service.vosStartCommand.subscribe(start);
+      const child = document.createElement('iframe');
+      document.body.appendChild(child);
+      try {
+        const sources: Record<string, MessageEventSource | null> = {
+          missing: null,
+          self: window,
+          child: child.contentWindow
+        };
+        window.dispatchEvent(new MessageEvent('message', {
+          source: sources[sender],
+          origin: window.location.origin,
+          data: {
+            type: 'vosStartCommand',
+            sessionId: 'active-session',
+            variables: [],
+            schemerConfig: { role: 'super' }
+          }
+        }));
+
+        expect(start).not.toHaveBeenCalled();
+        expect(service.sessionID).toBe('active-session');
+      } finally {
+        child.remove();
+      }
+    });
+  });
+
+  ['https://studio.example.test', 'null'].forEach(origin => {
+    it(`should accept the host with origin ${origin}`, () => {
+      const service = TestBed.inject(VeronaAPIService);
+      const start = jasmine.createSpy('start');
+      service.vosStartCommand.subscribe(start);
+      window.dispatchEvent(new MessageEvent('message', {
+        source: window.parent,
+        origin,
+        data: { type: 'vosStartCommand', sessionId: 'host-session' }
+      }));
+
+      expect(start).toHaveBeenCalledTimes(1);
+      expect(service.sessionID).toBe('host-session');
+    });
   });
 
   it('sendVosReadyNotification should log in standalone mode', () => {
@@ -88,6 +138,7 @@ describe('VeronaAPIService', () => {
       service.vosStartCommand.subscribe(start);
 
       window.dispatchEvent(new MessageEvent('message', {
+        source: window.parent,
         data: { type: 'vosStartCommand', sessionId, variables: [] }
       }));
 
@@ -100,8 +151,8 @@ describe('VeronaAPIService', () => {
     const service = TestBed.inject(VeronaAPIService);
     const warnSpy = spyOn(console, 'warn');
 
-    window.dispatchEvent(new MessageEvent('message', { data: { type: 'webpackOk' } }));
-    window.dispatchEvent(new MessageEvent('message', { data: { type: 'webpackClose' } }));
+    window.dispatchEvent(new MessageEvent('message', { source: window.parent, data: { type: 'webpackOk' } }));
+    window.dispatchEvent(new MessageEvent('message', { source: window.parent, data: { type: 'webpackClose' } }));
 
     expect(warnSpy).not.toHaveBeenCalled();
     expect(service.sessionID).toBe('');
@@ -121,7 +172,7 @@ describe('VeronaAPIService', () => {
     const service = TestBed.inject(VeronaAPIService);
     const warnSpy = spyOn(console, 'warn');
 
-    window.dispatchEvent(new MessageEvent('message', { data: { type: 'somethingElse' } }));
+    window.dispatchEvent(new MessageEvent('message', { source: window.parent, data: { type: 'somethingElse' } }));
 
     expect(warnSpy).toHaveBeenCalled();
     expect(service.sessionID).toBe('');
@@ -135,6 +186,7 @@ describe('VeronaAPIService', () => {
 
     // establish sessionId via start command
     window.dispatchEvent(new MessageEvent('message', {
+      source: window.parent,
       data: {
         type: 'vosStartCommand',
         sessionId: 's1',

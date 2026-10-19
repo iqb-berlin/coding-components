@@ -461,8 +461,10 @@ contract, independently of the Coding-Scheme 3.5 format stored in `codingScheme`
 Ready notifications carry the JSON-LD object as a JSON string in `metadata`;
 scheme-change notifications use ISO timestamps and the active host session.
 Start commands require a non-empty session ID; omitted variables default to an
-empty list and configuration is optional. The Studio `role` extension and the
-existing `variables` extension on scheme-change notifications remain supported.
+empty list and configuration is optional. Incoming messages are accepted only
+from the direct parent window, including hosts with an opaque origin. Messages
+from other frames or without a sender are ignored. The Studio `role` extension
+and the existing `variables` extension on scheme-change notifications remain supported.
 The module does not currently emit shared-parameter updates or coding dependencies.
 
 The browser suite validates messages against fixed local copies of the official

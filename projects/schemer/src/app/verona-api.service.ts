@@ -32,9 +32,11 @@ export class VeronaAPIService {
     if (metadata) {
       this.metadata = JSON.parse(metadata);
     }
-    fromEvent(window, 'message')
-      .subscribe((event: Event): void => {
-        this.handleMessage((event as MessageEvent).data);
+    fromEvent<MessageEvent>(window, 'message')
+      .subscribe((event): void => {
+        // Window identity also works when the host or module has an opaque origin.
+        if (event.source !== window.parent) return;
+        this.handleMessage(event.data);
       });
   }
 
