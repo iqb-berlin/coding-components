@@ -60,7 +60,40 @@ describe('VeronaAPIService', () => {
     expect(logSpy).toHaveBeenCalled();
     const payload = logSpy.calls.mostRecent().args[1] as Record<string, unknown>;
     expect(payload['type']).toBe('vosReadyNotification');
-    expect(payload['a']).toBe('1');
+    expect(JSON.parse(payload['metadata'] as string)).toEqual({ a: '1' });
+  });
+
+  it('should send nested JSON-LD metadata in embedded mode', () => {
+    const service = TestBed.inject(VeronaAPIService);
+    const postSpy = spyOn(window.parent, 'postMessage');
+    (service as unknown as { isStandalone: () => boolean }).isStandalone = () => false;
+    const metadata = {
+      '@type': 'schemer',
+      apiVersion: '3.2.0',
+      name: { de: 'IQB-Schemer', en: 'IQB Schemer' }
+    };
+
+    service.sendVosReadyNotification(metadata);
+
+    const payload = postSpy.calls.mostRecent().args[0] as Record<string, unknown>;
+    expect(payload['type']).toBe('vosReadyNotification');
+    expect(JSON.parse(payload['metadata'] as string)).toEqual(metadata);
+  });
+
+  [undefined, null, '', '   ', 123].forEach(sessionId => {
+    it(`should ignore a start command with invalid sessionId ${JSON.stringify(sessionId)}`, () => {
+      const service = TestBed.inject(VeronaAPIService);
+      service.sessionID = 'active-session';
+      const start = jasmine.createSpy('start');
+      service.vosStartCommand.subscribe(start);
+
+      window.dispatchEvent(new MessageEvent('message', {
+        data: { type: 'vosStartCommand', sessionId, variables: [] }
+      }));
+
+      expect(start).not.toHaveBeenCalled();
+      expect(service.sessionID).toBe('active-session');
+    });
   });
 
   it('should ignore webpackOk and webpackClose messages without warning', () => {
@@ -117,5 +150,19 @@ describe('VeronaAPIService', () => {
     expect(payload['type']).toBe('vosSchemeChangedNotification');
     expect(payload['sessionId']).toBe('s1');
     expect(payload['codingScheme']).toBeDefined();
+    const timestamp = payload['timeStamp'] as string;
+    expect(new Date(timestamp).toISOString()).toBe(timestamp);
+    expect(JSON.parse(payload['codingScheme'] as string).version).toBe('3.5');
+    expect(payload['codingSchemeType']).toBe('iqb@3.5');
+  });
+
+  it('should not send scheme changes without a host session', () => {
+    const service = TestBed.inject(VeronaAPIService);
+    const postSpy = spyOn(window.parent, 'postMessage');
+    (service as unknown as { isStandalone: () => boolean }).isStandalone = () => false;
+
+    service.sendVosSchemeChangedNotification(null);
+
+    expect(postSpy).not.toHaveBeenCalled();
   });
 });

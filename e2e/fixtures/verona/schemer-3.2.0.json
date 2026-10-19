@@ -1,0 +1,206 @@
+{
+  "asyncapi": "2.5.0",
+  "info": {
+    "title": "Verona Inferfaces Specification \"Schemer\"",
+    "version": "3.2.0",
+    "description": "This is one part of the [Verona Online Assessment Standards](https://verona-interfaces.github.io). All messages are sent via the postMessage function of the html page. The schemer takes the page root of its parent as target (parent.window), and the application binds the function call to the iframe element of the schemer.\nMost important, the message body carries as first parameter the operationId of the message.\nThe html page MUST contain a script-tag with metadata. The syntax and structure of this data are described [here](https://verona-interfaces.github.io/intro/metadata.html).",
+    "license": {
+      "name": "CC0-1.0",
+      "url": "http://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "contact": {
+      "name": "Institute for Educational Quality Improvement (IQB)",
+      "url": "https://www.iqb.hu-berlin.de",
+      "email": "iqb-tbadev@hu-berlin.de"
+    }
+  },
+  "channels": {
+    "vosReadyNotification": {
+      "subscribe": {
+        "operationId": "vosReadyNotification",
+        "summary": "Ready Notification",
+        "description": "The schemer announces that it's code is loaded and initialized so the communication can start.",
+        "message": {
+          "name": "vosReadyNotification",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "metadata": {
+                "type": "string",
+                "description": "Via this property, the schemer sends the stringified metadata object definied as json-ld in the header of the html file. See [here](https://verona-interfaces.github.io/intro/metadata.html) for more information."
+              }
+            },
+            "required": [
+              "metadata"
+            ]
+          }
+        }
+      }
+    },
+    "vosStartCommand": {
+      "publish": {
+        "operationId": "vosStartCommand",
+        "summary": "Start Command",
+        "description": "The application sends parameters for editing the coding scheme and commands the start of user interaction.",
+        "message": {
+          "name": "vosStartCommand",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "sessionId": {
+                "$ref": "#/components/schemas/SessionIdString"
+              },
+              "codingScheme": {
+                "type": "string",
+                "format": "byte",
+                "description": "The coding scheme (if given) to be edited.",
+                "example": "<CodingScheme> <Variable id=\"text-field_2\" label=\"text-field_2\"> <RuleBased> <Transform>DATE_TO_ISO</Transform> </RuleBased> <Code code=\"1\" score=\"11\" label=\"111\"> <Rule method=\"MATCH\"> <Parameter>2021-12-04</Parameter> </Rule> </Code> <Code code=\"2\" score=\"22\" label=\"222\"> <Rule method=\"MATCH\"> <Parameter>2022-12-04</Parameter> </Rule> </Code> </Variable> </CodingScheme>"
+              },
+              "codingSchemeType": {
+                "type": "string",
+                "description": "This lets the schemer the coding scheme format know. This might avoid UI mess after getting old schemes.",
+                "example": "iqb@1.0"
+              },
+              "variables": {
+                "description": "Data of variables from unit definition. These variables represent the states of controls during assessment and form the basis of all coding. We call these variables 'base variables'.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Variable"
+                }
+              },
+              "schemerConfig": {
+                "$ref": "#/components/schemas/SchemerConfig",
+                "description": "This data supplies some information or instruction about this specific editing of the response scheme."
+              }
+            },
+            "required": [
+              "sessionId"
+            ]
+          }
+        }
+      }
+    },
+    "vosSchemeChangedNotification": {
+      "subscribe": {
+        "operationId": "vosSchemeChangedNotification",
+        "summary": "Scheme Changed Notification",
+        "description": "The coding scheme of the unit has changed.",
+        "message": {
+          "name": "vosSchemeChangedNotification",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "sessionId": {
+                "$ref": "#/components/schemas/SessionIdString"
+              },
+              "timeStamp": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Ensures, that later arriving states are ignored."
+              },
+              "codingScheme": {
+                "type": "string",
+                "format": "byte",
+                "description": "To be stored."
+              },
+              "codingSchemeType": {
+                "type": "string",
+                "description": "In order to understand the coding scheme outside the schemer, the type of the scheme should be known. This helps to select a suitable coder to run coding.",
+                "example": "iqb@1.0"
+              },
+              "dependenciesToCode": {
+                "description": "Files to provide or services to keep accessible during the coding of responses to the items of the unit.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Dependency"
+                }
+              },
+              "sharedParameters": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SharedParameter"
+                }
+              }
+            },
+            "required": [
+              "sessionId",
+              "timeStamp"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SessionIdString": {
+        "description": "The session id flags all communication. If a message has no or empty session id, it's not processed. The session id is unique and was generated by the application. Any simple algorithm would work. The session id helps to link the correct unit with the data of the message. Using the id of the editor hosting html element is less reliable, because the element could be reused with another unit.",
+        "type": "string",
+        "example": "idk8ur5jf9ru5jk"
+      },
+      "SharedParameter": {
+        "type": "object",
+        "description": "This object structure is used to share data between instances of the module. The host may collect all shared data sent by modules and provide it to every module.",
+        "properties": {
+          "key": {
+            "description": "Identifier to find or set the shared parameter.",
+            "type": "string",
+            "minLength": 2
+          },
+          "value": {
+            "description": "Value of the parameter.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "example": {
+          "key": "CODE_MODE",
+          "value": "INSTRUCTIONS_ONLY"
+        }
+      },
+      "Dependency": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "https://short-answer-supercoder.iqb-berlin.de"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "file",
+              "service"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ]
+      },
+      "SchemerConfig": {
+        "type": "object",
+        "properties": {
+          "directDownloadUrl": {
+            "description": "After starting the schemer and loading the scheme, it might be necessary to load additional code or data from the server. This data is identified by an resource ID (usually a file name). The schemer can download this resource by itself without further interaction with the host frontend. The property directDownloadUrl provides the url for download. The schemer extends this url by an url separator \"/\" and the resource ID (uri-encoded if needed).",
+            "type": "string",
+            "example": "https://www.iqb-supercoder.de/download/iskeid-34e845-didmmemdkek"
+          },
+          "sharedParameters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SharedParameter"
+            }
+          }
+        }
+      },
+      "Variable": {
+        "$ref": "https://w3id.org/iqb/spec/variable-info/1.3"
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "type": "vosStartCommand",
+  "sessionId": "embedded-regression",
+  "schemerConfig": {
+    "definitionReportPolicy": "eager",
+    "role": "super",
+    "directDownloadUrl": "/api/workspace/1/download/",
+    "sharedParameters": []
+  },
+  "codingScheme": "{\"version\":\"3.5\",\"variableCodings\":[]}",
+  "codingSchemeType": "iqb@3.5",
+  "variables": [
+    {
+      "id": "response_1",
+      "alias": "response_1",
+      "type": "string",
+      "format": "",
+      "multiple": false,
+      "nullable": false,
+      "values": [],
+      "valuePositionLabels": []
+    },
+    {
+      "id": "response_2",
+      "alias": "response_2",
+      "type": "string",
+      "format": "",
+      "multiple": false,
+      "nullable": false,
+      "values": [],
+      "valuePositionLabels": []
+    }
+  ]
+}

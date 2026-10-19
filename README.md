@@ -455,6 +455,20 @@ The steps to publish a new release of the library:
 
 The `schemer` UI is also published as a [Verona](https://verona-interfaces.github.io) module.
 
+Schemer 2.9.0 uses the [Verona Schemer 3.2.0 message contract](https://github.com/verona-interfaces/schemer/tree/3.2.0)
+with Variable Info 1.x. The wrapper's `apiVersion` identifies this communication
+contract, independently of the Coding-Scheme 3.5 format stored in `codingScheme`.
+Ready notifications carry the JSON-LD object as a JSON string in `metadata`;
+scheme-change notifications use ISO timestamps and the active host session.
+Start commands require a non-empty session ID; omitted variables default to an
+empty list and configuration is optional. The Studio `role` extension and the
+existing `variables` extension on scheme-change notifications remain supported.
+The module does not currently emit shared-parameter updates or coding dependencies.
+
+The browser suite validates messages against fixed local copies of the official
+3.2.0/Variable Info 1.3 schemas. CI also builds and exercises the packed HTML,
+including its advertised API version and the existing Studio-style message flow.
+
 - **Download**: [Latest releases](https://github.com/iqb-berlin/coding-components/releases/latest)
 - **Integration**: Simply add the `.html` bundle to your Verona-compatible host.
 

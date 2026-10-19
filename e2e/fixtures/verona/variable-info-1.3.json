@@ -1,0 +1,104 @@
+{
+  "$id": "variable-info@verona@1.3",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "variable info for coding",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-zA-Z_]+$",
+      "description": "Identifier for the variable"
+    },
+    "alias": {
+      "type": "string",
+      "pattern": "^[0-9a-zA-Z_]+$",
+      "description": "Alternative identifier for the variable"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "string",
+        "integer",
+        "number",
+        "boolean",
+        "attachment",
+        "json",
+        "no-value",
+        "coded"
+      ],
+      "description": "Data type of the variable value"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "text-selection",
+        "image",
+        "capture-image",
+        "audio",
+        "ggb-file",
+        "non-negative",
+        "latex",
+        "math-ml",
+        "math-table",
+        "math-text-mix",
+        "ggb-variable",
+        ""
+      ],
+      "description": "Data type format"
+    },
+    "multiple": {
+      "type": "boolean",
+      "default": false,
+      "description": "Can the value be of type Array?"
+    },
+    "nullable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Can the value be null?"
+    },
+    "values": {
+      "type": "array",
+      "description": "List of possible values",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "valuePositionLabels": {
+      "type": "array",
+      "description": "Labels of the positions if the value is of type array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "valuesComplete": {
+      "type": "boolean",
+      "default": false,
+      "description": "Are the given values all possible values?"
+    },
+    "page": {
+      "type": "string",
+      "description": "Page of the unit, on which the variable is located."
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type"
+  ]
+}

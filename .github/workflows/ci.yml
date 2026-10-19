@@ -30,6 +30,13 @@ jobs:
           CI: true
         run: npm run test:schemer:responsive
 
+      - name: Build and verify packed Verona module
+        env:
+          CI: true
+        run: |
+          npm run buildAndPack_sc
+          SCHEMER_ARTIFACT="dist/iqb-schemer@$(node -p 'require("./package.json").config.schemer_version').html" npm run test:schemer:responsive
+
       - name: Upload browser failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
