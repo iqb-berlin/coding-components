@@ -47,6 +47,89 @@ describe('orphan coding resolution', () => {
     sourceParameters: { processing: [], solverExpression: '${01} + 1' }
   });
 
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    (['BASE', 'BASE_NO_VALUE'] as const).forEach(sourceType => {
+      (['RULES_ONLY', 'MANUAL_AND_RULES'] as const).forEach(codeModel => {
+        (['TRANSFER', 'START_EMPTY'] as const).forEach(decision => {
+          it(`resolves the combined MC text/radio conflict: ${type}, ${sourceType}, ${codeModel}, ${decision}`, () => {
+            const text = {
+              ...CodingFactory.createBaseCodingVariable('old-text', sourceType), alias: 'text_1', codeModel
+            };
+            const variables = [noValueVariable(type, 'new-text', 'text_1'), variable()];
+            const codings = [text, previous(), derived()];
+            const before = JSON.stringify({ variables, codings });
+            const plan = getOrphanCodingResolutionPlan(variables, codings);
+            expect(plan.problems).toEqual([]);
+            expect(plan.conflicts.map(conflict => conflict.current.id)).toEqual(['new-radio']);
+            const result = resolveOrphanCodings(variables, codings, [decision]);
+            expect(result).not.toBeNull();
+            if (!result) return;
+            expect(result.map(coding => coding.id)).not.toContain('old-text');
+            expect(result.find(coding => coding.id === 'new-text')).toEqual(jasmine.objectContaining({
+              sourceType: 'BASE_NO_VALUE', alias: 'text_1', codes: []
+            }));
+            expect(result.find(coding => coding.id === 'new-radio')?.codes)
+              .toEqual(decision === 'TRANSFER' ? previous().codes : []);
+            expect(result.find(coding => coding.id === 'derived')?.deriveSources)
+              .toEqual([decision === 'TRANSFER' ? 'new-radio' : 'old-radio']);
+            expect(JSON.stringify({ variables, codings })).toBe(before);
+          });
+        });
+      });
+    });
+  });
+
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    (['BASE', 'BASE_NO_VALUE'] as const).forEach(sourceType => {
+      [
+        { manualInstruction: '<p>Keep text instructions</p>' },
+        { codeModel: 'MANUAL_ONLY' as const },
+        { sourceParameters: { processing: ['TO_NUMBER' as const] } },
+        {}
+      ].forEach(settings => {
+        const description = `protected ${sourceType} text: ${type}, ${JSON.stringify(settings)}`;
+        it(`requires an atomic explicit repair for ${description}`, () => {
+          const text = {
+            ...CodingFactory.createBaseCodingVariable('old-text', sourceType), alias: 'text_1', ...settings
+          };
+          // Even a default text is protected by incoming source/formula references.
+          const dependent = {
+            ...derived('old-text'),
+            id: 'text-dependent',
+            alias: 'textResult',
+            sourceParameters: { solverExpression: '${old-text} + 1' }
+          };
+          const variables = [noValueVariable(type, 'new-text', 'text_1'), variable()];
+          const codings = [text, previous(), derived(), dependent];
+          const before = JSON.stringify(codings);
+          const plan = getOrphanCodingResolutionPlan(variables, codings);
+          expect(plan.problems).toEqual([]);
+          expect(plan.conflicts.map(conflict => conflict.current.id)).toEqual(['new-text', 'new-radio']);
+          expect(plan.conflicts[0].dependents).toEqual([dependent]);
+          expect(resolveOrphanCodings(variables, codings, ['TRANSFER', 'TRANSFER'])).toBeNull();
+          expect(resolveOrphanCodings(variables, codings, ['START_EMPTY'])).toBeNull();
+          const result = resolveOrphanCodings(variables, codings, ['START_EMPTY', 'TRANSFER'])!;
+          expect(result.find(coding => coding.id === 'text-dependent')).toEqual(dependent);
+          expect(result.find(coding => coding.id === 'new-text')?.sourceType).toBe('BASE_NO_VALUE');
+          expect(result.find(coding => coding.id === 'new-radio')?.codes).toEqual(previous().codes);
+          expect(CodingSchemeFactory.validate(variables, result)).toContain(jasmine.objectContaining({
+            type: 'SOURCE_MISSING', variableId: 'textResult', breaking: true
+          }));
+          expect(JSON.stringify(codings)).toBe(before);
+        });
+      });
+    });
+  });
+
+  it('does not overwrite a deactivated current answer variable or activate an old no-value coding', () => {
+    const target = { ...CodingFactory.createBaseCodingVariable('new-radio', 'BASE_NO_VALUE'), alias: '01' };
+    expect(resolveOrphanCodings([variable()], [previous(), target], ['TRANSFER'])).toBeNull();
+    const inactive = { ...previous(), sourceType: 'BASE_NO_VALUE' as const };
+    expect(resolveOrphanCodings([variable()], [inactive], ['TRANSFER'])).toBeNull();
+    expect(resolveOrphanCodings([variable()], [inactive], ['START_EMPTY'])!
+      .find(coding => coding.id === 'new-radio')?.sourceType).toBe('BASE');
+  });
+
   it('finds the orphan by current IDs and compares public names without letter case', () => {
     const old = { ...previous(), alias: 'Response' };
     const plan = getOrphanCodingResolutionPlan([variable('new-radio', 'response')], [old, derived()]);
@@ -353,16 +436,18 @@ describe('orphan coding resolution', () => {
   });
 
   ['no-value', 'NO_VALUE'].forEach(type => {
-    it(`rejects recovery onto a ${type} host variable with or without a fresh target`, () => {
+    it(`allows only an explicit empty restart onto a ${type} host variable`, () => {
       const variables = [noValueVariable(type)];
-      const target = { ...CodingFactory.createCodingVariable('new-radio'), alias: '01' };
+      const target = { ...CodingFactory.createBaseCodingVariable('new-radio', 'BASE_NO_VALUE'), alias: '01' };
       [[previous(), derived()], [previous(), target, derived()]].forEach(codings => {
         const before = JSON.stringify({ variables, codings });
         const plan = getOrphanCodingResolutionPlan(variables, codings);
-        expect(plan.conflicts).toEqual([]);
-        expect(plan.problems.length).toBe(1);
+        expect(plan.conflicts.length).toBe(1);
+        expect(plan.problems).toEqual([]);
         expect(resolveOrphanCodings(variables, codings, ['TRANSFER'])).toBeNull();
-        expect(resolveOrphanCodings(variables, codings, ['START_EMPTY'])).toBeNull();
+        const result = resolveOrphanCodings(variables, codings, ['START_EMPTY'])!;
+        expect(result.find(coding => coding.id === 'new-radio')?.sourceType).toBe('BASE_NO_VALUE');
+        expect(result.find(coding => coding.id === 'derived')?.deriveSources).toEqual(['old-radio']);
         expect(JSON.stringify({ variables, codings })).toBe(before);
       });
     });
@@ -467,6 +552,34 @@ describe('orphan coding resolution', () => {
   it('does not offer a partial repair while unrelated identifier errors remain', () => {
     const invalid = { ...derived(), alias: 'invalid.alias' };
     expect(resolveOrphanCodings([variable()], [previous(), invalid], ['TRANSFER'])).toBeNull();
+  });
+
+  (['BASE', 'BASE_NO_VALUE'] as const).forEach(sourceType => {
+    (['RULES_ONLY', 'MANUAL_AND_RULES'] as const).forEach(codeModel => {
+      it(`diagnoses an alias conflict on a retained ${sourceType}/${codeModel} source before offering recovery`, () => {
+        const placeholder = {
+          ...CodingFactory.createBaseCodingVariable('old-text', sourceType), alias: 'result', codeModel
+        };
+        // Legacy/imported base codings may retain source settings. A transfer must preserve them.
+        const old = { ...previous(), deriveSources: ['old-text'] };
+        const unrelated: VariableCodingData = {
+          ...CodingFactory.createCodingVariable('unrelated'),
+          alias: 'result',
+          sourceType: 'MANUAL',
+          codeModel: 'MANUAL_ONLY'
+        };
+        const codings = [old, placeholder, unrelated];
+        const before = JSON.stringify(codings);
+        const plan = getOrphanCodingResolutionPlan([variable()], codings);
+
+        expect(plan.conflicts.length).toBe(1);
+        expect(plan.problems).toEqual([
+          'Weitere ungültige Variablenbezeichner müssen zuerst an ihrer Quelle korrigiert werden.'
+        ]);
+        expect(resolveOrphanCodings([variable()], codings, ['TRANSFER'])).toBeNull();
+        expect(JSON.stringify(codings)).toBe(before);
+      });
+    });
   });
 
   it('requires one valid decision for every conflict and supports mixed choices', () => {

@@ -2,10 +2,8 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { normalizeVariableInfoType } from '@iqb/responses';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
-import {
-  analyzeVariableIdentifiers,
-  isEmptyVariableCoding
-} from './schemer-identifier-validation';
+import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
+import { getCodingDependents, getRemovableOrphanBaseCodings, isEmptyVariableCoding } from './base-coding-cleanup';
 import { validateVariableList } from './variable-identifier-validation';
 
 export type OrphanCodingDecision = 'TRANSFER' | 'START_EMPTY';
@@ -36,15 +34,13 @@ const samePublicName = (
   second: { id: string; alias?: string }
 ): boolean => publicName(first).toLowerCase() === publicName(second).toLowerCase();
 
-// Fresh base codings use RULES_ONLY; the orphan cleanup deliberately also
-// preserves empty codings with a non-default, user-selected coding model.
-const isFreshTarget = (coding: VariableCodingData): boolean => (
-  coding.sourceType === 'BASE' &&
-  coding.codeModel !== 'MANUAL_ONLY' &&
-  isEmptyVariableCoding({ ...coding, codeModel: 'MANUAL_AND_RULES' }) &&
-  !coding.deriveSources?.length &&
-  !coding.sourceParameters?.solverExpression &&
-  !coding.sourceParameters?.processing?.length
+const isFreshTarget = (coding: VariableCodingData, current: VariableInfo): boolean => (
+  coding.sourceType === (normalizeVariableInfoType(current.type) === 'NO_VALUE' ? 'BASE_NO_VALUE' : 'BASE') &&
+  isEmptyVariableCoding(coding)
+);
+
+export const canTransferOrphanCoding = (coding: VariableCodingData, current: VariableInfo): boolean => (
+  coding.sourceType === 'BASE' && normalizeVariableInfoType(current.type) !== 'NO_VALUE'
 );
 
 const createTarget = (variable: VariableInfo): VariableCodingData => ({
@@ -64,16 +60,18 @@ export const getOrphanCodingResolutionPlan = (
   if (!variables.length || validateVariableList(variables).length) return plan;
 
   const activeIds = new Set(variables.map(variable => variable.id));
+  const removable = getRemovableOrphanBaseCodings(variables, codings);
   const orphans = codings.filter(coding => (
-    coding.sourceType === 'BASE' && !activeIds.has(coding.id) && !isEmptyVariableCoding(coding)
+    (coding.sourceType === 'BASE' || coding.sourceType === 'BASE_NO_VALUE') &&
+    !activeIds.has(coding.id) && !removable.has(coding)
   ));
   variables.forEach(current => {
     const candidates = orphans.filter(orphan => samePublicName(orphan, current));
     if (!candidates.length) return;
     const name = publicName(current);
     const targets = codings.filter(coding => coding.id === current.id);
-    if (normalizeVariableInfoType(current.type) === 'NO_VALUE' || targets.length > 1 ||
-      (targets.length === 1 && !isFreshTarget(targets[0]))) {
+    if (targets.length > 1 ||
+      (targets.length === 1 && !isFreshTarget(targets[0], current))) {
       plan.problems.push(`Die aktuelle Variable „${name}“ kann nicht automatisch ersetzt werden: ` +
         'Sie besitzt bereits eigene Einstellungen oder ist keine aktive Basisvariable.');
       return;
@@ -85,17 +83,22 @@ export const getOrphanCodingResolutionPlan = (
       plan.problems.push(`Die technische ID der alten Kodierung „${name}“ ist nicht eindeutig.`);
       return;
     }
+    const dependents = new Set(candidates.flatMap(previous => getCodingDependents(previous, codings)));
     plan.conflicts.push({
       candidates,
       current,
-      dependents: codings.filter(coding => candidates.some(previous => coding.deriveSources?.includes(previous.id)))
+      dependents: codings.filter(coding => dependents.has(coding))
     });
   });
 
   if (plan.conflicts.length) {
     const previousCodings = new Set(plan.conflicts.flatMap(conflict => conflict.candidates));
-    const remaining = codings.filter(coding => !previousCodings.has(coding));
-    if (analyzeVariableIdentifiers(variables, remaining).hasProblems) {
+    // Decide cleanup against the original dependency graph, just as the commit does.
+    // Removing candidates first could hide a source that their transfer must retain.
+    const remainingIdentifiers = analyzeVariableIdentifiers(variables, codings).identifiers.filter(identifier => (
+      identifier.origin === 'VAR_LIST' || !previousCodings.has(codings[identifier.sourceIndex])
+    ));
+    if (validateVariableList(remainingIdentifiers).length) {
       plan.problems.push('Weitere ungültige Variablenbezeichner müssen zuerst an ihrer Quelle korrigiert werden.');
     }
   }
@@ -156,8 +159,11 @@ export const resolveOrphanCodings = (
     conflict.candidates.filter(candidate => !discardedIds.includes(candidate.id))
   ));
   if (selected.some(candidates => candidates.length !== 1)) return null;
+  if (selected.some(([candidate], index) => decisions[index] === 'TRANSFER' &&
+    !canTransferOrphanCoding(candidate, plan.conflicts[index].current))) return null;
 
-  const result = structuredClone(codings);
+  const removable = getRemovableOrphanBaseCodings(variables, codings);
+  const result = structuredClone(codings.filter(coding => !removable.has(coding)));
   const replacements = new Map<string, VariableInfo>();
   plan.conflicts.forEach((conflict, index) => {
     const previous = selected[index][0];
