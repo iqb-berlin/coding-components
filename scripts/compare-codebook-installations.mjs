@@ -50,6 +50,8 @@ const builtPackage = fileURLToPath(new URL('../dist/ngx-coding-components', impo
 const builtFiles = await packageFiles(builtPackage);
 const testedLock = JSON.parse(await readFile(new URL('../package-lock.json', import.meta.url), 'utf8'));
 const responsesVersion = testedLock.packages['node_modules/@iqb/responses'].version;
+const testedManifest = JSON.parse(await readFile(new URL('../projects/ngx-coding-components/package.json', import.meta.url), 'utf8'));
+const responsesPeerRange = testedManifest.peerDependencies['@iqb/responses'];
 const artifacts = [];
 for (const root of [studio, box]) {
   const lock = JSON.parse(await readFile(join(root, 'package-lock.json'), 'utf8'));
@@ -67,7 +69,7 @@ for (const root of [studio, box]) {
   const libraryRequire = createRequire(join(root, 'node_modules/@iqb/ngx-coding-components/package.json'));
   const manifest = libraryRequire('./package.json');
   assert.equal(manifest.dependencies['@iqb/responses'], undefined, 'Responses must not be privately pinned by the library');
-  assert.equal(manifest.peerDependencies['@iqb/responses'], '^5.3.1', 'the peer must exclude 5.3.0');
+  assert.equal(manifest.peerDependencies['@iqb/responses'], responsesPeerRange, 'the installed peer must match the reviewed library');
   assert.equal(libraryRequire.resolve('@iqb/responses'), hostRequire.resolve('@iqb/responses'),
     'Schemer, validation and generator must resolve the same Responses implementation as their host');
   assert.equal(hostRequire('@iqb/responses/package.json').version, responsesVersion, 'host must use the tested version');
@@ -211,7 +213,7 @@ await writeFile(join(output, 'installation-comparison.json'), JSON.stringify({ h
   inlineImageCases: inlineImageCases.length, inlineImageExportPairs,
   identicalJson: true, identicalAllDocxParts: true, artifactIntegrity: artifacts[0],
   identicalInstalledPackageFiles: true, installedPackageFiles: builtFiles.length,
-  responsesVersion, responsesPeerRange: '^5.3.1', responsesSharedWithHost: true,
+  responsesVersion, responsesPeerRange, responsesSharedWithHost: true,
   currentVariableInfoValidated: true, storedChemistryFormatsRecognized: true,
   realHostAdapters: true, inMemoryRepositories: true, httpBrowserRedis: false, windowsWord: false }, null, 2));
 console.log(`PASS: ${comparisons} export pairs through real Studio and Box preparation/adapters.`);

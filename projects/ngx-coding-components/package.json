@@ -59,7 +59,7 @@
     "ngx-tiptap": "^12.0.0",
     "prosemirror-state": "^1.3.4",
     "rxjs": "~7.8.0",
-    "@iqb/responses": "^5.4.0"
+    "@iqb/responses": "^5.5.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.2.24",
