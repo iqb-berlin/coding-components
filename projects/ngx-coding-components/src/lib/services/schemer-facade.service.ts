@@ -7,6 +7,7 @@ import { SchemerService } from './schemer.service';
 import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 import { analyzeVariableIdentifiers } from './schemer-identifier-validation';
 import { ResolveOrphanCodingsDialogComponent } from '../dialogs/resolve-orphan-codings-dialog.component';
+import { resolveDerivedCodingConflicts } from './derived-coding-conflict-resolution';
 import {
   getOrphanCodingResolutionPlan,
   resolveOrphanCodings
@@ -84,13 +85,19 @@ export class SchemerFacadeService {
         disableClose: true,
         data: {
           analysis,
+          variables: structuredClone(this.schemerService.varList),
+          variableCodings: structuredClone(scheme?.variableCodings || []),
+          canEdit: () => this.schemerService.userRole !== 'RO',
           ...(plan.problems.length ? { recoveryProblems: plan.problems } : {})
         }
       }
     );
     this.dialogContext.afterClosed(dialogRef).subscribe(result => {
       this.resolvingIdentifierConflicts = false;
-      if (canResolve && result && Array.isArray(result.decisions) && Array.isArray(result.discardedIds)) {
+      const orphanResult = canResolve && result &&
+        Array.isArray(result.decisions) && Array.isArray(result.discardedIds);
+      const derivedResult = !canResolve && result && Array.isArray(result.derivedChanges);
+      if (orphanResult || derivedResult) {
         const currentSnapshot = JSON.stringify([
           this.schemerService.varList, this.schemerService.codingScheme?.variableCodings
         ]);
@@ -100,9 +107,11 @@ export class SchemerFacadeService {
           return;
         }
         if (scheme && this.schemerService.userRole !== 'RO') {
-          const resolved = resolveOrphanCodings(
+          const resolved = orphanResult ? resolveOrphanCodings(
             this.schemerService.varList, scheme.variableCodings, result.decisions, result.discardedIds
-          );
+          ) : resolveDerivedCodingConflicts(
+            this.schemerService.varList, scheme.variableCodings, result.derivedChanges, result.confirmDeletion
+          ).variableCodings;
           if (resolved) {
             scheme.variableCodings = resolved;
             this.dismissedIdentifierConflictSignature = null;

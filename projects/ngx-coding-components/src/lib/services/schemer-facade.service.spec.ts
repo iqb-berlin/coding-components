@@ -75,6 +75,102 @@ describe('SchemerFacadeService', () => {
     expect(changes).not.toHaveBeenCalled();
   });
 
+  describe('derived alias conflicts', () => {
+    const prepareDerived = () => {
+      schemerService.setVarList([{ id: 'new_mc', alias: '01', type: 'string' } as never]);
+      const oldRow = { ...CodingFactory.createCodingVariable('old_row'), alias: '01a' };
+      oldRow.codes = [{ id: 1, type: 'FULL_CREDIT', score: 2 }];
+      schemerService.setCodingScheme({
+        version: '3.5',
+        variableCodings: [oldRow, {
+          ...CodingFactory.createCodingVariable('derived'),
+          alias: '01',
+          sourceType: 'SUM_SCORE',
+          deriveSources: ['old_row'],
+          codes: [{ id: 1, type: 'FULL_CREDIT', score: 3 }]
+        }]
+      } as never);
+      const afterClosed = new Subject<unknown>();
+      (dialog.open as jasmine.Spy).and.returnValue({
+        close: jasmine.createSpy('close'), afterClosed: () => afterClosed
+      });
+      const service = createService();
+      const changes = jasmine.createSpy('changes');
+      service.identifierConflictChanges$.subscribe(changes);
+      service.tryResolveIdentifierConflicts();
+      const data = (dialog.open as jasmine.Spy).calls.mostRecent().args[1].data;
+      return {
+        service, afterClosed, changes, data, before: structuredClone(schemerService.codingScheme)
+      };
+    };
+    const rename = { derivedChanges: [{ id: 'derived', action: 'RENAME', alias: 'old_01' }], confirmDeletion: false };
+
+    it('opens an editable derived-conflict dialog using a detached snapshot', () => {
+      const { data, before } = prepareDerived();
+      expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(ResolveIdentifierConflictsDialogComponent);
+      expect(data.canEdit()).toBeTrue();
+      expect(data.variableCodings).toEqual(before!.variableCodings);
+      data.variableCodings[1].codes = [];
+      expect(schemerService.codingScheme).toEqual(before);
+    });
+
+    it('commits a rename exactly once and preserves all coding content', () => {
+      const { afterClosed, changes, before } = prepareDerived();
+      const host = structuredClone(schemerService.varList);
+      afterClosed.next(rename);
+      afterClosed.next(rename);
+      expect(schemerService.codingScheme!.variableCodings).toEqual([
+        before!.variableCodings[0], { ...before!.variableCodings[1], alias: 'old_01' }
+      ]);
+      expect(schemerService.varList).toEqual(host);
+      expect(changes).toHaveBeenCalledOnceWith(true);
+    });
+
+    it('deletes only the explicitly confirmed derived variable', () => {
+      const { afterClosed, changes, before } = prepareDerived();
+      afterClosed.next({ derivedChanges: [{ id: 'derived', action: 'DELETE' }], confirmDeletion: true });
+      expect(schemerService.codingScheme!.variableCodings).toEqual([before!.variableCodings[0]]);
+      expect(changes).toHaveBeenCalledOnceWith(true);
+    });
+
+    [undefined, { derivedChanges: [{ id: 'old_row', action: 'DELETE' }], confirmDeletion: true },
+      { derivedChanges: [{ id: 'derived', action: 'DELETE' }], confirmDeletion: false },
+      { derivedChanges: [{ id: 'derived', action: 'RENAME', alias: 'bad.alias' }] }].forEach(result => {
+      it(`leaves the scheme unchanged for cancellation or invalid requests: ${JSON.stringify(result)}`, () => {
+        const { afterClosed, changes, before } = prepareDerived();
+        afterClosed.next(result);
+        expect(schemerService.codingScheme).toEqual(before);
+        expect(changes).not.toHaveBeenCalled();
+      });
+    });
+
+    it('rechecks write rights before applying derived changes', () => {
+      const {
+        afterClosed, data, changes, before
+      } = prepareDerived();
+      schemerService.setUserRole('RO');
+      expect(data.canEdit()).toBeFalse();
+      afterClosed.next(rename);
+      expect(schemerService.codingScheme).toEqual(before);
+      expect(changes).not.toHaveBeenCalled();
+    });
+
+    ['content', 'variables', 'replacement', 'reset'].forEach(update => {
+      it(`rejects stale derived edits after a ${update} update`, () => {
+        const { service, afterClosed, changes } = prepareDerived();
+        if (update === 'content') schemerService.codingScheme!.variableCodings[1].manualInstruction = 'Later change';
+        if (update === 'variables') schemerService.varList[0].alias = 'other';
+        if (update === 'replacement') schemerService.setCodingScheme(structuredClone(schemerService.codingScheme));
+        if (update === 'reset') service.resetIdentifierConflictResolutionState();
+        const before = structuredClone(schemerService.codingScheme);
+        afterClosed.next(rename);
+        expect(schemerService.codingScheme).toEqual(before);
+        if (update === 'reset') expect(changes).not.toHaveBeenCalled();
+        else expect(changes).toHaveBeenCalledOnceWith(false);
+      });
+    });
+  });
+
   ['no-value', 'NO_VALUE'].forEach(type => {
     (['TRANSFER', 'START_EMPTY', undefined] as const).forEach(decision => {
       it(`resolves the combined text/radio facade case with ${type} and ${decision || 'cancel'}`, () => {
@@ -344,7 +440,7 @@ describe('SchemerFacadeService', () => {
       ResolveIdentifierConflictsDialogComponent
     );
     expect((dialog.open as jasmine.Spy).calls.mostRecent().args[1].data)
-      .toEqual({ analysis });
+      .toEqual(jasmine.objectContaining({ analysis, variables: schemerService.varList, variableCodings: [] }));
   });
 
   it('tryResolveIdentifierConflicts should open dialog when duplicates exist', () => {
