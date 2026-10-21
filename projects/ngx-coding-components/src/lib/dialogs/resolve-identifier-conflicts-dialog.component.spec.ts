@@ -1,5 +1,6 @@
 import { MatDialogRef } from '@angular/material/dialog';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
+import { CodingFactory } from '@iqb/responses/coding-factory';
 import {
   ResolveIdentifierConflictsDialogComponent,
   ResolveIdentifierConflictsDialogData
@@ -135,5 +136,86 @@ describe('ResolveIdentifierConflictsDialogComponent', () => {
     expect(dialogRef.close).toHaveBeenCalled();
     expect((dialogRef.close as jasmine.Spy).calls.mostRecent().args.length)
       .toBe(0);
+  });
+
+  const prepareDerived = () => {
+    const variables = [{ id: 'new_mc', alias: '01' }] as VariableInfo[];
+    const variableCodings = [{
+      ...CodingFactory.createCodingVariable('derived'),
+      alias: '01',
+      sourceType: 'SUM_SCORE' as const,
+      deriveSources: ['old_row'],
+      codes: [{ id: 1, type: 'FULL_CREDIT' as const, score: 3 }]
+    }];
+    const dialogRef = { close: jasmine.createSpy('close') } as unknown as
+      MatDialogRef<ResolveIdentifierConflictsDialogComponent>;
+    const data: ResolveIdentifierConflictsDialogData = {
+      analysis: analyzeVariableIdentifiers(variables, variableCodings), variables, variableCodings, canEdit: () => true
+    };
+    const component = new ResolveIdentifierConflictsDialogComponent(dialogRef, data);
+    return { component, data, dialogRef };
+  };
+
+  it('stages a rename without mutation and returns only the confirmed request, once', () => {
+    const { component, data, dialogRef } = prepareDerived();
+    const before = JSON.stringify(data);
+    component.rename(component.derivedEdits[0], 'old_01');
+    expect(component.canApply).toBeTrue();
+    expect(JSON.stringify(data)).toBe(before);
+    expect(dialogRef.close).not.toHaveBeenCalled();
+    component.apply();
+    component.apply();
+    expect(dialogRef.close).toHaveBeenCalledOnceWith({
+      derivedChanges: [{ id: 'derived', action: 'RENAME', alias: 'old_01' }], confirmDeletion: false
+    });
+  });
+
+  it('rejects invalid and duplicate aliases in the dialog', () => {
+    const { component, dialogRef } = prepareDerived();
+    ['', 'bad.alias', '01'].forEach(alias => {
+      component.rename(component.derivedEdits[0], alias);
+      expect(component.canApply).toBeFalse();
+      component.apply();
+    });
+    expect(dialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('requires explicit deletion confirmation and resets it whenever the deletion selection changes', () => {
+    const { component, dialogRef } = prepareDerived();
+    component.markDeleted(component.derivedEdits[0], true);
+    expect(component.canApply).toBeFalse();
+    component.confirmDeletes(true);
+    expect(component.canApply).toBeTrue();
+    component.markDeleted(component.derivedEdits[0], false);
+    expect(component.confirmDeletion).toBeFalse();
+    component.markDeleted(component.derivedEdits[0], true);
+    expect(component.canApply).toBeFalse();
+    component.confirmDeletes(true);
+    component.apply();
+    expect(dialogRef.close).toHaveBeenCalledOnceWith({
+      derivedChanges: [{ id: 'derived', action: 'DELETE' }], confirmDeletion: true
+    });
+  });
+
+  it('cancels staged deletion without returning changes or mutating the scheme', () => {
+    const { component, data, dialogRef } = prepareDerived();
+    const before = JSON.stringify(data);
+    component.markDeleted(component.derivedEdits[0], true);
+    component.confirmDeletes(true);
+    component.close();
+    component.apply();
+    expect(dialogRef.close).toHaveBeenCalledOnceWith();
+    expect(JSON.stringify(data)).toBe(before);
+  });
+
+  it('rejects pending edits when write access is revoked', () => {
+    const { component, data, dialogRef } = prepareDerived();
+    component.rename(component.derivedEdits[0], 'old_01');
+    data.canEdit = () => false;
+    component.apply();
+    expect(component.canApply).toBeFalse();
+    expect(dialogRef.close).not.toHaveBeenCalled();
+    component.markDeleted(component.derivedEdits[0], true);
+    expect(component.hasDeletions).toBeFalse();
   });
 });

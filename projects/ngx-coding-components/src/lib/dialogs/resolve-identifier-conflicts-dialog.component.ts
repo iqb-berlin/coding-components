@@ -7,6 +7,12 @@ import {
   MatDialogTitle
 } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import {
   VariableValidationError,
   VariableValidationErrorCode
@@ -16,10 +22,27 @@ import {
   SchemerIdentifierAnalysis,
   SchemerIdentifierOrigin
 } from '../services/schemer-identifier-validation';
+import {
+  DerivedCodingConflictChange, getConflictingDerivedCodings, resolveDerivedCodingConflicts
+} from '../services/derived-coding-conflict-resolution';
 
 export interface ResolveIdentifierConflictsDialogData {
   analysis: SchemerIdentifierAnalysis;
   recoveryProblems?: string[];
+  variables?: VariableInfo[];
+  variableCodings?: VariableCodingData[];
+  canEdit?: () => boolean;
+}
+
+interface DerivedCodingEdit {
+  coding: VariableCodingData;
+  alias: string;
+  deleted: boolean;
+}
+
+export interface DerivedIdentifierConflictResult {
+  derivedChanges: DerivedCodingConflictChange[];
+  confirmDeletion: boolean;
 }
 
 interface ValidationErrorGroup {
@@ -65,11 +88,14 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
       @for (problem of data.recoveryProblems || []; track $index) {
         <p role="alert">{{ problem }}</p>
       }
-      <p>
-        Die Variablenbezeichner können nicht übernommen werden. Bitte
-        korrigiere die betroffenen Einträge an der jeweils angegebenen Quelle
-        und lade den Schemer neu.
-      </p>
+      <p>Die Variablenbezeichner können nicht übernommen werden.</p>
+      @if (derivedEdits.length) {
+        <p>Du kannst die betroffenen abgeleiteten Variablen hier gezielt umbenennen oder zum Löschen vormerken.
+          Beim Umbenennen bleiben Kodierungen und Quellen erhalten; Formelverweise werden angepasst.
+          Abbrechen verwirft die Auswahl. Andere Konflikte müssen an ihrer angegebenen Quelle korrigiert werden.</p>
+      } @else {
+        <p>Bitte korrigiere die betroffenen Einträge an der jeweils angegebenen Quelle und lade den Schemer neu.</p>
+      }
 
       <aside class="identifier-help">
         <b>Erlaubte Bezeichner:</b>
@@ -105,15 +131,56 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
           }
         </section>
       }
+
+      @if (derivedEdits.length) {
+        <h2>Abgeleitete Variablen bearbeiten</h2>
+        @for (edit of derivedEdits; track edit.coding.id) {
+          <section class="derived-edit" [attr.aria-label]="'Abgeleitete Variable ' + edit.coding.id">
+            <b>{{ edit.coding.alias || edit.coding.id }}</b>
+            <p>Technische ID: {{ edit.coding.id }} · {{ edit.coding.codes?.length || 0 }} Codes ·
+              {{ edit.coding.deriveSources?.length || 0 }} Quellen</p>
+            @if (edit.deleted) {
+              <p>Diese Ableitung einschließlich ihrer Regeln, Bewertungen und Hinweise ist zum Löschen vorgemerkt.
+                Ihre Quellvariablen und deren Kodierungen bleiben erhalten.</p>
+              <button mat-button [disabled]="!canEdit" (click)="markDeleted(edit, false)">Rückgängig</button>
+            } @else {
+              <mat-form-field appearance="fill">
+                <mat-label>Neuer Alias für {{ edit.coding.alias || edit.coding.id }}</mat-label>
+                <input matInput [ngModel]="edit.alias" (ngModelChange)="rename(edit, $event)" [disabled]="!canEdit">
+              </mat-form-field>
+              <button mat-button [disabled]="!canEdit" (click)="markDeleted(edit, true)">
+                Ableitung zum Löschen vormerken
+              </button>
+            }
+          </section>
+        }
+        @if (hasDeletions) {
+          <mat-checkbox [ngModel]="confirmDeletion" (ngModelChange)="confirmDeletes($event)" [disabled]="!canEdit">
+            Vorgemerkte Ableitungen einschließlich ihrer Kodierung löschen
+          </mat-checkbox>
+        }
+        @for (problem of editProblems; track $index) { <p role="alert">{{ problem }}</p> }
+        @if (!canEdit) { <p role="status">Du hast nur Leserechte. Die Kodierungen können nicht verändert werden.</p> }
+      }
     </mat-dialog-content>
 
     <mat-dialog-actions align="end">
       <button mat-raised-button color="primary" (click)="close()">
-        Schließen
+        {{ derivedEdits.length ? 'Abbrechen' : 'Schließen' }}
       </button>
+      @if (derivedEdits.length) {
+        <button mat-raised-button color="primary" [disabled]="!canApply" (click)="apply()">
+          Änderungen übernehmen
+        </button>
+      }
     </mat-dialog-actions>
   `,
   styles: [`
+    :host { display: flex; flex-direction: column; max-height: 95vh; }
+    mat-dialog-content { min-height: 0; flex: 1 1 auto; }
+    mat-dialog-actions { gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+    .derived-edit { border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; overflow-wrap: anywhere; }
+    .derived-edit mat-form-field { display: block; }
     .identifier-help {
       background: #f5f7ff;
       border-left: 4px solid #3f51b5;
@@ -151,15 +218,25 @@ const ERROR_GROUPS: Array<Omit<ValidationErrorGroup, 'errors'>> = [
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatButton
+    MatButton,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatCheckbox
   ]
 })
 export class ResolveIdentifierConflictsDialogComponent {
   identifiers: SchemerIdentifier[];
   errorGroups: ValidationErrorGroup[] = [];
+  derivedEdits: DerivedCodingEdit[];
+  confirmDeletion = false;
+  editProblems: string[] = [];
+  private validEdits = false;
+  private completed = false;
 
   constructor(
-    private dialogRef: MatDialogRef<ResolveIdentifierConflictsDialogComponent>,
+    private dialogRef: MatDialogRef<ResolveIdentifierConflictsDialogComponent, DerivedIdentifierConflictResult>,
     @Inject(MAT_DIALOG_DATA) public data: ResolveIdentifierConflictsDialogData
   ) {
     this.identifiers = data.analysis.identifiers.map(identifier => ({
@@ -171,6 +248,57 @@ export class ResolveIdentifierConflictsDialogComponent {
         errors: data.analysis.errors.filter(error => error.code === group.code)
       }))
       .filter(group => group.errors.length > 0);
+    this.derivedEdits = getConflictingDerivedCodings(data.variables || [], data.variableCodings || [])
+      .map(coding => ({ coding, alias: coding.alias ?? coding.id, deleted: false }));
+  }
+
+  get canEdit(): boolean { return !this.completed && !!this.data.canEdit?.(); }
+
+  get hasDeletions(): boolean { return this.derivedEdits.some(edit => edit.deleted); }
+
+  get canApply(): boolean { return this.canEdit && this.validEdits; }
+
+  private changes(): DerivedCodingConflictChange[] {
+    return this.derivedEdits.flatMap((edit): DerivedCodingConflictChange[] => {
+      if (edit.deleted) return [{ id: edit.coding.id, action: 'DELETE' }];
+      return edit.alias === (edit.coding.alias ?? edit.coding.id) ? [] :
+        [{ id: edit.coding.id, action: 'RENAME', alias: edit.alias }];
+    });
+  }
+
+  private validateEdits(): void {
+    const changes = this.changes();
+    const result = changes.length ? resolveDerivedCodingConflicts(
+      this.data.variables || [], this.data.variableCodings || [], changes, this.confirmDeletion
+    ) : null;
+    this.validEdits = !!result?.variableCodings;
+    this.editProblems = result?.problems || [];
+  }
+
+  rename(edit: DerivedCodingEdit, alias: string): void {
+    if (!this.canEdit || edit.deleted) return;
+    edit.alias = alias;
+    this.validateEdits();
+  }
+
+  markDeleted(edit: DerivedCodingEdit, deleted: boolean): void {
+    if (!this.canEdit) return;
+    edit.deleted = deleted;
+    this.confirmDeletion = false;
+    this.validateEdits();
+  }
+
+  confirmDeletes(confirmed: boolean): void {
+    if (!this.canEdit) return;
+    this.confirmDeletion = confirmed;
+    this.validateEdits();
+  }
+
+  apply(): void {
+    this.validateEdits();
+    if (!this.canApply) return;
+    this.completed = true;
+    this.dialogRef.close({ derivedChanges: this.changes(), confirmDeletion: this.confirmDeletion });
   }
 
   displayId(variableIndex: number): string {
@@ -209,6 +337,8 @@ export class ResolveIdentifierConflictsDialogComponent {
   }
 
   close(): void {
+    if (this.completed) return;
+    this.completed = true;
     this.dialogRef.close();
   }
 }
