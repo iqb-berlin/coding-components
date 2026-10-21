@@ -64,10 +64,8 @@ import {
   CodingSchemeValidationProblem,
   validateCodingScheme
 } from '../services/coding-scheme-validation';
-import {
-  isEmptyVariableCoding,
-  validateVariableCodingChange
-} from '../services/schemer-identifier-validation';
+import { validateVariableCodingChange } from '../services/schemer-identifier-validation';
+import { getRemovableOrphanBaseCodings } from '../services/base-coding-cleanup';
 
 @Component({
   selector: 'iqb-schemer',
@@ -218,15 +216,12 @@ export class SchemerComponent implements OnDestroy {
       this.schemerService.codingScheme.variableCodings
     ) {
       // remove orphan+empty base variables
-      const varListIds = this.schemerService.varList.map(v => v.id);
       const variableCodings =
         this.schemerService.codingScheme.variableCodings;
-      const varCodingsToDelete = variableCodings.filter(
-        bv => bv.sourceType === 'BASE' &&
-          varListIds.indexOf(bv.id) < 0 &&
-          SchemerComponent.isEmptyCoding(bv)
+      const varCodingsToDelete = getRemovableOrphanBaseCodings(
+        this.schemerService.varList, variableCodings
       );
-      if (varCodingsToDelete.length > 0) {
+      if (varCodingsToDelete.size > 0) {
         varCodingsToDelete.forEach(vc => {
           const varCodingIndexToDelete = variableCodings.indexOf(vc);
           if (varCodingIndexToDelete >= 0) {
@@ -494,10 +489,6 @@ export class SchemerComponent implements OnDestroy {
         }
       });
     }
-  }
-
-  private static isEmptyCoding(coding: VariableCodingData): boolean {
-    return isEmptyVariableCoding(coding);
   }
 
   addVarScheme() {

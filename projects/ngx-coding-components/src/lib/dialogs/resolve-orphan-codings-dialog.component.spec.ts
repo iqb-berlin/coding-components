@@ -36,6 +36,23 @@ describe('ResolveOrphanCodingsDialogComponent', () => {
 
   beforeEach(() => { canEdit = signal(true); });
 
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    it(`offers a discard-only repair for a protected orphan and current ${type} text`, () => {
+      const entry = conflict();
+      entry.current = JSON.parse(JSON.stringify({ ...entry.current, type }));
+      entry.candidates[0].sourceType = 'BASE_NO_VALUE';
+      const { component, fixture, close } = create([entry]);
+      const transfer: HTMLButtonElement = fixture.nativeElement.querySelector('button[color="primary"]');
+      expect(transfer.disabled).toBeTrue();
+      expect(fixture.nativeElement.textContent).toContain('Textelemente ohne Antwortwert bleiben deaktiviert');
+      expect(fixture.nativeElement.textContent).toContain('Original instructions');
+      component.decide('TRANSFER');
+      expect(close).not.toHaveBeenCalled();
+      component.decide('START_EMPTY');
+      expect(close).toHaveBeenCalledOnceWith({ decisions: ['START_EMPTY'], discardedIds: [] });
+    });
+  });
+
   it('shows the full instructions and warns that dependent sources need repair after starting empty', () => {
     const { fixture } = create();
     const element: HTMLElement = fixture.nativeElement;

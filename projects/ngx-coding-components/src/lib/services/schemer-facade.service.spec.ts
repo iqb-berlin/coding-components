@@ -1,5 +1,6 @@
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
+import { CodingFactory } from '@iqb/responses/coding-factory';
 import { ResolveIdentifierConflictsDialogComponent } from '../dialogs/resolve-identifier-conflicts-dialog.component';
 import { SchemerFacadeService } from './schemer-facade.service';
 import { SchemerService } from './schemer.service';
@@ -19,8 +20,11 @@ describe('SchemerFacadeService', () => {
 
   const createService = () => new SchemerFacadeService(schemerService, dialog);
 
-  const prepareRecovery = () => {
-    schemerService.setVarList([{ id: 'current', alias: 'response', type: 'string' } as never]);
+  const prepareRecovery = (textType?: string) => {
+    schemerService.setVarList([
+      { id: 'current', alias: 'response', type: 'string' } as never,
+      ...(textType ? [{ id: 'current-text', alias: 'text_1', type: textType } as never] : [])
+    ]);
     schemerService.setCodingScheme({
       variableCodings: [
         {
@@ -31,6 +35,11 @@ describe('SchemerFacadeService', () => {
         }
       ]
     } as never);
+    if (textType) {
+      schemerService.codingScheme!.variableCodings.push({
+        ...CodingFactory.createBaseCodingVariable('previous-text', 'BASE_NO_VALUE'), alias: 'text_1'
+      });
+    }
     const afterClosed = new Subject<unknown>();
     (dialog.open as jasmine.Spy).and.returnValue({
       close: jasmine.createSpy('close'),
@@ -45,6 +54,53 @@ describe('SchemerFacadeService', () => {
       service, afterClosed, changes, before
     };
   };
+
+  it('shows the diagnostic dialog instead of offering a transfer that would fail on a retained source conflict', () => {
+    const { service, afterClosed, changes } = prepareRecovery();
+    afterClosed.next(undefined);
+    schemerService.codingScheme!.variableCodings[0].deriveSources = ['old-text'];
+    schemerService.codingScheme!.variableCodings.push({
+      ...CodingFactory.createBaseCodingVariable('old-text', 'BASE_NO_VALUE'), alias: 'result'
+    });
+    const before = JSON.stringify(schemerService.codingScheme);
+    service.resetIdentifierConflictResolutionState();
+    service.tryResolveIdentifierConflicts();
+    const call = (dialog.open as jasmine.Spy).calls.mostRecent();
+    expect(call.args[0]).toBe(ResolveIdentifierConflictsDialogComponent);
+    expect(call.args[1].data.recoveryProblems).toEqual([
+      'Weitere ungültige Variablenbezeichner müssen zuerst an ihrer Quelle korrigiert werden.'
+    ]);
+    afterClosed.next({ decisions: ['TRANSFER'], discardedIds: [] });
+    expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+    expect(changes).not.toHaveBeenCalled();
+  });
+
+  ['no-value', 'NO_VALUE'].forEach(type => {
+    (['TRANSFER', 'START_EMPTY', undefined] as const).forEach(decision => {
+      it(`resolves the combined text/radio facade case with ${type} and ${decision || 'cancel'}`, () => {
+        const { afterClosed, changes, before } = prepareRecovery(type);
+        const variables = JSON.stringify(schemerService.varList);
+        expect((dialog.open as jasmine.Spy).calls.mostRecent().args[0]).toBe(ResolveOrphanCodingsDialogComponent);
+        expect((dialog.open as jasmine.Spy).calls.mostRecent().args[1].data.conflicts.length).toBe(1);
+        expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+        afterClosed.next(decision ? { decisions: [decision], discardedIds: [] } : undefined);
+        afterClosed.complete();
+        if (decision) {
+          expect(changes).toHaveBeenCalledOnceWith(true);
+          expect(schemerService.codingScheme!.variableCodings.map(coding => coding.id))
+            .not.toContain('previous-text');
+          expect(schemerService.codingScheme!.variableCodings.find(coding => coding.id === 'current-text'))
+            .toEqual(jasmine.objectContaining({ sourceType: 'BASE_NO_VALUE', alias: 'text_1', codes: [] }));
+          expect(schemerService.codingScheme!.variableCodings.find(coding => coding.id === 'current')?.codes)
+            .toEqual(decision === 'TRANSFER' ? [{ id: 1, score: 2 }] : []);
+        } else {
+          expect(changes).not.toHaveBeenCalled();
+          expect(JSON.stringify(schemerService.codingScheme)).toBe(before);
+        }
+        expect(JSON.stringify(schemerService.varList)).toBe(variables);
+      });
+    });
+  });
 
   it('offers explicit recovery for one orphan and commits a transfer exactly once', () => {
     const { afterClosed, changes } = prepareRecovery();

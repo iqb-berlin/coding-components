@@ -10,6 +10,7 @@ import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SchemerComponent } from './schemer.component';
 import { SchemerFacadeService } from '../services/schemer-facade.service';
 import { SchemerService } from '../services/schemer.service';
+import { isEmptyVariableCoding } from '../services/base-coding-cleanup';
 import { ResolveOrphanCodingsDialogComponent } from '../dialogs/resolve-orphan-codings-dialog.component';
 
 class FakeTranslateService {
@@ -490,7 +491,7 @@ describe('SchemerComponent', () => {
     expect(ids).not.toContain('orphan');
   });
 
-  it('updateVariableLists should remove the empty instance when orphan BASE ids collide', () => {
+  it('updateVariableLists should preserve ambiguous orphan BASE ids for explicit repair', () => {
     const populatedOrphan: VariableCodingData = {
       id: 'orphan',
       alias: 'orphan',
@@ -541,7 +542,7 @@ describe('SchemerComponent', () => {
     expect(schemerService.codingScheme?.variableCodings)
       .toContain(populatedOrphan);
     expect(schemerService.codingScheme?.variableCodings)
-      .not.toContain(emptyOrphan);
+      .toContain(emptyOrphan);
   });
 
   it('updateVariableLists should add missing BASE variables for varList entries and sync aliases', () => {
@@ -1284,34 +1285,27 @@ describe('SchemerComponent', () => {
       .toBe(MessageDialogComponent);
   });
 
-  it('isEmptyCoding should return false when label differs from id', () => {
-    const schemerComponentPrivate = SchemerComponent as unknown as {
-      isEmptyCoding: (coding: VariableCodingData) => boolean;
-    };
+  it('isEmptyVariableCoding should return false when label differs from id', () => {
     const coding = { id: 'x', label: 'Label', sourceType: 'BASE' } as unknown as VariableCodingData;
-    expect(schemerComponentPrivate.isEmptyCoding(coding)).toBeFalse();
+    expect(isEmptyVariableCoding(coding)).toBeFalse();
   });
 
-  it('isEmptyCoding should return false when processing/fragmenting/codes are present', () => {
-    const schemerComponentPrivate = SchemerComponent as unknown as {
-      isEmptyCoding: (coding: VariableCodingData) => boolean;
-    };
-
-    expect(schemerComponentPrivate.isEmptyCoding({
+  it('isEmptyVariableCoding should return false when processing/fragmenting/codes are present', () => {
+    expect(isEmptyVariableCoding({
       id: 'x',
       label: 'x',
       sourceType: 'BASE',
       processing: ['SORT_ARRAY']
     } as unknown as VariableCodingData)).toBeFalse();
 
-    expect(schemerComponentPrivate.isEmptyCoding({
+    expect(isEmptyVariableCoding({
       id: 'x',
       label: 'x',
       sourceType: 'BASE',
       fragmenting: 'f'
     } as unknown as VariableCodingData)).toBeFalse();
 
-    expect(schemerComponentPrivate.isEmptyCoding({
+    expect(isEmptyVariableCoding({
       id: 'x',
       label: 'x',
       sourceType: 'BASE',
@@ -1321,12 +1315,8 @@ describe('SchemerComponent', () => {
     } as unknown as VariableCodingData)).toBeFalse();
   });
 
-  it('isEmptyCoding should return false when manualInstruction is non-empty', () => {
-    const schemerComponentPrivate = SchemerComponent as unknown as {
-      isEmptyCoding: (coding: VariableCodingData) => boolean;
-    };
-
-    expect(schemerComponentPrivate.isEmptyCoding({
+  it('isEmptyVariableCoding should return false when manualInstruction is non-empty', () => {
+    expect(isEmptyVariableCoding({
       id: 'x',
       label: 'x',
       sourceType: 'BASE',
@@ -1335,12 +1325,8 @@ describe('SchemerComponent', () => {
     } as unknown as VariableCodingData)).toBeFalse();
   });
 
-  it('isEmptyCoding should return false when codeModel is not MANUAL_AND_RULES', () => {
-    const schemerComponentPrivate = SchemerComponent as unknown as {
-      isEmptyCoding: (coding: VariableCodingData) => boolean;
-    };
-
-    expect(schemerComponentPrivate.isEmptyCoding({
+  it('isEmptyVariableCoding should return false for an unsupported codeModel', () => {
+    expect(isEmptyVariableCoding({
       id: 'x',
       label: 'x',
       sourceType: 'BASE',
@@ -1348,12 +1334,8 @@ describe('SchemerComponent', () => {
     } as unknown as VariableCodingData)).toBeFalse();
   });
 
-  it('isEmptyCoding should return true for minimal empty coding', () => {
-    const schemerComponentPrivate = SchemerComponent as unknown as {
-      isEmptyCoding: (coding: VariableCodingData) => boolean;
-    };
-
-    expect(schemerComponentPrivate.isEmptyCoding({
+  it('isEmptyVariableCoding should return true for minimal empty coding', () => {
+    expect(isEmptyVariableCoding({
       id: 'x',
       label: 'x',
       sourceType: 'BASE',

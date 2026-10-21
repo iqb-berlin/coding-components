@@ -8,7 +8,7 @@ import { MatButton } from '@angular/material/button';
 import { ToTextFactory } from '@iqb/responses';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import {
-  OrphanCodingConflict, OrphanCodingDecision, OrphanCodingResolution
+  canTransferOrphanCoding, OrphanCodingConflict, OrphanCodingDecision, OrphanCodingResolution
 } from '../services/orphan-coding-resolution';
 
 export interface ResolveOrphanCodingsDialogData {
@@ -58,9 +58,14 @@ export interface ResolveOrphanCodingsDialogData {
           Prüfe bei Formeln auch die Variablenverweise im Formelausdruck.
         </aside>
       }
-      <p>„Kodierung übernehmen“ überträgt die verbleibende alte Kodierung auf das aktuelle Element.
-        „Neu beginnen“ legt dort eine leere Kodierung an.
-        In beiden Fällen werden die alten Basiskodierungen gelöscht.</p>
+      @if (canTransfer) {
+        <p>„Kodierung übernehmen“ überträgt die verbleibende alte Kodierung auf das aktuelle Element.</p>
+      } @else if (candidates.length === 1) {
+        <p>Diese alte Kodierung kann nicht auf das aktuelle Element übertragen werden.
+          Textelemente ohne Antwortwert bleiben deaktiviert.</p>
+      }
+      <p>„Neu beginnen“ setzt den Schemaeintrag des aktuellen Elements auf seine Standardwerte zurück
+        und löscht die alten Basiskodierungen.</p>
       @if (!data.canEdit()) {
         <p role="status">Du hast nur Leserechte. Die Kodierungen können nicht verändert werden.</p>
       }
@@ -71,7 +76,7 @@ export interface ResolveOrphanCodingsDialogData {
       <button mat-button (click)="cancel()">Abbrechen</button>
       <button mat-stroked-button [disabled]="!data.canEdit() || candidates.length !== 1"
         (click)="decide('START_EMPTY', $event.detail)">Neu beginnen und alte Kodierung löschen</button>
-      <button mat-raised-button color="primary" [disabled]="!data.canEdit() || candidates.length !== 1"
+      <button mat-raised-button color="primary" [disabled]="!data.canEdit() || !canTransfer"
         (click)="decide('TRANSFER', $event.detail)">Kodierung übernehmen</button>
     </mat-dialog-actions>
   `,
@@ -103,6 +108,10 @@ export class ResolveOrphanCodingsDialogComponent {
 
   get candidates(): VariableCodingData[] {
     return this.conflict.candidates.filter(candidate => !this.discardedIds.includes(candidate.id));
+  }
+
+  get canTransfer(): boolean {
+    return this.candidates.length === 1 && canTransferOrphanCoding(this.candidates[0], this.conflict.current);
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -144,6 +153,7 @@ export class ResolveOrphanCodingsDialogComponent {
 
   decide(decision: OrphanCodingDecision, clickCount = 1): void {
     if (this.completed || clickCount > 1 || !this.data.canEdit() || this.candidates.length !== 1) return;
+    if (decision === 'TRANSFER' && !this.canTransfer) return;
     this.decisions.push(decision);
     if (this.index + 1 === this.data.conflicts.length) {
       this.completed = true;

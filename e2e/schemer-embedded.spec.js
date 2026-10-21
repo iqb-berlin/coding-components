@@ -4,7 +4,9 @@ const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
-const { CodingFactory, CodingSchemeFactory } = require('@iqb/responses');
+const {
+  CodingFactory, CodingSchemeFactory, normalizeVariableInfoType, normalizeVariableInfoFormat
+} = require('@iqb/responses');
 const veronaSchema = require('./fixtures/verona/schemer-3.2.0.json');
 const variableSchema = require('./fixtures/verona/variable-info-1.3.json');
 const variableInfo21Schema = require('./fixtures/verona/variable-info-2.1.json');
@@ -108,13 +110,24 @@ const makeOrphanStart = (sessionId = 'orphan-recovery', currentId = 'current') =
 async function loadEmbeddedSchemer(
   page,
   start = makeStart([makeVariable('response_1'), makeVariable('response_2')]),
-  { variableInfo21 = false } = {}
+  { variableInfo21 = false, compatibleVariableInfo = false } = {}
 ) {
   // The message envelope remains API 3.2; 2.1 variable payloads are an additive compatibility feature.
-  expectVeronaMessage(variableInfo21 ? { ...start, variables: [] } : start);
-  if (variableInfo21) {
+  expectVeronaMessage(variableInfo21 || compatibleVariableInfo ? { ...start, variables: [] } : start);
+  if (variableInfo21 || compatibleVariableInfo) {
     start.variables.forEach(variable => {
-      expect(validateVariableInfo21(variable), JSON.stringify(validateVariableInfo21.errors)).toBe(true);
+      // Validate current identifiers for both supported spellings; send the original host payload unchanged.
+      const validationCopy = compatibleVariableInfo ? {
+        ...variable,
+        type: normalizeVariableInfoType(variable.type),
+        ...(variable.format ? { format: normalizeVariableInfoFormat(variable.format) } : {})
+      } : variable;
+      // Studio still supplies the optional 1.x page field, outside the current 2.1 schema.
+      if (compatibleVariableInfo && Object.prototype.hasOwnProperty.call(validationCopy, 'page')) {
+        expect(typeof validationCopy.page).toBe('string');
+        delete validationCopy.page;
+      }
+      expect(validateVariableInfo21(validationCopy), JSON.stringify(validateVariableInfo21.errors)).toBe(true);
     });
   }
   if (process.env.SCHEMER_ARTIFACT) {
@@ -146,6 +159,304 @@ async function loadEmbeddedSchemer(
     .some(message => message.type === 'vosReadyNotification'))).toBe(true);
   return page.frameLocator('iframe[title="Embedded Schemer"]');
 }
+
+const makeCmcStart = type => {
+  const rows = [1, 2, 3].map(index => ({
+    ...CodingFactory.createCodingVariable(`old_row_${index}`),
+    alias: `row_${index}`,
+    manualInstruction: `Instructions for row ${index}`,
+    codes: [{
+      id: 1,
+      type: 'FULL_CREDIT',
+      score: index,
+      ruleSets: [{ rules: [{ method: 'NUMERIC_MATCH', parameters: ['1'] }] }]
+    }]
+  }));
+  return {
+    ...makeStart([
+      { ...makeVariable('anchor'), type: type === 'NO_VALUE' ? 'INTEGER' : 'integer' },
+      { ...makeVariable('old_caption'), alias: 'cmc', type },
+      ...rows.map(row => ({
+        ...makeVariable(row.id), alias: row.alias, type: type === 'NO_VALUE' ? 'INTEGER' : 'integer'
+      }))
+    ]),
+    codingSchemeType: 'iqb@3.5',
+    codingScheme: JSON.stringify({
+      version: '3.5',
+      variableCodings: [CodingFactory.createCodingVariable('anchor'), ...rows, {
+        ...CodingFactory.createCodingVariable('total'),
+        sourceType: 'SUM_SCORE',
+        deriveSources: rows.map(row => row.id)
+      }]
+    })
+  };
+};
+
+['no-value', 'NO_VALUE'].forEach(type => {
+  [false, true].forEach(cancel => {
+    test(`CMC recreation without iframe reload: ${type}, cancel=${cancel}`, async ({ page }) => {
+      const start = makeCmcStart(type);
+      const frame = await loadEmbeddedSchemer(page, start, { variableInfo21: type === 'NO_VALUE' });
+      await expect(frame.locator('.var-list-entry')).toHaveCount(5);
+      await frame.locator('body').evaluate(element => element.setAttribute('data-cmc-instance', 'original'));
+      await frame.locator('var-coding .variable-details input').first().fill('Persist the initialized CMC');
+      await expect.poll(() => page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').length)).toBeGreaterThan(0);
+      const saved = await page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
+      const recreated = {
+        ...start,
+        codingScheme: saved,
+        variables: start.variables.map(variable => ({ ...variable, id: variable.id.replace(/^old_/, 'new_') }))
+      };
+      await page.evaluate(message => {
+        window.received = [];
+        document.querySelector('iframe').contentWindow.postMessage(message, '*');
+      }, recreated);
+      await expect(frame.locator('body')).toHaveAttribute('data-cmc-instance', 'original');
+      const dialog = frame.getByRole('dialog');
+      const transfer = frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true });
+      const restart = frame.getByRole('button', { name: 'Neu beginnen und alte Kodierung löschen', exact: true });
+      const changes = () => page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification'));
+      await expect(dialog).toHaveCount(1);
+      await expect(dialog).toContainText('Konflikt 1 von 3');
+      await expect(dialog).toContainText('Instructions for row 1');
+      await transfer.click();
+      await expect(dialog).toContainText('Konflikt 2 von 3');
+      expect(await changes()).toEqual([]);
+      await restart.click();
+      await expect(dialog).toContainText('Konflikt 3 von 3');
+      expect(await changes()).toEqual([]);
+      if (cancel) {
+        await frame.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+        await expect(dialog).toHaveCount(0);
+        expect(await changes()).toEqual([]);
+        await frame.getByRole('button', { name: 'Konflikte prüfen', exact: true }).click();
+        await expect(dialog).toContainText('Konflikt 1 von 3');
+        await expect(dialog).toContainText('Instructions for row 1');
+        await transfer.click();
+        await restart.click();
+        await expect(dialog).toContainText('Konflikt 3 von 3');
+      }
+      await transfer.click();
+      await expect(dialog).toHaveCount(0);
+      const notifications = await changes();
+      expect(notifications).toHaveLength(1);
+      const persisted = JSON.parse(notifications[0].codingScheme).variableCodings;
+      expect(persisted.find(coding => coding.id === 'new_row_1').codes[0].score).toBe(1);
+      expect(persisted.find(coding => coding.id === 'new_row_2').codes).toEqual([]);
+      expect(persisted.find(coding => coding.id === 'new_row_3').codes[0].score).toBe(3);
+      expect(persisted.find(coding => coding.id === 'new_caption').sourceType).toBe('BASE_NO_VALUE');
+      expect(persisted.find(coding => coding.id === 'total').deriveSources)
+        .toEqual(['new_row_1', 'old_row_2', 'new_row_3']);
+      expect(persisted.map(coding => coding.id)).not.toContain('old_caption');
+      await page.evaluate(message => {
+        document.querySelector('iframe').contentWindow.postMessage(message, '*');
+      }, { ...recreated, codingScheme: notifications[0].codingScheme });
+      await expect(frame.getByRole('dialog')).toHaveCount(0);
+      await expect(frame.locator('body')).toHaveAttribute('data-cmc-instance', 'original');
+      await frame.locator('.var-list-entry').filter({ hasText: 'total' }).click();
+      await expect(frame.locator('.missing-source-notice')).toContainText('old_row_2');
+      const reopened = await loadEmbeddedSchemer(page, {
+        ...recreated, codingScheme: notifications[0].codingScheme
+      }, { variableInfo21: type === 'NO_VALUE' });
+      await expect(reopened.getByRole('dialog')).toHaveCount(0);
+      await reopened.locator('.var-list-entry').filter({ hasText: 'total' }).click();
+      await expect(reopened.locator('.missing-source-notice')).toContainText('old_row_2');
+    });
+  });
+});
+
+test('Studio CMC fixture has identical mixed recovery with a reused iframe and a fresh load', async ({ page }) => {
+  const current = process.env.STUDIO_CMC_START_FILE
+    ? JSON.parse(await fs.readFile(process.env.STUDIO_CMC_START_FILE, 'utf8'))
+    : makeCmcStart('no-value');
+  const original = JSON.parse(current.codingScheme).variableCodings;
+  const total = original.find(coding => coding.sourceType === 'SUM_SCORE');
+  const oldRows = total.deriveSources.map(id => original.find(coding => coding.id === id));
+  expect(oldRows).toHaveLength(3);
+  if (!process.env.STUDIO_CMC_START_FILE) {
+    current.variables = current.variables.map(variable => ({
+      ...variable, id: variable.id.replace(/^old_/, 'new_')
+    }));
+  }
+  const newRows = oldRows.map(old => current.variables.find(variable => variable.alias === old.alias));
+  expect(newRows.every(variable => variable)).toBe(true);
+  const hostBefore = JSON.stringify(current.variables);
+  const previous = {
+    ...current,
+    variables: current.variables.map(variable => ({
+      ...variable,
+      id: oldRows.find(row => row.alias === variable.alias)?.id
+        || (normalizeVariableInfoType(variable.type) === 'NO_VALUE' ? `previous_${variable.id}` : variable.id)
+    }))
+  };
+  const frame = await loadEmbeddedSchemer(page, previous, { compatibleVariableInfo: true });
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+  await frame.locator('.var-list-entry').filter({ hasText: total.alias }).click();
+  await frame.locator('var-coding .variable-details input').first().fill('Local CMC initialization');
+  await expect.poll(() => page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').length)).toBeGreaterThan(0);
+  const saved = await page.evaluate(() => window.received
+    .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
+  const recreated = { ...current, codingScheme: saved };
+  await frame.locator('body').evaluate(element => element.setAttribute('data-cmc-instance', 'original'));
+  await page.evaluate(message => {
+    window.received = [];
+    document.querySelector('iframe').contentWindow.postMessage(message, '*');
+  }, recreated);
+
+  const decide = async currentFrame => {
+    const dialog = currentFrame.getByRole('dialog');
+    await expect(dialog).toHaveCount(1);
+    for (const [index, row] of newRows.entries()) {
+      await expect(dialog).toContainText(`Konflikt ${index + 1} von 3`);
+      await expect(dialog).toContainText(row.alias);
+      const name = index === 1 ? 'Neu beginnen und alte Kodierung löschen' : 'Kodierung übernehmen';
+      await currentFrame.getByRole('button', { name, exact: true }).click();
+      if (index < 2) {
+        expect(await page.evaluate(() => window.received
+          .filter(message => message.type === 'vosSchemeChangedNotification'))).toEqual([]);
+      }
+    }
+    await expect(dialog).toHaveCount(0);
+    const changes = await page.evaluate(() => window.received
+      .filter(message => message.type === 'vosSchemeChangedNotification'));
+    expect(changes).toHaveLength(1);
+    return JSON.parse(changes[0].codingScheme).variableCodings;
+  };
+  const warm = await decide(frame);
+  await expect(frame.locator('body')).toHaveAttribute('data-cmc-instance', 'original');
+  const expectedSources = [newRows[0].id, oldRows[1].id, newRows[2].id];
+  expect(warm.find(coding => coding.id === total.id).deriveSources).toEqual(expectedSources);
+  expect(warm.find(coding => coding.id === newRows[0].id).codes).toEqual(oldRows[0].codes);
+  expect(warm.find(coding => coding.id === newRows[1].id).codes).toEqual([]);
+  expect(warm.find(coding => coding.id === newRows[2].id).codes).toEqual(oldRows[2].codes);
+  current.variables.filter(variable => normalizeVariableInfoType(variable.type) === 'NO_VALUE').forEach(variable => {
+    expect(warm.find(coding => coding.id === variable.id).sourceType).toBe('BASE_NO_VALUE');
+  });
+  const cold = await loadEmbeddedSchemer(page, recreated, { compatibleVariableInfo: true });
+  expect(await decide(cold)).toEqual(warm);
+  expect(JSON.stringify(current.variables)).toBe(hostBefore);
+});
+
+['no-value', 'NO_VALUE'].forEach(type => {
+  const protectedCase = `protected ${type} text requires an explicit decision and cancels atomically`;
+  test(protectedCase, async ({ page }) => {
+    const start = makeOrphanStart();
+    start.variables.unshift({ ...makeVariable('new_text'), alias: 'text_1', type });
+    if (type === 'NO_VALUE') start.variables[1].type = 'NUMBER';
+    const scheme = JSON.parse(start.codingScheme);
+    scheme.variableCodings.unshift({
+      ...CodingFactory.createBaseCodingVariable('old_text', 'BASE_NO_VALUE'),
+      alias: 'text_1',
+      manualInstruction: '<p>Keep the old text instructions until explicitly discarded</p>'
+    });
+    start.codingScheme = JSON.stringify(scheme);
+    const frame = await loadEmbeddedSchemer(page, start, { variableInfo21: type === 'NO_VALUE' });
+    const dialog = frame.getByRole('dialog');
+    const restart = frame.getByRole('button', { name: 'Neu beginnen und alte Kodierung löschen', exact: true });
+    const transfer = frame.getByRole('button', { name: 'Kodierung übernehmen', exact: true });
+    await expect(dialog).toContainText('Konflikt 1 von 2');
+    await expect(dialog).toContainText('Keep the old text instructions');
+    await expect(transfer).toBeDisabled();
+    await restart.click();
+    await expect(dialog).toContainText('Konflikt 2 von 2');
+    expect(await page.evaluate(() => window.received
+      .filter(message => message.type === 'vosSchemeChangedNotification'))).toEqual([]);
+    await frame.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+    await frame.getByRole('button', { name: 'Konflikte prüfen', exact: true }).click();
+    await expect(dialog).toContainText('Konflikt 1 von 2');
+    await expect(dialog).toContainText('Keep the old text instructions');
+    await expect(transfer).toBeDisabled();
+    await restart.click();
+    await transfer.click();
+    await expect(dialog).toHaveCount(0);
+    const changes = await page.evaluate(() => window.received
+      .filter(message => message.type === 'vosSchemeChangedNotification'));
+    expect(changes).toHaveLength(1);
+    const persisted = JSON.parse(changes[0].codingScheme).variableCodings;
+    expect(persisted.find(coding => coding.id === 'new_text')).toEqual(expect.objectContaining({
+      sourceType: 'BASE_NO_VALUE', codes: [], manualInstruction: ''
+    }));
+    expect(persisted.find(coding => coding.id === 'current').codes).toEqual(scheme.variableCodings[1].codes);
+    expect(persisted.map(coding => coding.id)).not.toContain('old_text');
+  });
+
+  ['TRANSFER', 'START_EMPTY', 'CANCEL'].forEach(decision => {
+    test(`MC text/radio recreation with ${type}: ${decision} survives Verona save and reopen`, async ({ page }) => {
+      const start = makeOrphanStart();
+      start.codingScheme = start.codingScheme.replaceAll('old-radio', 'old_radio');
+      const responseType = type === 'NO_VALUE' ? 'INTEGER' : 'integer';
+      start.variables = [
+        { ...makeVariable('old_text'), alias: 'text_1', type },
+        { ...makeVariable('old_radio'), alias: '01', type: responseType }
+      ];
+      // First initialize the real app: its Verona start handler creates the text schema entry.
+      const frame = await loadEmbeddedSchemer(page, start, { variableInfo21: type === 'NO_VALUE' });
+      await expect(frame.getByRole('dialog')).toHaveCount(0);
+      await frame.locator('.var-list-entry').filter({ hasText: '01' }).click();
+      await frame.locator('var-coding .variable-details input').first().fill('Original MC coding');
+      await expect.poll(() => page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').at(-1)?.codingScheme)).toBeTruthy();
+      const saved = await page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
+      const oldCodings = JSON.parse(saved).variableCodings;
+      expect(oldCodings.find(coding => coding.id === 'old_text')).toEqual(expect.objectContaining({
+        sourceType: 'BASE_NO_VALUE', codeModel: 'RULES_ONLY', alias: 'text_1', codes: []
+      }));
+      const recreated = {
+        ...start,
+        codingScheme: saved,
+        variables: start.variables.map(variable => ({
+          ...variable, id: variable.id === 'old_text' ? 'new_text' : 'new_radio'
+        }))
+      };
+      const recovery = await loadEmbeddedSchemer(page, recreated, { variableInfo21: type === 'NO_VALUE' });
+      const dialog = recovery.getByRole('dialog');
+      await expect(dialog).toContainText('Konflikt 1 von 1');
+      await expect(dialog).toContainText('Original instructions');
+      await expect(dialog).not.toContainText('old_text');
+      const transfer = recovery.getByRole('button', { name: 'Kodierung übernehmen', exact: true });
+      if (decision === 'CANCEL') {
+        await recovery.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+        expect(await page.evaluate(() => window.received
+          .filter(message => message.type === 'vosSchemeChangedNotification'))).toEqual([]);
+        await recovery.getByRole('button', { name: 'Konflikte prüfen', exact: true }).click();
+        await expect(dialog).toContainText('Original instructions');
+      }
+      const effectiveDecision = decision === 'CANCEL' ? 'TRANSFER' : decision;
+      if (effectiveDecision === 'TRANSFER') await transfer.click();
+      else await recovery.getByRole('button', { name: 'Neu beginnen und alte Kodierung löschen', exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      const changes = await page.evaluate(() => window.received
+        .filter(message => message.type === 'vosSchemeChangedNotification'));
+      expect(changes).toHaveLength(1);
+      const persisted = JSON.parse(changes[0].codingScheme).variableCodings;
+      expect(persisted.map(coding => coding.id).sort()).toEqual(['derived', 'new_radio', 'new_text']);
+      expect(persisted.find(coding => coding.id === 'new_text')).toEqual(expect.objectContaining({
+        sourceType: 'BASE_NO_VALUE', codeModel: 'RULES_ONLY', alias: 'text_1', codes: []
+      }));
+      expect(persisted.find(coding => coding.id === 'new_radio')).toEqual(expect.objectContaining({
+        sourceType: 'BASE',
+        alias: '01',
+        codes: effectiveDecision === 'TRANSFER' ? oldCodings.find(coding => coding.id === 'old_radio').codes : []
+      }));
+      const reopened = await loadEmbeddedSchemer(page, {
+        ...recreated, codingScheme: changes[0].codingScheme
+      }, { variableInfo21: type === 'NO_VALUE' });
+      await expect(reopened.getByRole('dialog')).toHaveCount(0);
+      await expect(reopened.locator('.var-list-entry')).toHaveText(['01', 'sum']);
+      await reopened.locator('.var-list-entry').filter({ hasText: 'sum' }).click();
+      await expect(reopened.locator('.missing-source-notice')).toHaveCount(effectiveDecision === 'TRANSFER' ? 0 : 1);
+      expect(recreated.variables).toEqual([
+        { ...makeVariable('new_text'), alias: 'text_1', type },
+        { ...makeVariable('new_radio'), alias: '01', type: responseType }
+      ]);
+    });
+  });
+});
 
 [false, true].forEach(current => {
   const version = current ? '2.1 minimal' : '1.x';
