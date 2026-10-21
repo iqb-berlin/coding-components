@@ -118,6 +118,51 @@ describe('Derived coding conflict resolution', () => {
     expect(codings).toEqual(before);
   });
 
+  it('pins alias-based derivation sources to the original technical ID when renaming', () => {
+    const dependent: VariableCodingData = {
+      ...CodingFactory.createCodingVariable('dependent'),
+      sourceType: 'SUM_SCORE',
+      deriveSources: ['01', 'old_row_0', 'derived_01', '01']
+    };
+    const codings = [...scheme(), dependent];
+    const before = structuredClone(codings);
+    const result = resolveDerivedCodingConflicts(variables, codings, rename());
+    expect(result.problems).toEqual([]);
+    expect(result.variableCodings![6]).toEqual({
+      ...dependent, deriveSources: ['derived_01', 'old_row_0', 'derived_01', 'derived_01']
+    });
+    expect(codings).toEqual(before);
+  });
+
+  it('preserves technical-ID precedence over another coding with the same alias', () => {
+    const source = { ...CodingFactory.createCodingVariable('01'), alias: 'source', manualInstruction: 'Keep' };
+    const dependent: VariableCodingData = {
+      ...CodingFactory.createCodingVariable('dependent'), sourceType: 'SUM_SCORE', deriveSources: ['01']
+    };
+    const result = resolveDerivedCodingConflicts(variables, [...scheme(), source, dependent], rename());
+    expect(result.problems).toEqual([]);
+    expect(result.variableCodings![7]).toEqual(dependent);
+  });
+
+  it('rejects renaming when an ambiguous derivation source would silently acquire a binding', () => {
+    const base = { ...CodingFactory.createCodingVariable('new_mc'), alias: '01' };
+    const dependent: VariableCodingData = {
+      ...CodingFactory.createCodingVariable('dependent'), sourceType: 'SUM_SCORE', deriveSources: ['01']
+    };
+    const codings = [...scheme(), base, dependent];
+    const before = structuredClone(codings);
+    expect(resolveDerivedCodingConflicts(variables, codings, rename()).variableCodings).toBeNull();
+    expect(codings).toEqual(before);
+  });
+
+  it('rejects an alias that would silently bind a previously missing derivation source', () => {
+    const dependent: VariableCodingData = {
+      ...CodingFactory.createCodingVariable('dependent'), sourceType: 'SUM_SCORE', deriveSources: ['missing']
+    };
+    expect(resolveDerivedCodingConflicts(variables, [...scheme(), dependent], rename('missing')).variableCodings)
+      .toBeNull();
+  });
+
   it('keeps other formula sources when the new alias shadows a hidden technical ID', () => {
     const other = { ...CodingFactory.createCodingVariable('hidden'), alias: 'other_source' };
     const solver: VariableCodingData = {

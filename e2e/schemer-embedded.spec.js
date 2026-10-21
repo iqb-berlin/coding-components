@@ -309,36 +309,65 @@ test('derived conflict deletion needs confirmation and preserves all original so
   expect(persisted.find(coding => coding.id === 'new_mc').codes).toEqual([]);
 });
 
-test('derived conflict repair protects dependent codings and SOLVER references', async ({ page }) => {
-  const start = makeDerivedConflictStart();
-  const scheme = JSON.parse(start.codingScheme);
-  scheme.variableCodings.push({
-    ...CodingFactory.createCodingVariable('dependent'),
-    alias: 'dependent',
-    sourceType: 'SOLVER',
-    deriveSources: ['derived_01'],
-    // SOLVER references are serialized literally in Verona messages.
-    // eslint-disable-next-line no-template-curly-in-string
-    sourceParameters: { processing: [], solverExpression: '${01} + 1' }
-  });
-  start.codingScheme = JSON.stringify(scheme);
-  const frame = await loadEmbeddedSchemer(page, start);
-  const dialog = frame.getByRole('dialog');
-  await dialog.getByRole('button', { name: 'Ableitung zum Löschen vormerken', exact: true }).click();
-  await dialog.getByRole('checkbox').check();
-  await expect(dialog.getByRole('alert')).toContainText('dependent');
-  await expect(dialog.getByRole('button', { name: 'Änderungen übernehmen', exact: true })).toBeDisabled();
-  await dialog.getByRole('button', { name: 'Rückgängig', exact: true }).click();
-  await dialog.getByRole('textbox', { name: 'Neuer Alias für 01', exact: true }).fill('old_01');
-  await dialog.getByRole('button', { name: 'Änderungen übernehmen', exact: true }).click();
-  await expect(dialog).toHaveCount(0);
-  const changes = await page.evaluate(() => window.received
-    .filter(message => message.type === 'vosSchemeChangedNotification'));
-  expect(changes).toHaveLength(1);
-  const persisted = JSON.parse(changes[0].codingScheme).variableCodings;
-  expect(persisted.find(coding => coding.id === 'dependent')).toEqual({
-    // eslint-disable-next-line no-template-curly-in-string
-    ...scheme.variableCodings.at(-1), sourceParameters: { processing: [], solverExpression: '${old_01} + 1' }
+['SOLVER', 'SUM_SCORE'].forEach(sourceType => {
+  test(`derived conflict repair preserves alias-based ${sourceType} sources after reopening`, async ({ page }) => {
+    const start = makeDerivedConflictStart();
+    const scheme = JSON.parse(start.codingScheme);
+    scheme.variableCodings.push({
+      ...CodingFactory.createCodingVariable('dependent'),
+      alias: 'dependent',
+      sourceType,
+      deriveSources: ['01'],
+      // SOLVER references are serialized literally in Verona messages.
+      // eslint-disable-next-line no-template-curly-in-string
+      sourceParameters: { processing: [], solverExpression: '${01} + 1' }
+    });
+    start.codingScheme = JSON.stringify(scheme);
+    const frame = await loadEmbeddedSchemer(page, start);
+    const dialog = frame.getByRole('dialog');
+    await dialog.getByRole('button', { name: 'Ableitung zum Löschen vormerken', exact: true }).click();
+    await dialog.getByRole('checkbox').check();
+    await expect(dialog.getByRole('alert')).toContainText('dependent');
+    await expect(dialog.getByRole('button', { name: 'Änderungen übernehmen', exact: true })).toBeDisabled();
+    await dialog.getByRole('button', { name: 'Rückgängig', exact: true }).click();
+    await dialog.getByRole('textbox', { name: 'Neuer Alias für 01', exact: true }).fill('old_01');
+    await dialog.getByRole('button', { name: 'Änderungen übernehmen', exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    const changes = await page.evaluate(() => window.received
+      .filter(message => message.type === 'vosSchemeChangedNotification'));
+    expect(changes).toHaveLength(1);
+    const persisted = JSON.parse(changes[0].codingScheme).variableCodings;
+    const expectedDependent = {
+      // eslint-disable-next-line no-template-curly-in-string
+      ...scheme.variableCodings.at(-1),
+      deriveSources: ['derived_01'],
+      sourceParameters: {
+        processing: [],
+        // eslint-disable-next-line no-template-curly-in-string
+        solverExpression: sourceType === 'SOLVER' ? '${old_01} + 1' : '${01} + 1'
+      }
+    };
+    expect(persisted.find(coding => coding.id === 'dependent')).toEqual(expectedDependent);
+    const reopened = await loadEmbeddedSchemer(page, { ...start, codingScheme: changes[0].codingScheme });
+    await expect(reopened.getByRole('dialog')).toHaveCount(0);
+    await reopened.locator('.var-list-entry').filter({ hasText: /^\s*dependent\s*$/ }).click();
+    await expect(reopened.getByText('Kodierung reparieren')).toHaveCount(0);
+    await reopened.locator('var-coding .variable-details input').first().fill('Still uses original aggregate');
+    await expect.poll(() => page.evaluate(() => window.received
+      .filter(message => message.type === 'vosSchemeChangedNotification').length)).toBeGreaterThan(0);
+    const saved = await page.evaluate(() => window.received
+      .filter(message => message.type === 'vosSchemeChangedNotification').at(-1).codingScheme);
+    const roundTrip = JSON.parse(saved).variableCodings;
+    const dependent = roundTrip.find(coding => coding.id === 'dependent');
+    expect(dependent).toEqual({ ...expectedDependent, label: 'Still uses original aggregate' });
+    expect(CodingSchemeFactory.deriveValue(roundTrip, dependent, [
+      {
+        id: 'derived_01', value: 5, code: 1, score: 3, status: 'CODING_COMPLETE'
+      },
+      {
+        id: 'new_mc', value: 100, code: 1, score: 99, status: 'CODING_COMPLETE'
+      }
+    ])).toEqual(expect.objectContaining({ value: sourceType === 'SOLVER' ? 6 : 3, status: 'VALUE_CHANGED' }));
   });
 });
 

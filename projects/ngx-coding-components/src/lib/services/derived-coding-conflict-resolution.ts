@@ -35,6 +35,17 @@ const solverSourceId = (reference: string, codings: Pick<VariableCodingData, 'id
   codings.find(coding => coding.alias === reference)?.id || reference
 );
 
+// Derivation sources resolve technical IDs first, then unambiguous legacy aliases.
+const derivationSourceId = (
+  reference: string,
+  codings: Pick<VariableCodingData, 'id' | 'alias'>[]
+): string | undefined => {
+  const byId = codings.find(coding => coding.id === reference);
+  if (byId) return byId.id;
+  const byAlias = codings.filter(coding => coding.alias === reference);
+  return byAlias.length === 1 ? byAlias[0].id : undefined;
+};
+
 /** Revalidate targeted edits on a copy, preserving host variables and all other existing coding work. */
 export const resolveDerivedCodingConflicts = (
   variables: VariableInfo[],
@@ -90,6 +101,21 @@ export const resolveDerivedCodingConflicts = (
   });
   variables.filter(variable => !namespace.some(coding => coding.id === variable.id))
     .forEach(variable => namespace.push({ id: variable.id, alias: variable.alias || variable.id }));
+  let derivationSourcesPreserved = true;
+  result.forEach(coding => {
+    if (!coding.deriveSources) return;
+    coding.deriveSources = coding.deriveSources.map(reference => {
+      const sourceId = derivationSourceId(reference, codings);
+      if (derivationSourceId(reference, namespace) === sourceId) return reference;
+      if (sourceId && derivationSourceId(sourceId, namespace) === sourceId) return sourceId;
+      derivationSourcesPreserved = false;
+      return reference;
+    });
+  });
+  if (!derivationSourcesPreserved) {
+    return fail('Quellverweise können mit diesem Alias nicht eindeutig erhalten werden. ' +
+      'Bitte prüfe die Ableitungsquellen oder wähle einen anderen Alias.');
+  }
   let referencesPreserved = true;
   result.forEach(coding => {
     if (coding.sourceType !== 'SOLVER' || !coding.sourceParameters?.solverExpression) return;
