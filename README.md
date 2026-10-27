@@ -57,6 +57,21 @@ Additionally, this library exports multiple dialogs and helpers (see “Public A
 
 # Installation (Angular)
 
+## Stable Schemer 2.9.0 and library 4.1.1
+
+This release includes the accepted MC/CMC identifier-conflict repairs. When an
+element alias is reused, old base codings can be transferred or explicitly
+discarded. Conflicting derived variables can be renamed or deleted after
+confirmation; existing dependencies prevent unsafe deletion. Cancellation,
+permission changes and task changes discard pending repairs, and source
+references remain bound to their original variables after saving and reopening.
+
+Library 4.1.1 adds the final conflict repairs to the published 4.1.0 package.
+Schemer 2.9.0 retains the accepted beta.3 behavior and includes the production
+dependency override from #271. The release stays on Tiptap 2 and Schemer API
+3.2.0; the Tiptap migration and the additional NOT_REACHED partial-credit option
+(#269) are separate work.
+
 ## Partial credit (Schemer 2.9.0)
 
 In the source/derivation parameters of `SUM_SCORE`, `SUM_CODE` and `CONCAT_CODE`,
