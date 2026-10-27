@@ -311,5 +311,6 @@ export class RichTextEditorComponent implements AfterViewInit, OnChanges, OnDest
 
   ngOnDestroy(): void {
     this.dialogContext.destroy();
+    this.editor.destroy();
   }
 }

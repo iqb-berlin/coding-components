@@ -47,6 +47,7 @@ describe('RichTextEditorComponent', () => {
     commands: CommandSpyHost;
     isActive: (name: string) => boolean;
     getAttributes: () => Record<string, unknown>;
+    destroy: jasmine.Spy;
   };
 
   const createComponentWithFakeEditor = (options?: {
@@ -107,9 +108,11 @@ describe('RichTextEditorComponent', () => {
       chain: () => chain,
       commands: commandSpyHost,
       isActive: (name: string) => active[name],
-      getAttributes: () => ({})
+      getAttributes: () => ({}),
+      destroy: jasmine.createSpy('destroy')
     };
 
+    component.editor.destroy();
     component.editor = fakeEditor as unknown as Editor;
     return {
       component,
