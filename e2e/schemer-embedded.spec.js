@@ -1339,6 +1339,28 @@ test('embedded Schemer preserves value and no-value variables from a Studio unit
   expect(errors).toEqual([]);
 });
 
+test('embedded Schemer destroys rich text editors after save, cancel and Escape', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+
+  for (const action of ['Speichern', 'Abbrechen', 'Escape']) {
+    await frame.locator('var-coding .manual-instruction button').first().click();
+    const content = frame.locator('.ProseMirror');
+    const editor = await content.evaluateHandle(element => element.editor);
+    await content.fill(`Instruction closed with ${action}`);
+
+    if (action === 'Escape') {
+      await frame.getByRole('dialog').press('Escape');
+    } else {
+      await frame.getByRole('button', { name: action, exact: true }).click();
+    }
+
+    await expect(frame.getByRole('dialog')).toHaveCount(0);
+    expect(await editor.evaluate(instance => instance.isDestroyed), action).toBe(true);
+    await editor.dispose();
+  }
+});
+
 test('embedded Schemer saves rich text and an asynchronous image and discards cancelled edits', async ({ page }) => {
   const frame = await loadEmbeddedSchemer(page);
   await expect(frame.locator('.var-list-entry')).toHaveCount(2);
