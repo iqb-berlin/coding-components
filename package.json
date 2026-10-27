@@ -156,7 +156,10 @@
     "@babel/core": "7.29.7",
     "esbuild": "0.28.1",
     "fast-uri": "4.2.1",
-    "vite": "7.3.5"
+    "vite": "7.3.5",
+    "cheerio": {
+      "undici": "^7.30.1"
+    }
   },
   "eslintConfig": {
     "overrides": [
