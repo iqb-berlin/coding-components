@@ -57,6 +57,15 @@ Additionally, this library exports multiple dialogs and helpers (see “Public A
 
 # Installation (Angular)
 
+## Coding Components 5: Tiptap 3
+
+The library requires Angular 21, Tiptap 3.32+ within major version 3 and
+ngx-tiptap 14.0.1+ within major version 14. Upgrade the host's Tiptap packages
+together with `@iqb/ngx-coding-components`; the old Tiptap 2 peer graph is
+incompatible. This dependency change is the reason for the library's major bump.
+The packaged Verona Schemer carries its own editor dependencies and can be
+upgraded independently of other iframe modules.
+
 ## Partial credit (Schemer 2.9.0)
 
 In the source/derivation parameters of `SUM_SCORE`, `SUM_CODE` and `CONCAT_CODE`,

@@ -39,5 +39,10 @@ export const OrderedListExtension = OrderedList.extend({
 
   addInputRules() {
     return [];
+  },
+
+  /** Keep pasted labels literal; Tiptap 3's auto-conversion loses numbering in this custom schema. */
+  addProseMirrorPlugins() {
+    return [];
   }
 });

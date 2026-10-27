@@ -57,4 +57,52 @@ describe('RichTextEditorComponent with the real editor', () => {
     expect(fixture.componentInstance.editor.getHTML()).toBe(saved);
     expect(fixture.componentInstance.editor.getText()).toBe('A  B\u00a0C');
   });
+
+  it('does not report model writes as authored changes', async () => {
+    const changed = jasmine.createSpy('changed');
+    fixture.componentInstance.contentChange.subscribe(changed);
+
+    fixture.componentRef.setInput('content', '<p>Loaded  instruction&nbsp;one</p>');
+    await fixture.whenStable();
+    expect(fixture.componentInstance.editor.getText()).toBe('Loaded  instruction\u00a0one');
+    expect(changed).not.toHaveBeenCalled();
+
+    fixture.componentRef.setInput('content', '<p>Loaded  instruction&nbsp;two</p>');
+    await fixture.whenStable();
+    expect(fixture.componentInstance.editor.getText()).toBe('Loaded  instruction\u00a0two');
+    expect(changed).not.toHaveBeenCalled();
+
+    fixture.componentInstance.editor.commands.insertContent('Authored ');
+    await fixture.whenStable();
+    expect(changed).toHaveBeenCalledTimes(1);
+  });
+
+  it('reopens legacy instruction styles, embedded images and formula attributes', async () => {
+    const legacy = '<p><span style="font-size: 18px; color: rgb(255, 0, 0)">' +
+      '<strong><u>A  B&nbsp;C</u></strong></span>' +
+      '<aspect-nodeview-math-formula formula="x+1"></aspect-nodeview-math-formula></p>' +
+      '<img src="data:image/png;base64,cGl4ZWw=" alt="Legacy image" ' +
+      'data-style="float: right; margin-left: 10px" style="float: right; margin-left: 10px">';
+    fixture.componentRef.setInput('content', legacy);
+    await fixture.whenStable();
+    const saved = fixture.componentInstance.editor.getHTML();
+
+    fixture.destroy();
+    fixture = TestBed.createComponent(RichTextEditorComponent);
+    fixture.componentRef.setInput('content', saved);
+    fixture.componentRef.setInput('editorHeightPx', 300);
+    await fixture.whenStable();
+
+    const { editor } = fixture.componentInstance;
+    const document = new DOMParser().parseFromString(editor.getHTML(), 'text/html');
+    expect(editor.getText()).toContain('A  B\u00a0C');
+    expect(document.querySelector('strong u, u strong')?.textContent).toBe('A  B\u00a0C');
+    const styled = document.querySelector<HTMLSpanElement>('span[style*="font-size"]');
+    expect(styled?.style.fontSize).toBe('18px');
+    expect(styled?.style.color).toBe('rgb(255, 0, 0)');
+    expect(document.querySelector('img')?.getAttribute('src')).toBe('data:image/png;base64,cGl4ZWw=');
+    expect(document.querySelector('img')?.getAttribute('alt')).toBe('Legacy image');
+    expect(document.querySelector<HTMLImageElement>('img')?.style.cssFloat).toBe('right');
+    expect(document.querySelector('.iqb-math-formula')?.getAttribute('data-latex')).toBe('x+1');
+  });
 });

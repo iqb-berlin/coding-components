@@ -10,12 +10,6 @@ declare module '@tiptap/core' {
 
 export const BlockImage = Image.extend({
   name: 'blockImage',
-  addOptions() {
-    return {
-      ...this.parent?.(),
-      allowBase64: true
-    };
-  },
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -48,4 +42,4 @@ export const BlockImage = Image.extend({
       ) => ({ commands }) => commands.insertContent({ type: this.name, attrs: options })
     };
   }
-});
+}).configure({ allowBase64: true });

@@ -1,4 +1,4 @@
-import { Editor } from '@tiptap/core';
+import { Editor, JSONContent } from '@tiptap/core';
 import { Document } from '@tiptap/extension-document';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Text } from '@tiptap/extension-text';
@@ -23,12 +23,22 @@ describe('PreserveWhitespace', () => {
   it('honors an explicitly requested parser override and the emitUpdate flag', () => {
     let updates = 0;
     editor.on('update', () => { updates += 1; });
-    editor.commands.setContent('<p>A  B</p>', false, { preserveWhitespace: false });
+    editor.commands.setContent('<p>A  B</p>', {
+      emitUpdate: false,
+      parseOptions: { preserveWhitespace: false }
+    });
     expect(editor.getText()).toBe('A B');
     expect(updates).toBe(0);
-    editor.commands.setContent('<p>A  B</p>', true);
+    editor.commands.setContent('<p>A  B</p>', { emitUpdate: true });
     expect(editor.getText()).toBe('A  B');
     expect(updates).toBe(1);
+  });
+
+  it('uses the Tiptap 3 update default when no update option is supplied', () => {
+    const updated = jasmine.createSpy('updated');
+    editor.on('update', updated);
+    editor.commands.setContent('<p>Changed content</p>');
+    expect(updated).toHaveBeenCalledTimes(1);
   });
 
   it('keeps JSON content and marks unchanged', () => {
@@ -40,6 +50,7 @@ describe('PreserveWhitespace', () => {
       }]
     };
     editor.commands.setContent(content);
-    expect(editor.getJSON()).toEqual(content);
+    const stored: JSONContent = editor.getJSON();
+    expect(stored).toEqual(content);
   });
 });
