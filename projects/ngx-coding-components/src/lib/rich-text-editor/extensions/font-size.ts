@@ -1,39 +1,17 @@
-import { Extension } from '@tiptap/core';
-import '@tiptap/extension-text-style';
+import { FontSize as TiptapFontSize } from '@tiptap/extension-text-style';
 
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    fontSize: {
-      setFontSize: (fontSize: string) => ReturnType
-    };
-  }
-}
-
-export const FontSize = Extension.create({
-  name: 'fontSize',
-
-  addOptions() {
-    return {
-      types: ['textStyle']
-    };
-  },
-
+/** Keep the existing instruction default while using Tiptap's font-size commands and parsing. */
+export const FontSize = TiptapFontSize.extend({
   addGlobalAttributes() {
-    return [{
-      types: this.options.types,
+    return (this.parent?.() || []).map(attribute => ({
+      ...attribute,
       attributes: {
+        ...attribute.attributes,
         fontSize: {
-          default: '20px',
-          parseHTML: element => element.style.fontSize,
-          renderHTML: attributes => ({ style: `font-size: ${attributes['fontSize']}` })
+          ...attribute.attributes['fontSize'],
+          default: '20px'
         }
       }
-    }];
-  },
-
-  addCommands() {
-    return {
-      setFontSize: fontSize => ({ chain }) => chain().setMark('textStyle', { fontSize }).run()
-    };
+    }));
   }
 });

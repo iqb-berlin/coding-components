@@ -4,6 +4,22 @@ Angular components for creating, validating, and testing coding schemes in educa
 
 This library provides the UI for the **IQB Schemer**, a powerful tool to manage coding variables and rules based on the IQB data specifications.
 
+## Version 5 integration
+
+Version 5 requires Angular 21, Tiptap 3.32 or later within major version 3, and
+ngx-tiptap 14.0.1 or later within major version 14. Update all Tiptap peers in the
+host together; version 4's Tiptap 2 peers cannot be mixed with this release.
+
+Existing coding schemes and rich-text instructions remain supported. The editor
+preserves repeated/non-breaking spaces, legacy formula attributes, embedded images
+and the existing 20px default on styled instruction text. The font-size extension
+now extends Tiptap's implementation, including its set/unset commands. Loading
+content through Angular forms does not emit authored-change events.
+
+Direct callers of editor commands must use Tiptap 3's options object, for example
+`setContent(html, { emitUpdate: false })`. The whitespace extension accepts parser
+overrides through `parseOptions` on that same object.
+
 ## Key Components
 
 - **`<iqb-schemer>`**: The main coding scheme editor.

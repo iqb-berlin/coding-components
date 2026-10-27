@@ -1,4 +1,4 @@
-import { Editor } from '@tiptap/core';
+import { Editor, JSONContent } from '@tiptap/core';
 import { Document } from '@tiptap/extension-document';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Text } from '@tiptap/extension-text';
@@ -18,7 +18,8 @@ describe('IqbMathFormula input interoperability', () => {
   ].forEach(tag => {
     it(`imports native LaTeX from ${tag.startsWith('<span') ? 'shared' : 'Aspect'} HTML and survives reopening`, () => {
       editor.commands.setContent(`<p>Vor <strong>${tag}</strong> Nach</p>`);
-      const formula = editor.getJSON().content?.[0].content?.[1];
+      const stored: JSONContent = editor.getJSON();
+      const formula = stored.content?.[0].content?.[1];
       expect(formula?.type).toBe('iqbMathFormula');
       expect(formula?.attrs?.['latex']).toBe('\\frac{1}{2}');
       expect(formula?.marks).toEqual([{ type: 'bold' }]);
