@@ -1,5 +1,9 @@
 import { OrderedList } from '@tiptap/extension-ordered-list';
 
+const listStyleByType = new Map([
+  ['1', 'decimal'], ['a', 'lower-latin'], ['A', 'upper-latin'], ['i', 'lower-roman'], ['I', 'upper-roman']
+]);
+
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     orderedListExtension: {
@@ -12,9 +16,12 @@ declare module '@tiptap/core' {
 export const OrderedListExtension = OrderedList.extend({
   addAttributes() {
     return {
+      ...this.parent?.(),
       listStyle: {
         default: 'upper-roman',
-        parseHTML: element => element.style.listStyleType,
+        parseHTML: element => element.style.listStyleType ||
+          element.querySelector('li')?.style.listStyleType ||
+          listStyleByType.get(element.getAttribute('type') || '') || '',
         renderHTML: attributes => ({ style: `list-style: ${attributes['listStyle']}` })
       },
       fontSize: {

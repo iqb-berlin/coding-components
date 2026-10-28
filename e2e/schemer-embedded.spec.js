@@ -1361,6 +1361,40 @@ test('embedded Schemer destroys rich text editors after save, cancel and Escape'
   }
 });
 
+test('embedded Schemer preserves pasted list numbering and styles after save and reopen', async ({ page }) => {
+  const frame = await loadEmbeddedSchemer(page);
+  await expect(frame.locator('.var-list-entry')).toHaveCount(2);
+  await frame.locator('var-coding .manual-instruction button').first().click();
+  const editor = frame.locator('.ProseMirror');
+  await editor.focus();
+  await editor.evaluate(element => {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData('text/html', '<ol start="3" type="a"><li>Third'
+      + '<ol start="4" type="I"><li>Nested</li></ol></li><li>Fourth</li></ol>');
+    clipboardData.setData('text/plain', 'Third\nNested\nFourth');
+    element.dispatchEvent(new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }));
+  });
+  await expect(editor.locator('ol').first()).toHaveAttribute('start', '3');
+  await expect(editor.locator('ol').nth(1)).toHaveAttribute('start', '4');
+  await frame.getByRole('button', { name: 'Speichern', exact: true }).click();
+  await expect(frame.getByRole('dialog')).toHaveCount(0);
+
+  const storedLists = await page.evaluate(() => {
+    const changed = window.received.filter(message => message.type === 'vosSchemeChangedNotification').at(-1);
+    const html = JSON.parse(changed.codingScheme).variableCodings[0].manualInstruction;
+    return Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('ol'))
+      .map(list => ({ start: list.start, style: list.style.listStyleType }));
+  });
+  expect(storedLists).toEqual([{ start: 3, style: 'lower-latin' }, { start: 4, style: 'upper-roman' }]);
+
+  await frame.locator('var-coding .manual-instruction button').first().click();
+  await expect(editor.locator('ol').first()).toHaveAttribute('start', '3');
+  await expect(editor.locator('ol').nth(1)).toHaveAttribute('start', '4');
+  expect(await editor.locator('ol').evaluateAll(lists => lists.map(list => list.style.listStyleType)))
+    .toEqual(['lower-latin', 'upper-roman']);
+  await frame.getByRole('button', { name: 'Abbrechen', exact: true }).click();
+});
+
 test('embedded Schemer saves rich text and an asynchronous image and discards cancelled edits', async ({ page }) => {
   const frame = await loadEmbeddedSchemer(page);
   await expect(frame.locator('.var-list-entry')).toHaveCount(2);

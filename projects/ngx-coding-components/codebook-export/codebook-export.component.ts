@@ -56,7 +56,7 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   @Output() cancel = new EventEmitter<void>();
   @ViewChild(MatSort) sort!: MatSort;
 
-  dataSource = new MatTableDataSource<UnitSelectionItem>([]);
+  dataSource: MatTableDataSource<UnitSelectionItem> = new MatTableDataSource<UnitSelectionItem>([]);
   columns = ['select', 'key', 'name', 'group'];
   selection: number[] = [];
   filter = '';
