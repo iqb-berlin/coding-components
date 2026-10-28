@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "@iqb/mathlive": "^0.4.1",
-    "katex": "^0.16.11",
+    "katex": "0.18.2",
     "tslib": "^2.3.0",
     "docx": "8.5.0",
     "cheerio": "1.1.2",
