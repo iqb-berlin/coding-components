@@ -23,6 +23,10 @@
     "copy-code": "Code kopieren",
     "paste-code": "Code einfügen",
     "check": "Prüfe Syntax Kodierschema",
+    "validation": {
+      "title": "Kodierschema prüfen",
+      "failed": "Kodierschema konnte nicht geprüft werden."
+    },
     "show": "Zeige Kodierschema",
     "activate-base-no-value": "Aktiviere Basisvariable ohne Wert",
     "export-variable": "Variable exportieren",
@@ -226,6 +230,7 @@
     }
   },
   "coding-status": {
+    "UNCHECKED": "Kodierschema konnte nicht geprüft werden",
     "WARNING": "Warnungen (können ignoriert werden)",
     "ERROR": "Probleme, die das Kodieren verhindern",
     "OK": "Keine Probleme"

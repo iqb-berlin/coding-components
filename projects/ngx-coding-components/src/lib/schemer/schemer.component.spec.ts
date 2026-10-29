@@ -4,7 +4,8 @@ import { CodingFactory } from '@iqb/responses/coding-factory';
 import { VariableCodingData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
 import { VariableInfo } from '@iqbspecs/variable-info/variable-info.interface';
 import { firstValueFrom, of, Subject } from 'rxjs';
-import { MessageDialogComponent } from '../dialogs/message-dialog.component';
+import { MessageDialogComponent, MessageType } from '../dialogs/message-dialog.component';
+import { ShowCodingProblemsDialogComponent } from '../dialogs/show-coding-problems-dialog.component';
 import { FileService } from '../services/file.service';
 import { VarCodingComponent } from '../var-coding/var-coding.component';
 import { SchemerComponent } from './schemer.component';
@@ -750,9 +751,9 @@ describe('SchemerComponent', () => {
     expect(component.codingStatus['v2']).toBe('WARNING');
   });
 
-  it('updateVariableLists should handle validate() throwing and set problems to []', () => {
-    schemerService.setVarList([
-      {
+  describe('when coding scheme validation fails', () => {
+    beforeEach(() => {
+      schemerService.setVarList([{
         id: 'v1',
         alias: 'A',
         type: 'string',
@@ -761,20 +762,54 @@ describe('SchemerComponent', () => {
         nullable: false,
         values: [],
         valuePositionLabels: []
-      } as unknown as VariableInfo
-    ]);
-    schemerService.setCodingScheme({
-      variableCodings: [{
-        id: 'v1', alias: 'A', sourceType: 'BASE', codes: []
-      } as unknown as VariableCodingData]
-    } as unknown as never);
+      }]);
+      schemerService.setCodingScheme({
+        variableCodings: [{
+          id: 'v1', alias: 'A', sourceType: 'BASE', codes: []
+        }]
+      });
+      spyOn(console, 'error');
+    });
 
-    spyOn(CodingSchemeFactory, 'validate').and.throwError('boom');
+    it('replaces a previous success with an explicit failure and unchecked variables', () => {
+      const validate = spyOn(CodingSchemeFactory, 'validate').and.returnValue([]);
+      component.updateVariableLists();
+      validate.and.throwError('boom');
 
-    component.updateVariableLists();
+      component.updateVariableLists();
+      component.checkVarScheme();
 
-    expect(component.problems).toEqual([]);
-    expect(component.codingStatus['v1']).toBe('OK');
+      expect(component.problems).toEqual([]);
+      expect(component.codingStatus['v1']).toBe('UNCHECKED');
+      expect(messageDialog.open).toHaveBeenCalledWith(MessageDialogComponent, jasmine.objectContaining({
+        data: jasmine.objectContaining({ type: MessageType.error, content: 'varList.validation.failed' })
+      }));
+      expect(dialog.open).not.toHaveBeenCalled();
+    });
+
+    it('shows the normal result after a later successful validation', () => {
+      const validate = spyOn(CodingSchemeFactory, 'validate').and.throwError('boom');
+      component.updateVariableLists();
+      validate.and.returnValue([]);
+
+      component.updateVariableLists();
+      component.checkVarScheme();
+
+      expect(component.codingStatus['v1']).toBe('OK');
+      expect(dialog.open).toHaveBeenCalledWith(ShowCodingProblemsDialogComponent, {
+        width: '1000px', data: []
+      });
+      expect(messageDialog.open).not.toHaveBeenCalled();
+    });
+  });
+
+  it('does not report a successful check before validation has run', () => {
+    component.checkVarScheme();
+
+    expect(messageDialog.open).toHaveBeenCalledWith(MessageDialogComponent, jasmine.objectContaining({
+      data: jasmine.objectContaining({ content: 'varList.validation.failed' })
+    }));
+    expect(dialog.open).not.toHaveBeenCalled();
   });
 
   it('renameVarScheme should open error dialog when selected variable is BASE', () => {
