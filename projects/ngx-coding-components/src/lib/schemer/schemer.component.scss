@@ -83,7 +83,7 @@
   padding: 20px;
 }
 
-.var-marker-ERROR, .var-marker-WARNING, .var-marker-OK {
+.var-marker-ERROR, .var-marker-WARNING, .var-marker-OK, .var-marker-UNCHECKED {
   flex: 0 0 12px;
   height: 12px;
   border-radius: 0;
@@ -101,6 +101,10 @@
 
 .var-marker-OK {
   background: transparent;
+}
+
+.var-marker-UNCHECKED {
+  background: #888;
 }
 
 .bold-icon {

@@ -191,6 +191,44 @@ async function loadEmbeddedSchemer(
   return page.frameLocator('iframe[title="Embedded Schemer"]');
 }
 
+test('failed scheme validation is shown explicitly and recovers after a corrected host update', async ({ page }) => {
+  const coding = {
+    ...CodingFactory.createCodingVariable('response'),
+    codes: [{ id: 1, type: 'FULL_CREDIT', ruleSets: [{}] }]
+  };
+  const anchor = {
+    ...CodingFactory.createCodingVariable('anchor'),
+    codes: [{ id: 1, type: 'FULL_CREDIT', ruleSets: [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }] }]
+  };
+  const start = {
+    ...makeStart([makeVariable('anchor'), makeVariable('response')]),
+    codingScheme: JSON.stringify({ version: '3.5', variableCodings: [anchor, coding] })
+  };
+  const frame = await loadEmbeddedSchemer(page, start);
+  await expect(frame.locator('.var-marker-UNCHECKED')).toHaveCount(2);
+  await frame.locator('button').filter({ hasText: /^\s*menu\s*$/ }).click();
+  await frame.getByRole('menuitem', { name: /Prüfe Syntax Kodierschema/ }).click();
+  const dialog = frame.getByRole('dialog');
+  await expect(dialog).toContainText('Kodierschema konnte nicht geprüft werden.');
+  await expect(dialog).not.toContainText('keine Probleme gefunden.');
+  await dialog.getByRole('button', { name: 'Schließen', exact: true }).click();
+
+  coding.codes[0].ruleSets = [{ rules: [{ method: 'MATCH', parameters: ['a'] }] }];
+  await page.evaluate(message => document.querySelector('iframe').contentWindow.postMessage(message, '*'), {
+    ...start,
+    codingScheme: JSON.stringify({ version: '3.5', variableCodings: [anchor, coding] })
+  });
+  await expect(frame.locator('.var-marker-UNCHECKED')).toHaveCount(0);
+  await expect(frame.locator('.var-marker-OK')).toHaveCount(2);
+  await frame.locator('button').filter({ hasText: /^\s*menu\s*$/ }).click();
+  await frame.getByRole('menuitem', { name: /Prüfe Syntax Kodierschema/ }).click();
+  await expect(dialog).toContainText('keine Probleme gefunden.');
+
+  const errors = runtimeErrors.get(page);
+  expect(errors.some(error => error.startsWith('validateCodingScheme failed'))).toBe(true);
+  runtimeErrors.set(page, errors.filter(error => !error.startsWith('validateCodingScheme failed')));
+});
+
 const makeCmcStart = type => {
   const rows = [1, 2, 3].map(index => ({
     ...CodingFactory.createCodingVariable(`old_row_${index}`),

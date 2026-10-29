@@ -5,6 +5,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  signal,
   ViewChild
 } from '@angular/core';
 import {
@@ -154,6 +155,7 @@ export class SchemerComponent implements OnDestroy {
   codingStatus: { [id: string]: string } = {};
   selectedCoding$ = new BehaviorSubject<VariableCodingData | null>(null);
   problems: CodingSchemeValidationProblem[] = [];
+  private readonly validationSucceeded = signal(false);
   hasIdentifierConflict = false;
   varCodingChangedSubscription: Subscription | null = null;
   private identifierConflictSubscription: Subscription;
@@ -196,6 +198,8 @@ export class SchemerComponent implements OnDestroy {
 
   updateVariableLists() {
     this.changeDetector.markForCheck();
+    this.validationSucceeded.set(false);
+    this.problems = [];
     const previousSelectedId = this.selectedCoding$.value?.id;
 
     if (this.schemerFacade.tryResolveIdentifierConflicts()) {
@@ -306,12 +310,17 @@ export class SchemerComponent implements OnDestroy {
           this.schemerService.varList,
           this.schemerService.codingScheme.variableCodings
         );
+        this.validationSucceeded.set(true);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('validateCodingScheme failed', e);
         this.problems = [];
       }
       this.schemerService.codingScheme.variableCodings.forEach(v => {
+        if (!this.validationSucceeded()) {
+          this.codingStatus[v.id] = 'UNCHECKED';
+          return;
+        }
         this.codingStatus[v.id] = 'OK';
         const breakingProblem = this.problems.find(
           p => p.variableId === (v.alias || v.id) && p.breaking
@@ -816,6 +825,18 @@ export class SchemerComponent implements OnDestroy {
   }
 
   checkVarScheme() {
+    if (!this.validationSucceeded()) {
+      this.messageDialog.open(MessageDialogComponent, {
+        width: '600px',
+        data: {
+          type: MessageType.error,
+          title: this.tr('varList.validation.title'),
+          content: this.tr('varList.validation.failed'),
+          closeButtonLabel: this.tr('dialog-close')
+        } satisfies MessageDialogData
+      });
+      return;
+    }
     if (this.problems) {
       const dialogRef = this.showCodingProblemsDialog.open(
         ShowCodingProblemsDialogComponent,
