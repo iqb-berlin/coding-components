@@ -22,6 +22,22 @@ describe('SchemerService', () => {
   });
 
   describe('addCode', () => {
+    it('stores ANY for a new multiple-value code without changing existing codes', () => {
+      service.setUserRole('RW_MAXIMAL');
+      const existing: CodeData = { id: 1, ruleSets: [{ rules: [{ method: 'IS_EMPTY' }] }] };
+      const before = JSON.stringify(existing);
+      const created = service.addCode([existing], 'NO_CREDIT', true) as CodeData;
+      expect(created.ruleSets?.[0].valueArrayPos).toBe('ANY');
+      expect(JSON.stringify(existing)).toBe(before);
+    });
+
+    it('keeps scalar codes free of array references', () => {
+      service.setUserRole('RW_MAXIMAL');
+      const created = service.addCode([], 'FULL_CREDIT', false) as CodeData;
+      expect(created.ruleSets?.[0].valueArrayPos).toBeUndefined();
+      expect(Object.hasOwn(created.ruleSets?.[0] || {}, 'valueArrayPos')).toBeFalse();
+    });
+
     it('should block adding a residual type if a residual or intended incomplete already exists', () => {
       service.setUserRole('RW_MAXIMAL');
       const codeList: CodeData[] = [

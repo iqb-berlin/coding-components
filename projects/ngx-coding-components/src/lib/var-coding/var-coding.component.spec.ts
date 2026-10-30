@@ -328,6 +328,14 @@ describe('VarCodingComponent', () => {
     expect(dialogOpenSpy).toHaveBeenCalled();
   });
 
+  it('passes multiple-value metadata when adding a code', () => {
+    component.varCoding = { id: 'v1', codes: [] } as unknown as VariableCodingData;
+    component.varInfo = { id: 'v1', multiple: true } as typeof component.varInfo;
+    addCodeSpy.and.returnValue('code.error-message.no-access');
+    component.addCode('NO_CREDIT');
+    expect(addCodeSpy).toHaveBeenCalledWith(component.varCoding.codes, 'NO_CREDIT', true);
+  });
+
   it('addCode should emit varCodingChanged on success and update residual flags', () => {
     const emitSpy = spyOn(component.varCodingChanged, 'emit');
     component.varCoding = {

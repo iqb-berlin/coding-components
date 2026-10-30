@@ -37,7 +37,8 @@
           (click)="editArrayReference(ruleSet)"
           [matTooltip]="'rule-set.reference.title' | translate"
         >
-          A {{ ruleSet.valueArrayPos | ruleReference }}
+          A {{ ruleSet.valueArrayPos === undefined ? ('rule-set.reference.legacy-short' | translate) :
+          (ruleSet.valueArrayPos | ruleReference) }}
         </button>
         }
       </div>

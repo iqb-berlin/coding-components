@@ -14,7 +14,7 @@ import { MatSelectionList, MatListOption } from '@angular/material/list';
 
 export interface SelectCodeRuleReferenceDialogData {
   isFragmentMode: boolean;
-  value: number | 'ANY' | 'ANY_OPEN' | 'SUM' | 'LENGTH' ;
+  value?: number | 'ANY' | 'ANY_OPEN' | 'SUM' | 'LENGTH' ;
 }
 
 @Component({
@@ -24,7 +24,13 @@ export interface SelectCodeRuleReferenceDialogData {
       <div>{{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.prompt' | translate}}</div>
       <mat-selection-list [(ngModel)]="newSelection" multiple="false"
         [attr.aria-describedby]="!refData.isFragmentMode &&
-          (newSelection[0] === 'ANY' || newSelection[0] === 'ANY_OPEN') ? 'array-reference-help' : null">
+          (newSelection[0] === 'ANY' || newSelection[0] === 'ANY_OPEN' || newSelection[0] === 'legacy') ?
+            'array-reference-help' : null">
+        @if (hasLegacyReference) {
+          <mat-list-option [value]="'legacy'" class="reference-option">
+            <span class="reference-label">{{'rule-set.reference.legacy' | translate}}</span>
+          </mat-list-option>
+        }
         <mat-list-option [value]="'ANY'" class="reference-option">
           <span class="reference-label">
             {{(refData.isFragmentMode ? 'rule' : 'rule-set') + '.reference.any' | translate}}
@@ -47,10 +53,12 @@ export interface SelectCodeRuleReferenceDialogData {
           </span>
         </mat-list-option>
       </mat-selection-list>
-      @if (!refData.isFragmentMode && (newSelection[0] === 'ANY' || newSelection[0] === 'ANY_OPEN')) {
+      @if (!refData.isFragmentMode &&
+        (newSelection[0] === 'ANY' || newSelection[0] === 'ANY_OPEN' || newSelection[0] === 'legacy')) {
         <p id="array-reference-help" aria-live="polite">
-          {{(newSelection[0] === 'ANY' ? 'rule-set.reference.any-help' :
-            'rule-set.reference.any-open-help') | translate}}
+          {{(newSelection[0] === 'legacy' ? 'rule-set.reference.legacy-help' :
+            newSelection[0] === 'ANY' ? 'rule-set.reference.any-help' :
+              'rule-set.reference.any-open-help') | translate}}
         </p>
       }
       <mat-form-field>
@@ -86,12 +94,18 @@ export interface SelectCodeRuleReferenceDialogData {
 export class SelectCodeRuleReferenceDialogComponent {
   newValue: number;
   newSelection: string[];
+  readonly hasLegacyReference: boolean;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public refData: SelectCodeRuleReferenceDialogData,
     public dialogRef: MatDialogRef<SelectCodeRuleReferenceDialogComponent>
   ) {
-    if (typeof this.refData.value === 'number') {
+    this.hasLegacyReference = !refData.isFragmentMode &&
+      (refData.value === undefined || (typeof refData.value === 'number' && refData.value < 0));
+    if (this.hasLegacyReference) {
+      this.newValue = 0;
+      this.newSelection = ['legacy'];
+    } else if (typeof this.refData.value === 'number') {
       this.newValue = this.refData.value + 1;
       this.newSelection = ['specific'];
     } else {
@@ -101,6 +115,11 @@ export class SelectCodeRuleReferenceDialogComponent {
   }
 
   okButtonClick(): void {
+    // Keep the original absent/legacy reference; false leaves the caller's rule set unchanged.
+    if (this.newSelection[0] === 'legacy') {
+      this.dialogRef.close(false);
+      return;
+    }
     const result = this.newSelection[0] === 'specific' ? this.newValue - 1 : this.newSelection[0];
     this.dialogRef.close(result);
   }

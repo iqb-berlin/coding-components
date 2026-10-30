@@ -369,7 +369,8 @@ export class VarCodingComponent implements OnInit, OnDestroy, OnChanges {
     if (this.varCoding && this.varCoding.codes) {
       const addResult = this.schemerService.addCode(
         this.varCoding.codes,
-        codeType
+        codeType,
+        this.varInfo?.multiple || false
       );
       if (typeof addResult === 'string') {
         this.messageDialog.open(MessageDialogComponent, {
