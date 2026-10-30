@@ -31,6 +31,7 @@ import {
 } from '../../dialogs/select-code-rule-reference-dialog.component';
 import { RuleReferencePipe } from '../../pipes/rule-reference.pipe';
 import { SchemerService, UserRoleType } from '../../services/schemer.service';
+import { createDefaultRuleSet } from '../../services/schemer-code-ops';
 import { CodeRuleListComponent } from './code-rule-list.component';
 
 @Component({
@@ -89,15 +90,7 @@ export class CodeRulesComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    const newRuleSet: RuleSet = {
-      ruleOperatorAnd: false,
-      rules: [
-        {
-          method: 'MATCH',
-          parameters: ['']
-        }
-      ]
-    };
+    const newRuleSet = createDefaultRuleSet(this.varInfo?.multiple);
 
     this.code.ruleSets = [...(this.code.ruleSets || []), newRuleSet];
 

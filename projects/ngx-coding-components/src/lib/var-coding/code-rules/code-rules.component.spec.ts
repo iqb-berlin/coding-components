@@ -4,7 +4,10 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
-import { CodeData } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodeData, RuleSet } from '@iqbspecs/coding-scheme/coding-scheme.interface';
+import { CodingFactory } from '@iqb/responses';
+import { SelectCodeRuleReferenceDialogComponent }
+  from '../../dialogs/select-code-rule-reference-dialog.component';
 
 import { CodeRulesComponent } from './code-rules.component';
 
@@ -75,6 +78,45 @@ describe('CodeRulesComponent', () => {
     component.addRuleSet();
 
     expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('new multiple-value rule sets require every marking to satisfy a single rule', () => {
+    component.code = { id: 41, ruleSets: [] };
+    component.varInfo = { id: 'v1', multiple: true } as typeof component.varInfo;
+    component.addRuleSet();
+    const ruleSet = component.code.ruleSets![0];
+    expect(ruleSet.valueArrayPos).toBe('ANY');
+    ruleSet.rules = [{ method: 'NUMERIC_LESS_THAN', parameters: ['74'], fragment: 0 }];
+    const coding = CodingFactory.createCodingVariable('v1');
+    coding.fragmenting = '^(\\d+)-(\\d+)-#';
+    coding.codes = [component.code];
+    const response = { id: 'v1', status: 'VALUE_CHANGED' as const, value: ['69-70-#f9f871', '78-79-#f9f871'] };
+    expect(CodingFactory.code(response, coding).status).toBe('CODING_INCOMPLETE');
+    expect(CodingFactory.code({ ...response, value: ['69-70-#f9f871'] }, coding).code).toBe(41);
+  });
+
+  it('opening and saving a legacy array reference preserves serialized coding and its result', () => {
+    const coding = CodingFactory.createCodingVariable('v1');
+    const ruleSet: RuleSet = {
+      ruleOperatorAnd: true,
+      rules: [{ method: 'MATCH', parameters: ['A'] }, { method: 'MATCH', parameters: ['B'] }]
+    };
+    coding.codes = [{ id: 41, ruleSets: [ruleSet] }];
+    const before = JSON.stringify(coding);
+    const response = { id: 'v1', status: 'VALUE_CHANGED' as const, value: ['A', 'B'] };
+    const previousResult = CodingFactory.code(response, coding);
+    dialogOpenSpy.and.callFake((_component, config) => {
+      let result: unknown;
+      const dialog = new SelectCodeRuleReferenceDialogComponent(config.data, {
+        close: (value: unknown) => { result = value; }
+      } as never);
+      dialog.okButtonClick();
+      return { afterClosed: () => of(result) };
+    });
+    component.editArrayReference(ruleSet);
+    expect(JSON.stringify(coding)).toBe(before);
+    expect(CodingFactory.code(response, JSON.parse(JSON.stringify(coding)))).toEqual(previousResult);
+    expect(previousResult.code).toBe(41);
   });
 
   it('deleteRuleSet should remove a ruleset and emit codeRulesChanged', () => {

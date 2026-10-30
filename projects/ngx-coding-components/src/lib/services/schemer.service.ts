@@ -292,8 +292,8 @@ export class SchemerService {
     }
   }
 
-  addCode(codeList: CodeData[], codeType: CodeType): CodeData | string {
-    return addCodeOp(codeList, codeType, this.userRole, this.orderOfCodeTypes);
+  addCode(codeList: CodeData[], codeType: CodeType, multiple = false): CodeData | string {
+    return addCodeOp(codeList, codeType, this.userRole, this.orderOfCodeTypes, multiple);
   }
 
   deleteCode(codeList: CodeData[], codeIndex: number): boolean {

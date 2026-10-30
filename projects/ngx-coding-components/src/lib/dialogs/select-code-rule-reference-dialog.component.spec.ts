@@ -35,11 +35,26 @@ describe('SelectCodeRuleReferenceDialogComponent', () => {
     expect(component.newValue).toBe(0);
   });
 
-  it('should default selection to ANY when value is ANY (or falsy)', () => {
+  it('should select ANY when it is explicitly stored', () => {
     const { component } = createComponent({ isFragmentMode: false, value: 'ANY' });
 
     expect(component.newSelection).toEqual(['ANY']);
     expect(component.newValue).toBe(0);
+  });
+
+  [undefined, -1].forEach(value => {
+    it(`preserves the legacy array reference ${value} when saving unchanged`, () => {
+      const { component, dialogRef } = createComponent({ isFragmentMode: false, value });
+      expect(component.newSelection).toEqual(['legacy']);
+      component.okButtonClick();
+      expect(dialogRef.close).toHaveBeenCalledWith(false);
+    });
+  });
+
+  it('keeps the existing ANY default for fragment references', () => {
+    const { component } = createComponent({ isFragmentMode: true });
+    expect(component.newSelection).toEqual(['ANY']);
+    expect(component.hasLegacyReference).toBeFalse();
   });
 
   it('okButtonClick should close with newValue - 1 when specific is selected', () => {
@@ -95,6 +110,25 @@ describe('SelectCodeRuleReferenceDialogComponent UI', () => {
 
   const getHelp = (): HTMLElement | null => fixture.nativeElement.querySelector('#array-reference-help');
   const save = () => fixture.nativeElement.querySelector('button[color="primary"]').click();
+
+  it('shows the existing evaluation instead of silently selecting ANY for an omitted reference', async () => {
+    dialogData.value = undefined;
+    const list = await renderDialog();
+    expect((await list.getItems()).length).toBe(6);
+    await expectAsync((await list.getItems({ selected: true }))[0].getText())
+      .toBeResolvedTo('Bisherige Auswertung beibehalten');
+    expect(getHelp()?.textContent).toContain('Bei UND dürfen die Regeln auf unterschiedliche Werte zutreffen');
+    save();
+    expect(dialogRef.close).toHaveBeenCalledWith(false);
+  });
+
+  it('changes a legacy reference to ANY only after explicitly selecting it', async () => {
+    dialogData.value = undefined;
+    const list = await renderDialog();
+    await list.selectItems({ text: 'Alle vorhandenen Werte müssen passen' });
+    save();
+    expect(dialogRef.close).toHaveBeenCalledWith('ANY');
+  });
 
   it('explains why an additional non-matching value prevents ANY from matching', async () => {
     const list = await renderDialog();

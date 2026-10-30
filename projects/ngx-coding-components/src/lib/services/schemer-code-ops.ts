@@ -105,11 +105,18 @@ export const getPasteSingleCodeWarningKeys = (
   return Array.from(warningKeys);
 };
 
+export const createDefaultRuleSet = (multiple = false): RuleSet => ({
+  ...(multiple ? { valueArrayPos: 'ANY' as const } : {}),
+  ruleOperatorAnd: false,
+  rules: [{ method: 'MATCH', parameters: [''] }]
+});
+
 export const addCode = (
   codeList: CodeData[],
   codeType: CodeType,
   userRole: UserRoleType,
-  orderOfCodeTypes: CodeType[]
+  orderOfCodeTypes: CodeType[],
+  multiple = false
 ): CodeData | string => {
   if (!canEdit(userRole)) return 'code.error-message.no-access';
 
@@ -195,17 +202,7 @@ export const addCode = (
       label: '',
       score: codeType === 'FULL_CREDIT' ? 1 : 0,
       ruleSetOperatorAnd: true,
-      ruleSets: [
-        <RuleSet>{
-          ruleOperatorAnd: false,
-          rules: [
-            {
-              method: 'MATCH',
-              parameters: ['']
-            }
-          ]
-        }
-      ],
+      ruleSets: [createDefaultRuleSet(multiple)],
       manualInstruction: ''
     };
 
