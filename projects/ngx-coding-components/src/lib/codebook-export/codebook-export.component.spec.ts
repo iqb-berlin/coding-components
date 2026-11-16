@@ -28,6 +28,40 @@ describe('Studio codebook selection contract', () => {
     component.toggleAll(); expect(component.selection).toEqual([]);
   });
 
+  // The header checkbox acts on the units shown only when switched so, as in Studio's lists (#281)
+  it('selects and deselects only the shown units with shownOnly, keeping hidden selected ones', () => {
+    component.toggle(component.availableUnits[1]);
+    component.shownOnly = true;
+    component.filter = 'Alpha'; component.applyFilter();
+    component.toggleAll();
+    expect(component.selection).toEqual([2, 1]);
+    expect(component.headerChecked).toBeTrue();
+    component.toggleAll();
+    expect(component.selection).toEqual([2]);
+  });
+
+  it('leaves disabled units out of the shown ones as well', () => {
+    component.shownOnly = true; component.toggleAll();
+    expect(component.selection).toEqual([1, 2]);
+  });
+
+  it('counts the selected units the search hides and deselects them', () => {
+    component.toggle(component.availableUnits[1]); component.toggle(component.availableUnits[0]);
+    component.filter = 'Alpha'; component.applyFilter();
+    expect(component.hiddenSelectedCount).toBe(1);
+    const emit = spyOn(component.selectionChanged, 'emit');
+    component.deselectHidden();
+    expect(component.selection).toEqual([1]);
+    expect(emit).toHaveBeenCalledOnceWith([1]);
+  });
+
+  it('has nothing in scope when the search shows no unit', () => {
+    component.shownOnly = true; component.filter = 'nothing'; component.applyFilter();
+    expect(component.headerEmpty).toBeTrue();
+    component.toggleAll();
+    expect(component.selection).toEqual([]);
+  });
+
   it('searches names, keys and groups without changing selection', () => {
     component.toggle(component.availableUnits[1]);
     component.filter = 'gruppe'; component.applyFilter();
@@ -242,7 +276,7 @@ describe('codebook checkbox accessibility', () => {
     fixture.componentRef.setInput('availableUnits', [{ unitId: 1, key: 'TASK', unitName: 'Aufgabe' }]);
     fixture.detectChanges();
     const inputs = fixture.nativeElement.querySelectorAll('input[type="checkbox"]');
-    expect(inputs[0].getAttribute('aria-label')).toBe('codebook.coding.select-all-units');
+    expect(inputs[0].getAttribute('aria-label')).toBe('codebook.coding.toggle-all');
     expect(inputs[1].getAttribute('aria-label')).toBe('TASK');
     fixture.destroy();
   });
@@ -291,6 +325,38 @@ describe('codebook translations', () => {
     expect(text).toContain('Exportieren');
     expect(text).toContain('Abbrechen');
     expect(text).not.toMatch(/codebook\.[\w.-]+/);
+    fixture.destroy();
+  });
+
+  it('names the hidden selected units and the scope of the header checkbox', async () => {
+    await TestBed.configureTestingModule({
+      imports: [CodebookExportComponent, TranslateModule.forRoot({
+        loader: { provide: TranslateLoader, useClass: NgxCodingComponentsTranslateLoader }
+      })]
+    }).compileComponents();
+    await firstValueFrom(TestBed.inject(TranslateService).use('de'));
+    const fixture = TestBed.createComponent(CodebookExportComponent);
+    fixture.componentRef.setInput('availableUnits', [
+      { unitId: 1, key: 'A', unitName: 'Aufgabe A' },
+      { unitId: 2, key: 'B', unitName: 'Aufgabe B' }
+    ]);
+    fixture.componentRef.setInput('selectedUnitIds', [2]);
+    await fixture.whenStable();
+    fixture.componentInstance.filter = 'Aufgabe A'; fixture.componentInstance.applyFilter();
+    fixture.changeDetectorRef.markForCheck();
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const header = () => element.querySelector('[data-cy="selection-scope-toggle-all"] input') as HTMLInputElement;
+    expect(element.querySelector('.selected-units-hint')?.textContent).toContain('Eine Aufgabe ausgewählt');
+    const text = (selector: string) => element.querySelector(selector)?.textContent;
+    expect(text('[data-cy="selection-scope-hidden"]')).toContain(', davon 1 ausgeblendet');
+    expect(text('[data-cy="selection-scope-deselect-hidden"]')).toContain('ausgeblendete abwählen');
+    expect(element.querySelector('[data-cy="selection-scope-shown-only"]')?.textContent)
+      .toContain('Häkchen in der Kopfzeile wirkt nur auf angezeigte Einträge');
+    expect(header().getAttribute('aria-label')).toBe('Alle Einträge aus- oder abwählen, auch ausgeblendete');
+    (element.querySelector('[data-cy="selection-scope-shown-only"] button') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(header().getAttribute('aria-label')).toBe('Alle angezeigten Einträge aus- oder abwählen');
     fixture.destroy();
   });
 });
