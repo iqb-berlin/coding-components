@@ -4,9 +4,25 @@
     <div class="fx-row-space-between-stretch">
       <div class="fx-column-start-stretch">
         <div class="selected-units-hint">
-          @if (selection.length === 0) { <p>{{ 'codebook.workspace.select-unit' | translate }}</p> }
-          @if (selection.length === 1) { <p>{{ 'codebook.workspace.unit-selected' | translate }}</p> }
-          @if (selection.length > 1) { <p>{{ selection.length }} {{ 'codebook.workspace.units-selected' | translate }}</p> }
+          <!-- A flex row, so that the comma of the hidden count follows the count without a space. The
+               hidden part is always there and invisible while nothing is hidden, so the line keeps its height. -->
+          <p class="selection-count">
+            <span>
+              @if (selection.length === 0) { {{ 'codebook.workspace.select-unit' | translate }} }
+              @else if (selection.length === 1) { {{ 'codebook.workspace.unit-selected' | translate }} }
+              @else { {{ selection.length }} {{ 'codebook.workspace.units-selected' | translate }} }
+            </span>
+            <span class="hidden-selection" [class.hidden-part-placeholder]="!hiddenSelectedCount"
+              data-cy="selection-scope-hidden">{{
+                'codebook.coding.hidden-selected' | translate: { count: hiddenSelectedCount }
+              }}</span>
+            <span class="separator" [class.hidden-part-placeholder]="!hiddenSelectedCount">&middot;</span>
+            <button type="button" class="deselect-hidden-button" data-cy="selection-scope-deselect-hidden"
+              [class.hidden-part-placeholder]="!hiddenSelectedCount"
+              [disabled]="loading || busy || !hiddenSelectedCount" (click)="deselectHidden()">
+              {{ 'codebook.coding.deselect-hidden' | translate }}
+            </button>
+          </p>
         </div>
         <mat-form-field>
           <mat-label>{{ 'codebook.search-filter.filter-units' | translate }}</mat-label>
@@ -17,13 +33,18 @@
             [matTooltip]="'codebook.search-filter.delete-filter' | translate"
             (click)="filter = ''; applyFilter()"><span aria-hidden="true">×</span></button>
         </mat-form-field>
+        <mat-slide-toggle class="selection-scope" data-cy="selection-scope-shown-only" [(ngModel)]="shownOnly">
+          {{ 'codebook.coding.shown-only' | translate }}
+        </mat-slide-toggle>
         <mat-table [dataSource]="dataSource" matSort matSortActive="key" matSortDirection="asc" matSortDisableClear>
           <ng-container matColumnDef="select">
             <mat-header-cell *matHeaderCellDef>
-              <mat-checkbox (change)="toggleAll()" [disabled]="loading || busy"
-                [checked]="allSelected" [indeterminate]="selection.length > 0 && !allSelected"
-                [aria-label]="'codebook.coding.select-all-units' | translate"
-                [matTooltip]="filter ? ('codebook.coding.select-all-including-hidden' | translate) : ''"></mat-checkbox>
+              <mat-checkbox (change)="toggleAll()" [disabled]="loading || busy || headerEmpty"
+                data-cy="selection-scope-toggle-all"
+                [checked]="headerChecked" [indeterminate]="headerIndeterminate"
+                [aria-label]="(shownOnly ? 'codebook.coding.toggle-shown' : 'codebook.coding.toggle-all') | translate"
+                [matTooltip]="(shownOnly ? 'codebook.coding.toggle-shown' : 'codebook.coding.toggle-all') | translate"
+                matTooltipPosition="above"></mat-checkbox>
             </mat-header-cell>
             <mat-cell *matCellDef="let unit">
               <mat-checkbox [checked]="selection.includes(unit.unitId)" [disabled]="unit.disabled || loading || busy"
@@ -45,9 +66,6 @@
           <mat-header-row *matHeaderRowDef="columns; sticky: true"></mat-header-row>
           <mat-row *matRowDef="let unit; columns: columns"></mat-row>
         </mat-table>
-        <div class="selection-summary">
-          {{ 'codebook.coding.selected-units' | translate: { count: selection.length } }}
-        </div>
       </div>
       <div class="settings">
         <section class="example-section fx-column-start-start">

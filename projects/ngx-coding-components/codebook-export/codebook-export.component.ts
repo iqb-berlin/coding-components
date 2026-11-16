@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslateModule } from '@ngx-translate/core';
@@ -36,7 +37,7 @@ export const DEFAULT_CODEBOOK_OPTIONS: CodeBookContentSetting = {
   selector: 'ngx-codebook-export',
   standalone: true,
   imports: [FormsModule, MatTableModule, MatSortModule, MatCheckboxModule, MatDialogModule,
-    MatButtonModule, MatTooltipModule, MatSelectModule, MatRadioModule, MatFormFieldModule,
+    MatButtonModule, MatTooltipModule, MatSelectModule, MatRadioModule, MatSlideToggleModule, MatFormFieldModule,
     MatInputModule, TranslateModule],
   templateUrl: './codebook-export.component.html',
   styleUrls: ['./codebook-export.component.scss']
@@ -60,6 +61,9 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
   columns = ['select', 'key', 'name', 'group'];
   selection: number[] = [];
   filter = '';
+  // Whether the header checkbox acts on the units the search shows or on all of them. Filtering
+  // itself never changes the selection; units it hides stay selected and are counted as hidden.
+  shownOnly = false;
   contentOptions = { ...DEFAULT_CODEBOOK_OPTIONS };
   private unitsLoaded = false;
   private profilesLoaded = false;
@@ -111,6 +115,42 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
     return selectable.length > 0 && selectable.every(unit => this.selection.includes(unit.unitId));
   }
 
+  /** The units the header checkbox acts on, disabled ones left out. */
+  private get unitsInScope(): UnitSelectionItem[] {
+    return (this.shownOnly ? this.dataSource.filteredData : this.availableUnits).filter(unit => !unit.disabled);
+  }
+
+  // Read by the template on every change detection, so a set instead of includes() per unit
+  private get selectedInScope(): { inScope: number; selected: number } {
+    const selection = new Set(this.selection);
+    const units = this.unitsInScope;
+    return { inScope: units.length, selected: units.filter(unit => selection.has(unit.unitId)).length };
+  }
+
+  get headerChecked(): boolean {
+    const { inScope, selected } = this.selectedInScope;
+    return inScope > 0 && selected === inScope;
+  }
+
+  get headerIndeterminate(): boolean {
+    const { inScope, selected } = this.selectedInScope;
+    return selected > 0 && selected < inScope;
+  }
+
+  // Nothing in scope: a click on the header checkbox would tick it without selecting anything.
+  get headerEmpty(): boolean {
+    return !this.unitsInScope.length;
+  }
+
+  private get hiddenSelection(): number[] {
+    const shown = new Set(this.dataSource.filteredData.map(unit => unit.unitId));
+    return this.selection.filter(id => !shown.has(id));
+  }
+
+  get hiddenSelectedCount(): number {
+    return this.hiddenSelection.length;
+  }
+
   get exportDisabled(): boolean {
     const profilePending = this.selectedMissingsProfileId !== 0 &&
       !this.missingsProfiles.some(profile => profile.id === this.selectedMissingsProfileId);
@@ -126,9 +166,24 @@ export class CodebookExportComponent implements OnChanges, AfterViewInit {
     this.selectionChanged.emit([...this.selection]);
   }
 
+  /**
+   * Deselects the units in scope when all of them are selected and selects all of them otherwise,
+   * a partly ticked box as well. Units out of scope stay as they are.
+   */
   toggleAll(): void {
     if (this.loading || this.busy) return;
-    this.selection = this.allSelected ? [] : this.availableUnits.filter(unit => !unit.disabled).map(unit => unit.unitId);
+    const ids = new Set(this.unitsInScope.map(unit => unit.unitId));
+    const selected = new Set(this.selection);
+    this.selection = this.headerChecked ?
+      this.selection.filter(id => !ids.has(id)) :
+      [...this.selection, ...[...ids].filter(id => !selected.has(id))];
+    this.selectionChanged.emit([...this.selection]);
+  }
+
+  deselectHidden(): void {
+    if (this.loading || this.busy) return;
+    const hidden = new Set(this.hiddenSelection);
+    this.selection = this.selection.filter(id => !hidden.has(id));
     this.selectionChanged.emit([...this.selection]);
   }
 
