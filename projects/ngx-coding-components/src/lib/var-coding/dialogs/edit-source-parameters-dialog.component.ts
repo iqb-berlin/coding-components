@@ -408,6 +408,14 @@ export class EditSourceParametersDialog {
     this.clearSolverTestResult();
   }
 
+  changeSourceType(sourceType: SourceType): void {
+    this.data.sourceType = sourceType;
+    this.updatePossibleDeriveProcessing();
+    this.data.sourceParameters.processing = this.data.sourceParameters.processing?.filter(
+      option => this.possibleDeriveProcessing.includes(option)
+    );
+  }
+
   processingLabelKey(processingId: SourceProcessingType): string {
     return sourceProcessingLabelKey(processingId, this.data.sourceType);
   }

@@ -159,6 +159,33 @@ describe('EditSourceParametersDialog', () => {
     expect(dialog.possibleDeriveProcessing).toEqual([]);
   });
 
+  it('keeps selected shared options and drops CONCAT_CODE-only options when changing to SUM_SCORE', () => {
+    const original = { processing: ['SORT', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL'] };
+    const dialog = createDialog({ sourceType: 'CONCAT_CODE', sourceParameters: original });
+
+    dialog.changeSourceType('SUM_SCORE');
+
+    expect(dialog.data.sourceType).toBe('SUM_SCORE');
+    expect(dialog.data.sourceParameters.processing).toEqual(['TAKE_EMPTY_AS_ZERO_IF_PARTIAL']);
+    expect(original.processing).toEqual(['SORT', 'TAKE_EMPTY_AS_ZERO_IF_PARTIAL']);
+
+    dialog.changeSourceType('CONCAT_CODE');
+
+    expect(dialog.data.sourceParameters.processing).toEqual(['TAKE_EMPTY_AS_ZERO_IF_PARTIAL']);
+  });
+
+  it('drops all selected processing options when changing to a method without any', () => {
+    const dialog = createDialog({
+      sourceType: 'UNIQUE_VALUES',
+      sourceParameters: { processing: ['TO_LOWER_CASE'] }
+    });
+
+    dialog.changeSourceType('COPY_VALUE');
+
+    expect(dialog.possibleDeriveProcessing).toEqual([]);
+    expect(dialog.data.sourceParameters.processing).toEqual([]);
+  });
+
   ['SUM_SCORE', 'SUM_CODE', 'CONCAT_CODE'].forEach(sourceType => {
     it(`should offer opt-in partial credit for ${sourceType} and preserve the original on cancel`, () => {
       const original = { processing: [] as string[] };
