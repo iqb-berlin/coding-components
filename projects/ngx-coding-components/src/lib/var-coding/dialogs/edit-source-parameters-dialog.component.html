@@ -34,7 +34,7 @@
       </mat-form-field>
       <mat-form-field>
         <mat-label>{{ 'derive-method.prompt' | translate }}</mat-label>
-        <mat-select required [(value)]="data.sourceType" (selectionChange)="updatePossibleDeriveProcessing()">
+        <mat-select required [value]="data.sourceType" (selectionChange)="changeSourceType($event.value)">
           @for (st of sourceTypeList; track st) {
             <mat-option [value]="st">
               {{ 'derive-method.' + st | translate }}
