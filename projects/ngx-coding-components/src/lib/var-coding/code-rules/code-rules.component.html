@@ -9,8 +9,8 @@
         schemerService.userRole !== 'RO') {
         <mat-button-toggle-group
           appearance="legacy"
-          (ngModelChange)="setCodeRulesChanged()"
-          [(ngModel)]="code.ruleSetOperatorAnd"
+          [ngModel]="code.ruleSetOperatorAnd"
+          (ngModelChange)="code.ruleSetOperatorAnd = $event; setCodeRulesChanged()"
           [matTooltip]="'rule-set.prompt.operator' | translate"
         >
           <mat-button-toggle [value]="false">{{
