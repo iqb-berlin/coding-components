@@ -939,6 +939,73 @@ test('embedded Schemer hands off the latest input before a host save without wai
     .toHaveValue('Latest input before host save');
 });
 
+[
+  {
+    scope: 'rules within a rule set',
+    selector: 'code-rule-list mat-button-toggle-group',
+    operator: code => code.ruleSets[0].ruleOperatorAnd
+  },
+  {
+    scope: 'rule sets within a code',
+    selector: '.rule-sets-toolbar mat-button-toggle-group',
+    operator: code => code.ruleSetOperatorAnd
+  }
+].forEach(({ scope, selector, operator }) => {
+  test(`embedded Schemer saves the operator for ${scope} and retains it on reopen`, async ({ page }) => {
+    const base = { ...makeVariable('source'), type: 'integer' };
+    const start = {
+      ...makeStart([base]),
+      codingSchemeType: 'iqb@3.5',
+      codingScheme: JSON.stringify({
+        version: '3.5',
+        variableCodings: [CodingFactory.createCodingVariable(base.id), {
+          ...CodingFactory.createCodingVariable('derived'),
+          sourceType: 'SUM_SCORE',
+          deriveSources: [base.id],
+          codes: [{
+            id: 1,
+            type: 'FULL_CREDIT',
+            score: 1,
+            ruleSetOperatorAnd: false,
+            ruleSets: [{
+              ruleOperatorAnd: false,
+              rules: [
+                { method: 'NUMERIC_MIN', parameters: ['2'] },
+                { method: 'NUMERIC_MAX', parameters: ['4'] }
+              ]
+            }, {
+              rules: [{ method: 'NUMERIC_MATCH', parameters: ['6'] }]
+            }]
+          }]
+        }]
+      })
+    };
+    let frame = await loadEmbeddedSchemer(page, start);
+    const selectDerived = currentFrame => currentFrame.locator('.var-list-entry')
+      .getByText('derived', { exact: true }).click();
+    const toggle = and => frame.locator(selector).getByRole('radio', { name: and ? 'UND' : 'ODER', exact: true });
+    await selectDerived(frame);
+
+    for (const and of [true, false]) {
+      await expect(toggle(!and)).toBeChecked();
+      await toggle(and).click();
+      await expect(toggle(and)).toBeChecked();
+
+      // Save the first schema sent by the switch, before another edit can send a newer one.
+      const notification = await page.waitForFunction(() => window.received
+        .find(message => message.type === 'vosSchemeChangedNotification'));
+      const message = await notification.jsonValue();
+      expectVeronaMessage(message);
+      const saved = JSON.parse(message.codingScheme);
+      expect(operator(saved.variableCodings.find(variable => variable.id === 'derived').codes[0])).toBe(and);
+
+      frame = await loadEmbeddedSchemer(page, { ...start, codingScheme: message.codingScheme });
+      await selectDerived(frame);
+      await expect(toggle(and)).toBeChecked();
+    }
+  });
+});
+
 test('orphan recovery is discarded when the host switches to another conflicting task', async ({ page }) => {
   const start = makeOrphanStart();
   const scheme = JSON.parse(start.codingScheme);
